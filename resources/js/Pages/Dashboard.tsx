@@ -26,8 +26,9 @@ import FigmaSettings from '../components/Figma/FigmaSettings';
 import FigmaNotifications from '../components/Figma/FigmaNotifications';
 import FigmaSearch from '../components/Figma/FigmaSearch';
 import FigmaLabels from '../components/Figma/FigmaLabels';
+import FigmaKanban from '../components/Figma/FigmaKanban';
 
-type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'CONFIGURACION';
+type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'CONFIGURACION' | 'PROYECTO';
 
 export default function Dashboard({ initialLotes, dashboardStats }: { initialLotes: any[], dashboardStats: any }) {
     const [lotes, setLotes] = useState(initialLotes || []);
@@ -87,6 +88,8 @@ export default function Dashboard({ initialLotes, dashboardStats }: { initialLot
                     <div className={`px-4 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em] mb-2 mt-6 ${sidebarOpen ? 'block' : 'hidden'}`}>Sistema</div>
                     <SidebarItem icon={Bell} label="Alertas" view="NOTIFICACIONES" isActive={activeView === 'NOTIFICACIONES'} />
                     <SidebarItem icon={Settings} label="Ajustes" view="CONFIGURACION" isActive={activeView === 'CONFIGURACION'} />
+                    <div className={`px-4 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em] mb-2 mt-6 ${sidebarOpen ? 'block' : 'hidden'}`}>Gestión</div>
+                    <SidebarItem icon={LayoutGrid} label="Tablero Kanban" view="PROYECTO" isActive={activeView === 'PROYECTO'} />
                 </div>
 
                 <div className="p-4 border-t border-white/5 space-y-1 bg-black/20">
@@ -136,6 +139,7 @@ export default function Dashboard({ initialLotes, dashboardStats }: { initialLot
                         {activeView === 'LLM' && <FigmaLLM />}
                         {activeView === 'NOTIFICACIONES' && <FigmaNotifications />}
                         {activeView === 'CONFIGURACION' && <FigmaSettings />}
+                        {activeView === 'PROYECTO' && <FigmaKanban />}
                         
                         {(['AYUDA'].includes(activeView)) && (
                             <div className="bg-white rounded-3xl border border-slate-200 p-24 shadow-sm flex flex-col items-center justify-center text-slate-300">
