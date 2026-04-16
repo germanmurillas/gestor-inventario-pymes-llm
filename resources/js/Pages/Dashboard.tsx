@@ -29,8 +29,9 @@ import FigmaLabels from '../components/Figma/FigmaLabels';
 
 type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'CONFIGURACION';
 
-export default function Dashboard({ initialLotes }: { initialLotes: any[] }) {
+export default function Dashboard({ initialLotes, dashboardStats }: { initialLotes: any[], dashboardStats: any }) {
     const [lotes, setLotes] = useState(initialLotes || []);
+    const [stats, setStats] = useState(dashboardStats || null);
     const [activeView, setActiveView] = useState<ViewMode>('TABLERO');
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const viewRef = useRef<HTMLDivElement>(null);
@@ -127,7 +128,7 @@ export default function Dashboard({ initialLotes }: { initialLotes: any[] }) {
                 {/* View Container with GSAP Ref */}
                 <div className="flex-1 overflow-auto bg-[#F8FAFC]">
                     <div ref={viewRef} className="p-8 h-full">
-                        {activeView === 'TABLERO' && <FigmaTablero />}
+                        {activeView === 'TABLERO' && <FigmaTablero stats={stats} />}
                         {activeView === 'INVENTARIO' && <FigmaInventario lotes={lotes} />}
                         {activeView === 'BUSCAR' && <FigmaSearch />}
                         {activeView === 'ETIQUETAS' && <FigmaLabels />}
