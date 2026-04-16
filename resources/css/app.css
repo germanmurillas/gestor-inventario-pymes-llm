@@ -3,22 +3,41 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --color-brand: #111111;
-  --color-bg-gray: #F3F4F6;
+  --color-brand: #0A0A0B;
+  --color-bg-gray: #0F172A;
+  --color-accent: #6366F1; /* Indigo */
+  
+  --shadow-premium: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-inner-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 body {
-  background-color: #F3F4F6;
-  color: #111111;
+  background-color: #F8FAFC; /* Light gray for the outer shell to contrast with midnight cards */
+  color: #0F172A;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Figma Utility Classes */
-.wireframe-border {
-  border: 1px solid rgba(0, 0, 0, 0.1);
+/* Midnight Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.wireframe-shadow {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+.midnight-sidebar {
+  background: #0A0A0B;
+  color: #94A3B8;
+}
+
+.midnight-sidebar .active {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  box-shadow: var(--shadow-inner-glow);
+}
+
+/* GSAP Transition Helper */
+.page-transition {
+  opacity: 0;
+  transform: translateY(10px);
 }
