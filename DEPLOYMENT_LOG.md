@@ -34,5 +34,14 @@ Se implementó una arquitectura basada en contenedores para garantizar la inmuta
 4.  **Entrega Final:** Presentación de resultados al Prof. Héctor Fabio Ocampo. 👋🎓
 
 ---
-**Última actualización:** 24 de abril de 2026 - 01:20 AM
+**Última actualización:** 25 de abril de 2026 - 07:15 PM
 **Responsables:** Germán Murillas & Jorge Estacio.
+
+## 6. Mejoras de UI y Automatización (25/04/2026) 💎
+Se adelantaron componentes críticos para la validación de la tesis:
+*   **Módulo de Conciliación:** Implementación del modal de ajuste físico exclusivo para `Admin`. Conectado al endpoint de Laravel para actualización de Kardex.
+*   **Seguridad de Roles:** Sincronización del estado de autenticación con los componentes de Figma para restringir acciones sensibles.
+*   **Automatización OCI:** Creación del script `oci_ampere_request.sh`. Este script automatiza la solicitud recursiva de la instancia Ampere A1 (24GB RAM) para evitar el error "Out of Capacity" y asegurar el servidor principal.
+*   **Refinamiento Visual:** Ajuste de timings en transiciones GSAP y pulido de modales premium. ✅
+
+---

@@ -1,36 +1,48 @@
+<p align="center">
+  <img src="https://static.wikia.nocookie.net/logopedia/images/b/b8/Univalle.png" width="120" alt="Univalle Logo">
+</p>
+
 # Gestor de Inventario de Materia Prima con LLM (PYMETORY)
 
-## Descripción
-Proyecto de Trabajo de Grado para Ingeniería de Sistemas - Universidad del Valle (Sede Tuluá). 
-Este sistema utiliza Inteligencia Artificial (LLM) con técnicas de RAG (Retrieval-Augmented Generation) para gestionar inventarios de materiales y lotes en PYMES, optimizando el despacho mediante lógica FEFO (First-Expired, First-Out).
+> **Trabajo de Grado - Ingeniería de Sistemas**  
+> *Universidad del Valle - Sede Tuluá*
 
-## Equipo
-* **Autor:** German David Murillas Mondragón - Código: 2067549-3743
-* **Socio Técnico:** Jorge Augusto Estacio Almeciga
-* **Director:** Ing. Héctor Fabio Ocampo Arbeláez
+PYMETORY es un sistema inteligente de gestión de inventarios diseñado específicamente para PYMES. Utiliza Inteligencia Artificial (LLM) con técnicas de **RAG (Retrieval-Augmented Generation)** para optimizar la toma de decisiones y garantizar el cumplimiento de la lógica **FEFO (First-Expired, First-Out)** en el manejo de insumos críticos.
 
-## Estado del Proyecto
-Actualmente en fase de **Desarrollo de Prototipo Funcional**.
+## 🔗 Documentación Técnica (Tesis)
+Para la revisión del director y el jurado, se han consolidado los siguientes anexos técnicos:
+
+*   📊 **[Modelo Entidad-Relación (MER)](docs/MER.md)** - Estructura de la base de datos y Kardex.
+*   🏗️ **[Arquitectura del Sistema](docs/ARCHITECTURE.md)** - Stack tecnológico y flujo de datos IA.
+*   🎭 **[Casos de Uso](docs/USE_CASES.md)** - Definición de roles (Admin/Operario) y escenarios.
 
 ---
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
-## Stack Tecnológico
+## 🛠️ Stack Tecnológico Premium
 - **Backend:** Laravel 11 (PHP 8.3)
 - **Frontend:** React 19 + Inertia.js 2.0
-- **Estilos:** Tailwind CSS v4
-- **Animaciones:** GSAP 3
-- **IA:** OpenAI API (GPT-4o-mini) + RAG local embedding simulation.
+- **Estilos:** Tailwind CSS v4 (Midnight Luxe Concept)
+- **IA:** OpenAI API (GPT-4o-mini) + Motor RAG Contextual
+- **PDF:** DomPDF para reportes automatizados
 
-## Desarrollo con Agentes IA
-Este repositorio está optimizado para desarrollo asistido por agentes (Claude Code, Antigravity, Cursor). 
-Se recomienda el uso de [Laravel Boost](https://laravel.com/docs/ai) para supercargar el flujo de trabajo.
+## 👥 Equipo de Trabajo
+*   **Autor:** German David Murillas Mondragón
+*   **Socio Técnico & Partner:** Jorge Augusto Estacio Almeciga
+*   **Director de Proyecto:** Ing. Héctor Fabio Ocampo Arbeláez
 
-```bash
-composer require laravel/boost --dev
-php artisan boost:install
-```
+---
 
-## Licencia
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🚀 Instalación Rápida
+
+1.  Clonar el repositorio.
+2.  Configurar el archivo `.env` con las credenciales de base de datos y la `OPENAI_API_KEY`.
+3.  Ejecutar las migraciones y seeders para inicializar bodegas y usuarios:
+    ```bash
+    composer install
+    npm install
+    php artisan migrate --seed
+    npm run dev
+    ```
+
+## 📜 Licencia
+Este proyecto es propiedad intelectual de los autores bajo el marco académico de la **Universidad del Valle**.
