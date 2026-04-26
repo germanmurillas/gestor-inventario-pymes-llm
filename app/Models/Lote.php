@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 class Lote extends Model {
     protected $fillable = [
-        'material_id', 'batch_number', 'quantity', 
+        'material_id', 'bodega_id', 'batch_number', 'quantity', 
         'expiration_date', 'status'
     ];
 
@@ -19,6 +19,10 @@ class Lote extends Model {
 
     public function material(): BelongsTo {
         return $this->belongsTo(Material::class);
+    }
+
+    public function bodega(): BelongsTo {
+        return $this->belongsTo(Bodega::class);
     }
 
     public function getDaysUntilExpirationAttribute(): int {

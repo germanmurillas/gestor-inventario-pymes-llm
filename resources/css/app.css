@@ -1,43 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', sans-serif;
+  
   --color-brand: #0A0A0B;
-  --color-bg-gray: #0F172A;
-  --color-accent: #6366F1; /* Indigo */
+  --color-indigo-glow: #6366F1;
+  --color-obsidiana: #0A0A0B;
+  --color-slate-deep: #0F172A;
   
   --shadow-premium: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-inner-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  --shadow-radial-blue: 0 0 100px -20px rgba(99, 102, 241, 0.2);
 }
 
-body {
-  background-color: #F8FAFC; /* Light gray for the outer shell to contrast with midnight cards */
-  color: #0F172A;
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  body {
+    @apply bg-[#F8FAFC] text-[#0F172A] font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900;
+  }
+  
+  h1, h2, h3, h4, .font-display {
+    @apply font-display tracking-tight font-black uppercase;
+  }
 }
 
-/* Midnight Glassmorphism */
-.glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+/* Midnight Luxe Utilities */
+.bg-obsidiana { background-color: #0A0A0B; }
+
+.glass-morphism {
+  @apply bg-white/80 backdrop-blur-xl border border-white/40 shadow-premium;
 }
 
-.midnight-sidebar {
-  background: #0A0A0B;
-  color: #94A3B8;
+.midnight-glass {
+  @apply bg-black/60 backdrop-blur-2xl border border-white/5 shadow-2xl;
 }
 
-.midnight-sidebar .active {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  box-shadow: var(--shadow-inner-glow);
+.glow-indigo {
+  box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.5);
 }
 
-/* GSAP Transition Helper */
-.page-transition {
-  opacity: 0;
-  transform: translateY(10px);
+.radial-decor {
+  background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.05), transparent 40%);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}
+
+/* GSAP Helper */
+.reveal-visible {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0px);
 }

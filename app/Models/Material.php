@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Material extends Model {
     protected $fillable = [
-        'code', 'name', 'unit_type', 
-        'conversion_rate', 'stock_min', 'stock_max'
+        'code', 'name', 'unit', 'description', 
+        'stock_min', 'stock_max'
     ];
 
     public function lotes(): HasMany {
