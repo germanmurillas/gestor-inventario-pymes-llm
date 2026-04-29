@@ -29,6 +29,20 @@ _ide_helper.php
 .phpactor.json
 npm-debug.log
 yarn-error.log
-oracle_key.pem*.json
-item_info.txt
+# Credenciales y llaves privadas — NUNCA al repositorio
+oracle_key.pem
+*.pem
+*.key
+ssh-key*
+
+# Archivos JSON temporales de scripts de automatización
+all_items.json
+current_status.json
+final_check_items.json
+final_ids.json
+final_list.json
+items.json
+project_fields.json
+updated_items.json
 scratch/
+item_info.txt
