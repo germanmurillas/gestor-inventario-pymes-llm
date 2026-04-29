@@ -8,7 +8,7 @@ use Carbon\Carbon;
 class Lote extends Model {
     protected $fillable = [
         'material_id', 'bodega_id', 'batch_number', 'quantity', 
-        'expiration_date', 'status'
+        'unit_cost', 'expiration_date', 'status'
     ];
 
     protected function casts(): array {
