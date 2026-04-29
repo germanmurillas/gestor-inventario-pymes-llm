@@ -18,11 +18,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. Configuraciones y Tags del sistema (primero, sin dependencias)
+        $this->call([
+            TagSeeder::class,
+            SettingsSeeder::class,
+        ]);
+
         // 1. Usuario Admin
         User::create([
-            'name' => 'Germán David',
-            'email' => 'admin@pymetory.com',
-            'password' => bcrypt('password'),
+            'name'     => 'Germán David',
+            'email'    => 'admin@pymetory.com',
+            'password' => bcrypt('Pymetory2026'),
+            'role'     => 'admin',
         ]);
 
         // 2. Bodegas Realistas
@@ -90,12 +97,17 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Lote::create([
-            'material_id' => $varilla->id,
-            'bodega_id' => $bodegaA->id,
-            'batch_number' => 'LT-CENT-005',
-            'quantity' => 120,
+            'material_id'     => $varilla->id,
+            'bodega_id'       => $bodegaA->id,
+            'batch_number'    => 'LT-CENT-005',
+            'quantity'        => 120,
             'expiration_date' => now()->addYears(2),
-            'status' => 'active'
+            'status'          => 'active'
+        ]);
+
+        // 5. Notificaciones de ejemplo para la demo
+        $this->call([
+            NotificationSeeder::class,
         ]);
     }
 }
