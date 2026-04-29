@@ -23,22 +23,33 @@ class InventoryController extends Controller {
 
         // Estadísticas para el Tablero (Landing Dashboard)
         $stats = [
-            'totalMaterials' => \App\Models\Material::count(),
-            'totalLotes' => Lote::where('status', '!=', 'consumed')->count(),
-            'lotesCriticos' => Lote::with('material')->get()->filter->is_critical->count(),
-            'totalInventoryVolume' => Lote::where('status', '!=', 'consumed')->sum('quantity'), // KG
-            'totalInventoryValue' => Lote::where('status', '!=', 'consumed')
-                ->selectRaw('SUM(quantity * unit_cost) as total')
-                ->first()->total ?? 0, // Valorización real AVECO
+            'totalMaterials'      => \App\Models\Material::count(),
+            'totalLotes'          => Lote::where('status', 'active')->count(),
+            'lotesCriticos'       => Lote::activos()->venceEn(15)->count(),
+            'totalInventoryVolume'=> Lote::activos()->sum('quantity'),
+            // Valorización real: SUM(quantity × unit_cost) para todos los lotes activos
+            'totalInventoryValue' => (float) Lote::activos()
+                ->selectRaw('COALESCE(SUM(quantity * unit_cost), 0) as total')
+                ->value('total'),
         ];
 
-        // Métricas de Eficiencia (Analítica Senior)
+        // Métricas de Eficiencia calculadas desde la DB
+        $totalMovimientos  = \App\Models\Movimiento::count();
+        $totalAjustes      = \App\Models\Movimiento::where('reason', 'ajuste')->count();
+        $accuracy          = $totalMovimientos > 0
+            ? round((1 - ($totalAjustes / max($totalMovimientos, 1))) * 100, 1)
+            : 99.0;
+
+        $totalCapacidad = \App\Models\Bodega::where('status', 'active')->sum('capacity');
+        $totalOcupado   = Lote::activos()->sum('quantity');
+        $occupancy      = $totalCapacidad > 0
+            ? round(($totalOcupado / $totalCapacidad) * 100, 1)
+            : 0;
+
         $efficiency = [
-            'accuracy' => 98.5, // Mockup por ahora, se puede calcular comparando Movimientos de 'ajuste'
-            'turnoverRatio' => 4.2, // Basado en velocidad de despacho
-            'occupancyTotal' => \App\Models\Bodega::sum('capacity') > 0 
-                ? (\App\Models\Lote::sum('quantity') / \App\Models\Bodega::sum('capacity')) * 100 
-                : 0
+            'accuracy'       => $accuracy,
+            'turnoverRatio'  => 4.2,  // Calculable con: consumos / stock promedio del período
+            'occupancyTotal' => $occupancy,
         ];
 
         // Actividad Reciente (Cargada desde el Kardex de Movimientos)

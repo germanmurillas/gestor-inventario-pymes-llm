@@ -19,7 +19,7 @@ const FigmaTablero = ({ stats, user, onViewChange }: { stats: any, user: any, on
                         {isAdmin && (
                             <button 
                                 className="flex items-center gap-2 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all hover:shadow-sm active:scale-95"
-                                onClick={() => alert("Función de Conciliación (#10) habilitada: Permite ajustar stock físico vs lógico.")}
+                                onClick={() => onViewChange('CONCILIACION')}
                             >
                                 <LayoutGrid size={14} />
                                 Conciliación
@@ -76,11 +76,17 @@ const FigmaTablero = ({ stats, user, onViewChange }: { stats: any, user: any, on
                             <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
                                 <DollarSign size={24} />
                             </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-display">Stock</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-display">Valorización</span>
                         </div>
-                        <div className="text-3xl font-black text-slate-900 tracking-tighter font-display">{summary.totalInventoryValue} <span className="text-xs text-slate-400">Kg/L</span></div>
-                        <div className="text-[10px] text-slate-400 font-bold tracking-tight uppercase">Volumen Total</div>
+                        <div className="text-2xl font-black text-slate-900 tracking-tighter font-display">
+                            {summary.totalInventoryValue > 0
+                                ? `$${new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(summary.totalInventoryValue)}`
+                                : <span className="text-slate-400 text-sm">Sin costos</span>
+                            }
+                        </div>
+                        <div className="text-[10px] text-emerald-600 font-bold tracking-tight uppercase">COP · Stock activo</div>
                     </div>
+
                 </div>
             </div>
 
