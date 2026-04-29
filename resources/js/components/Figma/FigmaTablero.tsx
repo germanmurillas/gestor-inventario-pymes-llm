@@ -1,7 +1,7 @@
 import React from 'react';
 import { LayoutGrid, FileText, Folder, DollarSign, Clock, Package } from 'lucide-react';
 
-const FigmaTablero = ({ stats, user }: { stats: any, user: any }) => {
+const FigmaTablero = ({ stats, user, onViewChange }: { stats: any, user: any, onViewChange: (view: any) => void }) => {
     // Fallback data if stats are not loaded yet
     const summary = stats?.summary || { totalMaterials: 0, totalLotes: 0, lotesCriticos: 0, totalInventoryValue: 0 };
     const activity = stats?.recentActivity || [];
@@ -110,7 +110,10 @@ const FigmaTablero = ({ stats, user }: { stats: any, user: any }) => {
                             )}
                         </div>
                         <div className="p-4 border-t border-slate-100 flex justify-center bg-slate-50/20">
-                            <button className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
+                            <button 
+                                onClick={() => onViewChange('LOG_MAESTRO')}
+                                className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors"
+                            >
                                 Ver historial completo
                             </button>
                         </div>

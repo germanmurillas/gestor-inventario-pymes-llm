@@ -27,8 +27,9 @@ import FigmaNotifications from '../components/Figma/FigmaNotifications';
 import FigmaSearch from '../components/Figma/FigmaSearch';
 import FigmaLabels from '../components/Figma/FigmaLabels';
 import FigmaKanban from '../components/Figma/FigmaKanban';
+import FigmaLogMaestro from '../components/Figma/FigmaLogMaestro';
 
-type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'CONFIGURACION' | 'PROYECTO';
+type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'CONFIGURACION' | 'PROYECTO' | 'LOG_MAESTRO';
 
 export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth: any, initialLotes: any[], dashboardStats: any }) {
     const [lotes, setLotes] = useState(initialLotes || []);
@@ -94,6 +95,7 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                     <div className={`px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-6 ${sidebarOpen ? 'block' : 'hidden'}`}>Análisis</div>
                     <SidebarItem icon={MessageSquare} label="Asistente RAG" view="LLM" isActive={activeView === 'LLM'} />
                     <SidebarItem icon={BarChart3} label="Reportes" view="REPORTES" isActive={activeView === 'REPORTES'} />
+                    <SidebarItem icon={LayoutGrid} label="Log Maestro" view="LOG_MAESTRO" isActive={activeView === 'LOG_MAESTRO'} />
                     <SidebarItem icon={Tag} label="Etiquetas" view="ETIQUETAS" isActive={activeView === 'ETIQUETAS'} />
                     
                     <div className={`px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-6 ${sidebarOpen ? 'block' : 'hidden'}`}>Gestión</div>
@@ -135,15 +137,16 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     <div ref={viewRef} className="p-8 h-full">
-                        {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} />}
+                        {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} onViewChange={setActiveView} />}
                         {activeView === 'INVENTARIO' && <FigmaInventario lotes={lotes} bodegas={stats?.bodegas || []} user={user} />}
-                        {activeView === 'BUSCAR' && <FigmaSearch />}
-                        {activeView === 'ETIQUETAS' && <FigmaLabels />}
-                        {activeView === 'REPORTES' && <FigmaReports />}
+                        {activeView === 'BUSCAR' && <FigmaSearch lotes={lotes} />}
+                        {activeView === 'ETIQUETAS' && <FigmaLabels lotes={lotes} />}
+                        {activeView === 'REPORTES' && <FigmaReports stats={stats} />}
                         {activeView === 'LLM' && <FigmaLLM />}
                         {activeView === 'NOTIFICACIONES' && <FigmaNotifications />}
                         {activeView === 'CONFIGURACION' && <FigmaSettings />}
                         {activeView === 'PROYECTO' && <FigmaKanban />}
+                        {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro movements={stats?.fullActivity || []} onBack={() => setActiveView('TABLERO')} />}
                         
                         {(['AYUDA'].includes(activeView)) && (
                             <div className="bg-white rounded-3xl border border-slate-200 p-24 shadow-sm flex flex-col items-center justify-center text-slate-300">

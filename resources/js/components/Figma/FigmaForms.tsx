@@ -58,6 +58,12 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
             </div>
 
             <div className="bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-sm space-y-10">
+                {errors.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-pulse">
+                        <Tag size={16} />
+                        <span>{errors.error}</span>
+                    </div>
+                )}
                 {/* Form Sections (Mockup 14) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
