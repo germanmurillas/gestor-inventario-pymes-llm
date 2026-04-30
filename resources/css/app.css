@@ -60,3 +60,38 @@
   filter: blur(0px);
   transform: translateY(0px);
 }
+
+/* ── Print styles for QR labels ─────────────────────────────────────────── */
+@media print {
+    /* Ocultar todo excepto la etiqueta imprimible */
+    body > * { display: none !important; }
+    #printable-label,
+    #printable-label * {
+        display: block !important;
+        visibility: visible !important;
+    }
+    #printable-label {
+        position: fixed !important;
+        top: 0; left: 0;
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 24px !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        font-family: 'Inter', sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 16px !important;
+    }
+    /* Asegurar que el QR sea visible */
+    #printable-label svg {
+        display: block !important;
+        width: 200px !important;
+        height: 200px !important;
+    }
+}

@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ChatLLMController;
 use App\Http\Controllers\ConsumptionController;
+use App\Http\Controllers\SettingsController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -42,6 +43,13 @@ Route::post('/inventory/lote/{id}/consume', [InventoryController::class, 'consum
 // Endpoint de Consulta RAG Brutalista LLM
 Route::post('/chat-rag', [ChatLLMController::class, 'ask'])
     ->middleware(['auth', 'verified']);
+
+// ── Settings API ──────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('settings')->group(function () {
+    Route::get('/',         [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/',         [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/{clave}',  [SettingsController::class, 'get'])->name('settings.get');
+});
 
 // Motor de Autenticación Propio (Reemplaza a Laravel Breeze para inyectar Roles: admin/operario)
 use App\Http\Controllers\AuthController;
