@@ -20,6 +20,11 @@ Route::get('/inventory/report', [InventoryController::class, 'exportPdf'])
     ->middleware(['auth', 'verified', 'role:admin'])
     ->name('inventory.report');
 
+Route::get('/inventory/report/csv', [InventoryController::class, 'exportCsv'])
+    ->middleware(['auth', 'verified', 'role:admin'])
+    ->name('inventory.report.csv');
+
+
 Route::post('/inventory/consume', [ConsumptionController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('inventory.consume');

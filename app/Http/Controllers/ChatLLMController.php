@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Lote;
 
 class ChatLLMController extends Controller {
@@ -14,12 +16,27 @@ class ChatLLMController extends Controller {
         $query = $request->input('prompt');
         $apiKey = env('OPENAI_API_KEY');
 
+        // Leer configuraciones de la tabla de settings
+        $llmActivo = DB::table('settings')->where('clave', 'llm_activo')->value('valor');
+        if ($llmActivo === 'false') {
+            return response()->json([
+                'response' => "> MÓDULO IA DESACTIVADO\n> El asistente por Inteligencia Artificial ha sido desactivado por el administrador."
+            ]);
+        }
+
+        $llmModelo = DB::table('settings')->where('clave', 'llm_modelo')->value('valor') ?: 'gpt-4o-mini';
+        $llmTemp = DB::table('settings')->where('clave', 'llm_temperatura')->value('valor');
+        $llmMaxTokens = DB::table('settings')->where('clave', 'llm_max_tokens')->value('valor');
+
+        $temperature = is_numeric($llmTemp) ? (float) $llmTemp : 0.3;
+        $maxTokens = is_numeric($llmMaxTokens) ? (int) $llmMaxTokens : 1024;
+
         // MOCK MODE FALLBACK: Previene gasto de tokens o errores si el cliente aún no pone su key en .env
         if (!$apiKey || $apiKey === '') {
             // Dormimos 1 seg para emular latencia visual del brutalist design RAG
             sleep(1); 
             return response()->json([
-                'response' => "> MODO DESCONECTADO (Local LLM Emulation).\n> Recibido: \"{$query}\"\n> Ejecutando escaneo FEFO local sin API OpenAI."
+                'response' => "> MODO DESCONECTADO (Local LLM Emulation).\n> Recibido: \"{$query}\"\n> Modelo configurado: {$llmModelo} (Temp: {$temperature}, Max Tokens: {$maxTokens}).\n> Ejecutando escaneo FEFO local sin API OpenAI."
             ]);
         }
 
@@ -38,14 +55,16 @@ class ChatLLMController extends Controller {
             })->join(' ');
 
             $user = Auth::user();
-            $context = "Usuario: {$user->name} (Rol: {$user->role}). " .
+            $context = "Usuario: " . ($user->name ?? 'Invitado') . " (Rol: " . ($user->role ?? 'operario') . "). " .
                        "ESTADO BODEGAS: {$bodegas}. " .
                        "MOVIMIENTOS RECIENTES: {$movimientos}. " .
                        "LOTES CRÍTICOS/ACTIVOS: " . $lotes->toJson();
             
             $response = Http::withToken($apiKey)
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => 'gpt-4o-mini',
+                    'model' => $llmModelo,
+                    'temperature' => $temperature,
+                    'max_tokens' => $maxTokens,
                     'messages' => [
                         [
                             'role' => 'system', 
@@ -76,3 +95,4 @@ class ChatLLMController extends Controller {
         }
     }
 }
+

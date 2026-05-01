@@ -7,13 +7,30 @@ const FigmaReports = ({ stats }: { stats: any }) => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center gap-2 mb-8">
-                 <BarChart3 size={24} className="opacity-50 text-indigo-600" />
-                 <div>
-                    <h2 className="text-xl font-bold uppercase tracking-tight">Reportes & Analítica</h2>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Visión financiera y operativa de la bodega</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                 <div className="flex items-center gap-2">
+                      <BarChart3 size={24} className="opacity-50 text-indigo-600" />
+                      <div>
+                         <h2 className="text-xl font-bold uppercase tracking-tight">Reportes & Analítica</h2>
+                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Visión financiera y operativa de la bodega</p>
+                      </div>
+                 </div>
+                 <div className="flex items-center gap-3">
+                     <button
+                         onClick={() => window.location.href = '/inventory/report'}
+                         className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95 shadow-sm"
+                     >
+                         PDF
+                     </button>
+                     <button
+                         onClick={() => window.location.href = '/inventory/report/csv'}
+                         className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95 shadow-sm"
+                     >
+                         Excel / CSV
+                     </button>
                  </div>
             </div>
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
