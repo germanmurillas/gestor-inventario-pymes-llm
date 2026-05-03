@@ -22,6 +22,12 @@ class SettingsSeeder extends Seeder
             ['clave' => 'llm_max_tokens',      'valor' => '1024',                    'tipo' => 'integer', 'grupo' => 'llm',            'es_publica' => false, 'descripcion' => 'Máximo de tokens por respuesta del LLM'],
             ['clave' => 'llm_contexto_lotes',  'valor' => '20',                      'tipo' => 'integer', 'grupo' => 'llm',            'es_publica' => false, 'descripcion' => 'Número de lotes recientes a inyectar en el contexto RAG'],
             ['clave' => 'llm_activo',          'valor' => 'true',                    'tipo' => 'boolean', 'grupo' => 'llm',            'es_publica' => false, 'descripcion' => 'Activar o desactivar el módulo LLM'],
+            ['clave' => 'llm_source',          'valor' => 'local',                   'tipo' => 'string',  'grupo' => 'llm',            'es_publica' => false, 'descripcion' => 'Origen del LLM (local, external, free)'],
+            ['clave' => 'llm_external_key',    'valor' => 'hf_free_test_key_sample', 'tipo' => 'string',  'grupo' => 'llm',            'es_publica' => false, 'descripcion' => 'API Key del proveedor de LLM'],
+            ['clave' => 'llm_num_ctx',         'valor' => '2048',                    'tipo' => 'integer', 'grupo' => 'llm',            'es_publica' => false, 'descripcion' => 'Tamaño del contexto en Ollama'],
+            ['clave' => 'llm_num_gpu',         'valor' => '32',                      'tipo' => 'integer', 'grupo' => 'llm',            'es_publica' => false, 'descripcion' => 'Número de capas offload a la GPU'],
+
+
 
             // Grupo: Notificaciones
             ['clave' => 'notif_fefo_activo',   'valor' => 'true',                    'tipo' => 'boolean', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Enviar notificación cuando un lote entra en estado crítico FEFO'],

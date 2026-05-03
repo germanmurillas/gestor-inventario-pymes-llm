@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Globe, Cpu, Bell, ShieldCheck, Save, LogOut, Key, Zap, Database, CheckCircle, AlertTriangle } from 'lucide-react';
 import { router } from '@inertiajs/react';
 
@@ -11,14 +11,38 @@ const MODELS = ['gpt-4o-mini', 'gpt-4o', 'claude-3-haiku', 'claude-3-sonnet'] as
 const FigmaSettings = () => {
     const [activeTab, setActiveTab]     = useState<Tab>('GENERAL');
     const [temperature, setTemperature] = useState(0.3);
-    const [llmModel, setLlmModel]       = useState('gpt-4o-mini');
+    const [llmModel, setLlmModel]       = useState('pymetory-8b:latest');
     const [maxTokens, setMaxTokens]     = useState(1024);
     const [llmActive, setLlmActive]     = useState(true);
+    const [llmSource, setLlmSource]     = useState('local');
+    const [llmExternalKey, setLlmExternalKey] = useState('');
+    const [localModels, setLocalModels] = useState<string[]>([]);
+    const [numCtx, setNumCtx]           = useState(2048);
+    const [numGpu, setNumGpu]           = useState(32);
     const [notifFefo, setNotifFefo]     = useState(true);
     const [notifStock, setNotifStock]   = useState(true);
     const [fefoDias, setFefoDias]       = useState(15);
     const [saving, setSaving]           = useState(false);
     const [feedback, setFeedback]       = useState<{ type: 'ok' | 'error'; msg: string } | null>(null);
+
+
+    // Fetch local models on mount and when LLM tab is active
+    useEffect(() => {
+        const fetchModels = async () => {
+            try {
+                const res = await fetch('/ollama-models');
+                const data = await res.json();
+                if (data.models) {
+                    setLocalModels(data.models);
+                }
+            } catch (err) {
+                // Safe fallback
+            }
+        };
+        fetchModels();
+    }, [activeTab]);
+
+
 
     // ── Save handler — sends changed settings to /settings (PUT) ──────────────
     const handleSave = useCallback(async (settingsMap: Record<string, string>) => {
@@ -166,11 +190,50 @@ const FigmaSettings = () => {
                                 </div>
                             </div>
 
+                            {/* Selector de Origen del LLM */}
+                            <div className="space-y-3">
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Origen del LLM</div>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {[
+                                        { id: 'local', label: 'Local' },
+                                        { id: 'external', label: 'Manual' },
+                                        { id: 'free', label: 'Gratuito' }
+                                    ].map((s) => (
+                                        <button
+                                            key={s.id} type="button"
+                                            onClick={() => setLlmSource(s.id)}
+                                            className={`p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
+                                                llmSource === s.id
+                                                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                                    : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                                            }`}
+                                        >
+                                            {s.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Entrada de API Key Externa o Gratuita */}
+                            {llmSource !== 'local' && (
+                                <div className="space-y-2">
+                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">API Key / Token {llmSource === 'free' ? 'Gratuita' : 'Externa'}</div>
+                                    <input
+                                        type="text"
+                                        value={llmExternalKey}
+                                        onChange={(e) => setLlmExternalKey(e.target.value)}
+                                        placeholder={llmSource === 'free' ? 'Ingresa Token de HuggingFace...' : 'Ingresa API Key Externa de OpenAI...'}
+                                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-xs font-bold text-slate-900 focus:border-indigo-600 focus:bg-white outline-none transition-all"
+                                    />
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase">Clave para la comunicación con el proveedor seleccionado.</p>
+                                </div>
+                            )}
+
                             {/* Selector de modelo */}
                             <div className="space-y-3">
                                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Modelo de Lenguaje</div>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {MODELS.map((m) => (
+                                    {((llmSource === 'local' && localModels.length > 0) ? localModels : MODELS).map((m) => (
                                         <button
                                             key={m} type="button"
                                             onClick={() => setLlmModel(m)}
@@ -185,6 +248,7 @@ const FigmaSettings = () => {
                                     ))}
                                 </div>
                             </div>
+
 
                             {/* Temperatura */}
                             <div className="space-y-3">
@@ -217,6 +281,37 @@ const FigmaSettings = () => {
                                     className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                 />
                             </div>
+                            {/* Opciones Avanzadas de Ollama Local */}
+
+                            {llmSource === 'local' && (
+                                <div className="grid grid-cols-2 gap-4 p-6 bg-slate-50 border border-slate-100 rounded-[2rem]">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                            <span>Tamaño Contexto (Ollama)</span>
+                                            <span className="text-indigo-600 font-bold">{numCtx}</span>
+                                        </div>
+                                        <input
+                                            type="range" min="1024" max="8192" step="1024"
+                                            value={numCtx}
+                                            onChange={(e) => setNumCtx(parseInt(e.target.value))}
+                                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                            <span>Capas GPU (Ollama)</span>
+                                            <span className="text-indigo-600 font-bold">{numGpu}</span>
+                                        </div>
+                                        <input
+                                            type="range" min="0" max="99" step="1"
+                                            value={numGpu}
+                                            onChange={(e) => setNumGpu(parseInt(e.target.value))}
+                                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Estado RAG */}
                             <div className="p-6 bg-slate-900 rounded-[2rem] text-white flex items-center justify-between">
@@ -235,10 +330,14 @@ const FigmaSettings = () => {
 
                         <button
                             onClick={() => handleSave({
-                                llm_modelo:      llmModel,
-                                llm_temperatura: String(temperature),
-                                llm_max_tokens:  String(maxTokens),
-                                llm_activo:      llmActive ? 'true' : 'false',
+                                llm_modelo:       llmModel,
+                                llm_temperatura:  String(temperature),
+                                llm_max_tokens:   String(maxTokens),
+                                llm_activo:       llmActive ? 'true' : 'false',
+                                llm_source:       llmSource,
+                                llm_external_key: llmExternalKey,
+                                llm_num_ctx:      String(numCtx),
+                                llm_num_gpu:      String(numGpu),
                             })}
                             disabled={saving}
                             className="flex items-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95"
@@ -248,6 +347,7 @@ const FigmaSettings = () => {
                         </button>
                     </div>
                 )}
+
 
                 {/* ── 3. NOTIFICATIONS ───────────────────────────────────── */}
                 {activeTab === 'NOTIFICATIONS' && (

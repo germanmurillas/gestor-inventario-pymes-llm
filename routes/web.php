@@ -49,6 +49,21 @@ Route::post('/inventory/lote/{id}/consume', [InventoryController::class, 'consum
 Route::post('/chat-rag', [ChatLLMController::class, 'ask'])
     ->middleware(['auth', 'verified']);
 
+Route::get('/ollama-models', [ChatLLMController::class, 'getLocalOllamaModels'])
+    ->middleware(['auth', 'verified']);
+
+Route::get('/chat-history', [ChatLLMController::class, 'getChatHistory'])
+    ->middleware(['auth', 'verified']);
+
+Route::get('/chat-sessions', [ChatLLMController::class, 'getSessions'])
+    ->middleware(['auth', 'verified']);
+
+Route::get('/chat-sessions/{id}', [ChatLLMController::class, 'getSessionMessages'])
+    ->middleware(['auth', 'verified']);
+
+
+
+
 // ── Settings API ──────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('settings')->group(function () {
     Route::get('/',         [SettingsController::class, 'index'])->name('settings.index');

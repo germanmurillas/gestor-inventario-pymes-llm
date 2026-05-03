@@ -24,10 +24,39 @@ export default function TerminalRAG() {
     };
 
     useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+                const res = await fetch('/chat-history');
+                const data = await res.json();
+                if (data.history && data.history.length > 0) {
+                    const loaded: ChatMessage[] = [];
+                    data.history.reverse().forEach((item: any) => {
+                        loaded.push({
+                            role: 'user',
+                            content: item.prompt,
+                            timestamp: new Date(item.created_at)
+                        });
+                        loaded.push({
+                            role: 'ai',
+                            content: item.response,
+                            timestamp: new Date(item.created_at)
+                        });
+                    });
+                    setMessages(loaded);
+                }
+            } catch (err) {
+                // Ignore fallback
+            }
+        };
+        fetchHistory();
+    }, []);
+
+    useEffect(() => {
         scrollToBottom();
     }, [messages, isTyping]);
 
     const handleSend = async (e: React.FormEvent) => {
+
         e.preventDefault();
         if (!input.trim()) return;
 
