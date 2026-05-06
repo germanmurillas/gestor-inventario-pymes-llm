@@ -66,13 +66,110 @@ class ChatLLMController extends Controller {
         }
     }
 
+    private function classifyQuery($query) {
+        $q = strtolower($query);
+        if (preg_match('/cu[aá]nt[oa]s?.+hay|stock|cantidad|existencias|disponible/i', $q)) return 'stock_check';
+        if (preg_match('/cr[ií]tic[oa]|por vencer|pr[oó]xim[oa].+venc|alerta|urgente/i', $q)) return 'critical_alerts';
+        if (preg_match('/vence|fecha.+vencimient|cu[aá]ndo.+vence|expira/i', $q)) return 'expiration';
+        if (preg_match('/d[oó]nde|ubicaci[oó]n|bodega|almac[eé]n|est[aá].+guardado/i', $q)) return 'location';
+        if (preg_match('/valor|cu[aá]nto.+vale|precio|costo|cu[aá]nto.+cuest/i', $q)) return 'valuation';
+        if (preg_match('/entr[oó]|sali[oó]|movimient|historial|kardex|qui[eé]n.+mov/i', $q)) return 'movements';
+        if (preg_match('/lote|batch/i', $q)) return 'batch_info';
+        if (preg_match('/resumen|todo|general/i', $q)) return 'summary';
+        return 'general';
+    }
+
+    private function buildRagContext($query, $intent) {
+        $keywords = collect(explode(' ', strtolower($query)))
+            ->filter(fn($w) => strlen($w) > 2)
+            ->map(fn($w) => trim($w, "?. ,!¡¿;:"))
+            ->reject(fn($w) => in_array($w, ['que','los','las','del','por','con','una','para','como','tiene',
+                'hay','está','estan','haber','ser','fue','son','era','eran','donde','cuando','cual','cuales']))
+            ->values()
+            ->toArray();
+
+        $materialIds = [];
+        if (!empty($keywords)) {
+            $materialIds = \App\Models\Material::where(function($q) use ($keywords) {
+                foreach ($keywords as $word) {
+                    $q->orWhere('name', 'like', "%{$word}%")
+                      ->orWhere('description', 'like', "%{$word}%");
+                }
+            })->pluck('id')->toArray();
+        }
+
+        switch ($intent) {
+            case 'stock_check':
+                $lotes = Lote::with(['material', 'bodega'])
+                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
+                    ->orderBy('quantity', 'desc')
+                    ->take(6)->get();
+                $context = "CONSULTA DE STOCK - Datos actuales del inventario solicitado:\n";
+                break;
+            case 'critical_alerts':
+                $lotes = Lote::with(['material', 'bodega'])->fefoOrder()
+                    ->whereHas('material', fn($q) => $q->whereIn('id', $materialIds ?: \App\Models\Material::pluck('id')))
+                    ->take(5)->get();
+                $context = "ALERTAS FEFO - Lotes que requieren atención por vencimiento próximo:\n";
+                break;
+            case 'expiration':
+                $lotes = Lote::with(['material', 'bodega'])
+                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
+                    ->whereNotNull('expiration_date')
+                    ->orderBy('expiration_date', 'asc')
+                    ->take(6)->get();
+                $context = "FECHAS DE VENCIMIENTO - Lotes ordenados por cercanía de vencimiento:\n";
+                break;
+            case 'location':
+                $lotes = Lote::with(['material', 'bodega'])
+                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
+                    ->take(10)->get();
+                $context = "UBICACIÓN EN BODEGAS - Distribución física de los materiales:\n";
+                break;
+            case 'movements':
+                $movimientos = DB::table('movimientos')
+                    ->join('lotes', 'movimientos.lote_id', '=', 'lotes.id')
+                    ->join('materials', 'lotes.material_id', '=', 'materials.id')
+                    ->join('users', 'movimientos.user_id', '=', 'users.id')
+                    ->select('movimientos.*', 'materials.name as material', 'users.name as usuario')
+                    ->when(!empty($materialIds), fn($q) => $q->whereIn('lotes.material_id', $materialIds))
+                    ->orderBy('movimientos.created_at', 'desc')
+                    ->take(8)->get();
+                $context = "KARDEX DE MOVIMIENTOS (Historial inmutable):\n" . $movimientos->map(function($m) {
+                    return "- [{$m->created_at}] {$m->type}: {$m->quantity}u de {$m->material} | Razón: {$m->reason} | Usuario: {$m->usuario}";
+                })->join("\n");
+                break;
+            default:
+                $lotes = Lote::with(['material', 'bodega'])->fefoOrder()
+                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
+                    ->take(6)->get();
+                $context = "INVENTARIO ACTUAL:\n";
+        }
+
+        if ($intent !== 'movements') {
+            $context .= (isset($lotes) && $lotes->isNotEmpty())
+                ? $lotes->map(function($l) {
+                    return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$l->quantity} | Vence: " .
+                           ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') .
+                           " | Bodega: {$l->bodega->name}";
+                  })->join("\n")
+                : "- No se encontraron registros para esta consulta.";
+        }
+
+        $bodegas = \App\Models\Bodega::all()->map(fn($b) => "{$b->name}: {$b->occupancy_percentage}% ocupación")->join(' | ');
+        $context .= "\n\nESTADO DE BODEGAS: {$bodegas}";
+        $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó. Si pregunta por stock de cemento, solo habla de cemento. Si pregunta por vencimientos, solo muestra fechas. NO repitas todo el inventario a menos que te lo pidan explícitamente.";
+
+        return $context;
+    }
+
     public function ask(Request $request) {
         $request->validate([
             'prompt' => 'required|string|max:500',
             'session_id' => 'nullable|string',
             'session_title' => 'nullable|string'
         ]);
-        
+
         $query = $request->input('prompt');
         $sessionId = $request->input('session_id');
         $sessionTitle = $request->input('session_title');
@@ -81,208 +178,87 @@ class ChatLLMController extends Controller {
             $sessionId = uniqid('session_');
             $sessionTitle = mb_substr($query, 0, 30) ?: 'Nueva Consulta';
         }
-        
-        // Leer configuraciones de la tabla de settings
-        $llmActivo = DB::table('settings')->where('clave', 'llm_activo')->value('valor');
-        if ($llmActivo === 'false') {
+
+        $settings = DB::table('settings')->whereIn('clave', [
+            'llm_activo', 'llm_modelo', 'llm_temperatura', 'llm_max_tokens',
+            'llm_source', 'llm_external_key', 'llm_num_ctx', 'llm_num_gpu'
+        ])->pluck('valor', 'clave');
+
+        if (($settings['llm_activo'] ?? 'true') === 'false') {
             return response()->json([
-                'response' => "> MÓDULO IA DESACTIVADO\n> El asistente por Inteligencia Artificial ha sido desactivado por el administrador."
+                'response' => "> MÓDULO IA DESACTIVADO\n> El asistente ha sido desactivado por el administrador."
             ]);
         }
 
-        $llmModelo = DB::table('settings')->where('clave', 'llm_modelo')->value('valor') ?: 'pymetory-8b:latest';
-        $llmTemp = DB::table('settings')->where('clave', 'llm_temperatura')->value('valor');
-        $llmMaxTokens = DB::table('settings')->where('clave', 'llm_max_tokens')->value('valor');
-        $llmSource = DB::table('settings')->where('clave', 'llm_source')->value('valor') ?: 'local';
-        $llmExternalKey = DB::table('settings')->where('clave', 'llm_external_key')->value('valor');
-        $llmNumCtx = DB::table('settings')->where('clave', 'llm_num_ctx')->value('valor') ?: '2048';
-        $llmNumGpu = DB::table('settings')->where('clave', 'llm_num_gpu')->value('valor') ?: '32';
+        $llmModelo = $settings['llm_modelo'] ?? 'pymetory-8b:latest';
+        $temperature = (float)($settings['llm_temperatura'] ?? 0.3);
+        $maxTokens = (int)($settings['llm_max_tokens'] ?? 1024);
+        $llmSource = $settings['llm_source'] ?? 'local';
+        $apiKey = $settings['llm_external_key'] ?? env('OPENAI_API_KEY');
 
-        $temperature = is_numeric($llmTemp) ? (float) $llmTemp : 0.3;
-        $maxTokens = is_numeric($llmMaxTokens) ? (int) $llmMaxTokens : 1024;
+        $intent = $this->classifyQuery($query);
+        $contextoRAG = $this->buildRagContext($query, $intent);
 
-        // Determinar el API Key a usar según la fuente
-        $apiKey = match ($llmSource) {
-            'external' => $llmExternalKey,
-            'free'     => $llmExternalKey ?: 'hf_free_key_placeholder',
-            default    => env('OPENAI_API_KEY')
-        };
+        $promptSistema = "Eres Pymetory IA, asistente de inventarios para una PYME de construcción. " .
+            "IMPORTANTE: Responde EXACTAMENTE lo que el usuario pregunta. Si pregunta por un material específico, " .
+            "solo habla de ESE material. Si pregunta por vencimientos, solo muestra fechas. " .
+            "Solo menciona 'crítico' o 'urgente' si el usuario explícitamente te pregunta por alertas. " .
+            "Usa el siguiente contexto de base de datos para responder:\n\n{$contextoRAG}";
 
         if ($llmSource === 'local') {
             try {
-                // 1. Ingesta del contexto RAG para Ollama
-                $lotes = Lote::with(['material', 'bodega'])->fefoOrder()->take(5)->get();
-                $contexto = "Lotes críticos de inventario actual: " . $lotes->map(function($l) {
-                    return "{$l->material->name} (Lote: {$l->batch_number}, Vence: {$l->expiration_date})";
-                })->join(', ');
+                $ollamaResponse = Http::timeout(15)->post('http://localhost:11434/api/generate', [
+                    'model' => str_contains($llmModelo, ':') ? $llmModelo : "{$llmModelo}:latest",
+                    'prompt' => "{$promptSistema}\n\nPregunta del usuario: {$query}\n\nRespuesta:",
+                    'stream' => false,
+                    'options' => ['temperature' => $temperature, 'num_predict' => $maxTokens]
+                ]);
 
-                $promptCompleto = "Eres Pymetory IA, un Consultor de Inventarios. CONTEXTO: {$contexto}. Pregunta del usuario: \"{$query}\". Respuesta corta:";
-
-                $endpoints = [
-                    'http://127.0.0.1:11434/api/generate',
-                    'http://localhost:11434/api/generate',
-                    'http://host.docker.internal:11434/api/generate',
-                ];
-
-                $ollamaResponse = null;
-                foreach ($endpoints as $url) {
-                    try {
-                        $ollamaResponse = Http::timeout(4)->post($url, [
-                            'model' => str_contains($llmModelo, ':') ? $llmModelo : "{$llmModelo}:latest",
-                            'prompt' => $promptCompleto,
-                            'stream' => false,
-                            'options' => [
-                                'temperature' => $temperature,
-                                'num_predict' => $maxTokens,
-                                'num_ctx' => (int) $llmNumCtx,
-                                'num_gpu' => (int) $llmNumGpu
-                            ]
-                        ]);
-                        if ($ollamaResponse->successful()) {
-                            break;
-                        }
-                    } catch (\Exception $e) {
-                        // Intentar con la siguiente URL
-                    }
-                }
-
-                if ($ollamaResponse && $ollamaResponse->successful()) {
+                if ($ollamaResponse->successful()) {
                     $text = $ollamaResponse->json('response');
                     $this->recordChat($query, $text, 'local', $sessionId, $sessionTitle);
                     return response()->json([
-                        'response' => "> RESPUESTA EN VIVO DESDE OLLAMA LOCAL\n> Origen configurado: LOCAL (Modelo: {$llmModelo}).\n\n" . trim($text),
-                        'session_id' => $sessionId,
-                        'session_title' => $sessionTitle
-                    ]);
-                }
-
-                // Fallback Inteligente Determinista si Ollama no está listo o tarda
-                $fallbackText = "Analizando tu consulta en modo desconectado:\n\nPara el contexto de tu pregunta \"{$query}\", te informo que los lotes críticos actuales son:\n{$contexto}.\n\nRecomendación FEFO: Prioriza la salida de los materiales más antiguos para evitar mermas en la bodega.";
-                $this->recordChat($query, $fallbackText, 'local', $sessionId, $sessionTitle);
-                return response()->json([
-                    'response' => "> MODO AUTOCURATIVO (Local LLM Emulation activa).\n> Origen configurado: LOCAL.\n\n" . $fallbackText,
-                    'session_id' => $sessionId,
-                    'session_title' => $sessionTitle
-                ]);
-
-            } catch (\Exception $e) {
-                $fallbackText = "Analizando tu consulta en modo desconectado (Por falla de conexión):\n\nPregunta: \"{$query}\"\nContexto RAG de lotes:\n{$contexto}.\n\nRecomendación: Procede a gestionar los movimientos del inventario de acuerdo a la prioridad FEFO.";
-                $this->recordChat($query, $fallbackText, 'local', $sessionId, $sessionTitle);
-                return response()->json([
-                    'response' => "> MODO AUTOCURATIVO (Local LLM Emulation activa por Excepción).\n> Origen configurado: LOCAL.\n\n" . $fallbackText,
-                    'session_id' => $sessionId,
-                    'session_title' => $sessionTitle
-                ]);
-            }
-        }
-
-
-        if ($llmSource === 'free') {
-            try {
-                // 1. Ingesta del contexto RAG para HuggingFace
-                $lotes = Lote::with(['material', 'bodega'])->fefoOrder()->take(5)->get();
-                $contexto = "Lotes críticos de inventario actual: " . $lotes->map(function($l) {
-                    return "{$l->material->name} (Lote: {$l->batch_number}, Vence: {$l->expiration_date})";
-                })->join(', ');
-
-                $promptCompleto = "Eres Pymetory IA, un Consultor de Inventarios. CONTEXTO: {$contexto}. Pregunta del usuario: \"{$query}\". Respuesta corta:";
-
-                $hfResponse = Http::withToken($apiKey)
-                    ->timeout(8)
-                    ->post('https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct', [
-                        'inputs' => $promptCompleto,
-                        'parameters' => [
-                            'max_new_tokens' => 250,
-                            'temperature' => 0.7
-                        ]
-                    ]);
-
-                if ($hfResponse->successful()) {
-                    $output = $hfResponse->json();
-                    $text = is_array($output) && isset($output[0]['generated_text']) 
-                        ? $output[0]['generated_text'] 
-                        : (is_string($output) ? $output : json_encode($output));
-
-                    $cleanText = str_replace($promptCompleto, '', $text);
-                    $this->recordChat($query, $cleanText, 'free', $sessionId, $sessionTitle);
-
-                    return response()->json([
-                        'response' => "> RESPUESTA EN VIVO DESDE HUGGINGFACE INFERENCE\n> Origen configurado: FREE.\n\n" . trim($cleanText),
+                        'response' => trim($text),
+                        'intent' => $intent,
                         'session_id' => $sessionId,
                         'session_title' => $sessionTitle
                     ]);
                 }
             } catch (\Exception $e) {
-                // Fallback autocurative
+                \Log::error("Ollama error: " . $e->getMessage());
             }
-
-            sleep(1);
-            $fallbackResp = "> RESPUESTA HUGGINGFACE FREE INFERENCE (Autocurative Fallback Mode)\n> Origen configurado: FREE.\n> Análisis: El lote de Harina de Trigo (Lote: LT-4521) vence en 4 días. Te sugiero despacharlo de inmediato según la regla FEFO.";
-            $this->recordChat($query, $fallbackResp, 'free', $sessionId, $sessionTitle);
-            return response()->json([
-                'response' => $fallbackResp,
-                'session_id' => $sessionId,
-                'session_title' => $sessionTitle
-            ]);
         }
 
         try {
-            // 1. RAG Ingestion: Lotes críticos (Top 10 FEFO)
-            $lotes = Lote::with(['material', 'bodega'])->fefoOrder()->take(10)->get();
-            
-            // 2. RAG Ingestion: Estado de Bodegas
-            $bodegas = \App\Models\Bodega::all()->map(function($b) {
-                return "Bodega {$b->name} ({$b->code}): {$b->occupancy_percentage}% ocupada.";
-            })->join(' ');
-
-            // 3. RAG Ingestion: Últimos Movimientos (Kardex)
-            $movimientos = \App\Models\Movimiento::with('lote.material')->latest()->take(5)->get()->map(function($m) {
-                return "{$m->created_at->diffForHumans()}: {$m->type} de {$m->quantity}kg de {$m->lote->material->name} (Lote: {$m->lote->batch_number}).";
-            })->join(' ');
-
-            $user = Auth::user();
-            $context = "Usuario: " . ($user->name ?? 'Invitado') . " (Rol: " . ($user->role ?? 'operario') . "). " .
-                       "ESTADO BODEGAS: {$bodegas}. " .
-                       "MOVIMIENTOS RECIENTES: {$movimientos}. " .
-                       "LOTES CRÍTICOS/ACTIVOS: " . $lotes->toJson();
-            
-            $response = Http::withToken($apiKey)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => $llmModelo,
-                    'temperature' => $temperature,
-                    'max_tokens' => $maxTokens,
-                    'messages' => [
-                        [
-                            'role' => 'system', 
-                            'content' => "Eres Pymetory IA, un Consultor Senior de Inventarios y Cadena de Suministro para PYMES. 
-                            Tu tono es profesional, analítico y preventivo. 
-                            
-                            REGLAS DE ORO:
-                            1. Usa siempre los datos del CONTEXTO para responder.
-                            2. Si detectas que un lote vence en menos de 7 días, adviértelo proactivamente.
-                            3. Si una bodega supera el 80% de ocupación, sugiere organizar el espacio.
-                            4. Responde con un formato limpio de terminal (Markdown).
-                            
-                            CONTEXTO ACTUAL: " . $context
-                        ],
-                        ['role' => 'user', 'content' => $query],
-                    ],
-                ]);
+            $response = Http::withToken($apiKey)->timeout(15)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => $llmModelo,
+                'messages' => [
+                    ['role' => 'system', 'content' => $promptSistema],
+                    ['role' => 'user', 'content' => $query],
+                ],
+            ]);
 
             if ($response->successful()) {
                 $text = $response->json('choices.0.message.content');
                 $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle);
                 return response()->json([
-                    'response' => "> " . $text,
+                    'response' => trim($text),
+                    'intent' => $intent,
                     'session_id' => $sessionId,
                     'session_title' => $sessionTitle
                 ]);
             }
-
-            return response()->json(['response' => "> ERROR TERMINAL: Comunicación OpenAI fallida."], 500);
-
         } catch (\Exception $e) {
-            return response()->json(['response' => "> PANIC SYS: " . $e->getMessage()], 500);
+            return response()->json(['response' => "> ERROR DE CONEXIÓN: " . $e->getMessage()], 500);
         }
+
+        $fallbackLotes = Lote::with(['material', 'bodega'])->fefoOrder()->take(8)->get();
+        return response()->json([
+            'response' => "> MODO TEXTO (sin IA):\n" . $fallbackLotes->map(function($l) {
+                return "- {$l->material->name} [{$l->batch_number}]: {$l->quantity}u (Vence: " .
+                    ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') . ")";
+            })->join("\n"),
+            'intent' => $intent
+        ], 200);
     }
 }

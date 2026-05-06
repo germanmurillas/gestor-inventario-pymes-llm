@@ -46,3 +46,4 @@ project_fields.json
 updated_items.json
 scratch/
 item_info.txt
+.claude_context.md
