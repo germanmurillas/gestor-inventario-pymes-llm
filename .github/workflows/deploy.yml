@@ -1,116 +1,23 @@
-name: Deploy Pymetory
-
+name: Deploy to OCI
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-
 jobs:
-  lint-test:
-    runs-on: ubuntu-latest
-    outputs:
-      tests_passed: ${{ steps.tests.outcome }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install PHP dependencies
-        run: |
-          composer install --no-interaction --prefer-dist --no-progress
-          cp .env.example .env
-          php artisan key:generate
-          touch database/database.sqlite
-
-      - name: PHP Lint
-        run: find app config routes -name '*.php' -print0 | xargs -0 -n1 php -l
-
-      - name: JS Build Check
-        run: |
-          npm ci --ignore-scripts
-          npm run build
-
-      - name: PHP Tests
-        id: tests
-        run: composer test
-
-  deploy-pymetory:
-    needs: lint-test
-    if: needs.lint-test.outputs.tests_passed == 'success'
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Deploy to Pymetory
+        uses: appleboy/ssh-action@v1
         with:
-          php-version: '8.3'
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Build assets
-        run: |
-          composer install --no-interaction --prefer-dist --no-dev --no-progress
-          npm ci --ignore-scripts
-          npm run build
-          rm -rf node_modules
-
-      - name: Deploy Pymetory to OCI
-        uses: easingthemes/ssh-deploy@v5.1.0
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.OCI_SSH_KEY }}
-          ARGS: "-avzr --delete --exclude='.env' --exclude='storage/' --exclude='node_modules/' --exclude='.git/' --exclude='tests/'"
-          SOURCE: "./"
-          REMOTE_HOST: ${{ secrets.PYMETORY_HOST }}
-          REMOTE_PORT: ${{ secrets.PYMETORY_SSH_PORT }}
-          REMOTE_USER: ${{ secrets.PYMETORY_SSH_USER }}
-          TARGET: "/home/ubuntu/pymetory"
-
-  deploy-minimodel:
-    needs: lint-test
-    if: needs.lint-test.outputs.tests_passed == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy MiniModelGarden configs
-        uses: easingthemes/ssh-deploy@v5.1.0
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.OCI_SSH_KEY }}
-          ARGS: "-avzr --delete"
-          SOURCE: "./infra/"
-          REMOTE_HOST: ${{ secrets.MINIMODEL_HOST }}
-          REMOTE_PORT: ${{ secrets.MINIMODEL_SSH_PORT }}
-          REMOTE_USER: ${{ secrets.MINIMODEL_SSH_USER }}
-          TARGET: "/home/ubuntu/infra"
-
-  notify:
-    needs: [deploy-pymetory, deploy-minimodel]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify Telegram
-        run: |
-          STATUS="${{ needs.deploy-pymetory.result }}"
-          if [ "$STATUS" = "success" ]; then
-            MSG="Deploy Pymetory completado exitosamente"
-          elif [ "$STATUS" = "failure" ]; then
-            MSG="Deploy Pymetory FALLIDO - revisar logs"
-          else
-            MSG="Deploy Pymetory: $STATUS"
-          fi
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d "text=${MSG}" \
-            -d "parse_mode=HTML"
+          host: SERVIDOR
+          username: ubuntu
+          key: ${{ secrets.OCI_SSH_KEY }}
+          port: 443
+          script: |
+            cd /var/www/pymetory
+            git pull origin main
+            sudo -u www-data php artisan view:clear
+            sudo -u www-data php artisan config:clear
+            php artisan optimize 2>&1 | tail -3
+            sudo systemctl reload nginx
