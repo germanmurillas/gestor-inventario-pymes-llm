@@ -47,3 +47,5 @@ updated_items.json
 scratch/
 item_info.txt
 .claude_context.md
+*.mp4
+*.zip

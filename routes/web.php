@@ -6,6 +6,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ChatLLMController;
 use App\Http\Controllers\ConsumptionController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\KanbanController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -83,3 +84,14 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/kanban', [KanbanController::class, 'index'])->name('kanban');
+    Route::post('/kanban', [KanbanController::class, 'store']);
+    Route::post('/kanban/reorder', [KanbanController::class, 'reorder']);
+    Route::put('/kanban/{item}', [KanbanController::class, 'update']);
+    Route::delete('/kanban/{item}', [KanbanController::class, 'destroy']);
+    Route::post('/kanban/{item}/pin', [KanbanController::class, 'pin']);
+    Route::post('/kanban/ask-rag', [KanbanController::class, 'askRag']);
+    Route::post('/kanban/{item}/rag-context', [KanbanController::class, 'saveRagContext']);
+});

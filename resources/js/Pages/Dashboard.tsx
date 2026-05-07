@@ -64,9 +64,11 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
     const SidebarItem = ({ icon: Icon, label, view, isActive }: { icon: any, label: string, view: ViewMode, isActive: boolean }) => (
         <button 
             onClick={() => setActiveView(view)}
+            aria-label={`Ir a ${label}`}
+            aria-current={isActive ? 'page' : undefined}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-sans text-sm font-bold ${isActive ? 'bg-white/15 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
         >
-            <Icon size={18} className={isActive ? 'text-white' : 'text-slate-500'} />
+            <Icon size={18} className={isActive ? 'text-white' : 'text-slate-500'} aria-hidden="true" />
             <span className={`${sidebarOpen ? 'block' : 'hidden md:hidden'} tracking-tight`}>{label}</span>
         </button>
     );
@@ -76,13 +78,13 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
             <Head title={`${activeView} | Pymetory Premium`} />
 
             {/* Sidebar (Midnight Luxe) */}
-            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} h-full bg-obsidiana flex flex-col transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-50 border-r border-white/5`}>
+            <aside role="navigation" aria-label="Navegación principal" className={`${sidebarOpen ? 'w-64' : 'w-20'} h-full bg-obsidiana flex flex-col transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-50 border-r border-white/5`}>
                 <div className="h-20 flex items-center px-6 mb-2">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white glow-indigo">
+                        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white glow-indigo" aria-hidden="true">
                             <Box size={22} strokeWidth={2.5} />
                         </div>
-                        <span className={`font-display text-2xl tracking-tighter text-white ${sidebarOpen ? 'block' : 'hidden'}`}>Pymetory</span>
+                        <span className={`font-display text-2xl tracking-tighter text-white ${sidebarOpen ? 'block' : 'hidden'}`} role="banner">Pymetory</span>
                     </div>
                 </div>
 
@@ -101,7 +103,10 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                     <div className={`px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 mt-6 ${sidebarOpen ? 'block' : 'hidden'}`}>Gestión</div>
                     <SidebarItem icon={Bell} label="Alertas" view="NOTIFICACIONES" isActive={activeView === 'NOTIFICACIONES'} />
                     <SidebarItem icon={Settings} label="Ajustes" view="CONFIGURACION" isActive={activeView === 'CONFIGURACION'} />
-                    <SidebarItem icon={LayoutGrid} label="Kanban" view="PROYECTO" isActive={activeView === 'PROYECTO'} />
+                    <Link href="/kanban" className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-sans text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5`}>
+                        <LayoutGrid size={18} className="text-slate-500" />
+                        <span className={`${sidebarOpen ? 'block' : 'hidden'} tracking-tight`}>Kanban</span>
+                    </Link>
                 </div>
 
                 <div className="p-4 border-t border-white/5 bg-black/40">
@@ -125,12 +130,12 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
             <main className="flex-1 flex flex-col overflow-hidden relative">
                 <header className="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white/40 backdrop-blur-md z-40">
                     <div className="flex items-center gap-6">
-                        <button onClick={toggleSidebar} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:scale-110 active:scale-95">
-                            <Menu size={20} />
+                        <button onClick={toggleSidebar} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:scale-110 active:scale-95">
+                            <Menu size={20} aria-hidden="true" />
                         </button>
-                        <nav className="flex items-center gap-2">
+                        <nav className="flex items-center gap-2" aria-label="Breadcrumb">
                              <span className="text-slate-400 text-xs font-bold uppercase tracking-widest italic">Pymetory /</span>
-                             <h2 className="text-xs font-black uppercase tracking-widest text-slate-900">{activeView}</h2>
+                             <h1 className="text-xs font-black uppercase tracking-widest text-slate-900">{activeView}</h1>
                         </nav>
                     </div>
                 </header>
