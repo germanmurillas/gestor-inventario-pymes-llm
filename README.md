@@ -4,11 +4,16 @@
 ### Sistema de Gestión de Inventarios con Inteligencia Artificial para PYMEs
 
 [![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
 [![Inertia.js](https://img.shields.io/badge/Inertia.js-2.0-9553E9?style=for-the-badge&logo=inertia&logoColor=white)](https://inertiajs.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com)
+[![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.com)
+<br/>
+[![CI](https://img.shields.io/github/actions/workflow/status/germanmurillas/gestor-inventario-pymes-llm/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/germanmurillas/gestor-inventario-pymes-llm/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Project Board](https://img.shields.io/badge/Project_Board-Plan_Maestro-2ea44f?style=flat-square)](https://github.com/users/germanmurillas/projects/4)
+[![Issues](https://img.shields.io/github/issues/germanmurillas/gestor-inventario-pymes-llm?style=flat-square)](https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues)
 
 <br/>
 
@@ -23,6 +28,34 @@
 ![PYMETORY Dashboard](docs/screenshots/dashboard.png)
 
 </div>
+
+---
+
+## 🔗 Quick Links
+
+| Recurso | URL |
+|---------|-----|
+| **Plan Maestro** | [PLAN_MAESTRO.md](PLAN_MAESTRO.md) — Estado global del proyecto |
+| **Project Board** | [GitHub Projects #4](https://github.com/users/germanmurillas/projects/4) — Kanban de issues |
+| **Documentación** | [docs/](docs/) — Arquitectura, UML, MER, auditorías |
+| **Frontend Audit** | [docs/frontend-audit.md](docs/frontend-audit.md) — 35 hallazgos de QA |
+| **Kanban Board** | [KANBAN.md](KANBAN.md) — Tablero de tareas |
+
+---
+
+## 📋 Tabla de Contenidos
+
+- [¿Qué es PYMETORY?](#-qué-es-pymetory)
+- [Módulos del Sistema](#-módulos-del-sistema)
+- [Stack Tecnológico](#-stack-tecnológico)
+- [Arquitectura](#-arquitectura)
+- [Capturas del Sistema](#-capturas-del-sistema)
+- [Instalación Local](#-instalación-local)
+- [Despliegue en Producción](#-despliegue-en-producción)
+- [Operación Titan Predator](#-operación-titan-predator)
+- [Casos de Uso](#-casos-de-uso)
+- [Estado del Proyecto](#-estado-del-proyecto)
+- [Equipo](#-equipo)
 
 ---
 
@@ -200,12 +233,12 @@ Password: Pymetory2026
 | Componente | Detalle |
 |-----------|---------|
 | **Proveedor** | Oracle Cloud Infrastructure (OCI) |
-| **Servidor** | Ubuntu 22.04 LTS |
-| **IP Pública** | `SERVIDOR` |
-| **Stack** | Nginx + PHP-FPM 8.3 + MySQL 8 |
+| **Pymetory** | SERVIDOR · Ubuntu 22.04 · 956MB RAM · 50GB |
+| **MiniModelGarden** | SERVIDOR · Ubuntu 22.04 · 956MB RAM · 50GB · Ollama |
+| **Stack** | Nginx + PHP-FPM 8.3 + SQLite / MySQL 8 |
 
-### Instancia Objetivo (Pending)
-Se está cazando automáticamente una instancia **VM.Standard.A1.Flex (4 OCPU / 24 GB RAM)** usando el sistema automatizado **Titan Predator** para ejecutar el modelo LLM de forma local con Ollama.
+### Instancia Objetivo (Titan ARM)
+Se está cazando automáticamente una instancia **VM.Standard.A1.Flex (4 OCPU / 24 GB RAM)** usando el sistema automatizado **Titan Predator** para LeatherModelGarden — modelos LLM grandes locales.
 
 ---
 
@@ -268,12 +301,22 @@ Respuesta: "Tienes 850kg en Bodega 2. ⚠️ Vence en 12 días. Prioriza su cons
 ### Cronograma Universidad del Valle
 
 ```
-Sem 1-8   ████████████████ Requisitos y Mockups (Figma)     ✅
-Sem 9-11  ████████████     Backend Laravel + MySQL           ✅
-Sem 12    ████████         RAG/LLM + Frontend React 19       ✅
-Sem 13-14 ████             Pruebas + Reportes               🔄
-Sem 15    ██               Sustentación Final               ⏳
+Sem 1-8   ████████████████ Requisitos y Mockups (Figma)        ✅
+Sem 9-11  ████████████     Backend Laravel + MySQL             ✅
+Sem 12    ████████         RAG/LLM + Frontend React 19         ✅
+Sem 13-14 ████████         Pruebas + Reportes                  ✅
+Sem 15    ████             Documentación + Tesis               🔄
+Sem 16    ██               Sustentación Final                  ⏳
 ```
+
+### Ciclo Actual
+
+- **Ciclo Autónomo #1** — 25 issues en progreso ([#49](https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/49))
+- Agent α: Settings, Conciliación, Historial, Filtro disco, Auto-descarga
+- Agent β: RAG Kanban, Gráficos Titan, Dark mode
+- Agent γ: Notificaciones, Comandos Telegram, Uptime, Backups, CI/CD
+- Agent δ: Documentación, Diagramas, Tesis
+- Agent ε: GitHub Manager + QA
 
 ### Kanban Actual
 
