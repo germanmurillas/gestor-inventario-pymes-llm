@@ -49,3 +49,7 @@ item_info.txt
 .claude_context.md
 *.mp4
 *.zip
+.opencode_context.md
+instruccionSET.md
+.opencode_last_session.txt
+AGENT_PROFILES.md
