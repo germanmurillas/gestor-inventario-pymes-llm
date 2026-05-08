@@ -1,0 +1,244 @@
+\documentclass[letterpaper, 11pt, oneside]{book}
+\usepackage{pgfgantt} % Para generar Diagramas de Gantt
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc} %Para configuración de caracteres
+\usepackage[spanish]{babel} %Para configuración de idioma
+
+\usepackage{float} %Para que funcionen las tablas
+\usepackage{anysize} %Para usar márgenes
+\marginsize{2cm}{2cm}{1cm}{2cm} %{izquierda}{derecha}{arriba}{abajo}. La superior esta sobre 1, la derecha sobre -0.5 y la de abajo sobre 2 (por el número de página)
+%tablas
+\usepackage{fancyhdr}
+%tablas
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{float}
+%rotar tablas (y usar \includegraphics )
+\usepackage{rotating}
+%Dividir en diagonal
+%\usepackage{slashbox}
+%color tablas
+\usepackage{colortbl}
+%colocar tabla en lugar de cuadro
+
+
+\usepackage[numbib,notlof,notlot,nottoc]{tocbibind} %Para que la biliografía se llame así y no referencias y para que quede numerada como sección.
+%\usepackage[notlof,notlot,nottoc]{tocbibind} %Bibliografía sin numerar
+
+\bibliographystyle{ieeetr} %Estilo de bibliografía IEEE
+
+\usepackage{url} % inserción url's notas de pie.
+\usepackage[spanish,onelanguage]{algorithm2e} %for psuedo code
+
+%Para poder colocar texto en color
+\usepackage{color}
+\definecolor{naranja}{rgb}{1,0.5,0} % valores de las componentes roja, verde y azul (RGB)
+\definecolor{rojo}{rgb}{1,0,0}
+\definecolor{SteelBlue}{rgb}{0.3,0.5,0.7}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\definecolor{claregreen}{RGB}{4,180,95}
+\usepackage{listingsutf8}
+\lstset{ %
+  basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+  numberstyle=\footnotesize,          % the size of the fonts that are used for the line-numbers
+  numbersep=4pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;{}
+  extendedchars=false,
+  inputencoding=utf8, 
+}
+
+\lstdefinelanguage{XML}
+{
+  basicstyle=\tiny,           % the size of the fonts that are used for the code
+  numberstyle=\footnotesize,          % the size of the fonts that are used for the line-numbers
+  numbersep=4pt,                  % how far the line-numbers are from the code
+  morestring=[b]",
+  morestring=[s]{(}{)},
+  morecomment=[s]{<!-- }{-->},
+  stringstyle=\color{claregreen},
+  identifierstyle=\color{darkblue},
+  keywordstyle=\color{cyan}\bfseries,
+  morekeywords={xmlns,version,type, encoding, xml, DOCTYPE,SYSTEM,
+ELEMENT, ATTLIST, id, stylesheet, href},% list your attributes here
+  emph={REQUIRED},
+  emphstyle=\color{red}
+}
+
+%Para tener los bookmarks del pdf (menú al lado derecho en los visualizadores de pdf)
+% si colorlinks= true, no salen las cajas, sino el color del link!!
+% linkcolor para los indices, citecolor para las citas en texto, urlcolor para los enlaces
+\usepackage[pdftex,bookmarks=true, linkcolor=black, citecolor=black, colorlinks=true, urlcolor=black]{hyperref}
+
+%Para poder hacer subfiguras (subfloat)
+\usepackage{subfig}
+
+\usepackage{enumitem} % Para poder continuar enumerate en otras partes
+
+\usepackage{pdflscape}%Para colocar páginas horizontales en el PDF
+\usepackage{multicol}
+
+\usepackage{pgfgantt} % Para el cronograma de Gantt
+\usepackage{float}    % Para forzar la posición de tablas y figuras con [H]
+\usepackage{array}    % Para mejorar el formato de las tablas
+
+
+\begin{document}
+	
+\renewcommand{\tablename}{Tabla}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Portada%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{Capitulo0/Portada}
+%Portada
+\portada
+%Contraportada
+\contraportada
+\renewcommand{\thepage}{\roman{page}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Jurados%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \include{Capitulo0/Jurados}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Agradecimientos%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \include{Capitulo0/Agradecimientos}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Tabla de contenido%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\contentsname}{Tabla de Contenido}
+\tableofcontents
+
+\renewcommand{\listfigurename}{Lista de Figuras}
+\listoffigures 
+
+\renewcommand{\listtablename}{Lista de tablas}
+\listoftables
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Resumen%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter*{Resumen}
+\input{Capitulo0/Resumen}
+\thispagestyle{empty}
+
+
+%------------------------------Capitulo UNO: Introducción-------------------------------------------
+
+
+\markboth{Introducción}{Introducción}
+\renewcommand{\thepage}{\arabic{page}}
+\setcounter{page}{1}
+
+
+%-----------------------------------El problema
+\chapter{Introducción}
+
+%introducción
+\input{Capitulo1Introduccion/Introduccion}
+
+%Formulación del problema
+\input{Capitulo1Introduccion/Formulacion}
+
+%Objetivos
+\input{Capitulo1Introduccion/Objetivos}
+
+%Resultados esperados
+\input{Capitulo1Introduccion/ResultadosEsperados}
+
+%Metodología
+\input{Capitulo1Introduccion/Metodologia}
+
+%Información de los capitulos
+%\input{Capitulo1Introduccion/informacionCapitulos}
+
+%-----------------------------------Justificación y alcance
+\chapter{Justificación y alcance del proyecto}
+
+\input{Capitulo2JustificacionAlcance/Justificacion}
+
+%-----------------------------------Marco referencial
+\chapter{Marco referencial}
+
+\input{Capitulo3MarcoReferencial/IntroCap3}
+
+%Marco teórico
+\input{Capitulo3MarcoReferencial/teorico}
+
+
+%Marco Conceptual
+\input{Capitulo3MarcoReferencial/Conceptual}
+
+
+%======================================================================
+% INCLUYE AQUÍ TU CAPÍTULO 4 (METODOLOGÍA)
+% Ejemplo basado en tu imagen:
+\chapter{Metodología}
+\input{Capitulo4Metodologia/metodologia}
+% ... y los demás inputs de tu metodología
+%======================================================================
+
+
+%--------------------------------------------------CAPÍTULO 5: CRONOGRAMA
+\chapter{Cronograma de Hitos}
+\input{Capitulo5Cronograma/cronograma}
+
+
+%--------------------------------------------------CAPÍTULO 6: PRESUPUESTO
+\chapter{Presupuesto}
+\input{Capitulo6Presupuesto/presupuesto}
+
+
+%--------------------------------------------------CAPÍTULO 7: IMPACTO AMBIENTAL
+\chapter{Impacto Ambiental}
+\input{Capitulo7ImpactoAmbiental/impactoambiental}
+%----------------------------------DISEÑO DEL SISTEMA
+\chapter{Diseño del Sistema}
+\input{Capitulo5Diseno/diseno}
+
+%----------------------------------IMPLEMENTACIÓN
+\chapter{Implementación del Sistema}
+\input{Capitulo6Implementacion/implementacion}
+
+%----------------------------------PRUEBAS
+\chapter{Pruebas y Resultados}
+\input{Capitulo7Pruebas/pruebas}
+
+%----------------------------------DOCUMENTACIÓN
+\chapter{Documentación del Proyecto}
+\input{Capitulo8Documentacion/documentacion}
+
+%----------------------------------CONCLUSIONES
+\chapter{Conclusiones}
+\input{Final/Conclusiones}
+
+%----------------------------------TRABAJOS FUTUROS
+\chapter{Trabajos Futuros}
+\input{Final/TrabajosFuturos}
+
+%-----------------------------Bibliografía --------------------------------------------------
+
+\bibliography{Bibliografia}
+
+%-----------------------------Anexos --------------------------------------------------
+
+\chapter*{Anexos}
+\addcontentsline{toc}{chapter}{Anexos}
+\markboth{Anexos}{Anexos}
+
+\section*{Anexos}
+
+\begin{itemize}
+  \item \textbf{Anexo A}: Prototipo de interfaz del sistema web (Wireframes Figma - 18 mockups).
+  \item \textbf{Anexo B}: Modelo entidad-relación de la base de datos (10 tablas).
+  \item \textbf{Anexo C}: Diagramas UML (Casos de Uso, Secuencia, Arquitectura).
+  \item \textbf{Anexo D}: Manuales de usuario del sistema.
+  \item \textbf{Anexo E}: Evidencia del entorno de desarrollo y despliegue.
+  \item \textbf{Anexo F}: Transcripciones de entrevistas de levantamiento de requisitos.
+\end{itemize}
+
+El código fuente completo del proyecto se encuentra disponible en el repositorio de GitHub: \url{https://github.com/germanmurillas/gestor-inventario-pymes-llm}
+
+\end{document}

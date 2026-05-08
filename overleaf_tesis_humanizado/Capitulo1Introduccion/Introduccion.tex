@@ -1,0 +1,29 @@
+Imagina una panadería colombiana un lunes por la mañana. El encargado de bodega abre su cuaderno, recorre los estantes contando bultos de harina y paquetes de levadura uno por uno, y anota: ``trigo, como 4 bultos, creo que uno está vencido''. Este proceso, repetido en miles de pequeñas y medianas empresas (PYMEs) del país, resume el punto de partida del presente trabajo de grado.\cite{bbva2024mipymes}
+
+Las bodegas que almacenan y distribuyen materia prima enfrentan problemas cotidianos que cuestan dinero: productos que se vencen antes de usarse, pedidos urgentes porque no se sabía que algo se iba a acabar, discrepancias entre lo que dice el cuaderno y lo que realmente hay en el estante, y una total incapacidad de saber quién movió qué y por qué.
+
+% Contexto: la brecha digital en PYMEs
+Muchas PYMEs colombianas todavía gestionan sus inventarios con papel y lápiz. Aunque existen soluciones de software modernas, estas suelen tener precios inalcanzables, interfaces complejas y requerir personal técnico que estas empresas no tienen. El resultado: decisiones tomadas a ciegas, basadas en la memoria y la intuición, no en datos.
+
+% El caso real que motivó el proyecto
+Esta realidad se confirmó durante visitas a una panificadora mediana en Santiago de Cali. Allí, el encargado de bodega dependía enteramente de un cuaderno de contabilidad y de su memoria para saber qué había y qué faltaba. Las consecuencias eran cuantificables: lotes de harina y levadura vencidos sin usar, paros de producción en temporada alta por falta de insumos y cierres contables que tomaban hasta tres días.
+
+% La solución propuesta: Pymetory
+Para responder a esta necesidad concreta, este trabajo de grado propone \textbf{Pymetory}: un sistema web diseñado para que cualquier PYME pueda controlar su inventario de manera digital, sin ser experta en tecnología.
+
+El sistema gira alrededor de cuatro reglas básicas pero poderosas. Primero, organiza las salidas de bodega usando el principio \textbf{FEFO}: \textit{First Expired, First Out} —lo primero que vence es lo primero que sale. Así, un lote de harina que vence en junio se despacha antes que uno que vence en agosto, sin que nadie tenga que recordarlo. Segundo, mantiene un \textbf{Kardex digital inmutable} —un historial que registra cada movimiento (quién, cuándo, qué, por qué) sin posibilidad de borrarlo o modificarlo, como un libro contable digital a prueba de alteraciones. Tercero, controla quién puede hacer qué mediante \textbf{roles de usuario} (RBAC —\textit{Role-Based Access Control}): el administrador ve reportes y configura el sistema; el operario registra entradas y salidas. Cuarto, responde preguntas en español colombiano usando inteligencia artificial conectada a la base de datos real.
+
+% El módulo inteligente: hablarle al inventario
+La innovación más importante de Pymetory es su \textbf{módulo de consulta inteligente}. Funciona así: un operario escribe ``¿cuánta harina me queda?'' o ``¿qué está por vencer esta semana?'' en lenguaje natural, como si le preguntara a un compañero. El sistema entiende la intención de la pregunta, consulta la base de datos real del inventario, y responde con información precisa —no con respuestas genéricas inventadas por la inteligencia artificial.
+
+Esta capacidad se construye con una arquitectura llamada \textbf{RAG} (\textit{Retrieval-Augmented Generation} —generación aumentada por recuperación). Piénsalo así: en lugar de preguntarle a un experto externo que no conoce tu bodega (como haría un chatbot genérico), RAG primero recupera los datos específicos de \textit{tu} inventario y luego se los entrega a un modelo de lenguaje (LLM —\textit{Large Language Model}) para que redacte una respuesta clara y precisa. El resultado es un asistente que ``conoce'' tu bodega porque consulta tus datos reales, no información de internet.
+
+% Stack tecnológico y metodología
+Para construir Pymetory, el equipo utilizó herramientas modernas y de código abierto: \textbf{Laravel 11} como motor del sistema (el ``cerebro'' que procesa las reglas de negocio), \textbf{React 19} para las pantallas que ve el usuario, \textbf{Inertia.js 2.0} como puente para que ambas partes se comuniquen sin recargar la página, \textbf{Tailwind CSS v4} para un diseño visual limpio y adaptable a celulares, y \textbf{MySQL 8.0} como base de datos donde se guarda toda la información. El módulo de consulta inteligente se conecta al modelo GPT-4o-mini de OpenAI mediante su API.
+
+El proyecto se gestionó con la metodología ágil \textbf{SCRUM}, organizando el trabajo en seis ciclos (sprints) de dos semanas cada uno. Al final de cada ciclo, el equipo mostraba un avance funcional al director del proyecto y ajustaba el rumbo según su retroalimentación —una forma de trabajar que permite corregir errores temprano y mantener el foco en lo que realmente necesita el usuario.
+
+% Estructura del documento
+Este documento está organizado para guiar al lector desde el problema hasta la solución. El Capítulo 1 presenta el problema, los objetivos y los resultados esperados. El Capítulo 2 justifica por qué vale la pena resolver este problema y define el alcance del proyecto. El Capítulo 3 explica los conceptos clave y revisa trabajos relacionados. El Capítulo 4 detalla la metodología de trabajo. Los Capítulos 5 y 6 describen el diseño y la implementación del sistema. El Capítulo 7 presenta las pruebas realizadas y el impacto ambiental considerado. El Capítulo 8 resume la documentación del proyecto. Finalmente, se presentan las conclusiones y las líneas de trabajo futuro.
+
+\cite{univalle_resolucion137}. La estructura se diseñó siguiendo los lineamientos de la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle, en ausencia de una plantilla oficial reglamentada por el programa.

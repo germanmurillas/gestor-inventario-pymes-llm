@@ -1,0 +1,44 @@
+%========= INICIO DEL CÓDIGO PARA presupuesto.tex =========
+
+Este proyecto se ejecuta como trabajo de grado universitario. La inversión principal no es dinero sino tiempo y conocimiento. El presupuesto que presentamos a continuación es una \textbf{valoración académica del esfuerzo de ingeniería} ---es decir, cuánto costaría este trabajo si se contratara a un ingeniero para hacerlo, usando como referencia el salario mínimo del sector.
+
+Todas las herramientas utilizadas son de código abierto (licencia MIT, Apache o similar), lo que significa que no hay costos de licenciamiento. El computador, la conexión a internet y el software de desarrollo son propiedad de los estudiantes. En resumen: el costo monetario directo del proyecto es \$0 COP.
+
+\begin{table}[h!]
+\centering
+\caption{Valoración académica del esfuerzo de ingeniería.}
+\label{tab:costo_academico}
+\begin{tabular}{|l|c|c|r|}
+\hline
+\textbf{Actividad} & \textbf{Horas Estimadas} & \textbf{Valor por Hora (Referencial)} & \textbf{Costo Estimado} \\ \hline
+Análisis y Diseño & 55 horas & \$15.000 COP & \$825.000 \\ 
+Desarrollo del Sistema & 90 horas & \$15.000 COP & \$1.350.000 \\ 
+Pruebas y Validación & 20 horas & \$15.000 COP & \$300.000 \\ 
+Documentación del Proyecto & 35 horas & \$15.000 COP & \$525.000 \\ \hline
+\textbf{Total Estimado} & \textbf{200 horas} & & \textbf{\$3.000.000 COP} \\ \hline
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Recursos Tecnológicos y de Software:} Todos los recursos (computador personal, conexión a internet, software de desarrollo) son propiedad del estudiante o de código abierto, con un costo directo de \$0 COP.
+
+\subsection{Estimación de Costos de Despliegue y Mantenimiento Anual}
+\label{sec:costo_despliegue}
+
+Para dar una visión del ciclo de vida completo de la solución, ofrecemos una estimación de lo que costaría mantener el sistema en producción durante un año. Estos costos aplican si una PYME decidiera contratar hosting comercial; en nuestro caso, se utiliza la capa gratuita de Oracle Cloud \cite{oci_always_free}, que no tiene costo.
+
+\begin{table}[h!]
+\centering
+\caption{Costos operativos anuales estimados.}
+\label{tab:costo_operativo}
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Concepto} & \textbf{Costo Anual Estimado (COP)} & \textbf{Fuente} \\ \hline
+Registro de Dominio (.com.co) & \$59.000 + IVA & Colombia Hosting \cite{ColombiaHostingDominio} \\ 
+Hosting Básico en la Nube & \$300.000 & Colombia Hosting \cite{ColombiaHostingHosting} \\ \hline
+\textbf{Total Anual Estimado} & \textbf{\textasciitilde\$359.000 + IVA} & \\ \hline
+\end{tabular}
+\end{table}
+
+En la práctica, el sistema desplegado en Oracle Cloud Infrastructure no genera costos de hosting, y el dominio puede omitirse si se accede directamente por la dirección IP del servidor. Esto hace que Pymetory sea viable incluso para la PYME más pequeña: el único costo real es la luz que consume el servidor.
+
+%========= FIN DEL CÓDIGO PARA presupuesto.tex =========

@@ -1,0 +1,62 @@
+\section{Justificación}
+
+Desde la ingeniería, este proyecto ataca una brecha concreta: las PYMEs necesitan controlar su inventario pero las herramientas que existen no están pensadas para ellas. La solución que proponemos es un sistema web funcional, construido con un stack de código abierto, que no depende de licencias costosas ni requiere un ejército de técnicos para operarlo.
+
+Su arquitectura sigue el patrón MVC (Modelo-Vista-Controlador), una forma de organizar el código en tres capas separadas: los datos, la lógica y lo que ve el usuario. Esta separación hace que el sistema sea más fácil de mantener y de hacer crecer en el futuro, porque puedes cambiar una capa sin romper las otras.
+
+El sistema centraliza la información de la bodega en un solo lugar, automatiza las tareas repetitivas que hoy se hacen a mano y permite consultar datos en tiempo real desde cualquier dispositivo con internet. Así se reducen los riesgos del registro manual: errores de conteo, registros perdidos, datos desactualizados.
+
+Desde el punto de vista técnico, el proyecto recorre el ciclo completo de desarrollo de software: entender qué necesita el usuario, diseñar la arquitectura, construir el sistema por módulos, probarlo y documentarlo. Esto garantiza que el resultado no sea solo algo que ``funciona'', sino un producto mantenible, escalable y bien documentado, siguiendo las buenas prácticas de la ingeniería de software.
+
+El módulo de consulta inteligente basado en Large Language Models (LLM) ---modelos avanzados de lenguaje entrenados con grandes volúmenes de texto--- representa tanto un desafío técnico como una oportunidad. Su implementación explora el uso de APIs especializadas para interpretar preguntas en lenguaje natural, extraer la información relevante de la base de datos y responder con datos reales del inventario, no con información genérica.
+
+
+\subsection{Justificación Académica y Profesional}
+\label{sec:just_academica}
+
+Este proyecto se alinea con la modalidad de Trabajo de Investigación de la Escuela de Ingeniería de Sistemas y Computación. Va más allá de aplicar conocimientos técnicos: es un estudio de caso documentado sobre cómo construir software para empresas con poca experiencia digital, usando metodologías ágiles de desarrollo.
+
+Los resultados no son solo un sistema que funciona. Son también un modelo de arquitectura documentado y un conjunto de funcionalidades mínimas viables (MVP) que otros estudiantes y desarrolladores pueden tomar como punto de partida para crear soluciones similares para este sector empresarial, que es vital para la economía colombiana.
+
+En el plano profesional, el sistema terminado funciona como un portafolio tangible. Demuestra que el estudiante puede concebir, diseñar y construir una solución tecnológica que responde a necesidades reales del entorno empresarial, integrando habilidades de análisis de requisitos, diseño de bases de datos, ingeniería de software y desarrollo web.
+
+Este trabajo se posiciona como un caso de estudio sobre cómo adoptar tecnologías ágiles para crear soluciones dirigidas a PYMEs con baja madurez digital, incluyendo inteligencia artificial para mejorar la usabilidad. Podría servir como modelo de referencia para integrar LLMs en sistemas de gestión empresarial de forma sencilla y funcional.
+
+
+\subsection{Beneficiarios del Proyecto}
+\label{sec:beneficiarios}
+
+\begin{itemize}
+    \item \textbf{Pequeñas y medianas empresas (PYMEs):} Obtendrán una herramienta de bajo costo para digitalizar y optimizar uno de sus procesos logísticos más críticos.
+    \item \textbf{Responsables de bodega y operarios:} Contarán con una interfaz sencilla para registrar y consultar información de manera rápida y precisa, reduciendo la carga de trabajo manual y los errores.
+    \item \textbf{Administradores y dueños de negocio:} Tendrán acceso a reportes y alertas que facilitan una toma de decisiones informada y estratégica.
+    \item \textbf{La comunidad académica:} El proyecto y su documentación servirán como un caso de estudio práctico sobre el desarrollo de software aplicado a problemas empresariales y como referencia para futuros trabajos de investigación.
+    \item \textbf{La comunidad de desarrollo de software:} El proyecto contribuirá con un modelo de implementación de un gestor de inventario basado en tecnologías modernas, que puede ser replicado y adaptado, sirviendo de base para desarrollos futuros en entornos similares.
+    \item \textbf{Usuarios de tecnologías de IA:} El módulo LLM ofrecerá un ejemplo práctico de cómo la inteligencia artificial conversacional puede democratizar el acceso a la información empresarial, facilitando la interacción con sistemas complejos para usuarios no técnicos.
+\end{itemize}
+
+
+\section{Alcance del Proyecto y Niveles de Analítica}
+
+El sistema propuesto va más allá del simple registro digital. Integra una arquitectura pensada para optimizar la cadena de suministro con Inteligencia Artificial. De acuerdo con los criterios de evaluación, el proyecto se sitúa en un nivel de \textbf{Analítica Predictiva}: no solo muestra lo que pasó, sino que anticipa lo que puede pasar.
+
+\subsection{Funcionalidades Operativas del Sistema}
+El sistema integra por diseño las siguientes capacidades de gestión:
+\begin{itemize}
+    \item \textbf{Actualización del stock:} Cálculo automático y en tiempo real del inventario disponible por cada insumo registrado.
+    \item \textbf{Generación de alertas:} Notificaciones visuales que aparecen cuando un producto alcanza su nivel mínimo, antes de que se agote.
+    \item \textbf{Historial de movimientos (Kardex):} Registro cronológico detallado de todas las entradas y salidas, para garantizar que se pueda reconstruir el historial completo de cualquier material.
+    \item \textbf{Reportes automatizados:} Generación de informes analíticos exportables en formatos PDF y Excel, listos para compartir con contabilidad o gerencia.
+    \item \textbf{Interfaz web responsive:} Diseño que se adapta automáticamente a computadores, tablets y celulares, para poder consultar el inventario desde cualquier lugar.
+\end{itemize}
+
+\subsection{Módulo de Consulta Inteligente LLM (Aporte Diferencial)}
+Como innovación central, el sistema integra un modelo de lenguaje de gran escala (LLM) que opera en dos niveles de analítica:
+
+\begin{enumerate}
+    \item \textbf{Analítica Descriptiva y Diagnóstica:} El usuario puede preguntar en español colombiano ---sin saber SQL, sin aprender filtros--- cosas como ``¿cuánta harina me queda?'', ``¿qué movimientos hubo esta semana?'' o ``¿por qué bajó tanto el stock de azúcar?''.
+    \item \textbf{Analítica Predictiva (Valor Agregado):} El módulo procesa el historial del Kardex para hacer \textit{forecasting} ---previsión de la demanda futura. Esto permite predecir fechas probables de desabastecimiento (\textit{stock-out}) y sugerir cuándo reabastecer, basándose en el cálculo dinámico del Punto de Reorden (ROP), el nivel de inventario en el que conviene hacer un nuevo pedido.
+\end{enumerate}
+
+\subsection{Límites del Proyecto}
+Para que el proyecto sea viable dentro del tiempo académico disponible, se definen límites claros: el sistema gestiona una sola bodega física, los productos se registran manualmente (sin escáneres), no incluye facturación automatizada ni integración contable con terceros, y el LLM utiliza una arquitectura pre-entrenada accesible mediante API. Todo lo demás está dentro del alcance.

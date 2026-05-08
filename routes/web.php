@@ -100,3 +100,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/agents/status', [AgentMonitorController::class, 'status']);
     Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);
 });
+
+// ── Agent API (sin auth — accedido por Laboratorio 3D) ──────────────────────
+Route::get('/api/agents/status', [AgentMonitorController::class, 'status']);
+Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);

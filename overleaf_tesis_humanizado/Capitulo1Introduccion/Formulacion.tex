@@ -1,0 +1,84 @@
+\section{Formulación del problema}
+
+¿Cómo desarrollar un sistema web que, además de digitalizar el control de inventarios, incorpore un asistente inteligente capaz de responder preguntas en lenguaje natural, para ayudar a las PYMEs colombianas a reducir pérdidas por vencimiento, ganar trazabilidad en sus movimientos de bodega y tomar decisiones basadas en datos reales —dejando atrás la dependencia del cuaderno y la memoria?
+
+\section{Descripción del problema}
+
+Las pequeñas y medianas empresas (PYMEs) son el motor de la economía colombiana: representan el 99,5\% de las empresas formales del país y generan cerca del 40\% del Producto Interno Bruto (PIB).\cite{bbva2024mipymes} Sin embargo, existe una brecha importante en su nivel de digitalización. Mientras que el 63\% de las empresas medianas ya ha avanzado en su transformación digital, solo el 42\% de las microempresas ha dado ese paso.\cite{innpulsa_transformacion}
+
+% El corazón del problema: la gestión manual del inventario
+Una de las áreas más rezagadas es el control de la bodega. Muchas PYMEs todavía registran sus entradas y salidas de materia prima en cuadernos, libros de contabilidad o, en el mejor de los casos, hojas de cálculo que cada quien maneja a su manera.\cite{bbva2024mipymes} Estos métodos manuales tienen un costo real: errores de conteo, registros duplicados o perdidos, y una incapacidad casi total de saber qué pasó con un insumo, cuándo y por qué. La situación es más grave si se considera que apenas el 40\% de las microempresas colombianas usa internet en sus operaciones diarias.\cite{bbva2024mipymes}
+
+% Las consecuencias, en términos concretos
+Esta forma de trabajar produce tres problemas que golpean directamente el bolsillo de la empresa \cite{ballou2004logistica}:
+
+\begin{itemize}
+    \item \textbf{Pérdidas por ineficiencia}: Productos que se vencen o se dañan antes de usarse, falta de insumos justo cuando más se necesitan y compras de emergencia a precios elevados porque nadie anticipó la escasez.
+    \item \textbf{Falta de visibilidad}: El dueño o administrador no sabe en tiempo real qué tiene en su bodega. Sin esa información, planificar compras se convierte en un juego de adivinanza.
+    \item \textbf{Decisiones a ciegas}: Sin datos históricos ni reportes confiables, las decisiones estratégicas (¿cuánto comprar?, ¿cada cuánto?, ¿a qué proveedor?) se toman por intuición y experiencia, no por evidencia.
+\end{itemize}
+
+Aunque existen sistemas de gestión de inventarios en el mercado —como Odoo, Zoho Inventory o Stockpile— la mayoría resultan inalcanzables para una PYME colombiana. Sus precios de suscripción, la complejidad de sus interfaces y la necesidad de personal técnico para operarlos los convierten en herramientas diseñadas para grandes empresas, no para panaderías, ferreterías o talleres.\cite{bbva2024mipymes}
+
+\subsection{Caso de Estudio: Panificadora en Santiago de Cali}
+
+Para entender el problema desde la realidad y no desde la teoría, el equipo realizó un proceso de levantamiento de requisitos con una panificadora mediana de Santiago de Cali, seleccionada como caso de estudio representativo del sector de alimentos. Esta empresa produce y distribuye productos de panadería y repostería a nivel local, manejando insumos como harinas, azúcares, levaduras, grasas vegetales, esencias y empaques —materiales que, en su mayoría, tienen fecha de vencimiento.
+
+El levantamiento de requisitos consistió en ocho sesiones de trabajo con el personal de la panificadora y la dirección del trabajo de grado. La técnica utilizada fue la \textbf{elicitación} —un proceso de conversación guiada para extraer información y necesidades reales, no opiniones superficiales. Se partió de 20 preguntas iniciales que luego se refinaron hasta 10 preguntas definitivas, diseñadas para entender cómo funciona realmente la bodega en el día a día.
+
+Los hallazgos confirmaron y profundizaron lo que muestran las estadísticas nacionales. El encargado de bodega reportó cinco problemas concretos:
+
+\begin{enumerate}
+    \item \textbf{Ausencia total de un sistema digital}: La panificadora registraba sus entradas y salidas en un cuaderno de contabilidad. Cuando alguien necesitaba saber cuánta harina quedaba, el encargado debía recorrer físicamente la bodega contando bulto por bulto. Cada consulta tomaba entre 20 y 40 minutos.
+
+    \item \textbf{Pérdidas por vencimiento no detectado}: En un solo año, la panificadora tuvo que desechar lotes completos de harina y levadura que se vencieron sin usarse. La causa no era la falta del producto, sino la imposibilidad de saber cuál de todos los lotes guardados era el más antiguo. En palabras del encargado: ``muchas veces el lote que está más atrás en la estantería nunca se usa porque siempre se despacha el que está más al frente, y cuando nos acordamos del de atrás ya está vencido''.
+
+    \item \textbf{Desabastecimiento en temporada alta}: En diciembre y Semana Santa, la producción se detuvo por falta de materia prima. Nadie sabía con anticipación que los insumos se iban a acabar porque no existían datos históricos de consumo para proyectar necesidades.
+
+    \item \textbf{Imposibilidad de conciliar el inventario}: Al cierre de cada mes, calcular ``qué hay en la bodega y cuánto vale'' tomaba entre dos y tres días de trabajo conjunto entre el administrador, el bodeguero y el contador. Siempre aparecían diferencias entre lo anotado en el cuaderno y lo que había físicamente en los estantes.
+
+    \item \textbf{Cero trazabilidad}: No existía ningún registro de quién había despachado un material, en qué fecha, por qué motivo ni de qué lote provenía. Esto hacía imposible cualquier auditoría y diluía la responsabilidad sobre el manejo de los insumos.
+\end{enumerate}
+
+Estos cinco problemas no son exclusivos de esta panadería. Representan un patrón que se repite en miles de PYMEs colombianas del sector de alimentos, construcción, textiles y manufactura ligera. El caso de estudio confirmó que existe una necesidad real, concreta y urgente de herramientas de gestión de inventario diseñadas para este segmento empresarial.
+
+\subsection{La brecha entre las PYMEs y el software disponible}
+
+La Tabla \ref{tab:barreras_pymes} resume las barreras que separan a las PYMEs colombianas de las soluciones de inventario que existen hoy en el mercado.
+
+\begin{table}[H]
+\centering
+\caption{Barreras para la adopción de software de inventario en PYMEs colombianas.}
+\label{tab:barreras_pymes}
+\begin{tabular}{|l|p{5cm}|p{4cm}|}
+\hline
+\textbf{Barrera} & \textbf{Descripción} & \textbf{Evidencia en el caso de estudio} \\
+\hline
+Costo de licenciamiento & Suscripciones mensuales desde \$200.000 COP hasta \$2.000.000 COP por usuario & La panificadora no podía justificar ese gasto recurrente para un software \\
+\hline
+Complejidad técnica & Interfaces diseñadas para grandes empresas con procesos estandarizados & El encargado de bodega expresó que ``esos sistemas parecen hechos para ingenieros, no para nosotros'' \\
+\hline
+Falta de contexto local & Software diseñado en otros países sin adaptación al español colombiano ni a las regulaciones locales & Términos como \textit{SKU} o \textit{stock keeping unit} resultaban confusos para el personal \\
+\hline
+Curva de aprendizaje & Tiempo y costo de capacitar al personal en el uso de la herramienta & La panificadora no contaba con personal dedicado a TI que pudiera liderar la adopción \\
+\hline
+Dependencia de infraestructura & Requisitos de hardware, servidores o conectividad permanente & La conexión a internet en la zona industrial era intermitente \\
+\hline
+\end{tabular}
+\end{table}
+
+A estas barreras se suma una ausencia llamativa: ninguna de las soluciones disponibles ofrece un módulo que permita preguntar en lenguaje natural cosas como ``¿qué debo despachar primero?'' o ``¿cuánta harina me queda?'' sin tener que navegar por menús complejos o aprender filtros avanzados. El operario de bodega necesita respuestas, no capacitación en software.
+
+\subsection{Qué aporta Pymetory frente a este problema}
+
+Frente al panorama descrito, Pymetory se diseñó para cerrar cinco brechas concretas:
+
+\begin{itemize}
+    \item \textbf{Kardex digital automático}: Reemplaza el cuaderno de registros por un sistema que documenta cada movimiento automáticamente, guardando quién lo hizo, cuándo, qué cantidad había antes, qué cantidad quedó después y por qué se realizó.
+    \item \textbf{Despacho inteligente (FEFO)}: El sistema indica siempre qué lote debe salir primero según su fecha de vencimiento, resolviendo el problema de ``despachar siempre el que está más al frente''.
+    \item \textbf{Consultas en español colombiano}: El usuario puede preguntar ``¿cuánta harina me queda?'', ``¿qué está por vencer?'' o ``¿quién hizo el último despacho?'' y recibir una respuesta basada en los datos reales de \textit{su} inventario.
+    \item \textbf{Alertas automáticas}: El sistema avisa cuando un lote está próximo a vencer o cuando el stock de un material cae por debajo del nivel mínimo, sin depender de que alguien se acuerde de revisar.
+    \item \textbf{Reportes en un clic}: Informes de valorización, ocupación de bodegas y movimientos históricos en formatos PDF y CSV, reduciendo el cierre contable de tres días a pocos minutos.
+\end{itemize}
+
+\newpage

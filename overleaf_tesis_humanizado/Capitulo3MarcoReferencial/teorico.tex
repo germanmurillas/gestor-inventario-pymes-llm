@@ -1,0 +1,255 @@
+\section{Marco Teórico y Estado del Arte}
+
+\subsection{Marco Teórico}
+
+Un sistema de gestión de inventario es más que una base de datos donde se anota qué entra y qué sale. Es una herramienta de optimización logística. Según Ballou \cite{ballou2004logistica}, gestionar bien un inventario significa encontrar el equilibrio entre dos fuerzas opuestas: mantener suficiente producto para no parar la operación y no tener tanto que el dinero quede congelado en estanterías.
+
+El sistema que proponemos busca ayudar a las PYMEs a acercarse a ese equilibrio, dándoles la visibilidad que hoy no tienen: saber en tiempo real qué hay, qué está por acabarse y qué está por vencerse. Sin esa información, cualquier decisión de compra es a ciegas.
+
+El módulo de consulta inteligente se apoya en el Procesamiento de Lenguaje Natural (PLN), la rama de la inteligencia artificial que enseña a las computadoras a entender cómo hablamos los humanos ---no solo palabras sueltas, sino intenciones y contexto. Los Large Language Models (LLMs) son la evolución más reciente del PLN: modelos entrenados con cantidades masivas de texto, capaces de entender una pregunta en español colombiano y responder con información pertinente \cite{zhao2023surveyllm}. En lugar de obligar al usuario a aprender filtros y menús, el LLM permite preguntar como si se hablara con un compañero.
+
+La usabilidad ---qué tan fácil es usar un sistema sin equivocarse--- es otro pilar del diseño. Nos basamos en los 10 principios heurísticos de Jakob Nielsen \cite{nielsen1994heuristics}, que son reglas prácticas para diseñar interfaces que no confundan al usuario: mostrar siempre en qué estado está el sistema, hablar el lenguaje del usuario (no el del programador), prevenir errores antes de que ocurran y ofrecer salidas claras cuando algo sale mal.
+
+La accesibilidad web complementa la usabilidad. Se adoptaron las Pautas de Accesibilidad para el Contenido Web (WCAG) \cite{w3c_wcag_overview}, buscando cumplir el nivel AA: el estándar recomendado para que una página web pueda ser usada por personas con dificultades visuales, motoras o cognitivas. Esto incluye contraste suficiente, navegación sin mouse y etiquetas que los lectores de pantalla puedan interpretar.
+
+\subsection{Principios de Gestión de Inventarios}
+\label{sec:principios_gestion}
+
+\subsubsection{La Importancia de la Trazabilidad en la Logística}
+\label{sssec:trazabilidad}
+
+La trazabilidad es la capacidad de seguirle el rastro a un producto desde que entra a la bodega hasta que sale o se consume. Es como la hoja de vida de cada material: quién lo recibió, cuándo, dónde se guardó, cuándo se usó, quién lo despachó. Sin trazabilidad, cuando algo falla ---un lote vencido, una merma inexplicable--- es imposible saber qué pasó. Implementar un Kardex digital que garantice trazabilidad completa es una de las cuatro reglas inmutables de este proyecto.
+
+\subsubsection{Modelos de Control de Inventario: EOQ y Punto de Reorden (ROP)}
+\label{sssec:eoq_rop}
+
+Dos conceptos clásicos de la teoría de inventarios guían el diseño del sistema. La Cantidad Económica de Pedido (EOQ, por \textit{Economic Order Quantity}) responde a la pregunta ``¿cuánto debo pedir cada vez para minimizar costos?''. El Punto de Reorden (ROP, por \textit{Reorder Point}) responde a ``¿en qué momento debo hacer el pedido para no quedarme sin stock?''.
+
+Aunque Pymetory no calcula el EOQ automáticamente, sí proporciona los datos históricos necesarios para que un administrador pueda hacerlo: consumos pasados, estacionalidad y costos unitarios. La funcionalidad de alertas de stock mínimo es, de hecho, una implementación práctica del concepto de ROP: cuando el inventario baja de cierto nivel, el sistema avisa.
+
+\subsubsection{Métodos de Valoración de Inventario: PEPS y UEPS}
+\label{sssec:peps_ueps}
+
+Valorar un inventario es ponerle precio a lo que hay guardado. Los métodos más comunes son PEPS (Primeras en Entrar, Primeras en Salir) y UEPS (Últimas en Entrar, Primeras en Salir). PEPS asume que lo que se compró primero se consume primero, lo cual refleja el flujo físico real en la mayoría de los negocios. Al registrar cada movimiento cronológicamente en el Kardex, Pymetory se alinea con una lógica PEPS y le da a la empresa una base ordenada para sus cálculos de costos.
+
+\subsubsection{Estrategias de Rotación de Inventario: FEFO, FIFO y LIFO}
+\label{sssec:fefo_fifo_lifo}
+
+Rotar el inventario no es mover cajas. Es decidir en qué orden se despachan los productos para minimizar pérdidas. Hay tres estrategias principales. La Tabla \ref{tab:comparativa_rotacion} las compara.
+
+\begin{table}[H]
+\centering
+\caption{Comparativa de estrategias de rotación de inventario.}
+\label{tab:comparativa_rotacion}
+\begin{tabular}{|p{2.5cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\textbf{Criterio} & \textbf{FEFO (First Expired, First Out)} & \textbf{FIFO (First In, First Out)} & \textbf{LIFO (Last In, First Out)} \\
+\hline
+\textbf{Definición} & El producto con la fecha de vencimiento más próxima sale primero & El producto que ingresó primero al inventario sale primero & El producto que ingresó más recientemente sale primero \\
+\hline
+\textbf{Criterio de ordenamiento} & Fecha de vencimiento o caducidad & Fecha de ingreso al almacén & Fecha de ingreso al almacén (inversa) \\
+\hline
+\textbf{Aplicación principal} & Industria alimenticia, farmacéutica, química (productos perecederos) & Manufactura general, productos no perecederos, retail & Materiales no perecederos apilables (minerales, granos a granel) \\
+\hline
+\textbf{Ventaja principal} & Minimiza las pérdidas por vencimiento y deterioro & Refleja el flujo físico natural en la mayoría de las bodegas & Reduce costos de manipulación cuando los productos se apilan \\
+\hline
+\textbf{Desventaja principal} & Requiere registro y seguimiento de fechas de vencimiento por lote & No considera la caducidad; puede resultar en pérdidas por vencimiento si hay productos perecederos & Puede resultar en obsolescencia de los productos más antiguos; no aceptado bajo NIIF en muchos países \\
+\hline
+\textbf{Complejidad de implementación} & Alta: requiere identificar cada lote con su fecha de vencimiento y ordenar por ese campo & Media: requiere registrar la fecha de ingreso de cada lote y ordenar cronológicamente & Baja: el último que entra es el primero que sale, generalmente por disposición física \\
+\hline
+\textbf{Ejemplo en panificadora} & Despachar primero la harina que vence en 5 días, aunque haya ingresado después que un lote que vence en 30 días & Despachar la harina que se compró primero, sin importar que el lote más nuevo venza antes & Despachar la harina que acaba de llegar, dejando la más antigua al fondo de la estantería (no recomendado) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{¿Por qué FEFO para este proyecto?} Durante las entrevistas con la panificadora de Cali, el encargado de bodega reveló algo que ningún libro de texto habría anticipado: la empresa operaba con una lógica de facto similar a LIFO. ``Lo que acaba de llegar se pone adelante y lo viejo queda atrás'', explicó. El resultado había sido el desperdicio de al menos tres lotes de harina y levadura en un solo año. El director del trabajo de grado estableció entonces FEFO como requisito no negociable ---una regla inmutable.
+
+FEFO es particularmente relevante para PYMEs del sector de alimentos porque:
+
+\begin{itemize}
+    \item La materia prima perecedera (harinas, levaduras, lácteos, huevos) constituye la mayoría del inventario.
+    \item Una pérdida por vencimiento no solo implica el costo del material descartado, sino también el lucro cesante de los productos que pudieron haberse fabricado con ese material.
+    \item A diferencia de FIFO, que respeta el orden de llegada, FEFO respeta el orden de caducidad. En una panificadora, un lote de harina comprado ayer que vence en 15 días debe salir antes que un lote comprado hace un mes que vence en 45 días.
+    \item Implementar FEFO en un sistema digital elimina la dependencia de la memoria del operario para decidir qué despachar.
+\end{itemize}
+
+\subsection{Arquitectura RAG (Retrieval-Augmented Generation)}
+\label{sec:rag_teoria}
+
+El módulo de consulta inteligente de Pymetory se construye sobre un paradigma llamado RAG ---Generación Aumentada por Recuperación, por sus siglas en inglés. Es una arquitectura que combina dos cosas: la capacidad de un modelo de lenguaje para redactar respuestas fluidas y la capacidad de un sistema de bases de datos para encontrar información precisa.
+
+\subsubsection{El Problema de las Alucinaciones en los LLM}
+
+Los Large Language Models como GPT-4, Claude o Llama se entrenan con cantidades masivas de texto y desarrollan la capacidad de generar respuestas coherentes. Pero tienen una limitación crítica: su conocimiento está congelado en el momento del entrenamiento. No saben qué entró o salió de tu bodega hoy. Cuando se les pregunta sobre datos que desconocen, estos modelos tienden a ``alucinar'': generan respuestas que suenan convincentes pero que son factualmente incorrectas \cite{zhao2023surveyllm}.
+
+En un sistema de inventario, una alucinación puede ser costosa. Si un usuario pregunta ``¿cuánta harina me queda?'' y el modelo responde ``50 kg'' cuando en realidad hay 5 kg, la empresa podría dejar de comprar y sufrir un desabastecimiento. Para eliminar este riesgo, necesitamos un mecanismo que ancle las respuestas del modelo a datos reales. Esa es exactamente la función del patrón RAG.
+
+\subsubsection{Componentes de la Arquitectura RAG}
+
+La arquitectura RAG, introducida por Lewis et al. (2020) \cite{rag_lewis2020}, opera en tres etapas cada vez que un usuario hace una consulta:
+
+\begin{enumerate}
+    \item \textbf{Recuperación (Retrieval):} El sistema consulta la base de datos MySQL de Pymetory ---las tablas de materiales, lotes, bodegas, movimientos y configuraciones--- y extrae únicamente la información pertinente a la pregunta. Esta etapa es crítica: de ella depende que el modelo reciba datos relevantes, no ruido.
+    
+    \item \textbf{Aumento (Augmentation):} Los datos recuperados se organizan en un formato textual que el modelo puede procesar y se inyectan en el prompt ---la instrucción que se le da al modelo--- junto con indicaciones precisas de cómo responder. La clave está en ser selectivo: no se envía toda la base de datos, sino solo lo relevante.
+    
+    \item \textbf{Generación (Generation):} Con el contexto real inyectado, el modelo genera una respuesta. Como ahora ``ve'' los datos reales, su respuesta está anclada a hechos. Si el modelo no encuentra los datos que necesita, la arquitectura RAG lo lleva a responder honestamente que no tiene esa información, en lugar de inventarla.
+\end{enumerate}
+
+\subsubsection{Ventajas del Enfoque RAG sobre un Chat Convencional}
+
+La Tabla \ref{tab:rag_vs_chat} contrasta implementar un chat genérico con un LLM versus implementar la arquitectura RAG.
+
+\begin{table}[H]
+\centering
+\caption{Comparativa entre chat genérico con LLM y arquitectura RAG.}
+\label{tab:rag_vs_chat}
+\begin{tabular}{|p{3cm}|p{4cm}|p{5cm}|}
+\hline
+\textbf{Criterio} & \textbf{Chat LLM Convencional} & \textbf{Arquitectura RAG (Pymetory)} \\
+\hline
+\textbf{Fuente de datos} & Conocimiento del entrenamiento del modelo (estático) & Base de datos del inventario en tiempo real \\
+\hline
+\textbf{Actualización} & No se actualiza; el modelo no sabe qué entró o salió hoy & Cada consulta dispara una lectura de la base de datos \\
+\hline
+\textbf{Riesgo de alucinación} & Alto cuando se pregunta por datos específicos no incluidos en el entrenamiento & Bajo; el contexto inyectado fuerza al modelo a responder con los datos proporcionados \\
+\hline
+\textbf{Personalización} & Genérica; responde sobre ``inventarios en general'' & Específica; responde sobre el inventario de la PYME concreta \\
+\hline
+\textbf{Auditabilidad} & Baja; no hay trazabilidad entre la respuesta y una fuente de datos verificable & Alta; cada respuesta está vinculada a un contexto recuperado de la base de datos \\
+\hline
+\textbf{Dependencia externa} & Total; sin LLM no hay respuesta & Parcial; con mecanismo de fallback, el sistema puede responder con los datos crudos de la base de datos \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{El Mecanismo de Degradación Elegante (Fallback)}
+
+Una decisión de diseño fundamental fue asumir que el servicio de IA externo puede fallar. Depender de una API de terceros introduce un riesgo: si la clave no está configurada, si hay un corte de red, o si se agotan los créditos, el módulo de consulta inteligente quedaría inoperativo justo cuando se necesita.
+
+Para mitigar esto, se implementó un mecanismo de \textbf{degradación elegante} (\textit{graceful degradation}). Cuando la llamada al LLM falla, el sistema responde en ``modo texto'': muestra los datos recuperados de la base de datos en un formato legible, sin la capa de generación de lenguaje natural. La respuesta es menos conversacional, pero el usuario obtiene la información. Este principio ---la información del inventario debe estar disponible incluso sin IA--- fue una directriz del director del proyecto.
+
+\subsection{Framework Laravel y el Patrón MVC}
+\label{sec:laravel_mvc}
+
+Laravel es un framework de código abierto para desarrollar aplicaciones web en PHP, creado por Taylor Otwell en 2011. Lo elegimos por cuatro razones: su madurez (versión 11), su licencia MIT que permite uso comercial gratuito, su ecosistema de herramientas integradas (ORM, migraciones, middleware) y su adopción del patrón MVC.
+
+\subsubsection{El Patrón Modelo-Vista-Controlador (MVC)}
+
+El patrón MVC, formalizado por Trygve Reenskaug en 1979, propone separar el código en tres capas que no se mezclan:
+
+\begin{itemize}
+    \item \textbf{Modelo (Model):} Representa los datos y la lógica de negocio. En Laravel se implementa con Eloquent, un ORM (Object-Relational Mapper) que permite manipular la base de datos usando objetos de PHP, no consultas SQL escritas a mano. Por ejemplo, el modelo \texttt{Lote} contiene el scope \texttt{fefoOrder()} que garantiza que cualquier despacho priorice los lotes por fecha de vencimiento.
+    
+    \item \textbf{Vista (View):} Es lo que el usuario ve y toca. En Pymetory, las vistas son componentes React 19 conectados al backend mediante Inertia.js 2.0, que actúa como puente. Esto permite construir una interfaz moderna (Single Page Application) sin la complejidad de una API REST separada.
+    
+    \item \textbf{Controlador (Controller):} Recibe las solicitudes del usuario, aplica la lógica de negocio y retorna una respuesta. Cada módulo tiene su controlador: \texttt{InventoryController} para materiales y lotes, \texttt{ConsumptionController} para despachos, \texttt{ChatLLMController} para consultas inteligentes.
+\end{itemize}
+
+La separación en capas trae beneficios prácticos: puedes rediseñar la interfaz sin tocar la lógica de negocio, puedes probar cada capa por separado, y dos desarrolladores pueden trabajar simultáneamente sin pisarse.
+
+\subsubsection{Componentes Clave de Laravel Utilizados en Pymetory}
+
+\begin{itemize}
+    \item \textbf{Eloquent ORM:} Interfaz orientada a objetos para interactuar con MySQL. Las relaciones entre tablas se definen como métodos, y las consultas se construyen con una API fluida. El scope FEFO es un ejemplo de cómo encapsular una regla de negocio en un método reutilizable.
+    \item \textbf{Migraciones:} Permiten versionar los cambios del esquema de la base de datos con archivos PHP. Esto garantiza que el esquema se pueda reproducir en cualquier entorno.
+    \item \textbf{Middleware:} Capas de software que se ejecutan antes de que una solicitud llegue al controlador. Pymetory usa \texttt{Authenticate} para verificar sesión y \texttt{CheckRole} para verificar permisos según el rol.
+    \item \textbf{Seeders:} Pueblan la base de datos con datos de prueba realistas ---materiales con nombres coherentes, lotes con fechas de vencimiento variadas--- esenciales para probar el módulo RAG.
+    \item \textbf{Validación:} Sistema de validación de formularios que verifica los datos antes de que lleguen a la base de datos, con mensajes de error en español.
+\end{itemize}
+
+\subsection{React e Inertia.js: Single Page Applications sin API REST}
+\label{sec:react_inertia}
+
+Usar React 19 con Inertia.js 2.0 como capa de presentación fue una decisión arquitectónica que redujo significativamente la complejidad del sistema.
+
+\subsubsection{El Problema de las SPAs Tradicionales}
+
+En una SPA (Single Page Application) convencional, el frontend se comunica con el backend mediante una API REST. Esto implica definir y documentar endpoints, implementar serialización JSON en ambos lados, manejar estados de carga y error en cada componente, construir un cliente HTTP con interceptores de autenticación, y mantener sincronizados los tipos de TypeScript con los de PHP. Para un equipo de dos personas con un cronograma académico, esta complejidad no se justificaba.
+
+\subsubsection{Inertia.js como Puente entre Backend y Frontend}
+
+Inertia.js resuelve este problema con un principio simple: en lugar de que el frontend haga llamadas HTTP a endpoints JSON, el servidor de Laravel comparte datos directamente con los componentes React como props. El flujo es:
+
+\begin{enumerate}
+    \item El usuario navega a una página (ej. el dashboard).
+    \item Laravel procesa la solicitud, consulta la base de datos y prepara los datos.
+    \item En lugar de devolver HTML, el controlador retorna \texttt{Inertia::render('Dashboard', [props])}.
+    \item Inertia.js, en el navegador, renderiza el componente React \texttt{Dashboard.tsx} con esos datos.
+    \item Las navegaciones siguientes no recargan la página completa; solo se intercambia el componente y los datos.
+\end{enumerate}
+
+Este enfoque ofrece la fluidez de una SPA sin los costos de una API REST: sin endpoints adicionales, sin serialización manual, sin duplicación de tipos.
+
+\subsubsection{React 19 y TypeScript}
+
+React 19 se usó con TypeScript para construir los 18 componentes que corresponden a los mockups de Figma. TypeScript agrega tipado estático a JavaScript, lo que permite detectar errores en tiempo de compilación ---pasar un string donde se esperaba un número, acceder a una propiedad que no existe--- antes de que el código llegue a ejecutarse.
+
+Cada componente recibe sus datos como props desde Laravel vía Inertia.js, gestiona su propio estado local, utiliza GSAP para animaciones y aplica los estilos del tema Midnight Luxe con Tailwind CSS v4.
+
+\subsubsection{Comparativa de Enfoques de Frontend}
+
+\begin{table}[H]
+\centering
+\caption{Comparativa de enfoques de frontend para aplicaciones web.}
+\label{tab:comparativa_frontend}
+\begin{tabular}{|p{2.5cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|}
+\hline
+\textbf{Criterio} & \textbf{Laravel Blade (MPA)} & \textbf{React + API REST (SPA)} & \textbf{React + Inertia.js (Adoptado)} \\
+\hline
+\textbf{Experiencia de usuario} & Recargas de página completas en cada navegación & Navegación fluida, sin recargas & Navegación fluida, sin recargas \\
+\hline
+\textbf{Complejidad de desarrollo} & Baja: todo en Laravel & Alta: dos proyectos separados, API REST, serialización, CORS & Media: backend y frontend integrados, sin API REST \\
+\hline
+\textbf{Renderizado} & En el servidor (SSR) & En el cliente (CSR) & Híbrido: primer render en servidor, navegaciones en cliente \\
+\hline
+\textbf{Manejo de estado} & No aplica (sin estado en cliente) & Complejo: loading, error, cache & Simplificado: los datos llegan como props \\
+\hline
+\textbf{SEO} & Óptimo (HTML completo) & Problemático (requiere SSR adicional) & Bueno (primer render con datos) \\
+\hline
+\textbf{Curva de aprendizaje} & Baja (PHP + HTML) & Alta (API REST, React, estado) & Media (React + props de servidor) \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Marco Tecnológico}
+
+Elegimos el stack Laravel, PHP y MySQL por ser de código abierto, robusto y contar con una comunidad activa. Laravel acelera el desarrollo con su ORM Eloquent y sus componentes pre-construidos \cite{laraveldocs}. La arquitectura MVC, nativa en Laravel, es clave para mantener el código organizado y escalable \cite{fowler2002poeaa}. El diseño responsive se garantiza con Tailwind CSS \cite{mdn_responsive_design}. Para la integración del LLM se utilizan APIs de modelos pre-entrenados como los ofrecidos por OpenAI \cite{zhao2023surveyllm}.
+
+\subsection{Estado del Arte}
+
+Al analizar las soluciones que ya existen, encontramos un patrón. Plataformas como Odoo \cite{odoo}, Zoho Inventory \cite{zoho} y Stockpile \cite{stockpile} son robustas en gestión de inventarios, pero comparten una deficiencia: ninguna permite interactuar con el sistema mediante lenguaje natural. El usuario debe aprender la lógica de la herramienta, en lugar de que la herramienta se adapte a la lógica del usuario. Nuestra propuesta cierra esa brecha incorporando una capa de inteligencia conversacional.
+
+\begin{table}[H]
+\centering
+\caption{Tabla comparativa de soluciones de inventario.}
+\label{tab:comparativa_soluciones}
+\begin{tabular}{|l|p{0.35\textwidth}|p{0.35\textwidth}|}
+\hline
+\textbf{Plataforma} & \textbf{Ventajas} & \textbf{Desventajas para PYMEs} \\
+\hline
+Odoo \cite{odoo} & Escalable, personalizable, comunidad activa. & Configuración compleja, curva de aprendizaje alta, carencia de módulo LLM nativo. \\
+\hline
+Zoho Inventory \cite{zoho} & Interfaz amigable, integración con otras apps. & Plan gratuito muy limitado, costos recurrentes, no conversacional. \\
+\hline
+Stockpile \cite{stockpile} & Gratuito, sencillo de usar. & Funcionalidades muy básicas, sin reportes avanzados, sin consulta inteligente. \\
+\hline
+Solución Propuesta & Código abierto, personalizable, enfocado en PYMEs, módulo LLM incluido. & Alcance limitado a inventario, requiere instalación inicial. \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Análisis de Soluciones Académicas}
+
+Revisamos trabajos de grado en repositorios universitarios colombianos y encontramos un interés recurrente en resolver la gestión de inventarios para PYMEs. Bedoya (2022) en la UNAD \cite{unad_bedoya2022} y Bautista y Hernández (2022) en la UPB \cite{upb_bautista2022} proponen aplicaciones para administrar inventarios. A nivel de maestría, Acosta (2020) integra metodologías como Lean Manufacturing \cite{uamerica_acosta2020}. Sin embargo, ninguno de estos proyectos explora la integración de LLMs para mejorar la interacción con el usuario. Esa ausencia es precisamente la oportunidad que Pymetory aprovecha.
+
+\subsection{Tecnologías de Despliegue en la Nube}
+\label{sec:cloud}
+
+El sistema se desplegó en dos plataformas de nube, ambas con nivel gratuito:
+
+\begin{itemize}
+    \item \textbf{Google Cloud Platform (GCP):} Una instancia Compute Engine e2-micro con Ubuntu 22.04, Nginx y PHP-FPM 8.3. Este entorno, con apenas 1 vCPU y 1 GB de RAM, sirvió para validar que el sistema funciona en una máquina modesta ---el tipo de servidor que una PYME podría costear.
+    
+    \item \textbf{Oracle Cloud Infrastructure (OCI):} Una instancia VM.Standard.A1.Flex con arquitectura ARM Ampere (4 OCPUs, 24 GB de RAM). Esta máquina, obtenida mediante un script automatizado que sondea múltiples regiones, está pensada para producción: sus 24 GB de RAM permiten ejecutar modelos de lenguaje locales (Ollama) directamente en el servidor, eliminando la dependencia de APIs externas de pago.
+\end{itemize}

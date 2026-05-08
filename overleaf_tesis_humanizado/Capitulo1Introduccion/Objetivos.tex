@@ -1,0 +1,29 @@
+\section{Objetivos}
+
+\subsection{Objetivo general}
+
+Implementar un sistema web con arquitectura moderna y un módulo de consulta inteligente, que ayude a las PYMEs colombianas a optimizar el control de su bodega, reducir pérdidas por vencimiento y tomar mejores decisiones —dejando atrás los procesos manuales, la falta de trazabilidad y la ausencia de reportes.
+
+\subsection{Objetivos específicos}
+
+Cada objetivo incluye su indicador de cumplimiento para que el lector pueda verificar si se alcanzó lo propuesto.
+
+\begin{enumerate}
+
+\item \textbf{Entender las necesidades reales de una PYME.} Analizar cómo funciona la bodega de una panificadora real en Cali, mediante entrevistas guiadas con el personal, para identificar y documentar al menos 9 casos de uso, 10 reglas de negocio y los criterios que debe cumplir el sistema.
+
+\textit{Indicador:} Documento de requisitos (estándar IEEE 830) con 9 casos de uso validados por la empresa caso de estudio y aprobados por el director del trabajo de grado.
+
+\item \textbf{Diseñar el plano del sistema.} Crear el modelo de la base de datos (mínimo 10 tablas), los diagramas UML de los 4 procesos más importantes (entrada, despacho, conciliación y consulta inteligente) y al menos 18 prototipos visuales (mockups) en Figma que muestren cómo se verá cada pantalla. Incluir el diseño del módulo de consulta inteligente con su clasificador de preguntas en 10 categorías.
+
+\textit{Indicador:} Documento de diseño con modelo entidad-relación de 10 tablas, diagramas UML para 4 procesos críticos, 18 mockups en Figma aprobados por el director y especificación del motor RAG con 10 categorías de clasificación de intención.
+
+\item \textbf{Construir el sistema por etapas.} Desarrollar los 9 módulos del sistema usando la metodología ágil SCRUM en ciclos de dos semanas. Implementar la gestión de materiales y lotes, el despacho automático por fecha de vencimiento (FEFO), el historial inmutable de movimientos (Kardex), los roles de usuario (Admin y Operario), la conciliación de inventario, los reportes en PDF y CSV, las etiquetas QR para identificar lotes y el asistente de consultas en lenguaje natural conectado a la base de datos real.
+
+\textit{Indicador:} Sistema web funcional con 9 módulos operativos, repositorio en GitHub con al menos 50 commits y el sistema desplegado en al menos un servidor en la nube.
+
+\item \textbf{Verificar que todo funcione correctamente.} Ejecutar un plan de pruebas con 13 conjuntos de casos que cubran: pruebas automáticas de los 9 casos de uso (con la herramienta Playwright), 7 escenarios de despacho FEFO, 50 consultas en español para medir la precisión del asistente inteligente, evaluación de usabilidad con los 10 principios de Jakob Nielsen y una auditoría de accesibilidad según el nivel AA de las pautas WCAG 2.1. El sistema debe alcanzar al menos un 95\% de pruebas exitosas.
+
+\textit{Indicador:} Documento de resultados con 111 casos ejecutados, tasa de éxito global $\geq$ 95\%, informe de evaluación heurística y auditoría de accesibilidad WCAG AA.
+
+\end{enumerate}

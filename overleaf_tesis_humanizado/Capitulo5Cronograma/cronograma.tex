@@ -1,0 +1,64 @@
+
+El desarrollo se ejecutó bajo el marco de trabajo SCRUM, distribuido a lo largo de 36 semanas (9 meses). Para que se pueda verificar el cumplimiento de cada hito ---los puntos de control que marcan el avance del proyecto--- presentamos la distribución detallada de actividades, entregables y dependencias entre fases.
+
+Piensa en el cronograma como una receta de cocina con pasos que no se pueden saltar: no puedes hornear el pan antes de tener la harina, y no puedes probar el sistema antes de que esté construido. Cada fase depende de que la anterior esté terminada.
+
+% --- TABLA DE HITOS ---
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{4.8cm}|c|p{4.8cm}|c|}
+\hline
+\rowcolor[gray]{0.9} \textbf{Fase / Sprint} & \textbf{Semanas} & \textbf{Entregable Tangible} & \textbf{Dep.} \\ \hline
+Fase 1: Análisis de Requisitos & 1 - 4 & Documento SRS y Product Backlog & N/A \\ \hline
+Fase 2: Diseño Arquitectónico & 5 - 8 & Modelo Entidad-Relación y Mockups & Fase 1 \\ \hline
+Sprint 1: Seguridad y Core & 9 - 12 & Módulo de Autenticación y Roles & Fase 2 \\ \hline
+Sprint 2: Gestión de Catálogo & 13 - 16 & CRUD de Productos y Categorías & Sprint 1 \\ \hline
+Sprint 3: Operaciones Logísticas & 17 - 20 & Lógica de Movimientos y Kardex & Sprint 2 \\ \hline
+\textbf{Sprint 4: IA Predictiva} & \textbf{21 - 24} & \textbf{Módulo de Consulta LLM funcional} & \textbf{Sprint 3} \\ \hline
+Sprint 5: Reportería y Alertas & 25 - 28 & Subsistema de Reportes y Notificaciones & Sprint 4 \\ \hline
+Fase 3: Calidad y Validación & 29 - 32 & Informe de Pruebas y Métricas de IA & Sprint 5 \\ \hline
+Fase 4: Cierre y Documentación & 33 - 36 & Documento de Tesis y Aplicación Final & Fase 3 \\ \hline
+\end{tabular}
+\caption{Planificación detallada por semanas, entregables y dependencias técnicas.}
+\label{tab:cronograma_semanal}
+\end{table}
+
+\vspace{1cm}
+
+% --- DIAGRAMA DE GANTT ---
+\begin{figure}[H]
+\centering
+\begin{ganttchart}[
+    hgrid,
+    vgrid={*3{black, dotted}, *1{black, dashed}},
+    x unit=0.42cm,
+    y unit title=0.7cm,
+    y unit chart=0.65cm,
+    title height=1,
+    bar/.append style={fill=blue!30},
+    group label font=\bfseries\scriptsize,
+    bar label font=\scriptsize,
+    title label font=\scriptsize
+]{1}{36}
+    \gantttitle{Plan de Trabajo Semanal (36 Semanas)}{36} \\
+    \gantttitlelist{1,...,36}{1} \\
+    
+    \ganttgroup{Ingeniería}{1}{8} \\
+    \ganttbar{Análisis}{1}{4} \\
+    \ganttbar{Diseño}{5}{8} \\
+    
+    \ganttgroup{Desarrollo (Sprints)}{9}{28} \\
+    \ganttbar{S1: Seguridad}{9}{12} \\
+    \ganttbar{S2: Catálogo}{13}{16} \\
+    \ganttbar{S3: Operaciones}{17}{20} \\
+    \ganttbar[bar/.append style={fill=green!40}]{S4: IA Predictiva}{21}{24} \\
+    \ganttbar{S5: Reportes}{25}{28} \\
+    
+    \ganttgroup{Cierre}{29}{36} \\
+    \ganttbar{Pruebas/QA}{29}{32} \\
+    \ganttbar{Doc. Final}{33}{36}
+\end{ganttchart}
+\caption{Diagrama de Gantt con el aporte diferencial en IA resaltado.}
+\end{figure}
