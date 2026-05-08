@@ -7,6 +7,7 @@ use App\Http\Controllers\ChatLLMController;
 use App\Http\Controllers\ConsumptionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\KanbanController;
+use App\Http\Controllers\AgentMonitorController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -94,4 +95,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/kanban/{item}/pin', [KanbanController::class, 'pin']);
     Route::post('/kanban/ask-rag', [KanbanController::class, 'askRag']);
     Route::post('/kanban/{item}/rag-context', [KanbanController::class, 'saveRagContext']);
+
+    // Agent Monitor & Chat Relay
+    Route::get('/api/agents/status', [AgentMonitorController::class, 'status']);
+    Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);
 });

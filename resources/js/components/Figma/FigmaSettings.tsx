@@ -1,11 +1,46 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Globe, Cpu, Bell, ShieldCheck, Save, LogOut, Key, Zap, Database, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Globe, Cpu, Bell, ShieldCheck, Save, LogOut, Key, Zap, Database, CheckCircle, AlertTriangle, ExternalLink, Server, HardDrive, Loader2 } from 'lucide-react';
 import { router } from '@inertiajs/react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Tab = 'GENERAL' | 'LLM' | 'NOTIFICATIONS' | 'SECURITY';
 
-const MODELS = ['gpt-4o-mini', 'gpt-4o', 'claude-3-haiku', 'claude-3-sonnet'] as const;
+interface ModelInfo {
+  name: string;
+  display: string;
+  source: string;
+  developer_url: string;
+  parameter_count: number;
+  context_length: number;
+  speed_tok_s: number;
+  size_mb: number;
+  quantization: string;
+  installed: boolean;
+}
+
+const classifySpeed = (tok_s: number) => {
+  if (tok_s > 100) return { label: '💫 Instantáneo', level: 5 };
+  if (tok_s > 30)  return { label: '🌩️ Teletipo', level: 4 };
+  if (tok_s > 8)   return { label: '⚡ Rápido', level: 3 };
+  if (tok_s > 4)   return { label: '🚀 Normal', level: 2 };
+  return { label: '🐌 Pausado', level: 1 };
+};
+
+const classifyIntel = (params: number) => {
+  if (params > 200_000_000_000) return { label: '🧠🧠🧠 Genio', level: 5 };
+  if (params > 20_000_000_000)  return { label: '🧠🧠 Maestro', level: 4 };
+  if (params > 2_000_000_000)   return { label: '🧠 Experto', level: 3 };
+  if (params > 500_000_000)     return { label: '🎓 Intermedio', level: 2 };
+  return { label: '🔰 Básico', level: 1 };
+};
+
+const classifyContext = (ctx: number) => {
+  if (ctx > 200000) return { label: '📚📚 Biblioteca', level: 5 };
+  if (ctx > 64000)  return { label: '📚 Enciclopedia', level: 4 };
+  if (ctx > 16000)  return { label: '📑 Documento', level: 3 };
+  if (ctx > 4000)   return { label: '📄 Carta', level: 2 };
+  return { label: '📝 Nota', level: 1 };
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const FigmaSettings = () => {
@@ -24,6 +59,9 @@ const FigmaSettings = () => {
     const [fefoDias, setFefoDias]       = useState(15);
     const [saving, setSaving]           = useState(false);
     const [feedback, setFeedback]       = useState<{ type: 'ok' | 'error'; msg: string } | null>(null);
+    const [gardenModels, setGardenModels] = useState<ModelInfo[]>([]);
+    const [gardenSystem, setGardenSystem] = useState<any>(null);
+    const [gardenLoading, setGardenLoading] = useState(false);
 
 
     // Fetch local models on mount and when LLM tab is active
@@ -41,6 +79,26 @@ const FigmaSettings = () => {
         };
         fetchModels();
     }, [activeTab]);
+
+    // Fetch MiniModelGarden models when LLM source is local
+    useEffect(() => {
+        const fetchGardenModels = async () => {
+            setGardenLoading(true);
+            try {
+                const res = await fetch('http://SERVIDOR/api/models/benchmark');
+                const data = await res.json();
+                setGardenModels(data.models || []);
+                setGardenSystem(data.system || null);
+            } catch (err) {
+                // MiniModelGarden might be down
+            } finally {
+                setGardenLoading(false);
+            }
+        };
+        if (llmSource === 'local') {
+            fetchGardenModels();
+        }
+    }, [llmSource]);
 
 
 
@@ -229,25 +287,219 @@ const FigmaSettings = () => {
                                 </div>
                             )}
 
-                            {/* Selector de modelo */}
+                            {/* Selector de Modelo con Tarjetas */}
                             <div className="space-y-3">
-                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Modelo de Lenguaje</div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {((llmSource === 'local' && localModels.length > 0) ? localModels : MODELS).map((m) => (
-                                        <button
-                                            key={m} type="button"
-                                            onClick={() => setLlmModel(m)}
-                                            className={`p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
-                                                llmModel === m
-                                                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                                                    : 'border-slate-100 text-slate-400 hover:border-slate-200'
-                                            }`}
-                                        >
-                                            {m}
-                                        </button>
-                                    ))}
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                    Modelos Disponibles en MiniModelGarden
+                                </div>
+
+                                {gardenLoading && (
+                                    <div className="p-8 text-center text-slate-400">
+                                        <Loader2 className="animate-spin mx-auto mb-2" size={24} />
+                                        Consultando MiniModelGarden...
+                                    </div>
+                                )}
+
+                                {!gardenLoading && gardenModels.length === 0 && llmSource === 'local' && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {localModels.length > 0 ? localModels.map((m) => (
+                                            <button
+                                                key={m} type="button"
+                                                onClick={() => setLlmModel(m)}
+                                                className={`p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
+                                                    llmModel === m
+                                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                                        : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                                                }`}
+                                            >
+                                                {m}
+                                            </button>
+                                        )) : (
+                                            <div className="col-span-2 p-8 text-center text-slate-400 bg-slate-50 rounded-[2rem]">
+                                                No se pudieron cargar los modelos. Verifica que MiniModelGarden esté activo.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {!gardenLoading && llmSource !== 'local' && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {['gpt-4o-mini', 'gpt-4o', 'claude-3-haiku', 'claude-3-sonnet'].map((m) => (
+                                            <button
+                                                key={m} type="button"
+                                                onClick={() => setLlmModel(m)}
+                                                className={`p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
+                                                    llmModel === m
+                                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                                        : 'border-slate-100 text-slate-400 hover:border-slate-200'
+                                                }`}
+                                            >
+                                                {m}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    {gardenModels.filter(m => m.installed).map((model) => {
+                                        const speed = classifySpeed(model.speed_tok_s);
+                                        const intel = classifyIntel(model.parameter_count);
+                                        const ctx = classifyContext(model.context_length);
+                                        const isSelected = llmModel === model.name;
+
+                                        return (
+                                            <div
+                                                key={model.name}
+                                                onClick={() => {
+                                                    setLlmModel(model.name);
+                                                    setLlmSource('local');
+                                                }}
+                                                className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all ${
+                                                    isSelected
+                                                        ? 'border-indigo-600 bg-indigo-50 shadow-lg shadow-indigo-100'
+                                                        : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
+                                                }`}
+                                            >
+                                                {/* Header */}
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-sm"
+                                                            style={{ background: (model as any).color || '#6366f1' }}>
+                                                            {model.display.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-sm font-black text-slate-900">{model.display}</div>
+                                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{model.source}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {model.installed && (
+                                                            <span className="text-[8px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">INSTALADO</span>
+                                                        )}
+                                                        <a
+                                                            href={model.developer_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-indigo-100 flex items-center justify-center transition-colors"
+                                                            title={`Sitio del desarrollador`}
+                                                        >
+                                                            <ExternalLink size={14} className="text-slate-400 hover:text-indigo-600" />
+                                                        </a>
+                                                    </div>
+                                                </div>
+
+                                                {/* Bars */}
+                                                <div className="space-y-3">
+                                                    {/* Speed */}
+                                                    <div>
+                                                        <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase mb-1">
+                                                            <span>⚡ Velocidad</span>
+                                                            <span>{speed.label}</span>
+                                                        </div>
+                                                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-emerald-500 rounded-full transition-all"
+                                                                style={{ width: `${(speed.level / 5) * 100}%` }} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Intelligence */}
+                                                    <div>
+                                                        <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase mb-1">
+                                                            <span>🧠 Inteligencia</span>
+                                                            <span>{intel.label}</span>
+                                                        </div>
+                                                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-violet-500 rounded-full transition-all"
+                                                                style={{ width: `${(intel.level / 5) * 100}%` }} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Context */}
+                                                    <div>
+                                                        <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase mb-1">
+                                                            <span>🎓 Contexto</span>
+                                                            <span>{ctx.label}</span>
+                                                        </div>
+                                                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-amber-500 rounded-full transition-all"
+                                                                style={{ width: `${(ctx.level / 5) * 100}%` }} />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Footer info */}
+                                                <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[9px] font-bold text-slate-400 uppercase">
+                                                    <span>💾 {model.size_mb}MB · {model.quantization}</span>
+                                                    <span>{model.speed_tok_s} tok/s</span>
+                                                </div>
+
+                                                {/* Selected indicator */}
+                                                {isSelected && (
+                                                    <div className="mt-3 text-center">
+                                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-indigo-600 uppercase bg-indigo-100 px-4 py-1.5 rounded-full">
+                                                            <CheckCircle size={12} /> Modelo Activo
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
+
+                            {/* Panel de Sistema MiniModelGarden */}
+                            {gardenSystem && (
+                                <div className="p-6 bg-slate-900 rounded-[2rem] text-white space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <Server className="text-emerald-400" size={20} />
+                                        <div>
+                                            <div className="text-[10px] font-black uppercase text-emerald-400">MiniModelGarden</div>
+                                            <div className="text-xs text-slate-400 font-mono">{gardenSystem.active_model || 'Sin modelo activo'}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {/* RAM */}
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between text-[8px] font-bold text-slate-400 uppercase">
+                                                <span>💾 RAM</span>
+                                                <span>{gardenSystem.ram_available_mb}MB</span>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                                <div className="h-full bg-emerald-500 rounded-full"
+                                                    style={{ width: `${((gardenSystem.ram_total_mb - gardenSystem.ram_available_mb) / gardenSystem.ram_total_mb) * 100}%` }} />
+                                            </div>
+                                            <div className="text-[7px] text-slate-500">de {gardenSystem.ram_total_mb}MB</div>
+                                        </div>
+
+                                        {/* Disco */}
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between text-[8px] font-bold text-slate-400 uppercase">
+                                                <span>💿 Disco</span>
+                                                <span>{gardenSystem.disk_free_gb}GB</span>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                                <div className="h-full bg-indigo-500 rounded-full"
+                                                    style={{ width: `${(gardenSystem.disk_used_gb / gardenSystem.disk_total_gb) * 100}%` }} />
+                                            </div>
+                                            <div className="text-[7px] text-slate-500">de {gardenSystem.disk_total_gb}GB</div>
+                                        </div>
+
+                                        {/* CPU */}
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between text-[8px] font-bold text-slate-400 uppercase">
+                                                <span>⚙️ CPU</span>
+                                                <span>{gardenSystem.cpu_pct}%</span>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                                <div className="h-full bg-amber-500 rounded-full" style={{ width: `${gardenSystem.cpu_pct}%` }} />
+                                            </div>
+                                            <div className="text-[7px] text-slate-500">{gardenSystem.cpu_cores} cores</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
 
                             {/* Temperatura */}

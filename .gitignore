@@ -53,3 +53,9 @@ item_info.txt
 instruccionSET.md
 .opencode_last_session.txt
 AGENT_PROFILES.md
+
+# Docs con tokens/credenciales — NO subir
+docs/MASTER_RESTORE.md
+docs/AGENT_PIPELINE.md
+docs/PLAYWRIGHT_COMPACTION.md
+docs/omega-kanban-audit-*.md
