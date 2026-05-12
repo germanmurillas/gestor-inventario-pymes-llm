@@ -30,9 +30,12 @@ class SettingsSeeder extends Seeder
 
 
             // Grupo: Notificaciones
-            ['clave' => 'notif_fefo_activo',   'valor' => 'true',                    'tipo' => 'boolean', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Enviar notificación cuando un lote entra en estado crítico FEFO'],
-            ['clave' => 'notif_stock_bajo',    'valor' => 'true',                    'tipo' => 'boolean', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Notificar cuando el stock cae por debajo del mínimo'],
-            ['clave' => 'notif_email_admin',   'valor' => 'admin@pymetory.com',      'tipo' => 'string',  'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Email del administrador para alertas críticas'],
+            ['clave' => 'notif_fefo_activo',     'valor' => 'true',                    'tipo' => 'boolean', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Enviar notificación cuando un lote entra en estado crítico FEFO'],
+            ['clave' => 'notif_stock_bajo',      'valor' => 'true',                    'tipo' => 'boolean', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Notificar cuando el stock cae por debajo del mínimo'],
+            ['clave' => 'notif_email_activo',     'valor' => 'false',                   'tipo' => 'boolean', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Activar envío de alertas por correo electrónico'],
+            ['clave' => 'notif_telegram_activo',  'valor' => 'false',                   'tipo' => 'boolean', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Activar envío de alertas por Telegram'],
+            ['clave' => 'notif_email_admin',     'valor' => 'admin@pymetory.com',      'tipo' => 'string',  'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Email del administrador para alertas críticas'],
+            ['clave' => 'stock_umbral_bajo',     'valor' => '100',                     'tipo' => 'integer', 'grupo' => 'notificaciones', 'es_publica' => false, 'descripcion' => 'Umbral por defecto para alerta de stock bajo'],
 
             // Grupo: Seguridad
             ['clave' => 'sesion_timeout_min',  'valor' => '120',                     'tipo' => 'integer', 'grupo' => 'seguridad',      'es_publica' => false, 'descripcion' => 'Tiempo en minutos antes de cerrar sesión por inactividad'],

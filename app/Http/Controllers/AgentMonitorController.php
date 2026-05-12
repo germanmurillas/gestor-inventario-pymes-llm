@@ -67,6 +67,10 @@ class AgentMonitorController extends Controller
                         'heartbeat_age_sec' => $hb['age_sec'] ?? 0,
                         'need_help' => $hb['need_help'] ?? null,
                         'timestamp' => $hb['timestamp'] ?? 0,
+                        'check_in_time' => $hb['check_in_time'] ?? null,
+                        'check_out_time' => $hb['check_out_time'] ?? null,
+                        'summary' => $hb['summary'] ?? null,
+                        'llm_model' => $hb['llm_model'] ?? null,
                     ];
                 }
             }

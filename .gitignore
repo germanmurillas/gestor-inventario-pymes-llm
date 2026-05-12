@@ -31,6 +31,8 @@ npm-debug.log
 yarn-error.log
 # Credenciales y llaves privadas — NUNCA al repositorio
 oracle_key.pem
+oci_api_key.pem
+.oci/
 *.pem
 *.key
 ssh-key*

@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Material extends Model {
     protected $fillable = [
         'code', 'name', 'unit', 'description',
-        'stock_min', 'stock_max',
+        'stock_min', 'stock_max', 'photo_path',
         // Campos añadidos en migración 2026_04_29
         'unidad_medida', 'categoria', 'stock_minimo',
     ];
 
-    protected $appends = ['stock_total', 'tiene_criticos'];
+    protected $appends = ['stock_total', 'tiene_criticos', 'photo_url'];
 
     protected function casts(): array {
         return [
@@ -45,6 +45,12 @@ class Material extends Model {
     /** Si tiene algún lote crítico (vence en ≤ 15 días) */
     public function getTieneCriticosAttribute(): bool {
         return $this->lotes()->activos()->venceEn(15)->exists();
+    }
+
+    /** URL pública de la foto del material */
+    public function getPhotoUrlAttribute(): ?string {
+        if (!$this->photo_path) return null;
+        return asset('storage/' . $this->photo_path);
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────

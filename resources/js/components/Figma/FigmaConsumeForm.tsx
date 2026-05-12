@@ -1,6 +1,7 @@
 import React from 'react';
-import { ArrowLeft, MinusCircle, Info, Tag, Loader2, AlertTriangle, Truck } from 'lucide-react';
+import { ArrowLeft, MinusCircle, Info, Tag, Loader2, AlertTriangle, Truck, Camera, Lightbulb } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
+import FigmaFefoBadge from './FigmaFefoBadge';
 
 interface FigmaConsumeFormProps {
     onBack: () => void;
@@ -65,13 +66,49 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                             <div>
                                 <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Producto Seleccionado</div>
                                 <div className="text-xl font-black mt-1 leading-tight">{lote.codigo}</div>
-                                <div className="text-[10px] font-bold text-indigo-400 uppercase mt-1">Lote #{lote.lote}</div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="text-[10px] font-bold text-indigo-400 uppercase">Lote #{lote.lote}</div>
+                                    {lote.days_until_expiration !== undefined && (
+                                        <FigmaFefoBadge
+                                            daysUntilExpiration={lote.days_until_expiration}
+                                            size="sm"
+                                            showLabel={true}
+                                        />
+                                    )}
+                                </div>
                             </div>
 
                             <div className="pt-6 border-t border-white/10">
                                 <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Stock Disponible</div>
                                 <div className="text-3xl font-black mt-1">{lote.cantidad} <span className="text-xs text-white/40">KG</span></div>
                             </div>
+
+                            {lote.photo_url && (
+                                <div className="pt-6 border-t border-white/10">
+                                    <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-3">Verificación Visual</div>
+                                    <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-white/10 group cursor-pointer">
+                                        <img
+                                            src={lote.photo_url}
+                                            alt={`Foto de ${lote.codigo}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                            <Camera size={24} className="text-white" />
+                                        </div>
+                                    </div>
+                                    <p className="text-[8px] text-white/20 italic mt-2 leading-tight">Coincidencia visual para verificación FEFO de este despacho.</p>
+                                </div>
+                            )}
+
+                            {!lote.photo_url && (
+                                <div className="pt-6 border-t border-white/10">
+                                    <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Verificación Visual</div>
+                                    <div className="mt-3 w-full aspect-square rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-2">
+                                        <Camera size={24} className="text-white/20" />
+                                        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Sin foto del ítem</span>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="pt-6 border-t border-white/10 space-y-4">
                                 <div className="flex justify-between items-end">
@@ -91,12 +128,40 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                         </div>
                     </div>
 
-                    {lote.status === 'CRITICO' && (
-                        <div className="bg-red-50 border border-red-100 p-6 rounded-3xl flex gap-4 items-start">
-                            <AlertTriangle className="text-red-500 shrink-0" size={20} />
-                            <div>
-                                <div className="text-[10px] font-black text-red-600 uppercase tracking-widest">Prioridad FEFO</div>
-                                <p className="text-[10px] text-red-500 font-bold leading-tight mt-1 uppercase">Este lote está próximo a vencer. Se recomienda despacharlo con prioridad.</p>
+                    {lote.days_until_expiration !== undefined && lote.days_until_expiration <= 30 && (
+                        <div className={`p-6 rounded-3xl flex gap-4 items-start border ${
+                            lote.days_until_expiration <= 15
+                                ? 'bg-red-50 border-red-100'
+                                : 'bg-amber-50 border-amber-100'
+                        }`}>
+                            {lote.days_until_expiration <= 15 ? (
+                                <AlertTriangle className="text-red-500 shrink-0" size={20} />
+                            ) : (
+                                <Lightbulb className="text-amber-500 shrink-0" size={20} />
+                            )}
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${
+                                        lote.days_until_expiration <= 15 ? 'text-red-600' : 'text-amber-600'
+                                    }`}>
+                                        {lote.days_until_expiration <= 15 ? 'Prioridad FEFO' : 'Sugerencia FEFO'}
+                                    </span>
+                                    <FigmaFefoBadge
+                                        daysUntilExpiration={lote.days_until_expiration}
+                                        size="sm"
+                                    />
+                                </div>
+                                <p className="text-[10px] font-bold leading-tight uppercase text-slate-600">
+                                    {lote.days_until_expiration <= 15
+                                        ? `Este lote vence en ${lote.days_until_expiration} días. Se recomienda despacharlo con prioridad máxima.`
+                                        : `Este lote vence en ${lote.days_until_expiration} días. Considere consumirlo pronto para evitar desperdicio.`
+                                    }
+                                </p>
+                                {lote.stock_total !== undefined && lote.stock_total > lote.cantidad && (
+                                    <p className="text-[9px] text-indigo-600 font-bold uppercase">
+                                        Stock total del material: {lote.stock_total} KG en múltiples lotes
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}

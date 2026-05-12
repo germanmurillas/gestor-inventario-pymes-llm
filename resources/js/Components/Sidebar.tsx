@@ -11,6 +11,9 @@ import {
     Settings,
     User,
     LogOut,
+    ScanLine,
+    History,
+    ArrowRightLeft,
 } from 'lucide-react';
 
 interface NavItem {
@@ -41,11 +44,14 @@ const DASHBOARD_SECTIONS: NavSection[] = [
             { icon: BarChart3, label: 'Reportes', view: 'REPORTES' },
             { icon: LayoutGrid, label: 'Log Maestro', view: 'LOG_MAESTRO' },
             { icon: Tag, label: 'Etiquetas', view: 'ETIQUETAS' },
+            { icon: ScanLine, label: 'Escáner QR', view: 'ESCANER' },
         ],
     },
     {
         title: 'Gestión',
         items: [
+            { icon: History, label: 'Historial QR', view: 'SCAN_HISTORY' },
+            { icon: ArrowRightLeft, label: 'Transferencias', view: 'TRANSFERENCIAS' },
             { icon: Bell, label: 'Alertas', view: 'NOTIFICACIONES' },
             { icon: Settings, label: 'Ajustes', view: 'CONFIGURACION' },
             { icon: LayoutGrid, label: 'Kanban', view: '/kanban', href: '/kanban' },

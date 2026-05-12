@@ -54,10 +54,14 @@ const FigmaSettings = () => {
     const [localModels, setLocalModels] = useState<string[]>([]);
     const [numCtx, setNumCtx]           = useState(2048);
     const [numGpu, setNumGpu]           = useState(32);
-    const [notifFefo, setNotifFefo]     = useState(true);
-    const [notifStock, setNotifStock]   = useState(true);
-    const [fefoDias, setFefoDias]       = useState(15);
-    const [saving, setSaving]           = useState(false);
+    const [notifFefo, setNotifFefo]         = useState(true);
+    const [notifStock, setNotifStock]       = useState(true);
+    const [notifEmail, setNotifEmail]       = useState(false);
+    const [notifTelegram, setNotifTelegram] = useState(false);
+    const [notifEmailAdmin, setNotifEmailAdmin] = useState('admin@pymetory.com');
+    const [fefoDias, setFefoDias]           = useState(15);
+    const [stockUmbral, setStockUmbral]     = useState(100);
+    const [saving, setSaving]               = useState(false);
     const [feedback, setFeedback]       = useState<{ type: 'ok' | 'error'; msg: string } | null>(null);
     const [gardenModels, setGardenModels] = useState<ModelInfo[]>([]);
     const [gardenSystem, setGardenSystem] = useState<any>(null);
@@ -85,7 +89,7 @@ const FigmaSettings = () => {
         const fetchGardenModels = async () => {
             setGardenLoading(true);
             try {
-                const res = await fetch('http://SERVIDOR/api/models/benchmark');
+                const res = await fetch('http://SERVIDOR:8080/api/models/benchmark');
                 const data = await res.json();
                 setGardenModels(data.models || []);
                 setGardenSystem(data.system || null);
@@ -640,12 +644,101 @@ const FigmaSettings = () => {
                                     <div className="w-6 h-6 bg-white rounded-full shadow-lg" />
                                 </div>
                             </div>
+
+                            {/* Canales de Entrega */}
+                            <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] space-y-4">
+                                <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Canales de entrega</div>
+
+                                {/* Email Channel */}
+                                <div className="flex items-center justify-between"
+                                    onClick={() => setNotifEmail(!notifEmail)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
+                                            <Bell size={14} className="text-blue-500" />
+                                        </div>
+                                        <div className="text-[11px] font-bold text-slate-600 uppercase">Email</div>
+                                    </div>
+                                    <div className={`w-10 h-5 rounded-full p-0.5 flex cursor-pointer transition-all ${notifEmail ? 'bg-indigo-600 justify-end' : 'bg-slate-300 justify-start'}`}>
+                                        <div className="w-4 h-4 bg-white rounded-full shadow" />
+                                    </div>
+                                </div>
+
+                                {/* Telegram Channel */}
+                                <div className="flex items-center justify-between"
+                                    onClick={() => setNotifTelegram(!notifTelegram)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center">
+                                            <Bell size={14} className="text-sky-500" />
+                                        </div>
+                                        <div className="text-[11px] font-bold text-slate-600 uppercase">Telegram</div>
+                                    </div>
+                                    <div className={`w-10 h-5 rounded-full p-0.5 flex cursor-pointer transition-all ${notifTelegram ? 'bg-indigo-600 justify-end' : 'bg-slate-300 justify-start'}`}>
+                                        <div className="w-4 h-4 bg-white rounded-full shadow" />
+                                    </div>
+                                </div>
+
+                                {/* Admin Email */}
+                                {notifEmail && (
+                                    <div className="space-y-2 pt-2">
+                                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Email del administrador</div>
+                                        <input
+                                            type="email"
+                                            value={notifEmailAdmin}
+                                            onChange={(e) => setNotifEmailAdmin(e.target.value)}
+                                            placeholder="admin@pymetory.com"
+                                            className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3 text-xs font-bold text-slate-900 focus:border-indigo-600 outline-none transition-all"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Thresholds */}
+                            <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] space-y-5">
+                                <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Umbrales de alerta</div>
+
+                                {/* FEFO Días */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                        <span>Días críticos FEFO</span>
+                                        <span className="text-orange-600">{fefoDias} días</span>
+                                    </div>
+                                    <input
+                                        type="range" min="5" max="30" step="1"
+                                        value={fefoDias}
+                                        onChange={(e) => setFefoDias(parseInt(e.target.value))}
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-orange-600"
+                                    />
+                                    <p className="text-[8px] text-slate-400 font-bold uppercase">Lotes con menos de {fefoDias} días hasta vencimiento disparan alerta</p>
+                                </div>
+
+                                {/* Stock Bajo Umbral */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                        <span>Umbral stock bajo (por material)</span>
+                                        <span className="text-orange-600">{stockUmbral} unidades</span>
+                                    </div>
+                                    <input
+                                        type="range" min="10" max="500" step="10"
+                                        value={stockUmbral}
+                                        onChange={(e) => setStockUmbral(parseInt(e.target.value))}
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-orange-600"
+                                    />
+                                    <p className="text-[8px] text-slate-400 font-bold uppercase">Cantidad por debajo de la cual se dispara alerta de stock bajo</p>
+                                </div>
+                            </div>
                         </div>
 
                         <button
                             onClick={() => handleSave({
-                                notif_fefo_activo: notifFefo  ? 'true' : 'false',
-                                notif_stock_bajo:  notifStock ? 'true' : 'false',
+                                notif_fefo_activo:    notifFefo     ? 'true' : 'false',
+                                notif_stock_bajo:     notifStock    ? 'true' : 'false',
+                                notif_email_activo:   notifEmail    ? 'true' : 'false',
+                                notif_telegram_activo: notifTelegram ? 'true' : 'false',
+                                notif_email_admin:    notifEmailAdmin,
+                                fefo_dias_criticos:   String(fefoDias),
+                                stock_umbral_bajo:    String(stockUmbral),
                             })}
                             disabled={saving}
                             className="flex items-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95"

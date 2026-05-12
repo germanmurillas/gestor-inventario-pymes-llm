@@ -1,124 +1,117 @@
 import React from 'react';
-import { LayoutGrid, FileText, Folder, DollarSign, Clock, Package } from 'lucide-react';
+import { Package, FileText, Clock, DollarSign } from 'lucide-react';
+import FigmaKpiCard from './FigmaKpiCard';
+import FigmaBodegaBar from './FigmaBodegaBar';
+import FigmaQuickActions from './FigmaQuickActions';
+import FigmaActivityItem from './FigmaActivityItem';
+import FigmaFefoTimer from './FigmaFefoTimer';
 
-const FigmaTablero = ({ stats, user, onViewChange }: { stats: any, user: any, onViewChange: (view: any) => void }) => {
-    // Fallback data if stats are not loaded yet
-    const summary = stats?.summary || { totalMaterials: 0, totalLotes: 0, lotesCriticos: 0, totalInventoryValue: 0 };
+const FigmaTablero = ({ stats, user, onViewChange }: { stats: any; user: any; onViewChange: (view: any) => void }) => {
+    const summary = stats?.summary || { totalMaterials: 0, totalLotes: 0, lotesCriticos: 0, totalInventoryValue: 0, totalInventoryVolume: 0 };
+    const efficiency = stats?.efficiency || { accuracy: 99, turnoverRatio: 4.2, occupancyTotal: 0 };
     const activity = stats?.recentActivity || [];
-    const levels = stats?.inventoryLevels || [];
+    const bodegas = stats?.bodegas || [];
+    const fefoAlerts = stats?.fefoAlerts || [];
+    const trends = stats?.trends || {};
 
     const isAdmin = user.role === 'admin';
 
+    const formattedValue = summary.totalInventoryValue > 0
+        ? `$${new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(summary.totalInventoryValue)}`
+        : '—';
+
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Resumen de inventario */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display">Resumen de inventario</h3>
-                    <div className="flex items-center gap-3">
-                        {isAdmin && (
-                            <button 
-                                className="flex items-center gap-2 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all hover:shadow-sm active:scale-95"
-                                onClick={() => onViewChange('CONCILIACION')}
-                            >
-                                <LayoutGrid size={14} />
-                                Conciliación
-                            </button>
-                        )}
-                        {isAdmin && (
-                            <a 
-                                href="/inventory/report" 
-                                target="_blank"
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all glow-indigo hover:scale-105 active:scale-95"
-                            >
-                                <FileText size={14} />
-                                Reporte PDF
-                            </a>
-                        )}
-                    </div>
+        <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+            {/* ── Encabezado + Quick Actions ── */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                    <h2 className="text-lg font-black text-white uppercase tracking-tight font-display">
+                        Tablero de Control
+                    </h2>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+                        Vista general del inventario · {new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="glass-morphism p-6 rounded-[2.5rem] flex flex-col gap-1 hover:border-indigo-200 transition-all group">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-                                <Package size={24} />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-display">Insumos</span>
-                        </div>
-                        <div className="text-3xl font-black text-slate-900 tracking-tighter font-display">{summary.totalMaterials}</div>
-                        <div className="text-[10px] text-slate-400 font-bold tracking-tight uppercase">Catálogo activo</div>
-                    </div>
-
-                    <div className="glass-morphism p-6 rounded-[2.5rem] flex flex-col gap-1 hover:border-blue-200 transition-all group">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                                <FileText size={24} />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-display">Lotes</span>
-                        </div>
-                        <div className="text-3xl font-black text-slate-900 tracking-tighter font-display">{summary.totalLotes}</div>
-                        <div className="text-[10px] text-slate-400 font-bold tracking-tight uppercase">En bodegas</div>
-                    </div>
-
-                    <div className="glass-morphism p-6 rounded-[2.5rem] flex flex-col gap-1 bg-red-50/5 border-red-100/50 hover:border-red-200 transition-all group">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                                <Clock size={24} />
-                            </div>
-                            <span className="text-[10px] font-black text-red-600 uppercase tracking-widest font-display italic animate-pulse">Críticos</span>
-                        </div>
-                        <div className="text-3xl font-black text-red-600 tracking-tighter font-display">{summary.lotesCriticos}</div>
-                        <div className="text-[10px] text-red-400 font-bold tracking-tight uppercase italic">Riesgo FEFO</div>
-                    </div>
-
-                    <div className="glass-morphism p-6 rounded-[2.5rem] flex flex-col gap-1 bg-emerald-50/5 hover:border-emerald-200 transition-all group">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-                                <DollarSign size={24} />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-display">Valorización</span>
-                        </div>
-                        <div className="text-2xl font-black text-slate-900 tracking-tighter font-display">
-                            {summary.totalInventoryValue > 0
-                                ? `$${new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(summary.totalInventoryValue)}`
-                                : <span className="text-slate-400 text-sm">Sin costos</span>
-                            }
-                        </div>
-                        <div className="text-[10px] text-emerald-600 font-bold tracking-tight uppercase">COP · Stock activo</div>
-                    </div>
-
-                </div>
+                <FigmaQuickActions onAction={onViewChange} isAdmin={isAdmin} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Actividad reciente */}
+            {/* ── KPI Cards ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <FigmaKpiCard
+                    icon={<Package size={20} />}
+                    count={summary.totalMaterials}
+                    label="Insumos Activos"
+                    color="indigo"
+                    trend={trends.materiales?.startsWith('+') ? 'up' : 'down'}
+                    trendValue={trends.materiales}
+                />
+                <FigmaKpiCard
+                    icon={<FileText size={20} />}
+                    count={summary.totalLotes}
+                    label="Lotes en Bodega"
+                    color="blue"
+                    trend={trends.lotes?.startsWith('+') ? 'up' : 'down'}
+                    trendValue={trends.lotes}
+                />
+                <FigmaKpiCard
+                    icon={<Clock size={20} />}
+                    count={summary.lotesCriticos}
+                    label="Críticos FEFO"
+                    color="red"
+                    trend={Number(trends.criticos) > 0 ? 'up' : 'down'}
+                    trendValue={trends.criticos}
+                />
+                <FigmaKpiCard
+                    icon={<DollarSign size={20} />}
+                    count={formattedValue}
+                    label="Valorización COP"
+                    color="emerald"
+                    trend="up"
+                    trendValue={trends.valor}
+                />
+            </div>
+
+            {/* ── Grid principal: Actividad + Panel derecho ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* ── Actividad (Kardex) ── */}
                 <div className="lg:col-span-2 space-y-4">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display">Kardex de Actividad</h3>
-                    <div className="glass-morphism rounded-[2rem] overflow-hidden min-h-[400px]">
-                        <div className="divide-y divide-slate-100">
-                            {activity.length > 0 ? activity.map((act: any) => (
-                                <div key={act.id} className="p-5 flex items-center justify-between hover:bg-slate-50/50 transition-all group cursor-default">
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-center group-hover:rotate-3 transition-all duration-500">
-                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${act.action.includes('Ingreso') ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                                                {act.action.includes('Ingreso') ? <Package size={18} /> : <FileText size={18} />}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-black text-slate-900 tracking-tight">{act.material}</div>
-                                            <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{act.action} · Batch: {act.batch}</div>
-                                        </div>
-                                    </div>
-                                    <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest bg-slate-100/50 px-4 py-1.5 rounded-full border border-slate-200/50">{act.time}</div>
-                                </div>
-                            )) : (
-                                <div className="p-10 text-center text-slate-300 text-sm italic font-medium">No hay movimientos registrados.</div>
-                            )}
-                        </div>
-                        <div className="p-4 border-t border-slate-100 flex justify-center bg-slate-50/20">
-                            <button 
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display">
+                            Kardex de Actividad
+                        </h3>
+                        <button
+                            onClick={() => onViewChange('LOG_MAESTRO')}
+                            className="text-[10px] font-bold text-slate-500 hover:text-indigo-400 uppercase tracking-wider transition-colors"
+                        >
+                            Ver historial completo →
+                        </button>
+                    </div>
+
+                    <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/40 rounded-2xl overflow-hidden min-h-[300px]">
+                        {activity.length > 0 ? (
+                            activity.map((act: any) => (
+                                <FigmaActivityItem
+                                    key={act.id}
+                                    id={act.id}
+                                    material={act.material}
+                                    code={act.code}
+                                    batch={act.batch}
+                                    user={act.user}
+                                    quantity={act.quantity}
+                                    time={act.time}
+                                    action={act.action}
+                                    type={act.type}
+                                />
+                            ))
+                        ) : (
+                            <div className="p-12 text-center text-slate-600 text-xs font-bold uppercase tracking-wider">
+                                Sin movimientos registrados
+                            </div>
+                        )}
+                        <div className="p-4 border-t border-slate-700/30 flex justify-center bg-slate-800/20">
+                            <button
                                 onClick={() => onViewChange('LOG_MAESTRO')}
-                                className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors"
+                                className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 transition-colors"
                             >
                                 Ver historial completo
                             </button>
@@ -126,48 +119,79 @@ const FigmaTablero = ({ stats, user, onViewChange }: { stats: any, user: any, on
                     </div>
                 </div>
 
-                {/* Nivel de Inventario (Top 3) */}
-                <div className="space-y-4">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display">Insumos Críticos</h3>
-                    <div className="glass-morphism rounded-[2rem] p-8 shadow-sm space-y-6">
-                        {levels.length > 0 ? levels.map((item: any, idx: number) => (
-                            <div key={idx} className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-black text-slate-900 uppercase tracking-tighter">{item.name}</span>
-                                    <span className="text-xs font-black text-indigo-600">{item.quantity} Kg</span>
+                {/* ── Panel derecho: Bodegas + FEFO ── */}
+                <div className="space-y-6">
+                    {/* Bodegas */}
+                    <div>
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display mb-4">
+                            Ocupación por Bodega
+                        </h3>
+                        <div className="space-y-3">
+                            {bodegas.length > 0 ? (
+                                bodegas.map((b: any) => (
+                                    <FigmaBodegaBar
+                                        key={b.code}
+                                        name={b.name}
+                                        code={b.code}
+                                        percentage={b.percentage}
+                                        capacity={b.capacity}
+                                        occupied={b.occupied}
+                                        status={b.status}
+                                    />
+                                ))
+                            ) : (
+                                <div className="bg-slate-800/20 border border-dashed border-slate-700/30 rounded-xl p-6 text-center text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+                                    Sin bodegas
                                 </div>
-                                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/30">
-                                    <div 
-                                        className="h-full bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.3)] transition-all duration-[1.5s] ease-out"
-                                        style={{ width: `${Math.min((item.quantity / 500) * 100, 100)}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="text-center text-slate-300 text-xs italic py-10 font-display">Actualizando sincronización...</div>
-                        )}
-                        <div className="pt-8 border-t border-slate-100">
-                             <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-5">Estado de Bodega Real</div>
-                             <div className="grid grid-cols-2 gap-3">
-                                 {stats?.bodegas?.length > 0 ? stats.bodegas.map((bodega: any, bIdx: number) => (
-                                     <div key={bIdx} className="p-4 bg-obsidiana rounded-3xl border border-white/5 flex flex-col items-center justify-center relative overflow-hidden group hover:border-indigo-500/50 transition-all duration-500 shadow-2xl">
-                                         <div className="text-[10px] font-black text-white uppercase tracking-widest mb-1.5 z-10">{bodega.name}</div>
-                                         <div className="text-[8px] font-black text-indigo-400 uppercase z-10 tracking-widest">{bodega.percentage}% Ocupado</div>
-                                         {/* Progress Bar Background (Radial style) */}
-                                         <div 
-                                            className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-indigo-600 to-purple-500 transition-all duration-1000 shadow-[0_0_15px_rgba(99,102,241,0.8)]"
-                                            style={{ width: `${bodega.percentage}%` }}
-                                         ></div>
-                                         <div 
-                                            className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                         ></div>
-                                     </div>
-                                 )) : (
-                                     <div className="col-span-2 text-center text-slate-300 text-[10px] italic py-4">No hay bodegas configuradas.</div>
-                                 )}
-                             </div>
+                            )}
                         </div>
                     </div>
+
+                    {/* Estado de Eficiencia */}
+                    <div>
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display mb-4">
+                            Eficiencia Operativa
+                        </h3>
+                        <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/40 rounded-xl p-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Precisión</span>
+                                <span className="text-sm font-black text-emerald-400 font-display">{efficiency.accuracy}%</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rotación</span>
+                                <span className="text-sm font-black text-indigo-400 font-display">{efficiency.turnoverRatio}x</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ocupación Total</span>
+                                <span className={`text-sm font-black font-display ${efficiency.occupancyTotal >= 80 ? 'text-red-400' : efficiency.occupancyTotal >= 60 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                    {efficiency.occupancyTotal}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* FEFO Countdown */}
+                    {fefoAlerts.length > 0 && (
+                        <div>
+                            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display mb-4">
+                                Alerta FEFO · Próximos Vencimientos
+                            </h3>
+                            <div className="space-y-3">
+                                {fefoAlerts.map((alert: any) => (
+                                    <FigmaFefoTimer
+                                        key={alert.id}
+                                        material={alert.material}
+                                        codigo={alert.codigo}
+                                        lote={alert.lote}
+                                        diasRestantes={alert.diasRestantes}
+                                        vencimiento={alert.vencimiento}
+                                        bodega={alert.bodega}
+                                        nivel={alert.nivel}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -1,3 +1,9 @@
+> ⚠️ **MIGRADO A DESKTOPTITAN** — Mayo 2026
+> Todo el contenido de este servidor fue consolidado en una sola máquina Oracle Always Free:
+> **DesktopTitan** · SERVIDOR · 4 OCPU ARM · 24 GB RAM · 200 GB SSD
+> Los servidores legacy cazador-2 (SERVIDOR) y cazador-3 (SERVIDOR) ya no están activos.
+> Toda la infraestructura, servicios y documentación migraron a DesktopTitan.
+
 <div align="center">
 
 # 🏭 PYMETORY

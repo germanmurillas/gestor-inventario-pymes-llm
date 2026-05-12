@@ -13,11 +13,19 @@ class InventoryController extends Controller {
             return [
                 'id' => $lote->id,
                 'codigo' => $lote->material->code,
+                'material_name' => $lote->material->name,
+                'unit' => $lote->material->unit ?? 'kg',
                 'lote' => $lote->batch_number,
                 'cantidad' => $lote->quantity,
                 'vencimiento' => $lote->expiration_date->format('Y-m-d'),
-                'bodega' => $lote->bodega->name ?? 'Sin asignar', // Ubicación física
-                'status' => $lote->is_critical ? 'CRITICO' : 'NORMAL'
+                'days_until_expiration' => $lote->days_until_expiration,
+                'bodega' => $lote->bodega->name ?? 'Sin asignar',
+                'status' => $lote->is_critical ? 'CRITICO' : 'NORMAL',
+                'photo_url' => $lote->photo_url ?? $lote->material->photo_url,
+                'quantity' => $lote->quantity,
+                'stock_total' => Lote::where('material_id', $lote->material_id)
+                    ->where('status', 'active')
+                    ->sum('quantity'),
             ];
         });
 
@@ -62,6 +70,7 @@ class InventoryController extends Controller {
                 'user' => $mov->user->name ?? 'Sistema',
                 'quantity' => $mov->quantity,
                 'time' => $mov->created_at->diffForHumans(),
+                'type' => $mov->type,
                 'action' => $mov->type === 'entrada' ? 'Ingreso de Lote' : 'Consumo / Despacho'
             ];
         });
@@ -106,6 +115,35 @@ class InventoryController extends Controller {
             ];
         });
 
+        // FEFO Alertas: lotes que vencen en los próximos 30 días con días restantes
+        $fefoAlerts = Lote::activos()
+            ->where('expiration_date', '<=', now()->addDays(30))
+            ->with(['material', 'bodega'])
+            ->orderBy('expiration_date')
+            ->take(5)
+            ->get()
+            ->map(function ($lote) {
+                $diasRestantes = (int) now()->diffInDays($lote->expiration_date, false);
+                return [
+                    'id' => $lote->id,
+                    'material' => $lote->material->name,
+                    'codigo' => $lote->material->code,
+                    'lote' => $lote->batch_number,
+                    'diasRestantes' => $diasRestantes,
+                    'vencimiento' => $lote->expiration_date->format('Y-m-d'),
+                    'bodega' => $lote->bodega->name ?? 'Sin asignar',
+                    'nivel' => $diasRestantes <= 7 ? 'critico' : ($diasRestantes <= 15 ? 'warning' : 'info'),
+                ];
+            });
+
+        // Tendencias: cambios porcentuales mock (MVP) — se reemplazarán con datos reales del período
+        $trends = [
+            'materiales' => '+12%',
+            'lotes' => '+5%',
+            'criticos' => ($stats['lotesCriticos'] > 0 ? '+2' : '-3'),
+            'valor' => '+8%',
+        ];
+
         return Inertia::render('Dashboard', [
             'initialLotes' => $lotesActivos,
             'dashboardStats' => [
@@ -114,7 +152,9 @@ class InventoryController extends Controller {
                 'recentActivity' => $recentActivity,
                 'fullActivity' => $fullActivity,
                 'inventoryLevels' => $inventoryLevels,
-                'bodegas' => $bodegaStats
+                'bodegas' => $bodegaStats,
+                'fefoAlerts' => $fefoAlerts,
+                'trends' => $trends,
             ]
         ]);
     }
@@ -292,10 +332,16 @@ class InventoryController extends Controller {
                 'stock_initial' => 'required|numeric|min:0',
                 'expiration_date' => 'required|date|after:today',
                 'batch_number' => 'required|string|max:50',
-                'description' => 'nullable|string'
+                'description' => 'nullable|string',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             ]);
 
-            \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
+            $photoPath = null;
+            if ($request->hasFile('photo')) {
+                $photoPath = $request->file('photo')->store('photos/materials', 'public');
+            }
+
+            \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $photoPath) {
                 // 1. Crear el Material
                 $material = Material::create([
                     'name' => $validated['name'],
@@ -303,6 +349,7 @@ class InventoryController extends Controller {
                     'description' => $validated['description'],
                     'unit' => 'kg',
                     'stock_min' => 10,
+                    'photo_path' => $photoPath,
                 ]);
 
                 // 2. Crear el primer Lote

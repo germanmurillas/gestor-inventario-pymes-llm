@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { ArrowLeft, Save, Info, Package, DollarSign, Calendar, Tag, Loader2 } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { ArrowLeft, Save, Info, Package, DollarSign, Calendar, Tag, Loader2, Camera, Image as ImageIcon } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 
 const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: () => void, initialBodega?: any, bodegas?: any[] }) => {
@@ -10,8 +10,27 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
         stock_initial: 0,
         expiration_date: '',
         batch_number: '',
-        description: ''
+        description: '',
+        photo: null as File | null,
     });
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('photo', file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const removePhoto = () => {
+        setData('photo', null);
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
     // Sincronizar bodega inicial si cambia
     useEffect(() => {
@@ -135,6 +154,66 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                     placeholder="Detalles sobre el proveedor o uso comercial..." 
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none transition-all" 
                                 />
+                            </div>
+
+                            {/* Photo Upload */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Foto del Producto</label>
+                                <div className="flex items-start gap-4">
+                                    <div
+                                        onClick={() => !previewUrl && fileInputRef.current?.click()}
+                                        className={`relative w-32 h-32 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${
+                                            previewUrl
+                                                ? 'border-indigo-300 cursor-pointer'
+                                                : 'border-slate-300 cursor-pointer hover:border-indigo-400 bg-slate-50'
+                                        }`}
+                                    >
+                                        {previewUrl ? (
+                                            <>
+                                                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                                    <span className="text-white text-[10px] font-black uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-xl">Cambiar</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div
+                                                className="flex flex-col items-center gap-2 text-slate-400 group-hover:text-indigo-500 transition-colors"
+                                                onClick={() => fileInputRef.current?.click()}
+                                            >
+                                                <Camera size={28} />
+                                                <span className="text-[9px] font-black uppercase tracking-widest">Subir foto</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col gap-2 pt-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-200"
+                                        >
+                                            <Camera size={14} />
+                                            <span>{previewUrl ? 'Cambiar foto' : 'Seleccionar foto'}</span>
+                                        </button>
+                                        {previewUrl && (
+                                            <button
+                                                type="button"
+                                                onClick={removePhoto}
+                                                className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-all border border-red-200"
+                                            >
+                                                <span>✕ Quitar</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        onChange={handlePhotoChange}
+                                        className="hidden"
+                                    />
+                                </div>
+                                {errors.photo && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.photo}</p>}
+                                <p className="text-[9px] text-slate-400 italic">Formatos JPG, PNG o WebP. Máx 5 MB.</p>
                             </div>
                         </div>
                     </div>

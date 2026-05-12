@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Tag, Box, Printer, Download, QrCode, Search, Package } from 'lucide-react';
+import { Tag, Box, Printer, Download, QrCode, Search, Package, ScanLine } from 'lucide-react';
 import QRCode from "react-qr-code";
 
-const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
+const FigmaLabels = ({ lotes = [], onScanLote }: { lotes: any[], onScanLote?: (lote: any) => void }) => {
     const [selectedLote, setSelectedLote] = useState<any>(null);
 
     const handlePrint = () => {
@@ -100,6 +100,15 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
                                     <Download size={20} />
                                 </button>
                             </div>
+
+                            {/* Botón de Escaneo QR (Check-in/Check-out) */}
+                            <button
+                                onClick={() => onScanLote?.(selectedLote)}
+                                className="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-indigo-200"
+                            >
+                                <ScanLine size={18} />
+                                <span>Escanear este Lote (Check-in/out)</span>
+                            </button>
                         </div>
                     ) : (
                         <div className="h-[400px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center justify-center text-slate-300 space-y-4">

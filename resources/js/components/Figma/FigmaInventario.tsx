@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
-import { LayoutGrid, Box, Plus, Folder, Bell, Settings, ArrowRightLeft, ChevronRight, X, Warehouse, Ruler } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { LayoutGrid, Box, Plus, Folder, Bell, Settings, ArrowRightLeft, ChevronRight, X, Warehouse, Ruler, ScanLine, Sparkles } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import FigmaMovements from './FigmaMovements';
 import FigmaForms from './FigmaForms';
 import FigmaConsumeForm from './FigmaConsumeForm';
+import FigmaConsumeWizard from './FigmaConsumeWizard';
+import FigmaFefoBadge from './FigmaFefoBadge';
 
-const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bodegas?: any[], user?: any }) => {
-    const [viewMode, setViewMode] = useState<'GRID' | 'DETAIL' | 'FORM' | 'CONSUME'>('GRID');
+const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes?: any[], bodegas?: any[], user?: any, onNavigate?: (view: string) => void }) => {
+    const [viewMode, setViewMode] = useState<'GRID' | 'DETAIL' | 'FORM' | 'CONSUME' | 'WIZARD'>('GRID');
     const [showModal, setShowModal] = useState(false);
     const [showBodegaModal, setShowBodegaModal] = useState(false);
     const [showAdjustModal, setShowAdjustModal] = useState(false);
     const [selectedLote, setSelectedLote] = useState<any>(null);
     const [selectedBodega, setSelectedBodega] = useState<any>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedTag, setSelectedTag] = useState<string>('');
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -25,6 +29,11 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
         setShowModal(true);
     };
 
+    const openAudit = (lote: any) => {
+        setSelectedLote(lote);
+        setViewMode('DETAIL');
+    };
+
     const submitBodega = (e: React.FormEvent) => {
         e.preventDefault();
         post('/bodegas', {
@@ -35,13 +44,57 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
         });
     };
 
-    // Lógica de filtrado dinámico por bodega
-    const filteredLotes = selectedBodega 
-        ? lotes.filter((l: any) => l.bodega === selectedBodega.name)
-        : lotes;
+    // Extraer tags únicos de todos los materiales en los lotes
+    const allTags = useMemo(() => {
+        const tagsSet = new Set<string>();
+        lotes.forEach((l: any) => {
+            if (l.tags && Array.isArray(l.tags)) {
+                l.tags.forEach((t: any) => tagsSet.add(t.name || t));
+            }
+        });
+        return Array.from(tagsSet).sort();
+    }, [lotes]);
+
+    // Lógica de filtrado dinámico (Bodega + Búsqueda + Tags)
+    const filteredLotes = useMemo(() => {
+        return lotes.filter((l: any) => {
+            const matchesBodega = selectedBodega ? l.bodega === selectedBodega.name : true;
+            const matchesSearch = searchQuery 
+                ? (l.material_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                   l.codigo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                   l.lote?.toString().includes(searchQuery))
+                : true;
+            const matchesTag = selectedTag
+                ? (l.tags && l.tags.some((t: any) => (t.name || t) === selectedTag))
+                : true;
+            
+            return matchesBodega && matchesSearch && matchesTag;
+        });
+    }, [lotes, selectedBodega, searchQuery, selectedTag]);
+
+    // Derivar lista de materiales únicos para el wizard (con stock total)
+    const materialsList = useMemo(() => {
+        const map = new Map<number, { id: number; name: string; code: string; photo_url: string | null; stock_total: number }>();
+        lotes.forEach((l: any) => {
+            if (!l.material_name) return;
+            const key = l.codigo;
+            if (!map.has(key as any)) {
+                map.set(key as any, {
+                    id: l.id, // Will be overwritten if we find material_id
+                    name: l.material_name,
+                    code: l.codigo,
+                    photo_url: l.photo_url,
+                    stock_total: 0,
+                });
+            }
+            const entry = map.get(key as any)!;
+            entry.stock_total += parseFloat(l.cantidad) || 0;
+        });
+        return Array.from(map.values());
+    }, [lotes]);
 
     if (viewMode === 'DETAIL') {
-        return <FigmaMovements onBack={() => setViewMode('GRID')} />;
+        return <FigmaMovements lote={selectedLote} onBack={() => setViewMode('GRID')} />;
     }
 
     if (viewMode === 'FORM') {
@@ -50,6 +103,10 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
 
     if (viewMode === 'CONSUME') {
         return <FigmaConsumeForm onBack={() => setViewMode('GRID')} lote={selectedLote} />;
+    }
+
+    if (viewMode === 'WIZARD') {
+        return <FigmaConsumeWizard onBack={() => setViewMode('GRID')} initialMaterials={materialsList} />;
     }
 
     return (
@@ -66,7 +123,11 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
                         </div>
                         <div className="p-10 flex gap-8">
                             <div className="w-48 h-48 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center relative overflow-hidden">
-                                <Box size={64} className="opacity-10" />
+                                {selectedLote.photo_url ? (
+                                    <img src={selectedLote.photo_url} alt={selectedLote.codigo} className="w-full h-full object-cover" />
+                                ) : (
+                                    <Box size={64} className="opacity-10" />
+                                )}
                                 {selectedLote.status === 'CRITICO' && (
                                     <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-tighter">
                                         Crítico
@@ -75,7 +136,12 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
                             </div>
                             <div className="flex-1 space-y-6">
                                 <div>
-                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Vencimiento</div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Vencimiento</div>
+                                        {selectedLote.days_until_expiration !== undefined && (
+                                            <FigmaFefoBadge daysUntilExpiration={selectedLote.days_until_expiration} size="sm" />
+                                        )}
+                                    </div>
                                     <div className={`text-2xl font-bold mt-1 tracking-tighter ${selectedLote.status === 'CRITICO' ? 'text-red-600' : 'text-black'}`}>
                                         {selectedLote.vencimiento}
                                     </div>
@@ -100,6 +166,16 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
                                         className="flex-1 bg-obsidiana text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all active:scale-95 shadow-lg shadow-gray-200"
                                     >
                                         Gestionar Movimiento
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setShowModal(false);
+                                            setViewMode('WIZARD');
+                                        }}
+                                        className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all active:scale-95 shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                                    >
+                                        <Sparkles size={14} />
+                                        <span>Consumo Asistido</span>
                                     </button>
                                     
                                     {user?.role === 'admin' && (
@@ -255,11 +331,25 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
 
                     <div className="flex gap-4">
                         <button 
+                            onClick={() => setViewMode('WIZARD')}
+                            className="flex items-center gap-2 bg-obsidiana text-white px-5 py-2.5 rounded-xl shadow-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
+                        >
+                            <Sparkles size={14} />
+                            <span>Consumo FEFO</span>
+                        </button>
+                        <button 
                             onClick={() => setViewMode('FORM')}
                             className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg glow-indigo text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
                         >
                             <Plus size={14} />
                             <span>Nuevo Ingreso {selectedBodega ? `en ${selectedBodega.code}` : ''}</span>
+                        </button>
+                        <button 
+                            onClick={() => onNavigate?.('ESCANER')}
+                            className="flex items-center gap-2 bg-obsidiana text-white px-5 py-2.5 rounded-xl shadow-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
+                        >
+                            <ScanLine size={14} />
+                            <span>Escanear QR</span>
                         </button>
                     </div>
                 </div>
@@ -273,11 +363,24 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
                                     Crítico
                                 </div>
                             )}
+                            {lote.days_until_expiration !== undefined && lote.days_until_expiration <= 30 && lote.status !== 'CRITICO' && (
+                                <div className="absolute top-4 right-4 z-10">
+                                    <FigmaFefoBadge daysUntilExpiration={lote.days_until_expiration} size="sm" />
+                                </div>
+                            )}
                             <div 
                                 onClick={() => openPreview(lote)}
                                 className="aspect-[4/3] bg-slate-50/50 flex items-center justify-center border-b border-slate-100 cursor-pointer overflow-hidden relative"
                             >
-                                <Warehouse size={64} className={`opacity-5 group-hover:scale-110 transition-all duration-700 ${lote.status === 'CRITICO' ? 'text-red-500' : 'text-indigo-600'}`} />
+                                {lote.photo_url ? (
+                                    <img
+                                        src={lote.photo_url}
+                                        alt={lote.codigo}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
+                                    />
+                                ) : (
+                                    <Warehouse size={64} className={`opacity-5 group-hover:scale-110 transition-all duration-700 ${lote.status === 'CRITICO' ? 'text-red-500' : 'text-indigo-600'}`} />
+                                )}
                                 <div className="absolute inset-0 bg-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <div className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-white/50 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
                                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Auditar Detalle</span>
@@ -300,9 +403,24 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user }: { lotes?: any[], bo
                                 <div className="flex items-center justify-between border-t border-slate-100 pt-6">
                                     <div className="flex gap-4">
                                         <Bell size={18} className={`${lote.status === 'CRITICO' ? 'text-red-400 animate-pulse' : 'text-slate-400'} hover:text-indigo-600 cursor-pointer transition-colors`} />
-                                        <ArrowRightLeft size={18} onClick={() => setViewMode('DETAIL')} className="text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors" />
+                                        <button 
+                                            onClick={() => openAudit(lote)}
+                                            className="text-slate-400 hover:text-indigo-600 transition-colors"
+                                            title="Auditar Kardex"
+                                        >
+                                            <Clock size={18} />
+                                        </button>
+                                        <ArrowRightLeft size={18} onClick={() => openPreview(lote)} className="text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors" />
                                     </div>
-                                    <Settings size={18} className="text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors" />
+                                    <div className="flex items-center gap-2">
+                                        <Settings size={18} className="text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors" />
+                                        <button 
+                                            onClick={() => openPreview(lote)}
+                                            className="w-8 h-8 bg-slate-50 border border-slate-200 text-slate-400 flex items-center justify-center rounded-xl hover:bg-white hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95 shadow-sm"
+                                        >
+                                            <ChevronRight size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -375,6 +493,26 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
                                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
                                 required
                             />
+                            {errors.reason && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.reason}</div>}
+                        </div>
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        disabled={processing}
+                        className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg glow-red disabled:opacity-50"
+                    >
+                        {processing ? 'Sincronizando...' : 'Corregir Inventario'}
+                    </button>
+                    <p className="text-[9px] text-slate-400 text-center italic">Esta acción registrará un movimiento de ajuste en el Kardex para auditoría.</p>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+export default FigmaInventario;
+                      />
                             {errors.reason && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.reason}</div>}
                         </div>
                     </div>

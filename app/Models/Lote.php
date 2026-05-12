@@ -9,13 +9,14 @@ use Carbon\Carbon;
 class Lote extends Model {
     protected $fillable = [
         'material_id', 'bodega_id', 'batch_number', 'quantity',
-        'unit_cost', 'expiration_date', 'status'
+        'unit_cost', 'expiration_date', 'status', 'photo_path'
     ];
 
     protected $appends = [
         'days_until_expiration',
         'is_critical',
         'valor_total',
+        'photo_url',
     ];
 
     protected function casts(): array {
@@ -61,6 +62,12 @@ class Lote extends Model {
     /** Valor económico total del lote: quantity × unit_cost */
     public function getValorTotalAttribute(): float {
         return round(($this->quantity ?? 0) * ($this->unit_cost ?? 0), 2);
+    }
+
+    /** URL pública de la foto del lote */
+    public function getPhotoUrlAttribute(): ?string {
+        if (!$this->photo_path) return null;
+        return asset('storage/' . $this->photo_path);
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────

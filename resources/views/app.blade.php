@@ -19,6 +19,7 @@
     <meta name="twitter:title" content="Pymetory — Gestión de Inventarios con LLM">
     <meta name="twitter:description" content="Sistema inteligente de control de inventarios para PYMEs.">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
