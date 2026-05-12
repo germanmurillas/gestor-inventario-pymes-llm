@@ -73,9 +73,10 @@ class ChatLLMController extends Controller {
         if (preg_match('/vence|fecha.+vencimient|cu[aá]ndo.+vence|expira/i', $q)) return 'expiration';
         if (preg_match('/d[oó]nde|ubicaci[oó]n|bodega|almac[eé]n|est[aá].+guardado/i', $q)) return 'location';
         if (preg_match('/valor|cu[aá]nto.+vale|precio|costo|cu[aá]nto.+cuest/i', $q)) return 'valuation';
-        if (preg_match('/entr[oó]|sali[oó]|movimient|historial|kardex|qui[eé]n.+mov/i', $q)) return 'movements';
-        if (preg_match('/lote|batch/i', $q)) return 'batch_info';
-        if (preg_match('/resumen|todo|general/i', $q)) return 'summary';
+        if (preg_match('/entr[oó]|sali[oó]|movimient|historial|kardex|qui[eé]n.+mov/i', $q) && !preg_match('/lote/i', $q)) return 'movements';
+        if (preg_match('/lote\s*LT-\d+|batch\s*\d+/i', $q)) return 'batch_info';
+        if (preg_match('/resumen|todo|general|panorama/i', $q)) return 'summary';
+        if (preg_match('/concili|ajust|diferencia|descuadr/i', $q)) return 'conciliation';
         return 'general';
     }
 

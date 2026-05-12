@@ -158,7 +158,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/inventory/transfers', [TransferController::class, 'index'])
         ->name('inventory.transfers');
 });
-
-// ── Agent API (sin auth — accedido por Laboratorio 3D) ──────────────────────
-Route::get('/api/agents/status', [AgentMonitorController::class, 'status']);
-Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);

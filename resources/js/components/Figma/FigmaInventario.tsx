@@ -512,23 +512,3 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
 };
 
 export default FigmaInventario;
-                      />
-                            {errors.reason && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.reason}</div>}
-                        </div>
-                    </div>
-                    
-                    <button 
-                        type="submit" 
-                        disabled={processing}
-                        className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg glow-red disabled:opacity-50"
-                    >
-                        {processing ? 'Sincronizando...' : 'Corregir Inventario'}
-                    </button>
-                    <p className="text-[9px] text-slate-400 text-center italic">Esta acción registrará un movimiento de ajuste en el Kardex para auditoría.</p>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-export default FigmaInventario;

@@ -60,7 +60,13 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
     const isDashboardView = activeView === 'TABLERO';
 
     return (
-        <div className={`flex h-screen overflow-hidden font-sans transition-colors duration-500 ${isDashboardView ? 'bg-[#0a1628] text-white' : 'bg-[#F8FAFC] text-[#0F172A] radial-decor'}`}>
+        <div className="flex h-screen overflow-hidden font-sans bg-obsidiana text-white relative">
+            {/* ── Aurora Background ── */}
+            <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+                <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(201,168,76,0.12)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+                <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.1)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '4s' }} />
+                <div className="absolute top-[40%] left-[30%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.06)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
+            </div>
             <Head title={`${activeView} | Pymetory Premium`} />
 
             <Sidebar
@@ -72,21 +78,15 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
             />
 
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col overflow-hidden relative">
-                <header className={`h-16 border-b flex items-center justify-between px-8 z-40 backdrop-blur-md transition-colors duration-500 ${
-                    isDashboardView
-                        ? 'bg-[#0a1628]/60 border-slate-700/40 text-white'
-                        : 'bg-white/40 border-slate-200 text-[#0F172A]'
-                }`}>
+            <main className="flex-1 flex flex-col overflow-hidden relative z-10">
+                <header className="h-16 border-b flex items-center justify-between px-8 z-40 bg-obsidiana/60 backdrop-blur-xl border-slate-700/30 text-white">
                     <div className="flex items-center gap-6">
-                        <button onClick={toggleSidebar} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className={`p-2 rounded-xl transition-all hover:scale-110 active:scale-95 ${
-                            isDashboardView ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'
-                        }`}>
+                        <button onClick={toggleSidebar} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 rounded-xl transition-all hover:scale-110 active:scale-95 hover:bg-slate-800 text-slate-400">
                             <Menu size={20} aria-hidden="true" />
                         </button>
                         <nav className="flex items-center gap-2" aria-label="Breadcrumb">
-                             <span className={`text-xs font-bold uppercase tracking-widest italic ${isDashboardView ? 'text-slate-500' : 'text-slate-400'}`}>Pymetory /</span>
-                             <h1 className={`text-xs font-black uppercase tracking-widest ${isDashboardView ? 'text-white' : 'text-slate-900'}`}>{activeView}</h1>
+                             <span className="text-xs font-bold uppercase tracking-widest italic text-slate-500">Pymetory /</span>
+                             <h1 className="text-xs font-black uppercase tracking-widest text-white">{activeView}</h1>
                         </nav>
                     </div>
                 </header>
@@ -122,11 +122,11 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                         )}
                         
                         {(['AYUDA'].includes(activeView)) && (
-                            <div className="bg-white rounded-3xl border border-slate-200 p-24 shadow-sm flex flex-col items-center justify-center text-slate-300">
-                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                                    <HelpCircle size={32} className="opacity-20 text-indigo-600" />
+                            <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/30 rounded-3xl p-24 flex flex-col items-center justify-center text-slate-500">
+                                <div className="w-16 h-16 bg-slate-700/40 rounded-full flex items-center justify-center mb-6">
+                                    <HelpCircle size={32} className="text-champan/30" />
                                 </div>
-                                <div className="text-sm font-black uppercase tracking-[0.3em] opacity-30 text-slate-900 text-center">
+                                <div className="text-sm font-black uppercase tracking-[0.3em] text-slate-500 text-center">
                                     Módulo en<br/>Laboratorio
                                 </div>
                             </div>
