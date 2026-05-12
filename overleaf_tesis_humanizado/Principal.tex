@@ -114,10 +114,10 @@ ELEMENT, ATTLIST, id, stylesheet, href},% list your attributes here
 \contraportada
 \renewcommand{\thepage}{\roman{page}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Jurados%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \include{Capitulo0/Jurados}
+ \include{Capitulo0/Jurados}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Agradecimientos%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \include{Capitulo0/Agradecimientos}
+ \include{Capitulo0/Agradecimientos}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Tabla de contenido%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -163,7 +163,7 @@ ELEMENT, ATTLIST, id, stylesheet, href},% list your attributes here
 \input{Capitulo1Introduccion/Metodologia}
 
 %Información de los capitulos
-%\input{Capitulo1Introduccion/informacionCapitulos}
+\input{Capitulo1Introduccion/informacionCapitulos}
 
 %-----------------------------------Justificación y alcance
 \chapter{Justificación y alcance del proyecto}
@@ -241,14 +241,22 @@ ELEMENT, ATTLIST, id, stylesheet, href},% list your attributes here
 
 \section*{Anexos}
 
-\begin{itemize}
-  \item \textbf{Anexo A}: Prototipo de interfaz del sistema web (Wireframes Figma - 18 mockups).
-  \item \textbf{Anexo B}: Modelo entidad-relación de la base de datos (10 tablas).
-  \item \textbf{Anexo C}: Diagramas UML (Casos de Uso, Secuencia, Arquitectura).
-  \item \textbf{Anexo D}: Manuales de usuario del sistema.
-  \item \textbf{Anexo E}: Evidencia del entorno de desarrollo y despliegue.
-  \item \textbf{Anexo F}: Transcripciones de entrevistas de levantamiento de requisitos.
-\end{itemize}
+A continuación se presentan los anexos que complementan el trabajo de grado:
+
+\input{Anexos/AnexoCasosDeUso}
+\newpage
+\input{Anexos/anexoModeloER}
+\newpage
+\input{Anexos/AnexoDiagramaFlujo}
+\newpage
+\input{Anexos/anexoManualesDeUsuario}
+\newpage
+\input{Anexos/anexoEntradaEjemplo}
+\newpage
+\input{Anexos/anexoSalidaEjemplo}
+\newpage
+\input{Anexos/anexoEntradaGenetico}
+\newpage
 
 El código fuente completo del proyecto se encuentra disponible en el repositorio de GitHub: \url{https://github.com/germanmurillas/gestor-inventario-pymes-llm}
 
