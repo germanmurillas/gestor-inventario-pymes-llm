@@ -114,15 +114,15 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
             {/* Modal de Producto (Mockup 6) */}
             {showModal && selectedLote && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-700/30 w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-800/50/50">
                             <h3 className="font-bold uppercase tracking-tight">Vista Previa: {selectedLote.codigo}</h3>
                             <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-200 rounded-full transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
                         <div className="p-10 flex gap-8">
-                            <div className="w-48 h-48 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center relative overflow-hidden">
+                            <div className="w-48 h-48 bg-slate-800/50 rounded-lg border border-gray-100 flex items-center justify-center relative overflow-hidden">
                                 {selectedLote.photo_url ? (
                                     <img src={selectedLote.photo_url} alt={selectedLote.codigo} className="w-full h-full object-cover" />
                                 ) : (
@@ -149,14 +149,14 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                 <div className="grid grid-cols-2 gap-4">
                                      <div className="space-y-1">
                                         <label className="text-[10px] font-bold text-gray-400 uppercase">Cantidad</label>
-                                        <div className="text-sm font-bold border border-gray-200 rounded px-3 py-1 bg-white">{selectedLote.cantidad} KG</div>
+                                        <div className="text-sm font-bold border border-slate-700/30 rounded px-3 py-1 bg-slate-900/80 backdrop-blur-xl">{selectedLote.cantidad} KG</div>
                                      </div>
                                      <div className="space-y-1">
                                         <label className="text-[10px] font-bold text-gray-400 uppercase">Lote</label>
-                                        <div className="text-sm font-bold border border-gray-200 rounded px-3 py-1 bg-white">#{selectedLote.lote}</div>
+                                        <div className="text-sm font-bold border border-slate-700/30 rounded px-3 py-1 bg-slate-900/80 backdrop-blur-xl">#{selectedLote.lote}</div>
                                      </div>
                                 </div>
-                                <p className="text-xs text-gray-500 leading-relaxed italic">"Producto auditado por el sistema Pymetory. Prioridad de despacho: {selectedLote.status === 'CRITICO' ? 'Inmediata (FEFO)' : 'Normal'}."</p>
+                                <p className="text-xs text-slate-400 leading-relaxed italic">"Producto auditado por el sistema Pymetory. Prioridad de despacho: {selectedLote.status === 'CRITICO' ? 'Inmediata (FEFO)' : 'Normal'}."</p>
                                 <div className="flex gap-4">
                                     <button 
                                         onClick={() => {
@@ -184,7 +184,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                                 setShowModal(false);
                                                 setShowAdjustModal(true);
                                             }}
-                                            className="px-6 bg-white border-2 border-slate-200 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors"
+                                            className="px-6 bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800/50 transition-colors"
                                             title="Conciliación de Stock"
                                         >
                                             Conciliar
@@ -208,13 +208,13 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
             {/* Modal Nueva Bodega */}
             {showBodegaModal && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-obsidiana/40 backdrop-blur-xl p-4">
-                    <div className="bg-white rounded-[2.5rem] shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
+                        <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-800/50/50">
                             <div>
                                 <h3 className="text-lg font-black text-slate-900 tracking-tight font-display">Nueva Ubicación</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Crear carpeta de inventario</p>
                             </div>
-                            <button onClick={() => setShowBodegaModal(false)} className="w-10 h-10 bg-white border border-slate-200 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-50 transition-colors">
+                            <button onClick={() => setShowBodegaModal(false)} className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-200 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
@@ -227,7 +227,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                         value={data.name}
                                         onChange={e => setData('name', e.target.value)}
                                         placeholder="Ej: Bodega Norte, Cuarentena..."
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                                     />
                                     {errors.name && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.name}</div>}
                                 </div>
@@ -239,7 +239,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                             value={data.code}
                                             onChange={e => setData('code', e.target.value.toUpperCase())}
                                             placeholder="B-001"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all uppercase"
+                                            className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all uppercase"
                                         />
                                         {errors.code && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.code}</div>}
                                     </div>
@@ -249,7 +249,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                             type="number" 
                                             value={data.capacity}
                                             onChange={e => setData('capacity', parseInt(e.target.value))}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>
@@ -271,7 +271,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                 <div className="space-y-4">
                     <div 
                         onClick={() => setSelectedBodega(null)}
-                        className={`flex items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all font-display group ${!selectedBodega ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-black hover:bg-slate-50'}`}
+                        className={`flex items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all font-display group ${!selectedBodega ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-black hover:bg-slate-800/50'}`}
                     >
                         <Box size={20} className={!selectedBodega ? 'text-white' : 'text-indigo-600 group-hover:scale-110 transition-transform'} />
                         <span className="text-xs font-black uppercase tracking-widest">Todo el inventario</span>
@@ -297,7 +297,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                 <div 
                                     key={bodega.code} 
                                     onClick={() => setSelectedBodega(bodega)}
-                                    className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all group ${selectedBodega?.code === bodega.code ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'}`}
+                                    className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all group ${selectedBodega?.code === bodega.code ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-800/50'}`}
                                 >
                                     <div className={`w-2 h-2 rounded-full ${selectedBodega?.code === bodega.code ? 'bg-indigo-400 animate-pulse' : 'bg-slate-200 group-hover:bg-indigo-500'} transition-colors`}></div>
                                     <span className="text-[10px] font-black tracking-widest uppercase truncate">{bodega.name}</span>
@@ -370,7 +370,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                             )}
                             <div 
                                 onClick={() => openPreview(lote)}
-                                className="aspect-[4/3] bg-slate-50/50 flex items-center justify-center border-b border-slate-100 cursor-pointer overflow-hidden relative"
+                                className="aspect-[4/3] bg-slate-800/50/50 flex items-center justify-center border-b border-slate-100 cursor-pointer overflow-hidden relative"
                             >
                                 {lote.photo_url ? (
                                     <img
@@ -382,7 +382,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                     <Warehouse size={64} className={`opacity-5 group-hover:scale-110 transition-all duration-700 ${lote.status === 'CRITICO' ? 'text-red-500' : 'text-indigo-600'}`} />
                                 )}
                                 <div className="absolute inset-0 bg-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div className="bg-white/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-white/50 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                                    <div className="bg-slate-900/80 backdrop-blur-xl/80 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-white/50 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
                                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Auditar Detalle</span>
                                     </div>
                                 </div>
@@ -416,7 +416,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                                         <Settings size={18} className="text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors" />
                                         <button 
                                             onClick={() => openPreview(lote)}
-                                            className="w-8 h-8 bg-slate-50 border border-slate-200 text-slate-400 flex items-center justify-center rounded-xl hover:bg-white hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95 shadow-sm"
+                                            className="w-8 h-8 bg-slate-800/50 border border-slate-200 text-slate-400 flex items-center justify-center rounded-xl hover:bg-slate-900/80 backdrop-blur-xl hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95 shadow-sm"
                                         >
                                             <ChevronRight size={16} />
                                         </button>
@@ -455,19 +455,19 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-obsidiana/40 backdrop-blur-xl p-4">
-            <div className="bg-white rounded-[2.5rem] shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
-                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-800/50/50">
                     <div>
                         <h3 className="text-lg font-black text-slate-900 tracking-tight font-display">Conciliación Física</h3>
                         <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest">Ajuste de Stock: {lote.codigo}</p>
                     </div>
-                    <button onClick={onClose} className="w-10 h-10 bg-white border border-slate-200 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-50 transition-colors">
+                    <button onClick={onClose} className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-200 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
                         <X size={20} />
                     </button>
                 </div>
                 <form onSubmit={submitAdjust} className="p-8 space-y-6">
                     <div className="space-y-4">
-                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
                             <div className="text-[10px] font-black text-slate-400 uppercase">Stock actual en sistema</div>
                             <div className="text-2xl font-black text-slate-900">{lote.cantidad} KG</div>
                         </div>
@@ -479,7 +479,7 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
                                 step="0.01"
                                 value={data.new_quantity}
                                 onChange={e => setData('new_quantity', parseFloat(e.target.value))}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-xl font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-4 text-xl font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                             />
                             {errors.new_quantity && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.new_quantity}</div>}
                         </div>
@@ -490,7 +490,7 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
                                 value={data.reason}
                                 onChange={e => setData('reason', e.target.value)}
                                 placeholder="Indica por qué cambió el stock (ej: pérdida por humedad, error de pesaje...)"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
+                                className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
                                 required
                             />
                             {errors.reason && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.reason}</div>}

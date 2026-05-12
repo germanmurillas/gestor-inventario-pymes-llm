@@ -30,7 +30,7 @@ const trendIcon = (dir: TrendDirection) => {
 const trendColor = (dir: TrendDirection) => {
     if (dir === 'up') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
     if (dir === 'down') return 'text-red-400 bg-red-500/10 border-red-500/20';
-    return 'text-slate-500 bg-slate-500/10 border-slate-500/20';
+    return 'text-slate-500 bg-slate-800/500/10 border-slate-500/20';
 };
 
 export default function FigmaKpiCard({ icon, count, label, color = 'indigo', trend, trendValue }: FigmaKpiCardProps) {

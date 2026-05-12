@@ -52,7 +52,7 @@ const FigmaKanban = () => {
                     <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Sincronizado con KANBAN.md</p>
                 </div>
                 <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
+                    <button className="px-4 py-2 bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-800/50 transition-all flex items-center gap-2">
                         <MoreHorizontal size={14} /> Opciones
                     </button>
                     <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-200 hover:scale-105 transition-all">
@@ -71,7 +71,7 @@ const FigmaKanban = () => {
 
                         <div className="flex-1 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
                             {col.tasks.map(task => (
-                                <div key={task.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all group cursor-grab active:cursor-grabbing">
+                                <div key={task.id} className="bg-slate-900/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all group cursor-grab active:cursor-grabbing">
                                     <div className="flex justify-between items-start mb-2">
                                         <PriorityBadge p={task.priority} />
                                         <button className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-slate-600">
@@ -82,7 +82,7 @@ const FigmaKanban = () => {
                                     <p className="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">{task.desc}</p>
                                     
                                     <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
-                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg">
+                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-800/50 rounded-lg">
                                             <Tag size={10} className="text-slate-400" />
                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">{task.tag}</span>
                                         </div>

@@ -47,7 +47,7 @@ const FigmaPhotoUpload = ({ photoUrl, uploadUrl, deleteUrl, label = 'Foto del Í
   return (
     <>
       <div className="space-y-2">
-        <label className="text-xs font-black text-gray-700 uppercase tracking-tight">{label}</label>
+        <label className="text-xs font-black text-slate-200 uppercase tracking-tight">{label}</label>
         <div className="flex items-start gap-4">
           {/* Thumbnail / Placeholder */}
           <div
@@ -55,7 +55,7 @@ const FigmaPhotoUpload = ({ photoUrl, uploadUrl, deleteUrl, label = 'Foto del Í
             className={`relative w-32 h-32 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${
               displayUrl
                 ? 'border-indigo-300 cursor-zoom-in hover:border-indigo-500'
-                : 'border-slate-300 cursor-pointer hover:border-indigo-400 bg-slate-50'
+                : 'border-slate-300 cursor-pointer hover:border-indigo-400 bg-slate-800/50'
             }`}
           >
             {displayUrl ? (
@@ -123,7 +123,7 @@ const FigmaPhotoUpload = ({ photoUrl, uploadUrl, deleteUrl, label = 'Foto del Í
         >
           <button
             onClick={() => setShowLightbox(false)}
-            className="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-2xl flex items-center justify-center transition-all"
+            className="absolute top-6 right-6 w-12 h-12 bg-slate-900/80 backdrop-blur-xl/10 hover:bg-slate-900/80 backdrop-blur-xl/20 text-white rounded-2xl flex items-center justify-center transition-all"
           >
             <X size={24} />
           </button>

@@ -28,10 +28,10 @@ const FigmaLabels = ({ lotes = [], onScanLote }: { lotes: any[], onScanLote?: (l
                             <div 
                                 key={lote.id} 
                                 onClick={() => setSelectedLote(lote)}
-                                className={`p-6 rounded-[2rem] border-2 transition-all cursor-pointer group ${selectedLote?.id === lote.id ? 'border-indigo-600 bg-indigo-50/30 shadow-xl shadow-indigo-100' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+                                className={`p-6 rounded-[2rem] border-2 transition-all cursor-pointer group ${selectedLote?.id === lote.id ? 'border-indigo-600 bg-indigo-50/30 shadow-xl shadow-indigo-100' : 'border-slate-100 bg-slate-900/80 backdrop-blur-xl hover:border-slate-200'}`}
                             >
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                    <div className="p-3 bg-slate-800/50 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                         <Package size={20} />
                                     </div>
                                     <div className="text-[8px] font-black uppercase tracking-widest text-slate-400">
@@ -55,13 +55,13 @@ const FigmaLabels = ({ lotes = [], onScanLote }: { lotes: any[], onScanLote?: (l
                     {selectedLote ? (
                         <div className="space-y-8">
                             {/* Etiqueta Física */}
-                            <div id="printable-label" className="bg-white border-2 border-slate-900 rounded-lg p-8 shadow-2xl space-y-6 flex flex-col items-center">
+                            <div id="printable-label" className="bg-slate-900/80 backdrop-blur-xl border-2 border-slate-900 rounded-lg p-8 shadow-2xl space-y-6 flex flex-col items-center">
                                 <div className="text-center space-y-1">
                                     <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Pymetory System</div>
                                     <div className="text-lg font-black uppercase text-slate-900">{selectedLote.material?.name}</div>
                                 </div>
 
-                                <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-inner">
+                                <div className="p-4 bg-slate-900/80 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-inner">
                                     <QRCode 
                                         value={JSON.stringify({
                                             id: selectedLote.id,
@@ -96,7 +96,7 @@ const FigmaLabels = ({ lotes = [], onScanLote }: { lotes: any[], onScanLote?: (l
                                     <Printer size={18} />
                                     <span>Imprimir Etiqueta</span>
                                 </button>
-                                <button className="p-5 bg-white border border-slate-200 text-slate-400 rounded-[2rem] hover:text-indigo-600 hover:border-indigo-100 transition-all">
+                                <button className="p-5 bg-slate-900/80 backdrop-blur-xl border border-slate-200 text-slate-400 rounded-[2rem] hover:text-indigo-600 hover:border-indigo-100 transition-all">
                                     <Download size={20} />
                                 </button>
                             </div>
@@ -111,7 +111,7 @@ const FigmaLabels = ({ lotes = [], onScanLote }: { lotes: any[], onScanLote?: (l
                             </button>
                         </div>
                     ) : (
-                        <div className="h-[400px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center justify-center text-slate-300 space-y-4">
+                        <div className="h-[400px] bg-slate-800/50 border-2 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center justify-center text-slate-300 space-y-4">
                             <QrCode size={60} strokeWidth={1} className="opacity-20 translate-y-2 animate-pulse" />
                             <p className="text-[10px] font-black uppercase tracking-widest">Esperando selección...</p>
                         </div>

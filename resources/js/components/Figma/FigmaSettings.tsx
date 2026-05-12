@@ -168,7 +168,7 @@ const FigmaSettings = () => {
             </div>
 
             {/* Tab System */}
-            <div className="flex bg-slate-50 border border-slate-100 rounded-[2.5rem] p-2 w-fit">
+            <div className="flex bg-slate-800/50 border border-slate-100 rounded-[2.5rem] p-2 w-fit">
                 <TabButton id="GENERAL"       label="General"   icon={Globe}       />
                 <TabButton id="LLM"           label="Núcleo IA" icon={Cpu}         />
                 <TabButton id="NOTIFICATIONS" label="Alertas"   icon={Bell}        />
@@ -176,7 +176,7 @@ const FigmaSettings = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="bg-white border-2 border-slate-50 rounded-[3rem] p-12 shadow-sm min-h-[500px]">
+            <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-slate-50 rounded-[3rem] p-12 shadow-sm min-h-[500px]">
 
                 {/* ── 1. GENERAL ─────────────────────────────────────────── */}
                 {activeTab === 'GENERAL' && (
@@ -206,7 +206,7 @@ const FigmaSettings = () => {
                             </div>
 
                             {/* Timezone info */}
-                            <div className="p-6 bg-slate-50 rounded-[2rem] flex items-center justify-between">
+                            <div className="p-6 bg-slate-800/50 rounded-[2rem] flex items-center justify-between">
                                 <div className="space-y-1">
                                     <div className="text-sm font-black text-slate-900 uppercase">Zona Horaria</div>
                                     <div className="text-[10px] text-slate-400 font-bold uppercase">America/Bogota (UTC-5)</div>
@@ -240,7 +240,7 @@ const FigmaSettings = () => {
                         <div className="space-y-8">
                             {/* Activar/desactivar LLM */}
                             <div
-                                className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between cursor-pointer group hover:bg-white hover:border-indigo-100 transition-all"
+                                className="p-8 bg-slate-800/50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between cursor-pointer group hover:bg-slate-900/80 backdrop-blur-xl hover:border-indigo-100 transition-all"
                                 onClick={() => setLlmActive(!llmActive)}
                             >
                                 <div className="space-y-1">
@@ -248,7 +248,7 @@ const FigmaSettings = () => {
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Activa el asistente de inventario por IA</div>
                                 </div>
                                 <div className={`w-14 h-8 rounded-full p-1 flex transition-all ${llmActive ? 'bg-indigo-600 justify-end' : 'bg-slate-200 justify-start'}`}>
-                                    <div className="w-6 h-6 bg-white rounded-full shadow-lg" />
+                                    <div className="w-6 h-6 bg-slate-900/80 backdrop-blur-xl rounded-full shadow-lg" />
                                 </div>
                             </div>
 
@@ -285,7 +285,7 @@ const FigmaSettings = () => {
                                         value={llmExternalKey}
                                         onChange={(e) => setLlmExternalKey(e.target.value)}
                                         placeholder={llmSource === 'free' ? 'Ingresa Token de HuggingFace...' : 'Ingresa API Key Externa de OpenAI...'}
-                                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-xs font-bold text-slate-900 focus:border-indigo-600 focus:bg-white outline-none transition-all"
+                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-xs font-bold text-slate-900 focus:border-indigo-600 focus:bg-slate-900/80 backdrop-blur-xl outline-none transition-all"
                                     />
                                     <p className="text-[9px] text-slate-400 font-bold uppercase">Clave para la comunicación con el proveedor seleccionado.</p>
                                 </div>
@@ -319,7 +319,7 @@ const FigmaSettings = () => {
                                                 {m}
                                             </button>
                                         )) : (
-                                            <div className="col-span-2 p-8 text-center text-slate-400 bg-slate-50 rounded-[2rem]">
+                                            <div className="col-span-2 p-8 text-center text-slate-400 bg-slate-800/50 rounded-[2rem]">
                                                 No se pudieron cargar los modelos. Verifica que MiniModelGarden esté activo.
                                             </div>
                                         )}
@@ -361,7 +361,7 @@ const FigmaSettings = () => {
                                                 className={`p-6 rounded-[2rem] border-2 cursor-pointer transition-all ${
                                                     isSelected
                                                         ? 'border-indigo-600 bg-indigo-50 shadow-lg shadow-indigo-100'
-                                                        : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
+                                                        : 'border-slate-100 bg-slate-900/80 backdrop-blur-xl hover:border-slate-200 hover:shadow-md'
                                                 }`}
                                             >
                                                 {/* Header */}
@@ -540,7 +540,7 @@ const FigmaSettings = () => {
                             {/* Opciones Avanzadas de Ollama Local */}
 
                             {llmSource === 'local' && (
-                                <div className="grid grid-cols-2 gap-4 p-6 bg-slate-50 border border-slate-100 rounded-[2rem]">
+                                <div className="grid grid-cols-2 gap-4 p-6 bg-slate-800/50 border border-slate-100 rounded-[2rem]">
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
                                             <span>Tamaño Contexto (Ollama)</span>
@@ -578,7 +578,7 @@ const FigmaSettings = () => {
                                         <div className="text-sm font-bold uppercase tracking-tight">Vectores Sincronizados</div>
                                     </div>
                                 </div>
-                                <button type="button" className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors">
+                                <button type="button" className="px-4 py-2 bg-slate-900/80 backdrop-blur-xl/10 hover:bg-slate-900/80 backdrop-blur-xl/20 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors">
                                     Re-Indexar
                                 </button>
                             </div>
@@ -619,7 +619,7 @@ const FigmaSettings = () => {
                         <div className="space-y-6 pt-4">
                             {/* Toggle FEFO */}
                             <div
-                                className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between cursor-pointer group hover:bg-white hover:border-indigo-100 transition-all"
+                                className="p-8 bg-slate-800/50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between cursor-pointer group hover:bg-slate-900/80 backdrop-blur-xl hover:border-indigo-100 transition-all"
                                 onClick={() => setNotifFefo(!notifFefo)}
                             >
                                 <div className="space-y-1">
@@ -627,13 +627,13 @@ const FigmaSettings = () => {
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Notificaciones cuando un lote entra en período crítico</div>
                                 </div>
                                 <div className={`w-14 h-8 rounded-full p-1 flex transition-all ${notifFefo ? 'bg-indigo-600 justify-end' : 'bg-slate-200 justify-start'}`}>
-                                    <div className="w-6 h-6 bg-white rounded-full shadow-lg" />
+                                    <div className="w-6 h-6 bg-slate-900/80 backdrop-blur-xl rounded-full shadow-lg" />
                                 </div>
                             </div>
 
                             {/* Toggle Stock Bajo */}
                             <div
-                                className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between cursor-pointer group hover:bg-white hover:border-indigo-100 transition-all"
+                                className="p-8 bg-slate-800/50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between cursor-pointer group hover:bg-slate-900/80 backdrop-blur-xl hover:border-indigo-100 transition-all"
                                 onClick={() => setNotifStock(!notifStock)}
                             >
                                 <div className="space-y-1">
@@ -641,12 +641,12 @@ const FigmaSettings = () => {
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Alerta cuando el stock cae por debajo del mínimo</div>
                                 </div>
                                 <div className={`w-14 h-8 rounded-full p-1 flex transition-all ${notifStock ? 'bg-indigo-600 justify-end' : 'bg-slate-200 justify-start'}`}>
-                                    <div className="w-6 h-6 bg-white rounded-full shadow-lg" />
+                                    <div className="w-6 h-6 bg-slate-900/80 backdrop-blur-xl rounded-full shadow-lg" />
                                 </div>
                             </div>
 
                             {/* Canales de Entrega */}
-                            <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] space-y-4">
+                            <div className="p-6 bg-slate-800/50 border border-slate-100 rounded-[2rem] space-y-4">
                                 <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Canales de entrega</div>
 
                                 {/* Email Channel */}
@@ -660,7 +660,7 @@ const FigmaSettings = () => {
                                         <div className="text-[11px] font-bold text-slate-600 uppercase">Email</div>
                                     </div>
                                     <div className={`w-10 h-5 rounded-full p-0.5 flex cursor-pointer transition-all ${notifEmail ? 'bg-indigo-600 justify-end' : 'bg-slate-300 justify-start'}`}>
-                                        <div className="w-4 h-4 bg-white rounded-full shadow" />
+                                        <div className="w-4 h-4 bg-slate-900/80 backdrop-blur-xl rounded-full shadow" />
                                     </div>
                                 </div>
 
@@ -675,7 +675,7 @@ const FigmaSettings = () => {
                                         <div className="text-[11px] font-bold text-slate-600 uppercase">Telegram</div>
                                     </div>
                                     <div className={`w-10 h-5 rounded-full p-0.5 flex cursor-pointer transition-all ${notifTelegram ? 'bg-indigo-600 justify-end' : 'bg-slate-300 justify-start'}`}>
-                                        <div className="w-4 h-4 bg-white rounded-full shadow" />
+                                        <div className="w-4 h-4 bg-slate-900/80 backdrop-blur-xl rounded-full shadow" />
                                     </div>
                                 </div>
 
@@ -688,14 +688,14 @@ const FigmaSettings = () => {
                                             value={notifEmailAdmin}
                                             onChange={(e) => setNotifEmailAdmin(e.target.value)}
                                             placeholder="admin@pymetory.com"
-                                            className="w-full bg-white border-2 border-slate-200 rounded-2xl px-5 py-3 text-xs font-bold text-slate-900 focus:border-indigo-600 outline-none transition-all"
+                                            className="w-full bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 rounded-2xl px-5 py-3 text-xs font-bold text-slate-900 focus:border-indigo-600 outline-none transition-all"
                                         />
                                     </div>
                                 )}
                             </div>
 
                             {/* Thresholds */}
-                            <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] space-y-5">
+                            <div className="p-6 bg-slate-800/50 border border-slate-100 rounded-[2rem] space-y-5">
                                 <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Umbrales de alerta</div>
 
                                 {/* FEFO Días */}
@@ -762,7 +762,7 @@ const FigmaSettings = () => {
 
                         <div className="space-y-8 pt-4">
                             {/* Sesión timeout info */}
-                            <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] space-y-3">
+                            <div className="p-8 bg-slate-800/50 border border-slate-100 rounded-[2.5rem] space-y-3">
                                 <div className="flex items-center gap-3">
                                     <Key size={16} className="text-slate-400" />
                                     <div className="text-sm font-black text-slate-700 uppercase">Timeout de sesión</div>
@@ -772,14 +772,14 @@ const FigmaSettings = () => {
                                         type="number" min="30" max="480" step="30"
                                         defaultValue={120}
                                         id="session-timeout"
-                                        className="w-32 bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-black text-slate-900 text-center"
+                                        className="w-32 bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-black text-slate-900 text-center"
                                     />
                                     <span className="text-[10px] font-bold text-slate-400 uppercase">minutos de inactividad</span>
                                 </div>
                             </div>
 
                             {/* Log de Auditoría */}
-                            <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between">
+                            <div className="p-8 bg-slate-800/50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between">
                                 <div className="space-y-1">
                                     <div className="text-sm font-black text-slate-900 uppercase">Log de Auditoría</div>
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Registra todas las acciones del sistema</div>

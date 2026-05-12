@@ -136,7 +136,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/kanban', [KanbanController::class, 'index'])->name('kanban');
     Route::post('/kanban', [KanbanController::class, 'store']);
     Route::post('/kanban/reorder', [KanbanController::class, 'reorder']);
@@ -145,7 +145,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/kanban/{item}/pin', [KanbanController::class, 'pin']);
     Route::post('/kanban/ask-rag', [KanbanController::class, 'askRag']);
     Route::post('/kanban/{item}/rag-context', [KanbanController::class, 'saveRagContext']);
+});
 
+Route::middleware('auth')->group(function () {
     // Agent Monitor & Chat Relay
     Route::get('/api/agents/status', [AgentMonitorController::class, 'status']);
     Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);

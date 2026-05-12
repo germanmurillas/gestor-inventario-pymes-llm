@@ -61,7 +61,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                     <button
                         type="button"
                         onClick={onBack}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                        className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                     </button>
@@ -113,7 +113,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                             </div>
 
                             <div className="flex justify-center">
-                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-full bg-slate-900/80 backdrop-blur-xl/10 flex items-center justify-center">
                                     <ArrowRightLeft size={18} className="text-champan" />
                                 </div>
                             </div>
@@ -159,7 +159,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                             -{data.cantidad} KG
                                         </div>
                                     </div>
-                                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-slate-900/80 backdrop-blur-xl/10 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-indigo-500 transition-all duration-500"
                                             style={{
@@ -197,7 +197,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
 
                 {/* Right: Form */}
                 <div className="md:col-span-2 space-y-8">
-                    <div className="bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-sm space-y-8">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-8">
                         <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
                             <Warehouse size={14} />
                             <span>Origen y Destino</span>
@@ -205,7 +205,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                     Bodega Origen
                                 </label>
                                 <select
@@ -215,7 +215,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                         setData('from_bodega_id', e.target.value);
                                         setData('lote_id', '');
                                     }}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                                 >
                                     <option value="">Seleccionar bodega...</option>
                                     {bodegas.map((b) => (
@@ -232,14 +232,14 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                     Bodega Destino
                                 </label>
                                 <select
                                     required
                                     value={data.to_bodega_id}
                                     onChange={(e) => setData('to_bodega_id', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                                 >
                                     <option value="">Seleccionar bodega...</option>
                                     {bodegas
@@ -265,7 +265,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                     Seleccionar Lote
                                 </label>
                                 <select
@@ -273,7 +273,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                     value={data.lote_id}
                                     onChange={(e) => setData('lote_id', e.target.value)}
                                     disabled={!data.from_bodega_id}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer disabled:opacity-40"
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer disabled:opacity-40"
                                 >
                                     <option value="">Seleccionar lote...</option>
                                     {filteredLotes
@@ -296,7 +296,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                     Cantidad a Transferir (KG)
                                 </label>
                                 <div className="relative">
@@ -309,7 +309,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                         placeholder="0.000"
                                         max={maxTransfer}
                                         disabled={!data.lote_id}
-                                        className={`w-full bg-slate-50 border ${
+                                        className={`w-full bg-slate-800/50 border ${
                                             errors.cantidad ? 'border-red-500' : 'border-slate-200'
                                         } rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-40`}
                                     />
@@ -329,7 +329,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-black text-gray-700 uppercase tracking-tight">
+                            <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                 Motivo de la Transferencia
                             </label>
                             <input
@@ -338,7 +338,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                 value={data.reason}
                                 onChange={(e) => setData('reason', e.target.value)}
                                 placeholder="Ej: Reorganización de bodega, optimización de espacio..."
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:italic"
+                                className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:italic"
                             />
                             {errors.reason && (
                                 <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">

@@ -35,7 +35,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                     <button 
                         type="button"
                         onClick={onBack}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                        className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                     </button>
@@ -115,7 +115,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                     <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Proyección de Salida</div>
                                     <div className="text-xs font-bold text-indigo-400">-{data.quantity} KG</div>
                                 </div>
-                                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-2 bg-slate-900/80 backdrop-blur-xl/10 rounded-full overflow-hidden">
                                     <div 
                                         className="h-full bg-indigo-500 transition-all duration-500" 
                                         style={{ width: `${percentage}%` }}
@@ -169,7 +169,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
 
                 {/* Right: Form Actions */}
                 <div className="md:col-span-2 space-y-8">
-                    <div className="bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-sm space-y-8">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-8">
                         <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
                             <MinusCircle size={14} />
                             <span>Detalles del Despacho</span>
@@ -178,7 +178,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Cantidad a Retirar (KG)</label>
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Cantidad a Retirar (KG)</label>
                                     <div className="relative">
                                         <input 
                                             type="number" 
@@ -188,7 +188,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                             onChange={e => setData('quantity', parseFloat(e.target.value))}
                                             placeholder="0.00"
                                             max={lote.cantidad}
-                                            className={`w-full bg-slate-50 border ${errors.quantity ? 'border-red-500' : 'border-slate-200'} rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
+                                            className={`w-full bg-slate-800/50 border ${errors.quantity ? 'border-red-500' : 'border-slate-200'} rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
                                         />
                                         <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
                                             <span className="text-[10px] font-black text-slate-400 uppercase">Máximo</span>
@@ -198,12 +198,12 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                     {errors.quantity && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.quantity}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Motivo del Despacho</label>
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Motivo del Despacho</label>
                                     <select 
                                         required
                                         value={data.reason}
                                         onChange={e => setData('reason', e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                                     >
                                         <option value="produccion">⚙️ Consumo para Producción</option>
                                         <option value="venta">📦 Despacho por Venta</option>
@@ -216,12 +216,12 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
 
                             <div className="space-y-4">
                                 <div className="space-y-2 h-full flex flex-col">
-                                    <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Descripción / Observaciones</label>
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Descripción / Observaciones</label>
                                     <textarea 
                                         value={data.description}
                                         onChange={e => setData('description', e.target.value)}
                                         placeholder="Indica el número de orden de producción o cualquier detalle relevante..."
-                                        className="flex-1 w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none transition-all placeholder:italic"
+                                        className="flex-1 w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none transition-all placeholder:italic"
                                     />
                                     {errors.description && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.description}</p>}
                                 </div>

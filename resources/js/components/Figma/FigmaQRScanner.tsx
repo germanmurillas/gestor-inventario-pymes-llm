@@ -80,7 +80,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                     <button
                         type="button"
                         onClick={onBack}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                        className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                     </button>
@@ -101,7 +101,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                 {/* Left Panel: Scanner */}
                 <div className="lg:col-span-2 space-y-6">
                     {step === 'SCAN' && (
-                        <div className="bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-sm space-y-8">
+                        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-8">
                             {/* Mode Toggle */}
                             <div className="flex items-center justify-center gap-2">
                                 <button
@@ -109,7 +109,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
                                         inputMode === 'manual'
                                             ? 'bg-obsidiana text-white shadow-lg'
-                                            : 'bg-slate-50 text-slate-400 hover:text-slate-600'
+                                            : 'bg-slate-800/50 text-slate-400 hover:text-slate-600'
                                     }`}
                                 >
                                     <Keyboard size={16} />
@@ -150,7 +150,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                             setScanError('');
                                         }}
                                         placeholder='{"id":1,"sku":"MAT-001","batch":"L-001","v":"1.0"}'
-                                        className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 transition-all"
+                                        className="flex-1 bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 transition-all"
                                     />
                                     <button
                                         onClick={handleDecode}
@@ -176,7 +176,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                     {step === 'ACTION' && decodedLote && (
                         <form onSubmit={handleSubmit} className="space-y-8">
                             {/* Item Details */}
-                            <div className="bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-sm space-y-6">
+                            <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-6">
                                 <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
                                     <Package size={14} />
                                     <span>Producto Escaneado</span>
@@ -209,7 +209,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     className={`p-8 rounded-[2rem] border-2 transition-all text-center ${
                                         data.action === 'entrada'
                                             ? 'border-green-500 bg-green-50 shadow-xl shadow-green-100'
-                                            : 'border-gray-200 bg-white hover:border-green-300'
+                                            : 'border-slate-700/30 bg-slate-900/80 backdrop-blur-xl hover:border-green-300'
                                     }`}
                                 >
                                     <div className="flex flex-col items-center gap-4">
@@ -229,7 +229,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     className={`p-8 rounded-[2rem] border-2 transition-all text-center ${
                                         data.action === 'salida'
                                             ? 'border-red-500 bg-red-50 shadow-xl shadow-red-100'
-                                            : 'border-gray-200 bg-white hover:border-red-300'
+                                            : 'border-slate-700/30 bg-slate-900/80 backdrop-blur-xl hover:border-red-300'
                                     }`}
                                 >
                                     <div className="flex flex-col items-center gap-4">
@@ -245,9 +245,9 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                             </div>
 
                             {data.action && (
-                                <div className="bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-sm space-y-6 animate-in slide-in-from-bottom-4 duration-300">
+                                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-6 animate-in slide-in-from-bottom-4 duration-300">
                                     <div className="space-y-4">
-                                        <label className="text-xs font-black text-gray-700 uppercase tracking-tight">
+                                        <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                             Cantidad (KG)
                                         </label>
                                         <input
@@ -258,7 +258,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                             value={data.quantity || ''}
                                             onChange={e => setData('quantity', parseFloat(e.target.value) || 0)}
                                             placeholder="0.00"
-                                            className={`w-full bg-slate-50 border ${errors.quantity ? 'border-red-500' : 'border-slate-200'} rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
+                                            className={`w-full bg-slate-800/50 border ${errors.quantity ? 'border-red-500' : 'border-slate-200'} rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
                                         />
                                         {errors.quantity && (
                                             <p className="text-red-500 text-[10px] font-bold uppercase">{errors.quantity}</p>
@@ -266,14 +266,14 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <label className="text-xs font-black text-gray-700 uppercase tracking-tight">
+                                        <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                             Nota / Observación
                                         </label>
                                         <textarea
                                             value={data.description}
                                             onChange={e => setData('description', e.target.value)}
                                             placeholder="Ej: Retorno de producción, material de cuarentena..."
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 transition-all placeholder:italic"
+                                            className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 transition-all placeholder:italic"
                                         />
                                     </div>
 
@@ -301,7 +301,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                     )}
 
                     {step === 'DONE' && (
-                        <div className="bg-white border border-green-200 rounded-[2.5rem] p-16 shadow-sm flex flex-col items-center text-center space-y-6">
+                        <div className="bg-slate-900/80 backdrop-blur-xl border border-green-200 rounded-[2.5rem] p-16 shadow-sm flex flex-col items-center text-center space-y-6">
                             <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center">
                                 <CheckCircle size={40} className="text-white" />
                             </div>
@@ -335,7 +335,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                         <div className="relative z-10 space-y-6">
                             <div>
                                 <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Formato QR</div>
-                                <div className="text-xs font-mono text-indigo-400 mt-2 bg-white/5 p-3 rounded-xl break-all">
+                                <div className="text-xs font-mono text-indigo-400 mt-2 bg-slate-900/80 backdrop-blur-xl/5 p-3 rounded-xl break-all">
                                     {'{"id":1,"sku":"MAT-001","batch":"L-001","v":"1.0"}'}
                                 </div>
                             </div>

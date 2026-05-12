@@ -44,7 +44,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                     <button
                         type="button"
                         onClick={onBack}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                        className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                     </button>
@@ -76,7 +76,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
             )}
 
             {!loading && !error && scans.length === 0 && (
-                <div className="bg-white border-2 border-dashed border-slate-200 rounded-[3rem] py-32 flex flex-col items-center justify-center text-slate-300">
+                <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-dashed border-slate-200 rounded-[3rem] py-32 flex flex-col items-center justify-center text-slate-300">
                     <ScanLine size={56} className="mb-6 opacity-20" />
                     <p className="text-sm font-black uppercase tracking-[0.3em] opacity-40 text-slate-900">
                         Sin escaneos QR registrados
@@ -88,11 +88,11 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
             )}
 
             {!loading && !error && scans.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-slate-50 border-b border-slate-100">
+                                <tr className="bg-slate-800/50 border-b border-slate-100">
                                     <th className="px-6 py-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Tipo</th>
                                     <th className="px-6 py-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Material</th>
                                     <th className="px-6 py-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Lote</th>
@@ -104,7 +104,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {scans.map((scan) => (
-                                    <tr key={scan.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <tr key={scan.id} className="hover:bg-slate-800/50/50 transition-colors group">
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2">
                                                 {scan.type === 'entrada' ? (
@@ -164,17 +164,17 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
             {/* Stats Summary */}
             {!loading && !error && scans.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Escaneos</div>
                         <div className="text-2xl font-black text-slate-900 mt-2">{scans.length}</div>
                     </div>
-                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entradas (Check-in)</div>
                         <div className="text-2xl font-black text-green-600 mt-2">
                             {scans.filter(s => s.type === 'entrada').length}
                         </div>
                     </div>
-                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Salidas (Check-out)</div>
                         <div className="text-2xl font-black text-red-600 mt-2">
                             {scans.filter(s => s.type === 'salida').length}

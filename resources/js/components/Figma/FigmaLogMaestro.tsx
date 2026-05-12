@@ -43,14 +43,14 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                             placeholder="Buscar por material, lote o usuario..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
+                            className="w-full pl-12 pr-4 py-3 bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
                         />
                     </div>
                     
                     <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                         <button 
                             onClick={() => setFilterType('all')}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900/80 backdrop-blur-xl text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Todos
                         </button>
@@ -71,10 +71,10 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
             </div>
 
             {/* Main Table Container */}
-            <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col relative">
+            <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col relative">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left font-sans">
-                        <thead className="bg-slate-50/80 border-b border-slate-100">
+                        <thead className="bg-slate-800/50/80 border-b border-slate-100">
                             <tr>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Movimiento</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Insumo / Lote</th>
@@ -85,7 +85,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {filteredMovements.length > 0 ? filteredMovements.map((mov) => (
-                                <tr key={mov.id} className="hover:bg-slate-50/50 transition-all group">
+                                <tr key={mov.id} className="hover:bg-slate-800/50/50 transition-all group">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${mov.type === 'entrada' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
@@ -139,7 +139,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                 </div>
                 
                 {/* Stats Footer for the Log */}
-                <div className="bg-slate-50 border-t border-slate-100 px-8 py-4 flex justify-between items-center">
+                <div className="bg-slate-800/50 border-t border-slate-100 px-8 py-4 flex justify-between items-center">
                     <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         Mostrando {filteredMovements.length} de {movements.length} transacciones
                     </div>

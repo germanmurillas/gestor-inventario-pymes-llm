@@ -62,39 +62,41 @@ class MasterDemoSeeder extends Seeder
         // 4. Lotes Estratégicos (Escenarios de Demo)
         // Lote Crítico (Próximo a vencer)
         $loteCritico = Lote::create([
-            'material_id' => 1, // Harina
+            'material_id' => 1,
             'bodega_id' => $bodegaSecos->id,
             'batch_number' => 'L-HR-9921',
             'quantity' => 120.5,
-            'expiration_date' => now()->addDays(2), // ALERT TRIGGER
+            'unit_cost' => 2500,
+            'expiration_date' => now()->addDays(2),
             'status' => 'active'
         ]);
 
-        // Lotes Saludables
         Lote::create([
-            'material_id' => 2, // Aceite
+            'material_id' => 2,
             'bodega_id' => $bodegaFrio->id,
             'batch_number' => 'L-AC-4432',
             'quantity' => 500,
+            'unit_cost' => 8500,
             'expiration_date' => now()->addMonths(6),
             'status' => 'active'
         ]);
 
         Lote::create([
-            'material_id' => 3, // Azúcar
+            'material_id' => 3,
             'bodega_id' => $bodegaSecos->id,
             'batch_number' => 'L-AZ-1120',
             'quantity' => 800.5,
+            'unit_cost' => 3200,
             'expiration_date' => now()->addYear(),
             'status' => 'active'
         ]);
 
-        // Lote en Silo (Casi lleno)
         Lote::create([
-            'material_id' => 1, // Harina granel
+            'material_id' => 1,
             'bodega_id' => $bodegaSilo->id,
             'batch_number' => 'SILO-H-001',
             'quantity' => 4500,
+            'unit_cost' => 2500,
             'expiration_date' => now()->addMonths(3),
             'status' => 'active'
         ]);

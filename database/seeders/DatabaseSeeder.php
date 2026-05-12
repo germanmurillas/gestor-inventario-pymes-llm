@@ -83,6 +83,7 @@ class DatabaseSeeder extends Seeder
             'bodega_id' => $bodegaA->id,
             'batch_number' => 'LT-CENT-001',
             'quantity' => 2500,
+            'unit_cost' => 25000,
             'expiration_date' => now()->addMonths(6),
             'status' => 'active'
         ]);
@@ -92,6 +93,7 @@ class DatabaseSeeder extends Seeder
             'bodega_id' => $bodegaB->id,
             'batch_number' => 'LT-QUIM-099',
             'quantity' => 15,
+            'unit_cost' => 45000,
             'expiration_date' => now()->addDays(4),
             'status' => 'active'
         ]);
@@ -101,6 +103,7 @@ class DatabaseSeeder extends Seeder
             'bodega_id'       => $bodegaA->id,
             'batch_number'    => 'LT-CENT-005',
             'quantity'        => 120,
+            'unit_cost'       => 18000,
             'expiration_date' => now()->addYears(2),
             'status'          => 'active'
         ]);

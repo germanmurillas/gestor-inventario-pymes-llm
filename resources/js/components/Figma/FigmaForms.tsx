@@ -57,7 +57,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                     <button 
                         type="button"
                         onClick={onBack}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                        className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                     </button>
@@ -76,7 +76,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                 </button>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-sm space-y-10">
+            <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-10">
                 {errors.error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-pulse">
                         <Tag size={16} />
@@ -94,50 +94,50 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                         </div>
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Nombre del Producto</label>
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Nombre del Producto</label>
                                 <input 
                                     type="text" 
                                     required
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
                                     placeholder="Ej: Harina de Trigo Especial" 
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
                                 />
                                 {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.name}</p>}
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Código</label>
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Código</label>
                                     <input 
                                         type="text" 
                                         required
                                         value={data.code}
                                         onChange={e => setData('code', e.target.value.toUpperCase())}
                                         placeholder="MAT-00X" 
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all uppercase" 
+                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all uppercase" 
                                     />
                                     {errors.code && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.code}</p>}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Lote Interno</label>
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Lote Interno</label>
                                     <input 
                                         type="text" 
                                         required
                                         value={data.batch_number}
                                         onChange={e => setData('batch_number', e.target.value)}
                                         placeholder="L-0000" 
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
                                     />
                                     {errors.batch_number && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.batch_number}</p>}
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Ubicación / Bodega</label>
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Ubicación / Bodega</label>
                                 <select 
                                     required
                                     value={data.bodega_id}
                                     onChange={e => setData('bodega_id', e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold"
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold"
                                 >
                                     <option value="">Seleccione una bodega...</option>
                                     {bodegas.map((b: any) => (
@@ -147,25 +147,25 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                 {errors.bodega_id && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.bodega_id}</p>}
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Descripción del Material</label>
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Descripción del Material</label>
                                 <textarea 
                                     value={data.description}
                                     onChange={e => setData('description', e.target.value)}
                                     placeholder="Detalles sobre el proveedor o uso comercial..." 
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none transition-all" 
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none transition-all" 
                                 />
                             </div>
 
                             {/* Photo Upload */}
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Foto del Producto</label>
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Foto del Producto</label>
                                 <div className="flex items-start gap-4">
                                     <div
                                         onClick={() => !previewUrl && fileInputRef.current?.click()}
                                         className={`relative w-32 h-32 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${
                                             previewUrl
                                                 ? 'border-indigo-300 cursor-pointer'
-                                                : 'border-slate-300 cursor-pointer hover:border-indigo-400 bg-slate-50'
+                                                : 'border-slate-300 cursor-pointer hover:border-indigo-400 bg-slate-800/50'
                                         }`}
                                     >
                                         {previewUrl ? (
@@ -226,7 +226,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                         </div>
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Stock Inicial</label>
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Stock Inicial</label>
                                 <div className="relative">
                                     <input 
                                         type="number" 
@@ -236,7 +236,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         value={data.stock_initial}
                                         onChange={e => setData('stock_initial', parseFloat(e.target.value))}
                                         placeholder="0.00" 
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
+                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
                                     />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-tighter">KG</span>
                                 </div>
@@ -244,7 +244,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                             </div>
                             
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-700 uppercase tracking-tight">Fecha de Vencimiento (FEFO)</label>
+                                <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Fecha de Vencimiento (FEFO)</label>
                                 <div className="relative">
                                     <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                     <input 
@@ -252,7 +252,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         required
                                         value={data.expiration_date}
                                         onChange={e => setData('expiration_date', e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
+                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
                                     />
                                 </div>
                                 {errors.expiration_date && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.expiration_date}</p>}

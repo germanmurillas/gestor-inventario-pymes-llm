@@ -266,7 +266,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
             ? (isMonetary ? `$${value.toLocaleString('es-CO')}` : isKilos ? `${Number(value).toFixed(2)} kg` : value)
             : value;
         return (
-            <div key={key} className="flex flex-col items-center justify-center p-4 bg-white/5 rounded-2xl min-w-[90px]">
+            <div key={key} className="flex flex-col items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xl/5 rounded-2xl min-w-[90px]">
                 <div className="text-xl font-black text-white tracking-tight">{display}</div>
                 <div className="text-[9px] font-bold text-white/50 uppercase tracking-wider mt-1 text-center">{key}</div>
             </div>
@@ -315,7 +315,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                 </div>
 
                 {/* 2. Eficiencia Operativa */}
-                <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm space-y-6">
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2rem] p-8 shadow-sm space-y-6">
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         <TrendingUp size={14} className="text-indigo-600" /><span>Exactitud de Inventario</span>
                     </div>
@@ -330,7 +330,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                 </div>
 
                 {/* 3. Rotación */}
-                <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm space-y-6">
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2rem] p-8 shadow-sm space-y-6">
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         <Clock size={14} className="text-indigo-600" /><span>Índice de Rotación (FEFO)</span>
                     </div>
@@ -350,7 +350,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                 </div>
 
                 {/* 5. Ocupación de Bodega */}
-                <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm space-y-4">
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2rem] p-8 shadow-sm space-y-4">
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         <LayoutGrid size={14} className="text-indigo-600" /><span>Ocupación Global</span>
                     </div>
@@ -378,7 +378,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                             className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2
                                 ${filters.type === rt.value
                                     ? 'bg-obsidiana text-white shadow-lg shadow-indigo-500/20'
-                                    : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                                    : 'bg-slate-900/80 backdrop-blur-xl border border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700'
                                 }`}
                         >
                             {rt.label}
@@ -388,7 +388,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                 </div>
 
                 {/* Filter Bar */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6">
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-2xl p-4 mb-6">
                     <div className="flex items-center justify-between mb-3">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
@@ -419,7 +419,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                         type="date"
                                         value={filters.from}
                                         onChange={(e) => setFilters(prev => ({ ...prev, from: e.target.value }))}
-                                        className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
+                                        className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-800/50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
                                     />
                                 </div>
                             </div>
@@ -432,7 +432,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                         type="date"
                                         value={filters.to}
                                         onChange={(e) => setFilters(prev => ({ ...prev, to: e.target.value }))}
-                                        className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
+                                        className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-800/50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
                                     />
                                 </div>
                             </div>
@@ -444,7 +444,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                 <select
                                     value={filters.bodega_id}
                                     onChange={(e) => setFilters(prev => ({ ...prev, bodega_id: e.target.value }))}
-                                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
+                                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-800/50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
                                 >
                                     <option value="">Todas las bodegas</option>
                                     {filterOptions.bodegas.map((b) => (
@@ -460,7 +460,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                 <select
                                     value={filters.material_id}
                                     onChange={(e) => setFilters(prev => ({ ...prev, material_id: e.target.value }))}
-                                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
+                                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 bg-slate-800/50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
                                 >
                                     <option value="">Todos los materiales</option>
                                     {filterOptions.materials.map((m) => (
@@ -483,7 +483,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                         </div>
                         <div className="flex flex-wrap gap-3">
                             {Object.entries(reportSummary).map(([key, val], idx) => (
-                                <div key={key} className="flex flex-col items-center justify-center px-5 py-3 bg-white/5 rounded-2xl min-w-[100px]">
+                                <div key={key} className="flex flex-col items-center justify-center px-5 py-3 bg-slate-900/80 backdrop-blur-xl/5 rounded-2xl min-w-[100px]">
                                     <div className="text-xl font-black text-white tracking-tight">
                                         {key.includes('Valor') || key.includes('Costo')
                                             ? `$${Number(val).toLocaleString('es-CO')}`
@@ -523,8 +523,8 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                 {filters.type === 'historial' && reportData && reportData.length > 0 ? (
                     <HistoryChart data={reportData} />
                 ) : (
-                    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-800/50/50">
                             <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                                 <Table size={12} />
                                 Vista Previa ({reportData?.length || 0} registros)
@@ -549,7 +549,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                     </thead>
                                     <tbody>
                                         {reportData.slice(0, 50).map((row, idx) => (
-                                            <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                            <tr key={idx} className="border-b border-slate-50 hover:bg-slate-800/50/50 transition-colors">
                                                 {Object.values(row).map((val: any, i) => (
                                                     <td key={i} className="px-4 py-2.5 text-xs text-slate-600 whitespace-nowrap max-w-[200px] truncate">
                                                         {val !== null && val !== undefined ? String(val) : '—'}

@@ -203,7 +203,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                     <button
                         type="button"
                         onClick={onBack}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                        className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                     </button>
@@ -251,7 +251,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                             placeholder="Buscar material por nombre o código..."
-                            className="w-full bg-white border border-slate-200 rounded-2xl px-12 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-300"
+                            className="w-full bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-2xl px-12 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-300"
                         />
                     </div>
 
@@ -276,11 +276,11 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                     className={`text-left p-5 rounded-2xl border-2 transition-all duration-200 ${
                                         selectedMaterial?.id === material.id
                                             ? 'border-indigo-500 bg-indigo-50/50 shadow-lg shadow-indigo-100'
-                                            : 'border-slate-100 bg-white hover:border-indigo-200 hover:shadow-md'
+                                            : 'border-slate-100 bg-slate-900/80 backdrop-blur-xl hover:border-indigo-200 hover:shadow-md'
                                     }`}
                                 >
                                     <div className="flex gap-4">
-                                        <div className="w-16 h-16 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
+                                        <div className="w-16 h-16 rounded-xl bg-slate-800/50 border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
                                             {material.photo_url ? (
                                                 <img src={material.photo_url} alt={material.name} className="w-full h-full object-cover" />
                                             ) : (
@@ -367,7 +367,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                 {suggestion?.suggested_lote && !suggestionLoading && (
                                     <div className="pt-4 border-t border-white/10 space-y-3">
                                         <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Sugerencia FEFO</div>
-                                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3">
+                                        <div className="bg-slate-900/80 backdrop-blur-xl/5 p-4 rounded-2xl border border-white/10 space-y-3">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-bold">{suggestion.suggested_lote.batch_number}</span>
                                                 <FigmaFefoBadge
@@ -387,7 +387,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
 
                     {/* Quantity + split plan */}
                     <div className="md:col-span-2 space-y-6">
-                        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-sm space-y-8">
+                        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-10 shadow-sm space-y-8">
                             {/* Quantity input */}
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-500 uppercase tracking-widest">
@@ -402,7 +402,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                         placeholder="0.000"
                                         min={0.001}
                                         max={suggestion?.total_available || undefined}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-5 text-2xl font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-5 text-2xl font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                     />
                                     <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
                                         <span className="text-[10px] font-black text-slate-400 uppercase">Máx</span>
@@ -450,7 +450,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                 <select
                                     value={reason}
                                     onChange={e => setReason(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
                                 >
                                     {REASONS.map(r => (
                                         <option key={r.value} value={r.value}>{r.icon} {r.label}</option>
@@ -465,7 +465,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                     value={description}
                                     onChange={e => setDescription(e.target.value)}
                                     placeholder="Nº de orden de producción, receta o detalle relevante..."
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 placeholder:italic"
+                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 placeholder:italic"
                                 />
                             </div>
 
@@ -537,7 +537,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
             {step === 3 && selectedMaterial && suggestion && (
                 <div className="space-y-6">
                     {/* Confirmation card */}
-                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-sm space-y-8">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-10 shadow-sm space-y-8">
                         <div className="flex items-center gap-3">
                             <ClipboardCheck size={20} className="text-indigo-600" />
                             <div>
@@ -572,7 +572,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                             <div className="border border-slate-200 rounded-2xl overflow-hidden">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="bg-slate-50 border-b border-slate-200">
+                                        <tr className="bg-slate-800/50 border-b border-slate-200">
                                             <th className="px-5 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Lote</th>
                                             <th className="px-5 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">Vencimiento</th>
                                             <th className="px-5 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">FEFO</th>
@@ -582,7 +582,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                     </thead>
                                     <tbody>
                                         {suggestion.split_plan.map((plan, idx) => (
-                                            <tr key={plan.id} className={`border-b border-slate-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                                            <tr key={plan.id} className={`border-b border-slate-100 ${idx % 2 === 0 ? 'bg-slate-900/80 backdrop-blur-xl' : 'bg-slate-800/50/50'}`}>
                                                 <td className="px-5 py-3.5">
                                                     <span className="text-sm font-bold text-slate-900">{plan.batch_number}</span>
                                                 </td>
@@ -614,7 +614,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                             </div>
                             <div className="space-y-1">
                                 {suggestion.split_plan.map((plan) => (
-                                    <div key={plan.id} className="flex items-center gap-3 text-[10px] bg-slate-50 p-3 rounded-xl">
+                                    <div key={plan.id} className="flex items-center gap-3 text-[10px] bg-slate-800/50 p-3 rounded-xl">
                                         <Clock size={12} className="text-slate-400" />
                                         <span className="font-black text-slate-500 uppercase">{plan.batch_number}</span>
                                         <span className="text-slate-400">→</span>
@@ -660,7 +660,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
             {/* ── STEP 4: Success ───────────────────────────────────────────── */}
             {step === 4 && consumptionResult && (
                 <div className="max-w-2xl mx-auto">
-                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-12 shadow-sm space-y-8 text-center">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-12 shadow-sm space-y-8 text-center">
                         {/* Success animation */}
                         <div className="relative">
                             <div className="w-24 h-24 mx-auto bg-emerald-100 rounded-full flex items-center justify-center animate-in zoom-in-95 duration-500">
@@ -677,7 +677,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                         </div>
 
                         {/* Result summary */}
-                        <div className="bg-slate-50 rounded-2xl p-6 space-y-4 text-left">
+                        <div className="bg-slate-800/50 rounded-2xl p-6 space-y-4 text-left">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Material</div>

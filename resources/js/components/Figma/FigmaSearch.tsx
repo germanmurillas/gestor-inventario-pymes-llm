@@ -88,7 +88,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
         const days = Math.ceil((new Date(vencimiento).getTime() - Date.now()) / 86400000);
         const color = days <= 15 ? 'text-red-600 bg-red-50 border-red-200'
                     : days <= 30 ? 'text-amber-600 bg-amber-50 border-amber-200'
-                    : 'text-slate-400 bg-slate-50 border-slate-200';
+                    : 'text-slate-400 bg-slate-800/50 border-slate-200';
         return (
             <span className={`flex items-center gap-1 px-2 py-1 text-[8px] font-black rounded-full uppercase border ${color}`}>
                 <Clock size={8} />
@@ -118,7 +118,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
                     type="text"
                     id="search-input"
                     placeholder="Nombre del producto, SKU, No. de Lote, Bodega..."
-                    className="w-full bg-white border-2 border-slate-100 rounded-3xl pl-20 pr-14 py-6 text-xl shadow-2xl shadow-indigo-100/50 focus:outline-none focus:border-indigo-300 transition-all placeholder:text-slate-300 font-medium"
+                    className="w-full bg-slate-900/80 backdrop-blur-xl border-2 border-slate-100 rounded-3xl pl-20 pr-14 py-6 text-xl shadow-2xl shadow-indigo-100/50 focus:outline-none focus:border-indigo-300 transition-all placeholder:text-slate-300 font-medium"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     autoComplete="off"
@@ -137,7 +137,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
             {/* Filters Row */}
             <div className="flex flex-wrap items-center gap-4">
                 {/* Status filters */}
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-1.5">
+                <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-100 rounded-2xl p-1.5">
                     {([
                         { id: 'TODOS',    label: `Todos (${counts.total})` },
                         { id: 'CRITICO',  label: `Críticos (${counts.criticos})` },
@@ -164,7 +164,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
                         <select
                             value={bodegaFilter}
                             onChange={(e) => setBodegaFilter(e.target.value)}
-                            className="bg-white border-2 border-slate-100 rounded-2xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 focus:outline-none focus:border-indigo-300 transition-all"
+                            className="bg-slate-900/80 backdrop-blur-xl border-2 border-slate-100 rounded-2xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 focus:outline-none focus:border-indigo-300 transition-all"
                         >
                             <option value="TODAS">Todas las bodegas</option>
                             {bodegas.map((b: any) => (
@@ -186,7 +186,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
                     {filteredResults.map((item) => (
                         <div
                             key={item.id}
-                            className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group cursor-pointer relative overflow-hidden"
+                            className="bg-slate-900/80 backdrop-blur-xl border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group cursor-pointer relative overflow-hidden"
                         >
                             {/* Background icon */}
                             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -225,7 +225,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
                                 </div>
 
                                 {/* Bodega */}
-                                <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-2xl">
+                                <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-2xl">
                                     <MapPin size={10} className="text-indigo-600 shrink-0" />
                                     <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest truncate">
                                         {item.bodega || 'Sin asignar'}

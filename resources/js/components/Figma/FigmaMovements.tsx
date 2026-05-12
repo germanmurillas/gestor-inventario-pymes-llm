@@ -23,7 +23,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
             <div className="flex items-center gap-6">
                 <button 
                     onClick={onBack}
-                    className="w-12 h-12 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-95 group"
+                    className="w-12 h-12 bg-slate-900/80 backdrop-blur-xl hover:bg-slate-800/50 border border-slate-200 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-95 group"
                 >
                     <ArrowLeft size={20} className="text-slate-600 group-hover:-translate-x-1 transition-transform" />
                 </button>
@@ -42,10 +42,10 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Product Stats */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm space-y-8 relative overflow-hidden">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-8 shadow-sm space-y-8 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] -mr-16 -mt-16 opacity-50" />
                         
-                        <div className="aspect-square bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-center relative z-10 overflow-hidden">
+                        <div className="aspect-square bg-slate-800/50 rounded-3xl border border-slate-100 flex items-center justify-center relative z-10 overflow-hidden">
                             {lote.photo_url ? (
                                 <img src={lote.photo_url} alt={lote.material_name} className="w-full h-full object-cover" />
                             ) : (
@@ -60,11 +60,11 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                             </div>
                             
                             <div className="grid grid-cols-1 gap-6">
-                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Stock Actual</label>
                                     <div className="text-xl font-black text-slate-900">{lote.cantidad} <span className="text-[10px] text-slate-400 uppercase">KG</span></div>
                                 </div>
-                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Costo Unitario</label>
                                     <div className="text-xl font-black text-slate-900">${new Intl.NumberFormat('es-CO').format(lote.unit_cost || 0)}</div>
                                 </div>
@@ -92,11 +92,11 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                         </span>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                    <tr className="bg-slate-800/50/50 border-b border-slate-100">
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Operación</th>
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Responsable</th>
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Fecha & Hora</th>
@@ -116,7 +116,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                         </tr>
                                     ) : movements.length > 0 ? (
                                         movements.map((mov, idx) => (
-                                            <tr key={mov.id} className="hover:bg-slate-50/50 transition-colors group">
+                                            <tr key={mov.id} className="hover:bg-slate-800/50/50 transition-colors group">
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${

@@ -61,3 +61,7 @@ docs/MASTER_RESTORE.md
 docs/AGENT_PIPELINE.md
 docs/PLAYWRIGHT_COMPACTION.md
 docs/omega-kanban-audit-*.md
+
+# Large binary files
+wheels/
+*.whl
