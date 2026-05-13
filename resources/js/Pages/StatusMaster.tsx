@@ -3,8 +3,9 @@ import { Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AgentCard from '../Components/AgentCard';
 import WhatsAppChat from '../Components/WhatsAppChat';
+import AgentChart from '../Components/AgentChart';
 import { GoldenParticles, ScrambleText, MagneticCard } from '../Components/PremiumEffects';
-import { Activity, MessageCircle, Wifi, WifiOff, RefreshCw, Zap } from 'lucide-react';
+import { Activity, MessageCircle, Wifi, WifiOff, RefreshCw, Zap, BarChart3 } from 'lucide-react';
 
 const API_URL = '/api/agent-bus';
 
@@ -31,7 +32,7 @@ export default function StatusMaster() {
   const [connected, setConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<'grid' | 'chat'>('grid');
+  const [view, setView] = useState<'grid' | 'chat' | 'charts'>('grid');
 
   const fetchData = async () => {
     try {
@@ -129,6 +130,15 @@ export default function StatusMaster() {
                 <MessageCircle size={14} className="inline mr-1" />
                 Chat
               </button>
+              <button
+                onClick={() => setView('charts')}
+                className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all ${
+                  view === 'charts' ? 'bg-champan/20 text-champan' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <BarChart3 size={14} className="inline mr-1" />
+                Charts
+              </button>
             </div>
 
             {/* Refresh button */}
@@ -171,6 +181,11 @@ export default function StatusMaster() {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+        ) : view === 'charts' ? (
+          /* Charts View */
+          <div className="max-w-4xl mx-auto">
+            <AgentChart agents={agents} events={events} />
           </div>
         ) : (
           /* WhatsApp Chat View */
