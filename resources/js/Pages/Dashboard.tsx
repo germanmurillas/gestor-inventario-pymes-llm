@@ -57,8 +57,6 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
         }
     }, [activeView]);
 
-    const isDashboardView = activeView === 'TABLERO';
-
     return (
         <div className="flex h-screen overflow-hidden font-sans bg-obsidiana text-white relative">
             {/* ── Aurora Background ── */}
