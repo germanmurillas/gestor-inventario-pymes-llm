@@ -3,11 +3,11 @@
 
 % ─────────────────────────────────────────────────
 % VERSION TRACKER — No modificar este bloque
-% Versión:    Tesis Humanizada (Dummies)
+% Versión:    Tesis Técnica (para jurados)
 % Archivo:    Capitulo4Metodologia/metodologia.tex
 % Última mod:  2026-05-06T16:08:45
 % Git commit:  cc9c766f @ main
-% Audiencia:   divulgativo
+% Audiencia:   académico
 % Verificar antes de editar: bash check_tesis_version.sh overleaf_tesis/Capitulo4Metodologia/metodologia.tex
 % ─────────────────────────────────────────────────
 
@@ -20,14 +20,14 @@ Este proyecto se enmarca en la \textbf{investigación aplicada}, ya que su fin e
 \label{sec:scrum}
 Para la gestión del proyecto se adoptó una metodología de desarrollo Ágil, la cual fue implementada usando el marco de trabajo (framework) SCRUM. Se eligió este enfoque por su flexibilidad, su capacidad para gestionar la incertidumbre y su énfasis en la entrega de valor de manera iterativa e incremental.
 
-Aunque SCRUM define roles como Product Owner, Scrum Master y Equipo de Desarrollo, para este proyecto se adaptaron de la siguiente manera: para obtener una retroalimentación crítica y asegurar que el desarrollo se alineara con los objetivos, el Director de Trabajo de Grado (Prof. Héctor Fabio Ocampo) actuó como el principal \textit{stakeholder} y su perspectiva en las revisiones de sprint cumplió una función análoga a la del Product Owner, validando los incrementos de software y ajustando prioridades según los objetivos divulgativos y técnicos del proyecto.
+Aunque SCRUM define roles como Product Owner, Scrum Master y Equipo de Desarrollo, para este proyecto se adaptaron de la siguiente manera: para obtener una retroalimentación crítica y asegurar que el desarrollo se alineara con los objetivos, el Director de Trabajo de Grado (Prof. Héctor Fabio Ocampo) actuó como el principal \textit{stakeholder} y su perspectiva en las revisiones de sprint cumplió una función análoga a la del Product Owner, validando los incrementos de software y ajustando prioridades según los objetivos académicos y técnicos del proyecto.
 
 Los autores (Germán David Murillas Mondragón y Jorge Augusto Estacio Almeciga), por su parte, asumieron de manera conjunta las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso, eliminando impedimentos y asegurando la adherencia a las ceremonias de SCRUM.
 
 El flujo de trabajo se organizó en Sprints, que son ciclos de trabajo iterativos de dos semanas de duración. Cada sprint siguió los eventos clave del framework:
 
 \begin{itemize}
-    \item \textbf{Product Backlog:} Se creó y mantuvo un listado priorizado de todas las funcionalidades del sistema (historias de usuario) en GitHub Projects. El backlog inicial contenía 25 historias de usuario derivadas de los 9 casos de uso identificados en la panificadora caso de estudio. Las historias se priorizaron según el valor para el usuario y las dependencias técnicas, siguiendo el método MoSCoW (Must have, Should have, Could have, Won't have). La gestión del proyecto se apoyó en GitHub Projects 	te{github_projects} como herramienta de seguimiento, aplicando principios de calidad 	te{iso9001}.
+    \item \textbf{Product Backlog:} Se creó y mantuvo un listado priorizado de todas las funcionalidades del sistema (historias de usuario) en GitHub Projects. El backlog inicial contenía 25 historias de usuario derivadas de los 9 casos de uso identificados en la panificadora caso de estudio. Las historias se priorizaron según el valor para el usuario y las dependencias técnicas, siguiendo el método MoSCoW (Must have, Should have, Could have, Won't have). La gestión del proyecto se apoyó en GitHub Projects \cite{github_projects} como herramienta de seguimiento, aplicando principios de gestión de calidad \cite{iso9001}.
     
     \item \textbf{Sprint Planning:} Al inicio de cada sprint, el equipo seleccionó un conjunto de tareas del Product Backlog para conformar el \textit{Sprint Backlog}, que constituyó el plan de trabajo para las siguientes dos semanas. Cada Sprint Planning tuvo una duración máxima de 2 horas, durante las cuales se estimó el esfuerzo de cada tarea y se descompusieron las historias de usuario en tareas técnicas específicas.
     
@@ -159,7 +159,7 @@ El quinto sprint materializó los mockups de Figma en componentes React funciona
 
 \subsubsection{Sprint 6: Pruebas, Despliegue y Documentación (Semanas 15--16)}
 
-El sprint final se enfocó en garantizar la calidad del producto y preparar los entregables divulgativos:
+El sprint final se enfocó en garantizar la calidad del producto y preparar los entregables académicos:
 
 \begin{itemize}
     \item \textbf{Día 1--5}: Implementación y ejecución de 111 casos de prueba automatizados con Playwright 1.59, organizados en 13 suites: Autenticación y RBAC (5), Inventario y Lotes (6), Despacho FEFO (7), Conciliación (4), Etiquetas QR (3), Reportes PDF (4), Configuración (4), Regresión Visual (5), RAG --- Clasificación (50), RAG --- Fallback (4), Usabilidad (10 heurísticas), Accesibilidad (5 criterios WCAG AA), Rendimiento (4 métricas).
@@ -214,7 +214,7 @@ El desarrollo de este proyecto se rigió por principios de integridad académica
 \begin{itemize}
     \item \textbf{Confidencialidad de datos empresariales}: Los datos proporcionados por la panificadora caso de estudio (nombres de materiales, cantidades, precios) fueron anonimizados en los seeders de la base de datos y en toda la documentación pública. La empresa autorizó el uso de sus procesos operativos como referencia para el levantamiento de requisitos, pero los datos específicos de su operación comercial no se divulgan.
     \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, los autores utilizaron asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) como herramientas de productividad para generación de código, depuración y documentación. Todo el código generado fue revisado, comprendido y validado por los autores antes de su inclusión en el proyecto, en cumplimiento de las políticas de integridad académica de la Universidad del Valle.
-    \item \textbf{Licencias de software}: Todas las tecnologías utilizadas en el proyecto ---Laravel, React, Inertia.js, Tailwind CSS, GSAP, MySQL, Playwright--- son de código abierto y cuentan con licencias que permiten su uso en proyectos divulgativos y comerciales sin costo. La API de OpenAI se utilizó bajo el plan de pago por uso (\textit{pay-as-you-go}), con créditos proporcionados por los autores.
+    \item \textbf{Licencias de software}: Todas las tecnologías utilizadas en el proyecto ---Laravel, React, Inertia.js, Tailwind CSS, GSAP, MySQL, Playwright--- son de código abierto y cuentan con licencias que permiten su uso en proyectos académicos y comerciales sin costo. La API de OpenAI se utilizó bajo el plan de pago por uso (\textit{pay-as-you-go}), con créditos proporcionados por los autores.
     \item \textbf{Cumplimiento normativo}: El proyecto se acoge a la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle, que establece los lineamientos para trabajos de grado en la modalidad de Trabajo de Investigación.
 \end{itemize}
 
