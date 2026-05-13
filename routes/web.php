@@ -27,6 +27,7 @@ Route::get('/status-master', function () {
     return Inertia::render('StatusMaster');
 })->name('status-master');
 
+// Agent bus API (SSH proxy to DesktopTitan — may be slow, frontend handles gracefully)
 Route::get('/api/agent-bus', [\App\Http\Controllers\AgentBusController::class, 'events']);
 
 Route::get('/inventory/report', [InventoryController::class, 'exportPdf'])

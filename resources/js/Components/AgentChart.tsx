@@ -58,7 +58,7 @@ export default function AgentChart({ agents, events }: { agents: AgentData[]; ev
       className="space-y-6"
     >
       {/* Bar Chart — eventos por agente */}
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-5">
+      <div className="relative bg-slate-900/40 backdrop-blur-2xl border border-white/\[0.06\] shadow-\[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)\] rounded-2xl p-5 overflow-hidden before:absolute before:inset-0 before:rounded-2xl before:bg-\[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.03)_0%,transparent_70%)\] before:pointer-events-none">
         <div className="flex items-center gap-2 mb-4">
           <BarChart3 size={16} className="text-champan" />
           <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
@@ -85,7 +85,7 @@ export default function AgentChart({ agents, events }: { agents: AgentData[]; ev
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Pie Chart — distribución de estados */}
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-5">
+        <div className="relative bg-slate-900/40 backdrop-blur-2xl border border-white/\[0.06\] shadow-\[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)\] rounded-2xl p-5 overflow-hidden before:absolute before:inset-0 before:rounded-2xl before:bg-\[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.03)_0%,transparent_70%)\] before:pointer-events-none">
           <div className="flex items-center gap-2 mb-4">
             <PieChartIcon size={16} className="text-champan" />
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
@@ -122,7 +122,7 @@ export default function AgentChart({ agents, events }: { agents: AgentData[]; ev
         </div>
 
         {/* Area Chart — actividad en el tiempo */}
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-5">
+        <div className="relative bg-slate-900/40 backdrop-blur-2xl border border-white/\[0.06\] shadow-\[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)\] rounded-2xl p-5 overflow-hidden before:absolute before:inset-0 before:rounded-2xl before:bg-\[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.03)_0%,transparent_70%)\] before:pointer-events-none">
           <div className="flex items-center gap-2 mb-4">
             <Activity size={16} className="text-champan" />
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">

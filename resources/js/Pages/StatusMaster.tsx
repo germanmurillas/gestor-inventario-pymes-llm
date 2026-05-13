@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AgentCard from '../Components/AgentCard';
 import WhatsAppChat from '../Components/WhatsAppChat';
 import AgentChart from '../Components/AgentChart';
-import { GoldenParticles, ScrambleText, MagneticCard } from '../Components/PremiumEffects';
+import { GoldenParticles, ScrambleText, MagneticCard, CarbonCard, FloatingOrb, GradientBorder } from '../Components/PremiumEffects';
 import { Activity, MessageCircle, Wifi, WifiOff, RefreshCw, Zap, BarChart3 } from 'lucide-react';
 
 const API_URL = '/api/agent-bus';
@@ -66,11 +66,12 @@ export default function StatusMaster() {
     <div className="min-h-screen bg-obsidiana text-white font-sans relative overflow-hidden">
       <Head title="Status Master | Pymetory" />
 
-      {/* Aurora Background + Golden Particles */}
+      {/* Aurora Background + Golden Particles + Floating Orbs */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-15%] left-[-5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(201,168,76,0.12)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.10)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '3s' }} />
-        <div className="absolute top-[30%] right-[20%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '5s' }} />
+        <FloatingOrb color="champan" size={500} className="top-[-10%] left-[-5%]" delay={0} />
+        <FloatingOrb color="emerald" size={350} className="bottom-[-10%] right-[-5%]" delay={2} />
+        <FloatingOrb color="indigo" size={280} className="top-[30%] right-[15%]" delay={4} />
+        <FloatingOrb color="pink" size={200} className="top-[60%] left-[10%]" delay={3} />
       </div>
       <GoldenParticles />
 

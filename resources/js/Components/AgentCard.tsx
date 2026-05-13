@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRipple } from './PremiumEffects';
 
 const STATUS_MAP: Record<string, { label: string; icon: string; color: string }> = {
   durmiendo:     { label: 'Durmiendo',    icon: '🛏️', color: 'text-slate-600' },
@@ -35,6 +36,8 @@ interface Props {
 }
 
 export default function AgentCard({ agent }: Props) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const ripples = useRipple(cardRef);
   const statusInfo = STATUS_MAP[agent.status] || STATUS_MAP.activo;
   const isGestating = agent.status === 'gestando';
   const isCrashed = agent.status === 'crash';
@@ -60,19 +63,23 @@ export default function AgentCard({ agent }: Props) {
 
   return (
     <motion.div
+      ref={cardRef}
       layout
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       className={`
-        relative bg-slate-900/70 backdrop-blur-xl border rounded-2xl p-4
-        transition-colors duration-500 overflow-hidden
-        ${isCrashed ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]' :
-          isGestating ? 'border-pink-500/30 shadow-[0_0_20px_rgba(236,72,153,0.15)]' :
-          isActive ? 'border-emerald-500/20' :
-          'border-slate-700/30'}
+        relative bg-slate-900/40 backdrop-blur-2xl border border-white/[0.06]
+        shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04),inset_0_-1px_0_rgba(0,0,0,0.3)]
+        rounded-2xl p-5 overflow-hidden transition-colors duration-500
+        before:absolute before:inset-0 before:rounded-2xl before:bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.04)_0%,transparent_70%)] before:pointer-events-none
+        ${isCrashed ? 'border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]' :
+          isGestating ? 'border-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.15)]' :
+          isActive ? 'border-emerald-500/15' :
+          ''}
       `}
     >
+      {ripples}
       {/* Crash shake */}
       {isCrashed && (
         <motion.div
