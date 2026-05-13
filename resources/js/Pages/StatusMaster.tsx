@@ -3,7 +3,8 @@ import { Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AgentCard from '../Components/AgentCard';
 import WhatsAppChat from '../Components/WhatsAppChat';
-import { Activity, MessageCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { GoldenParticles, ScrambleText, MagneticCard } from '../Components/PremiumEffects';
+import { Activity, MessageCircle, Wifi, WifiOff, RefreshCw, Zap } from 'lucide-react';
 
 const API_URL = '/api/agent-bus';
 
@@ -64,12 +65,13 @@ export default function StatusMaster() {
     <div className="min-h-screen bg-obsidiana text-white font-sans relative overflow-hidden">
       <Head title="Status Master | Pymetory" />
 
-      {/* Aurora Background */}
+      {/* Aurora Background + Golden Particles */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-15%] left-[-5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(201,168,76,0.10)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.08)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '3s' }} />
-        <div className="absolute top-[30%] right-[20%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.06)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '5s' }} />
+        <div className="absolute top-[-15%] left-[-5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(201,168,76,0.12)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.10)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '3s' }} />
+        <div className="absolute top-[30%] right-[20%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '5s' }} />
       </div>
+      <GoldenParticles />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
@@ -80,7 +82,9 @@ export default function StatusMaster() {
               animate={{ opacity: 1, y: 0 }}
               className="text-2xl font-black text-white uppercase tracking-tight font-display"
             >
-              <span className="text-champan">Status</span> Master
+              <Zap size={20} className="inline text-champan mr-2" />
+              <span className="text-champan">Status</span>{' '}
+              <ScrambleText text="Master" className="text-white" />
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -150,7 +154,9 @@ export default function StatusMaster() {
             <AnimatePresence mode="popLayout">
               {agents.length > 0 ? (
                 agents.map(agent => (
-                  <AgentCard key={agent.name} agent={agent} />
+                  <MagneticCard key={agent.name}>
+                    <AgentCard agent={agent} />
+                  </MagneticCard>
                 ))
               ) : (
                 <motion.div

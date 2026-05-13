@@ -14,7 +14,7 @@ const STATUS_MAP: Record<string, { label: string; icon: string; color: string }>
   crash:         { label: 'Crasheado',    icon: '❌', color: 'text-red-500' },
 };
 
-interface AgentAgent {
+interface AgentData {
   name: string;
   hostname: string;
   status: string;
@@ -24,6 +24,10 @@ interface AgentAgent {
   last_ts: string;
   target?: string;
   event_id: string;
+  path?: string;
+  file?: string;
+  command?: string;
+  args?: string;
 }
 
 interface Props {
@@ -35,6 +39,24 @@ export default function AgentCard({ agent }: Props) {
   const isGestating = agent.status === 'gestando';
   const isCrashed = agent.status === 'crash';
   const isActive = agent.status === 'activo';
+
+  const displayPath = agent.path || '—';
+  const displayFile = agent.file || (agent.last_event ? `${agent.last_event}.jsonl` : '—');
+  const displayArgs = agent.args || (agent.target ? `target: ${agent.target}` : '—');
+  const displayCommand = agent.command || agent.last_summary || '—';
+  const displayRawLog = JSON.stringify({
+    source: agent.name,
+    event: agent.last_event,
+    status: agent.status,
+    ts: agent.last_ts,
+    summary: agent.last_summary,
+    hostname: agent.hostname,
+    target: agent.target,
+    path: agent.path,
+    file: agent.file,
+    command: agent.command,
+    args: agent.args,
+  }, null, 2);
 
   return (
     <motion.div
@@ -121,7 +143,7 @@ export default function AgentCard({ agent }: Props) {
                 exit={{ opacity: 0, x: 10 }}
                 className="text-[10px] text-slate-300 font-mono truncate"
               >
-                /agents/{agent.name}.md
+                {displayPath}
               </motion.div>
             </AnimatePresence>
           </motion.div>
@@ -132,7 +154,7 @@ export default function AgentCard({ agent }: Props) {
               📄 Archivo
             </div>
             <div className="text-[10px] text-slate-300 font-mono truncate">
-              {agent.last_event}.jsonl
+              {displayFile}
             </div>
           </div>
 
@@ -142,7 +164,7 @@ export default function AgentCard({ agent }: Props) {
               ⚙️ Argumentos
             </div>
             <div className="text-[10px] text-slate-300 font-mono truncate">
-              {agent.target ? `target: ${agent.target}` : '—'}
+              {displayArgs}
             </div>
           </div>
 
@@ -152,7 +174,7 @@ export default function AgentCard({ agent }: Props) {
               ⚡ Comando
             </div>
             <div className="text-[10px] text-slate-300 font-mono truncate">
-              pymetory-bus log {agent.name} {agent.last_event} ...
+              {displayCommand}
             </div>
           </div>
 
@@ -174,13 +196,7 @@ export default function AgentCard({ agent }: Props) {
                 transition={{ delay: 0.2 }}
                 className="text-[9px] text-emerald-400/80 font-mono leading-relaxed max-h-20 overflow-y-auto"
               >
-{`{
-  "agent": "${agent.name}",
-  "event": "${agent.last_event}",
-  "status": "${agent.status}",
-  "ts": "${agent.last_ts}",
-  "summary": "${agent.last_summary}"
-}`}
+{displayRawLog}
               </motion.pre>
             </motion.div>
           </AnimatePresence>
