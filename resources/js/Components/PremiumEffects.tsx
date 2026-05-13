@@ -65,32 +65,118 @@ export function ScrambleText({ text, className = '' }: { text: string; className
   return <span className={className}>{display}</span>;
 }
 
-/** Golden particles — partículas doradas flotantes */
+/** Golden particles — partículas doradas flotantes con paleta Midnight Luxe */
 export function GoldenParticles() {
+  const palette = [
+    '#C9A84C', // champán
+    '#C9A84C', // champán (doble peso)
+    '#D4AF37', // dorado metálico
+    '#E8C547', // dorado claro
+    '#6366f1', // índigo
+    '#6366f1', // índigo
+    '#10b981', // esmeralda
+    '#f59e0b', // ámbar
+    '#fbbf24', // ámbar claro
+    '#ec4899', // rosa
+    '#8b5cf6', // violeta
+    '#06b6d4', // cian
+  ];
+
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-      {[...Array(30)].map((_, i) => (
+      {/* Partículas pequeñas — brillo ambiental */}
+      {[...Array(50)].map((_, i) => {
+        const size = 1 + Math.random() * 3;
+        const color = palette[i % palette.length];
+        return (
+          <motion.div
+            key={`ambient-${i}`}
+            className="absolute rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: size,
+              height: size,
+              background: color,
+              boxShadow: `0 0 ${2 + Math.random() * 4}px ${color}`,
+            }}
+            animate={{
+              y: [0, -60 - Math.random() * 80, 0],
+              x: [0, (Math.random() - 0.5) * 40, 0],
+              opacity: [0, 0.3 + Math.random() * 0.4, 0],
+              scale: [0, 1 + Math.random(), 0],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 5,
+              repeat: Infinity,
+              delay: Math.random() * 6,
+              ease: 'easeInOut',
+            }}
+          />
+        );
+      })}
+
+      {/* Partículas medianas — dorado principal */}
+      {[...Array(30)].map((_, i) => {
+        const size = 2 + Math.random() * 5;
+        const isGold = i < 18;
+        const color = isGold
+          ? ['#C9A84C', '#D4AF37', '#E8C547', '#F5D76E'][i % 4]
+          : palette[8 + (i % 4)];
+        return (
+          <motion.div
+            key={`gold-${i}`}
+            className="absolute rounded-full blur-[0.5px]"
+            style={{
+              left: `${10 + Math.random() * 80}%`,
+              top: `${10 + Math.random() * 80}%`,
+              width: size,
+              height: size,
+              background: color,
+              boxShadow: isGold
+                ? `0 0 ${4 + Math.random() * 8}px ${color}, 0 0 ${8 + Math.random() * 12}px ${color}66`
+                : `0 0 ${2 + Math.random() * 4}px ${color}`,
+            }}
+            animate={{
+              y: [0, -30 - Math.random() * 60, 0],
+              x: [0, (Math.random() - 0.5) * 50, 0],
+              opacity: [0, 0.4 + Math.random() * 0.4, 0],
+              scale: [0, 1 + Math.random() * 1.5, 0],
+            }}
+            transition={{
+              duration: 3.5 + Math.random() * 5,
+              repeat: Infinity,
+              delay: Math.random() * 7,
+              ease: 'easeInOut',
+            }}
+          />
+        );
+      })}
+
+      {/* Partículas grandes — sparkles ocasionales */}
+      {[...Array(15)].map((_, i) => (
         <motion.div
-          key={i}
+          key={`sparkle-${i}`}
           className="absolute rounded-full"
-          style={{ 
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            width: `${1 + Math.random() * 2}px`,
-            height: `${1 + Math.random() * 2}px`,
-            background: i % 3 === 0 ? '#C9A84C' : i % 3 === 1 ? '#fbbf24' : '#f59e0b',
+          style={{
+            left: `${20 + Math.random() * 60}%`,
+            top: `${20 + Math.random() * 60}%`,
+            width: 3 + Math.random() * 4,
+            height: 3 + Math.random() * 4,
+            background: '#C9A84C',
+            boxShadow: '0 0 10px #C9A84C, 0 0 20px #C9A84C88, 0 0 40px #C9A84C44',
           }}
           animate={{
-            y: [0, -40 - Math.random() * 50, 0],
-            x: [0, (Math.random() - 0.5) * 30, 0],
-            opacity: [0, 0.5 + Math.random() * 0.3, 0],
-            scale: [0, 1 + Math.random(), 0],
+            y: [0, -20 - Math.random() * 30, 0],
+            x: [0, (Math.random() - 0.5) * 20, 0],
+            opacity: [0, 0.7, 0],
+            scale: [0, 1.5, 0],
           }}
           transition={{
-            duration: 2.5 + Math.random() * 4,
+            duration: 2 + Math.random() * 3,
             repeat: Infinity,
-            delay: Math.random() * 5,
-            ease: 'easeInOut',
+            delay: Math.random() * 6,
+            ease: [0.4, 0, 0.2, 1],
           }}
         />
       ))}
