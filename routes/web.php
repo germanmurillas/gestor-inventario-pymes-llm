@@ -22,6 +22,13 @@ Route::get('/dashboard', [InventoryController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// ── Status Master — Agent Bus Monitor ──────────────────────────────────────────
+Route::get('/status-master', function () {
+    return Inertia::render('StatusMaster');
+})->name('status-master');
+
+Route::get('/api/agent-bus', [\App\Http\Controllers\AgentBusController::class, 'events']);
+
 Route::get('/inventory/report', [InventoryController::class, 'exportPdf'])
     ->middleware(['auth', 'verified', 'role:admin'])
     ->name('inventory.report');

@@ -11,6 +11,7 @@
         "@dnd-kit/utilities": "^3.2.2",
         "@inertiajs/react": "^2.0.0",
         "follow-redirects": "^1.16.0",
+        "framer-motion": "^12.38.0",
         "gsap": "^3.12.5",
         "lucide-react": "^0.513.0",
         "postcss": "^8.5.14",
