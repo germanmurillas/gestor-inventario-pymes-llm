@@ -3,63 +3,55 @@
 
 % ─────────────────────────────────────────────────
 % VERSION TRACKER — No modificar este bloque
-% Versión:    Tesis Humanizada
+% Versión:    Tesis Humanizada (Dummies)
 % Archivo:    Capitulo4Metodologia/metodologia.tex
-% Última mod:  2026-05-08T08:32:03
+% Última mod:  2026-05-06T16:08:45
 % Git commit:  cc9c766f @ main
-% Audiencia:   general
-% Verificar antes de editar: bash check_tesis_version.sh overleaf_tesis_humanizado/Capitulo4Metodologia/metodologia.tex
+% Audiencia:   divulgativo
+% Verificar antes de editar: bash check_tesis_version.sh overleaf_tesis/Capitulo4Metodologia/metodologia.tex
 % ─────────────────────────────────────────────────
 
 
 \section{Tipo de Investigación}
 \label{sec:tipo_investigacion}
-
-Este proyecto se enmarca en la \textbf{investigación aplicada}: toma el conocimiento de la ingeniería de sistemas y lo usa para construir una solución a un problema real del entorno empresarial. También es \textbf{investigación proyectiva}, porque no se limita a analizar el problema sino que propone y construye un artefacto de software funcional ---un producto que funciona, no un informe que se archiva. El proyecto sigue los lineamientos de la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle para trabajos de grado en la modalidad de Trabajo de Investigación \cite{univalle_resolucion137}.
+Este proyecto se enmarca en la \textbf{investigación aplicada}, ya que su fin es utilizar el conocimiento de la ingeniería de sistemas para desarrollar una solución tecnológica a un problema práctico y concreto del entorno empresarial. Se apoya también en la \textbf{investigación proyectiva}, al proponer y construir un artefacto de software funcional. El proyecto sigue los lineamientos de la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle para trabajos de grado en la modalidad de Trabajo de Investigación \cite{univalle_resolucion137}.
 
 \section{Enfoque Metodológico (SCRUM)}
 \label{sec:scrum}
+Para la gestión del proyecto se adoptó una metodología de desarrollo Ágil, la cual fue implementada usando el marco de trabajo (framework) SCRUM. Se eligió este enfoque por su flexibilidad, su capacidad para gestionar la incertidumbre y su énfasis en la entrega de valor de manera iterativa e incremental.
 
-Para gestionar el desarrollo adoptamos \textbf{SCRUM}, un marco de trabajo ágil que organiza el proyecto en ciclos cortos llamados Sprints. ¿Por qué SCRUM y no un enfoque tradicional? La respuesta es práctica: cuando construyes software para un usuario real ---una panificadora con necesidades que evolucionan a medida que entiende lo que la tecnología puede hacer--- es imposible anticipar todos los requisitos desde el primer día. SCRUM permite construir, mostrar avances, recibir retroalimentación y ajustar el rumbo cada dos semanas.
+Aunque SCRUM define roles como Product Owner, Scrum Master y Equipo de Desarrollo, para este proyecto se adaptaron de la siguiente manera: para obtener una retroalimentación crítica y asegurar que el desarrollo se alineara con los objetivos, el Director de Trabajo de Grado (Prof. Héctor Fabio Ocampo) actuó como el principal \textit{stakeholder} y su perspectiva en las revisiones de sprint cumplió una función análoga a la del Product Owner, validando los incrementos de software y ajustando prioridades según los objetivos divulgativos y técnicos del proyecto.
 
-SCRUM define tres roles. En este proyecto los adaptamos al contexto académico así:
+Los autores (Germán David Murillas Mondragón y Jorge Augusto Estacio Almeciga), por su parte, asumieron de manera conjunta las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso, eliminando impedimentos y asegurando la adherencia a las ceremonias de SCRUM.
 
-\begin{itemize}
-    \item \textbf{Product Owner}: Representa al cliente y define qué debe hacer el sistema. Esta función la cumplió el director del trabajo de grado (Prof. Héctor Fabio Ocampo), quien estableció las reglas inmutables y validó cada incremento de software.
-    \item \textbf{Equipo de Desarrollo}: Los dos autores (Germán David Murillas Mondragón y Jorge Augusto Estacio Almeciga) asumieron conjuntamente la construcción del sistema.
-    \item \textbf{Scrum Master}: Facilita el proceso y elimina obstáculos. También lo asumieron los autores, asegurando que se respetaran las ceremonias de SCRUM.
-\end{itemize}
-
-El flujo de trabajo se organizó en Sprints de dos semanas, cada uno con cuatro momentos clave:
+El flujo de trabajo se organizó en Sprints, que son ciclos de trabajo iterativos de dos semanas de duración. Cada sprint siguió los eventos clave del framework:
 
 \begin{itemize}
-    \item \textbf{Product Backlog:} Listado priorizado de todas las funcionalidades del sistema, gestionado en GitHub Projects. El backlog inicial contenía 25 historias de usuario derivadas de los 9 casos de uso, priorizadas con el método MoSCoW (Must have, Should have, Could have, Won't have).
+    \item \textbf{Product Backlog:} Se creó y mantuvo un listado priorizado de todas las funcionalidades del sistema (historias de usuario) en GitHub Projects. El backlog inicial contenía 25 historias de usuario derivadas de los 9 casos de uso identificados en la panificadora caso de estudio. Las historias se priorizaron según el valor para el usuario y las dependencias técnicas, siguiendo el método MoSCoW (Must have, Should have, Could have, Won't have). La gestión del proyecto se apoyó en GitHub Projects 	te{github_projects} como herramienta de seguimiento, aplicando principios de calidad 	te{iso9001}.
     
-    \item \textbf{Sprint Planning:} Al inicio de cada sprint, el equipo seleccionaba las tareas del backlog que abordaría en las siguientes dos semanas. Cada Planning duraba máximo 2 horas y descomponía las historias en tareas técnicas concretas.
+    \item \textbf{Sprint Planning:} Al inicio de cada sprint, el equipo seleccionó un conjunto de tareas del Product Backlog para conformar el \textit{Sprint Backlog}, que constituyó el plan de trabajo para las siguientes dos semanas. Cada Sprint Planning tuvo una duración máxima de 2 horas, durante las cuales se estimó el esfuerzo de cada tarea y se descompusieron las historias de usuario en tareas técnicas específicas.
     
-    \item \textbf{Sprint Review:} Al final de cada sprint, se presentaba al director un incremento de software funcional ---no diapositivas, sino código que funcionaba. El director daba retroalimentación y se ajustaban prioridades.
+    \item \textbf{Sprint Review:} Al finalizar cada sprint, se presentó el incremento de software funcional al Director del proyecto para recibir retroalimentación, validar el avance y ajustar prioridades para el siguiente sprint. Las revisiones se documentaron en actas que registraron las observaciones del director y los acuerdos alcanzados.
     
-    \item \textbf{Sprint Retrospective:} Después de la revisión, el equipo reflexionaba sobre tres preguntas: ¿qué funcionó bien?, ¿qué se puede mejorar?, ¿qué acción concreta tomaremos en el próximo sprint?
+    \item \textbf{Sprint Retrospective:} Posterior a la revisión, el equipo reflexionó sobre el proceso para identificar puntos de mejora en eficiencia y colaboración para el siguiente sprint. Las retrospectivas se centraron en tres preguntas: ¿qué funcionó bien?, ¿qué se puede mejorar?, ¿qué acciones concretas tomaremos en el próximo sprint?
 \end{itemize}
 
 \section{Fases del Proyecto}
 \label{sec:fases_proyecto}
-
-El desarrollo se estructuró en seis fases que cubren desde entender el problema hasta entregar el producto final:
-
+El desarrollo del proyecto se estructuró en las siguientes fases:
 \begin{itemize}
-    \item \textbf{Levantamiento de Requerimientos:} Identificar necesidades reales y construir el backlog priorizado.
-    \item \textbf{Diseño del Sistema:} Diseñar la arquitectura MVC, modelar la base de datos y prototipar las interfaces en Figma.
-    \item \textbf{Desarrollo e Implementación:} Configurar el entorno y codificar los módulos de forma iterativa (sprints), con control de versiones en Git/GitHub.
-    \item \textbf{Implementación del Módulo LLM:} Poner en marcha el módulo de consulta inteligente, integrando APIs y desarrollando la lógica para interpretar lenguaje natural y generar respuestas.
-    \item \textbf{Pruebas y Validación:} Ejecutar pruebas unitarias y funcionales al final de cada sprint. Esta fase incluyó evaluación heurística con los 10 principios de Nielsen y auditoría de accesibilidad WCAG 2.1 nivel AA.
-    \item \textbf{Documentación y Despliegue:} Redactar el documento de tesis de forma concurrente al desarrollo y preparar la sustentación final.
+    \item \textbf{Levantamiento de Requerimientos:} Identificación de necesidades y elaboración del product backlog con las funcionalidades priorizadas.
+    \item \textbf{Diseño del Sistema:} Diseño de la arquitectura MVC, modelado de la base de datos y prototipado de las interfaces de usuario (wireframes).
+    \item \textbf{Desarrollo e Implementación:} Configuración del entorno y codificación iterativa de los módulos (sprints), con control de versiones mediante Git/GitHub.
+    \item \textbf{Implementación del Módulo LLM:} Configuración y puesta en marcha del módulo de consulta inteligente basado en LLM, incluyendo la integración de APIs y el desarrollo de la lógica para la interpretación de lenguaje natural y la generación de respuestas.
+    \item \textbf{Pruebas y Validación:} Ejecución de pruebas unitarias y funcionales al final de cada sprint para asegurar la calidad. Esta fase incluyó una evaluación heurística formal basada en los 10 principios de Jakob Nielsen para medir la usabilidad de la interfaz. Asimismo, se realizó una auditoría de accesibilidad utilizando herramientas automáticas y revisión manual para verificar el cumplimiento de los criterios del nivel AA de las WCAG 2.1.
+    \item \textbf{Documentación y Despliegue:} Redacción concurrente del documento de trabajo de grado y preparación para la sustentación final.
 \end{itemize}
 
 \section{Planificación de Sprints}
 \label{sec:planificacion_sprints}
 
-El sistema se desarrolló en 6 sprints de dos semanas cada uno (12 semanas de desarrollo activo), más 4 semanas adicionales para levantamiento de requisitos, diseño, documentación y preparación de la sustentación. La Tabla \ref{tab:sprints} detalla cada sprint.
+El desarrollo del sistema se ejecutó a lo largo de 6 sprints de dos semanas cada uno, totalizando 12 semanas de desarrollo activo, más 4 semanas adicionales dedicadas a las fases de levantamiento de requisitos, diseño, documentación final y preparación de la sustentación. La Tabla \ref{tab:sprints} detalla la planificación de cada sprint con sus fechas, objetivos y entregables.
 
 \begin{table}[H]
 \centering
@@ -90,90 +82,90 @@ Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & 111 casos de prue
 
 \subsubsection{Fase 0: Requisitos y Diseño (Semanas 1--4)}
 
-Antes de escribir una línea de código, dedicamos cuatro semanas a entender el problema y diseñar la solución:
+Durante las primeras cuatro semanas, anteriores al inicio formal de los sprints de desarrollo, se realizaron las siguientes actividades:
 
 \begin{itemize}
-    \item \textbf{Semana 1--2}: Revisión de literatura sobre gestión de inventarios y tecnologías web. Definición del problema y alcance. Identificación de la panificadora como caso de estudio.
-    \item \textbf{Semana 3}: Sesiones de elicitación con la panificadora. Aplicación de 10 preguntas depuradas. Documentación de hallazgos.
-    \item \textbf{Semana 4}: Documento de requisitos IEEE 830. Definición de 9 casos de uso. Diseño del modelo entidad-relación (10 tablas). Creación de 18 mockups en Figma (2 por módulo). Revisión y aprobación por el director.
+    \item \textbf{Semana 1--2}: Revisión de literatura sobre gestión de inventarios y tecnologías de desarrollo web. Definición del problema y alcance del proyecto. Identificación de la panificadora como caso de estudio.
+    \item \textbf{Semana 3}: Realización de las sesiones de elicitación de requisitos con la panificadora. Aplicación de la técnica de elicitación con 10 preguntas depuradas. Documentación de hallazgos.
+    \item \textbf{Semana 4}: Elaboración del documento de especificación de requisitos según el estándar IEEE 830. Definición de 9 casos de uso. Diseño del modelo entidad-relación (10 tablas). Creación de los 18 mockups en Figma (2 por cada módulo: estado con datos y estado vacío). Revisión y aprobación de mockups por el director del proyecto.
 \end{itemize}
 
 \textbf{Entregables}: Documento IEEE 830, modelo entidad-relación, 18 mockups en Figma aprobados, product backlog con 25 historias de usuario.
 
 \subsubsection{Sprint 1: Fundación del Proyecto (Semanas 5--6)}
 
-El primer sprint puso los cimientos técnicos sobre los que se construyó todo:
+El primer sprint se enfocó en establecer la base técnica sobre la cual se construiría todo el sistema:
 
 \begin{itemize}
-    \item \textbf{Día 1--3}: Instalación del entorno de desarrollo: Laravel 11, PHP 8.3, MySQL 8.0, Node.js para Vite. Creación del repositorio en GitHub.
-    \item \textbf{Día 4--7}: Migraciones para las 10 tablas. Modelos Eloquent con relaciones. Seeders con datos realistas de la panificadora.
-    \item \textbf{Día 8--12}: Sistema de autenticación con Laravel Breeze. Roles Admin/Operario. Middleware CheckRole para RBAC.
-    \item \textbf{Día 13--14}: Sprint Review con el director. Retrospective: se identificó la necesidad de mejorar la comunicación entre los dos desarrolladores.
+    \item \textbf{Día 1--3}: Instalación y configuración del entorno de desarrollo: Laravel 11, PHP 8.3, MySQL 8.0, Node.js para Vite. Creación del repositorio en GitHub (\texttt{germanmurillas/gestor-inventario-pymes-llm}).
+    \item \textbf{Día 4--7}: Ejecución de migraciones para las 10 tablas del modelo entidad-relación. Definición de modelos Eloquent con relaciones. Creación de seeders con datos realistas de la panificadora (materiales, lotes, bodegas).
+    \item \textbf{Día 8--12}: Implementación del sistema de autenticación con Laravel Breeze. Definición de roles (Admin/Operario) en la tabla users. Implementación del middleware CheckRole para control de acceso basado en roles (RBAC). Pruebas manuales de inicio de sesión con ambos roles.
+    \item \textbf{Día 13--14}: Sprint Review con el director. Verificación de que los middlewares de autenticación y RBAC funcionaran correctamente. Sprint Retrospective: se identificó la necesidad de mejorar la comunicación entre los dos desarrolladores que trabajaban en horarios complementarios.
 \end{itemize}
 
-\textbf{Entregables}: Proyecto Laravel funcional, 10 tablas migradas, modelos con relaciones, seeders poblados, RBAC funcional, repositorio GitHub activo.
+\textbf{Entregables}: Proyecto Laravel funcional, 10 tablas migradas, modelos con relaciones, seeders poblados, RBAC funcional (Admin/Operario), repositorio GitHub activo.
 
 \subsubsection{Sprint 2: Módulo de Inventario (Semanas 7--8)}
 
-Este sprint abordó el núcleo del sistema: gestionar materiales, lotes y bodegas:
+El segundo sprint abordó el núcleo funcional del sistema: la gestión de materiales, lotes y bodegas:
 
 \begin{itemize}
-    \item \textbf{Día 1--5}: CRUD completo de materiales con validaciones en español. CRUD de lotes con asignación automática de número secuencial.
-    \item \textbf{Día 6--9}: Dashboard con KPIs: total de materiales, lotes activos, lotes críticos, valorización total. Búsqueda con debounce de 300 ms.
-    \item \textbf{Día 10--12}: Gestión de bodegas con porcentaje de ocupación. Vista de inventario por bodega con navegación tipo carpetas.
-    \item \textbf{Día 13--14}: Sprint Review. Se validó el dashboard y el CRUD. Retrospective: se acordó priorizar FEFO en el siguiente sprint.
+    \item \textbf{Día 1--5}: Implementación del CRUD completo de materiales (crear, leer, actualizar, eliminar) con validación de formularios en español. Implementación del CRUD de lotes con asignación automática de número de lote secuencial.
+    \item \textbf{Día 6--9}: Desarrollo del dashboard de indicadores clave: total de materiales, total de lotes activos, lotes en estado crítico (umbral configurable a 15 días), valorización total del inventario ($\sum cantidad \times costo\_unitario$). Implementación de la búsqueda con debounce de 300 ms.
+    \item \textbf{Día 10--12}: Módulo de gestión de bodegas con cálculo de porcentaje de ocupación. Vista de inventario organizada por bodegas con navegación tipo carpetas. Implementación del componente FigmaInventario.tsx.
+    \item \textbf{Día 13--14}: Sprint Review con el director. Se validó el dashboard con KPIs y la funcionalidad de CRUD de materiales y lotes. Sprint Retrospective: se acordó priorizar la implementación FEFO en el siguiente sprint por ser una regla inmutable del proyecto.
 \end{itemize}
 
-\textbf{Entregables}: CRUD de materiales, CRUD de lotes, dashboard con 4 KPIs, búsqueda con debounce, gestión de bodegas con \% ocupación.
+\textbf{Entregables}: CRUD de materiales, CRUD de lotes, dashboard con 4 KPIs, búsqueda con debounce, gestión de bodegas con \% ocupación, componente FigmaInventario.tsx.
 
 \subsubsection{Sprint 3: Lógica FEFO, Conciliación y Reportes (Semanas 9--10)}
 
-El tercer sprint implementó las reglas de negocio más críticas:
+El tercer sprint implementó las reglas de negocio más críticas y los módulos exclusivos del rol Admin:
 
 \begin{itemize}
-    \item \textbf{Día 1--5}: Scope FEFO en el modelo Lote. Controlador de despachos con consumo automático: al solicitar una cantidad, el sistema consume primero del lote con vencimiento más próximo.
-    \item \textbf{Día 6--8}: Módulo de conciliación (Admin only). Flujo: seleccionar material $\rightarrow$ ingresar cantidad verificada físicamente $\rightarrow$ comparar $\rightarrow$ generar ajuste en Kardex.
-    \item \textbf{Día 9--11}: Reportes de valorización, ocupación, lotes críticos e historial de Kardex. Exportación PDF (DomPDF) y CSV.
-    \item \textbf{Día 12--14}: Etiquetas QR con información del lote para impresión directa. Sprint Review: el director validó el funcionamiento de FEFO con varios escenarios.
+    \item \textbf{Día 1--5}: Implementación del scope FEFO en el modelo Lote (\texttt{scopeFefoOrder}), que ordena los lotes por fecha de vencimiento ascendente. Desarrollo del controlador de despachos (\texttt{ConsumptionController}) con consumo automático FEFO: al solicitar una cantidad, el sistema consume primero del lote con vencimiento más próximo, luego del siguiente, y así sucesivamente.
+    \item \textbf{Día 6--8}: Implementación del módulo de conciliación (Admin only). Flujo: seleccionar material y bodega $\rightarrow$ ingresar cantidad verificada físicamente $\rightarrow$ comparar con cantidad registrada $\rightarrow$ si hay diferencia, generar movimiento de ajuste en el Kardex con trazabilidad completa.
+    \item \textbf{Día 9--11}: Desarrollo del módulo de generación de reportes. Reportes disponibles: valorización total por material y bodega, ocupación de bodegas, lotes críticos (próximos a vencer), historial de movimientos del Kardex. Exportación en formatos PDF (DomPDF) y CSV.
+    \item \textbf{Día 12--14}: Implementación del módulo de etiquetas QR: generación de código QR con información del lote (número de lote, material, fecha de vencimiento), renderizado para impresión directa desde el navegador. Sprint Review: el director validó el correcto funcionamiento de FEFO con varios escenarios de prueba. Sprint Retrospective: se identificó que el módulo RAG requeriría más atención de la prevista por la complejidad de la integración con la API de OpenAI.
 \end{itemize}
 
-\textbf{Entregables}: Scope FEFO, controlador de despachos con consumo automático, módulo de conciliación (Admin), 4 tipos de reportes exportables, etiquetas QR con impresión.
+\textbf{Entregables}: Scope FEFO, controlador de despachos con consumo automático, módulo de conciliación (Admin), 4 tipos de reportes exportables, módulo de etiquetas QR con impresión.
 
 \subsubsection{Sprint 4: Módulo RAG de Consulta Inteligente (Semanas 11--12)}
 
-Este sprint se dedicó íntegramente al componente más innovador:
+El cuarto sprint se dedicó íntegramente al componente más innovador del sistema:
 
 \begin{itemize}
-    \item \textbf{Día 1--3}: Diseño detallado de la arquitectura RAG. Definición de 10 categorías de intención (stock\_check, critical\_alerts, expiration, location, valuation, movements, batch\_info, summary, conciliation, general).
-    \item \textbf{Día 4--7}: Implementación de \texttt{classifyQuery} con expresiones regulares afinadas para reconocer variaciones del español colombiano.
-    \item \textbf{Día 8--11}: Implementación de \texttt{buildRagContext} que consulta las tablas relevantes según la intención. Integración con API de OpenAI (GPT-4o-mini).
-    \item \textbf{Día 12--14}: Mecanismo de fallback: si OpenAI no responde, el sistema muestra los datos en modo texto. Persistencia de conversaciones en \texttt{chat\_histories}.
+    \item \textbf{Día 1--3}: Diseño detallado de la arquitectura RAG: clasificación de intención $\rightarrow$ construcción de contexto $\rightarrow$ generación de respuesta. Definición de 10 categorías de intención (stock\_check, critical\_alerts, expiration, location, valuation, movements, batch\_info, summary, conciliation, general).
+    \item \textbf{Día 4--7}: Implementación del método \texttt{classifyQuery} con expresiones regulares para cada categoría de intención. Las expresiones regulares se afinan para reconocer variaciones del español colombiano, contemplando acentos opcionales y sinónimos comunes en el contexto de bodegas.
+    \item \textbf{Día 8--11}: Implementación del método \texttt{buildRagContext} que, según la intención clasificada, consulta las tablas relevantes de la base de datos y estructura la información en un prompt para el LLM. Integración con la API de OpenAI (GPT-4o-mini) mediante el cliente HTTP de Laravel.
+    \item \textbf{Día 12--14}: Implementación del mecanismo de fallback: si la API de OpenAI no está disponible (sin clave, timeout, error de red), el sistema responde en modo texto mostrando los datos recuperados directamente de la base de datos. Persistencia de conversaciones en la tabla \texttt{chat\_histories}. Sprint Review: el director aprobó la arquitectura RAG y verificó el correcto funcionamiento del mecanismo de fallback. Sprint Retrospective: se acordó que el siguiente sprint se enfocaría en pulir la interfaz visual.
 \end{itemize}
 
-\textbf{Entregables}: ChatLLMController completo, integración con API OpenAI, 10 categorías de intención, mecanismo de fallback, persistencia de conversaciones.
+\textbf{Entregables}: ChatLLMController completo (classifyQuery + buildRagContext), integración con API OpenAI GPT-4o-mini, 10 categorías de intención, mecanismo de fallback, persistencia de conversaciones, componente FigmaLLM.tsx.
 
 \subsubsection{Sprint 5: Diseño Visual y Configuración (Semanas 13--14)}
 
 El quinto sprint materializó los mockups de Figma en componentes React funcionales:
 
 \begin{itemize}
-    \item \textbf{Día 1--5}: Implementación de 18 componentes React fieles a los mockups. Tema Midnight Luxe (Obsidiana \#0D0D12, Champán \#C9A84C) con Tailwind CSS v4.
-    \item \textbf{Día 6--9}: Animaciones GSAP siguiendo la guía de tiempos: micro-interacciones (150--250 ms), transiciones de estado (300--400 ms), entrada en viewport (800--1200 ms).
-    \item \textbf{Día 10--12}: Panel de configuración con 4 pestañas: General, LLM, Notificaciones, Seguridad. Persistencia en tabla \texttt{settings}.
-    \item \textbf{Día 13--14}: Sprint Review: el director validó que los 18 componentes reflejaran fielmente los mockups.
+    \item \textbf{Día 1--5}: Implementación de los 18 componentes React fieles a los mockups de Figma: FigmaTablero, FigmaInventario, FigmaLLM, FigmaSettings, FigmaLogMaestro, FigmaReports, FigmaNotificaciones, FigmaAyuda, y sus correspondientes estados vacíos. Aplicación del tema Midnight Luxe (Obsidiana \#0D0D12, Champán \#C9A84C, Marfil \#FAF8F5, Pizarra \#2A2A35) mediante Tailwind CSS v4.
+    \item \textbf{Día 6--9}: Implementación de animaciones GSAP siguiendo la guía de tiempos definida en el diseño: micro-interacciones (150--250 ms), transiciones de estado (300--400 ms), entrada en viewport (800--1200 ms), hero fade-up en cascada (1200--1600 ms).
+    \item \textbf{Día 10--12}: Desarrollo del panel de configuración (FigmaSettings.tsx) con 4 pestañas: General (datos de la empresa), LLM (modelo, temperatura, tokens máximos), Notificaciones (umbrales y canales), Seguridad (parámetros de acceso). Implementación de persistencia de configuración en la tabla \texttt{settings}.
+    \item \textbf{Día 13--14}: Sprint Review: el director validó que los 18 componentes reflejaran fielmente los mockups de Figma. Sprint Retrospective: se acordó dedicar el último sprint exclusivamente a pruebas y correcciones.
 \end{itemize}
 
-\textbf{Entregables}: 18 componentes React, tema Midnight Luxe, animaciones GSAP, panel de configuración con 4 pestañas.
+\textbf{Entregables}: 18 componentes React, tema Midnight Luxe, animaciones GSAP, panel de configuración con 4 pestañas, tabla settings con persistencia.
 
 \subsubsection{Sprint 6: Pruebas, Despliegue y Documentación (Semanas 15--16)}
 
-El sprint final se enfocó en garantizar la calidad y preparar los entregables académicos:
+El sprint final se enfocó en garantizar la calidad del producto y preparar los entregables divulgativos:
 
 \begin{itemize}
-    \item \textbf{Día 1--5}: Ejecución de 111 casos de prueba con Playwright 1.59, organizados en 13 suites: Autenticación y RBAC, Inventario y Lotes, Despacho FEFO, Conciliación, Etiquetas QR, Reportes PDF, Configuración, Regresión Visual, RAG --- Clasificación, RAG --- Fallback, Usabilidad, Accesibilidad, Rendimiento.
-    \item \textbf{Día 6--9}: Corrección de bugs. Despliegue en GCP (instancia e2-micro) y configuración de OCI (VM.Standard.A1.Flex, 24 GB RAM).
-    \item \textbf{Día 10--12}: Redacción de documentación técnica: manual de instalación, manual de usuario, documento de arquitectura. Elaboración de anexos.
-    \item \textbf{Día 13--14}: Sprint Review final. Validación del sistema completo. Cierre del proyecto.
+    \item \textbf{Día 1--5}: Implementación y ejecución de 111 casos de prueba automatizados con Playwright 1.59, organizados en 13 suites: Autenticación y RBAC (5), Inventario y Lotes (6), Despacho FEFO (7), Conciliación (4), Etiquetas QR (3), Reportes PDF (4), Configuración (4), Regresión Visual (5), RAG --- Clasificación (50), RAG --- Fallback (4), Usabilidad (10 heurísticas), Accesibilidad (5 criterios WCAG AA), Rendimiento (4 métricas).
+    \item \textbf{Día 6--9}: Corrección de bugs identificados durante las pruebas. Despliegue del sistema en Google Cloud Platform (instancia e2-micro, Ubuntu 22.04, Nginx, PHP-FPM 8.3, MySQL 8.0). Configuración del servidor OCI (VM.Standard.A1.Flex, 4 OCPUs, 24 GB RAM) con sondeo automatizado para obtención de instancia.
+    \item \textbf{Día 10--12}: Redacción de la documentación técnica: manual de instalación, manual de usuario, documento de arquitectura, API reference (endpoints y controladores). Elaboración de los anexos del documento de tesis.
+    \item \textbf{Día 13--14}: Sprint Review final con el director. Validación del sistema completo. Cierre del proyecto y preparación para la sustentación.
 \end{itemize}
 
 \textbf{Entregables}: 111 casos de prueba (99.1\% de éxito), sistema desplegado en GCP, documentación completa, repositorio GitHub público con +50 commits.
@@ -181,7 +173,7 @@ El sprint final se enfocó en garantizar la calidad y preparar los entregables a
 \section{Herramientas de Desarrollo y Colaboración}
 \label{sec:herramientas}
 
-La Tabla \ref{tab:herramientas} resume las herramientas utilizadas.
+La Tabla \ref{tab:herramientas} resume las herramientas utilizadas durante el desarrollo del proyecto.
 
 \begin{table}[H]
 \centering
@@ -199,7 +191,7 @@ IDE & Visual Studio Code + Cursor & Edición de código con soporte para PHP, Ty
 \hline
 Diseño UI & Figma & Creación de 18 mockups de alta fidelidad para los 9 módulos \\
 \hline
-Comunicación & Google Meet + WhatsApp & Reuniones de sprint review y coordinación del equipo \\
+Comunicación & Google Meet + WhatsApp & Reuniones de sprint review con el director y coordinación del equipo \\
 \hline
 Base de datos & MySQL Workbench + TablePlus & Administración visual de la base de datos durante el desarrollo \\
 \hline
@@ -217,16 +209,13 @@ Despliegue & SSH + SCP + Tmux & Transferencia de archivos y administración de s
 \section{Consideraciones Éticas}
 \label{sec:etica}
 
-Este proyecto se rigió por principios de integridad académica y profesional:
+El desarrollo de este proyecto se rigió por principios de integridad académica y profesional:
 
 \begin{itemize}
-    \item \textbf{Confidencialidad de datos empresariales}: Los datos de la panificadora se anonimizaron en los seeders y en toda la documentación pública. La empresa autorizó el uso de sus procesos como referencia, pero sus datos comerciales específicos no se divulgan.
-    
-    \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, los autores utilizaron asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) para generación de código, depuración y documentación. Todo el código generado fue revisado, comprendido y validado por los autores antes de incluirlo en el proyecto, en cumplimiento de las políticas de integridad académica de la Universidad del Valle.
-    
-    \item \textbf{Licencias de software}: Todas las tecnologías utilizadas ---Laravel, React, Inertia.js, Tailwind CSS, GSAP, MySQL, Playwright--- son de código abierto con licencias que permiten uso académico y comercial sin costo. La API de OpenAI se usó bajo el plan de pago por uso, con créditos proporcionados por los autores.
-    
-    \item \textbf{Cumplimiento normativo}: El proyecto se acoge a la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle \cite{univalle_resolucion137}.
+    \item \textbf{Confidencialidad de datos empresariales}: Los datos proporcionados por la panificadora caso de estudio (nombres de materiales, cantidades, precios) fueron anonimizados en los seeders de la base de datos y en toda la documentación pública. La empresa autorizó el uso de sus procesos operativos como referencia para el levantamiento de requisitos, pero los datos específicos de su operación comercial no se divulgan.
+    \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, los autores utilizaron asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) como herramientas de productividad para generación de código, depuración y documentación. Todo el código generado fue revisado, comprendido y validado por los autores antes de su inclusión en el proyecto, en cumplimiento de las políticas de integridad académica de la Universidad del Valle.
+    \item \textbf{Licencias de software}: Todas las tecnologías utilizadas en el proyecto ---Laravel, React, Inertia.js, Tailwind CSS, GSAP, MySQL, Playwright--- son de código abierto y cuentan con licencias que permiten su uso en proyectos divulgativos y comerciales sin costo. La API de OpenAI se utilizó bajo el plan de pago por uso (\textit{pay-as-you-go}), con créditos proporcionados por los autores.
+    \item \textbf{Cumplimiento normativo}: El proyecto se acoge a la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle, que establece los lineamientos para trabajos de grado en la modalidad de Trabajo de Investigación.
 \end{itemize}
 
 %========= FIN DEL CÓDIGO PARA metodologia.tex =========
