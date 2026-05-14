@@ -16,11 +16,13 @@ class AgentBusController extends Controller
             return response()->json($cached);
         }
 
-        $result = Process::timeout(8)->run([
-            '/usr/local/bin/pymetory-bus-www', 'query', '--limit', '50'
-        ]);
-
-        $events = $result->successful() ? (json_decode($result->output(), true) ?: []) : [];
+        $output = shell_exec(
+            'ssh -p443 -o StrictHostKeyChecking=no -o ConnectTimeout=4 ' .
+            '-i /tmp/titan_key ubuntu@SERVIDOR ' .
+            "'/usr/local/bin/pymetory-bus query --limit 50' 2>/dev/null"
+        );
+        
+        $events = $output ? (json_decode($output, true) ?: []) : [];
         
         $agents = [];
         foreach ($events as $e) {
