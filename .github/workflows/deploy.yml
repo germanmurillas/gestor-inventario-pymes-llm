@@ -1,23 +1,49 @@
-name: Deploy to OCI
+name: CI/CD Pipeline — Pymetory
+
 on:
   push:
+    branches: [main, develop]
+  pull_request:
     branches: [main]
+
 jobs:
-  deploy:
+  # ── 1. Lint & Syntax Check ──
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to Pymetory
-        uses: appleboy/ssh-action@v1
+      - uses: shivammathur/setup-php@v2
         with:
-          host: SERVIDOR
-          username: ubuntu
-          key: ${{ secrets.OCI_SSH_KEY }}
-          port: 443
+          php-version: '8.3'
+      - name: PHP Syntax Check
+        run: |
+          find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors"
+
+  # ── 2. Deploy to DesktopTitan (Oracle Cloud) ──
+  deploy:
+    needs: lint
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DESKTOPTITAN_HOST }}
+          port: ${{ secrets.DESKTOPTITAN_PORT }}
+          username: ${{ secrets.DESKTOPTITAN_USER }}
+          key: ${{ secrets.DESKTOPTITAN_KEY }}
           script: |
-            cd /var/www/pymetory
+            cd /var/www/portafolio/SolucionesWeb/pymetoryTesis
             git pull origin main
-            sudo -u www-data php artisan view:clear
-            sudo -u www-data php artisan config:clear
-            php artisan optimize 2>&1 | tail -3
-            sudo systemctl reload nginx
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+            php artisan config:clear
+            php artisan cache:clear
+            npm ci
+            npx vite build
+            pkill -f 'artisan serve' || true
+            nohup php artisan serve --host=127.0.0.1 --port=8081 > /tmp/artisan-serve.log 2>&1 &
+            sudo chown -R www-data:www-data .
+            echo "✅ Deploy completado"
