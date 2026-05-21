@@ -9,17 +9,18 @@ class Material extends Model {
     protected $fillable = [
         'code', 'name', 'unit', 'description',
         'stock_min', 'stock_max', 'photo_path',
-        // Campos añadidos en migración 2026_04_29
         'unidad_medida', 'categoria', 'stock_minimo',
+        'custom_fields',
     ];
 
     protected $appends = ['stock_total', 'tiene_criticos', 'photo_url'];
 
     protected function casts(): array {
         return [
-            'stock_min'   => 'float',
-            'stock_max'   => 'float',
-            'stock_minimo'=> 'float',
+            'stock_min'     => 'float',
+            'stock_max'     => 'float',
+            'stock_minimo'  => 'float',
+            'custom_fields' => 'json',
         ];
     }
 

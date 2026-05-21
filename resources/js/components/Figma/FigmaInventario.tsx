@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { LayoutGrid, Box, Plus, Folder, Bell, Settings, ArrowRightLeft, ChevronRight, X, Warehouse, Ruler, ScanLine, Sparkles } from 'lucide-react';
+import { LayoutGrid, Box, Plus, Folder, Bell, Settings, ArrowRightLeft, ChevronRight, X, Warehouse, Ruler, ScanLine, Sparkles, Clock } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import FigmaMovements from './FigmaMovements';
 import FigmaForms from './FigmaForms';
@@ -114,7 +114,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
             {/* Modal de Producto (Mockup 6) */}
             {showModal && selectedLote && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
-                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-700/30 w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-700/30 w-full w-full overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-800/50/50">
                             <h3 className="font-bold uppercase tracking-tight">Vista Previa: {selectedLote.codigo}</h3>
                             <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-200 rounded-full transition-colors">

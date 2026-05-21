@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Globe, Cpu, Bell, ShieldCheck, Save, LogOut, Key, Zap, Database, CheckCircle, AlertTriangle, ExternalLink, Server, HardDrive, Loader2 } from 'lucide-react';
+import { Globe, Cpu, Bell, ShieldCheck, Save, LogOut, Key, Zap, Database, CheckCircle, AlertTriangle, ExternalLink, Server, HardDrive, Loader2, Plus, Trash2, GripVertical, ToggleLeft, ToggleRight, Tag } from 'lucide-react';
 import { router } from '@inertiajs/react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Tab = 'GENERAL' | 'LLM' | 'NOTIFICATIONS' | 'SECURITY';
+type Tab = 'GENERAL' | 'LLM' | 'NOTIFICATIONS' | 'SECURITY' | 'CUSTOMFIELDS' | 'COMPANY';
 
 interface ModelInfo {
   name: string;
@@ -67,6 +67,18 @@ const FigmaSettings = () => {
     const [gardenSystem, setGardenSystem] = useState<any>(null);
     const [gardenLoading, setGardenLoading] = useState(false);
 
+    // Custom Fields state
+    interface CustomField { id: number; name: string; key: string; type: string; options?: string[]; sort_order: number; active: boolean; required: boolean; default_value: string | null; }
+    const [customFields, setCustomFields] = useState<CustomField[]>([]);
+    const [newField, setNewField] = useState({ name: '', key: '', type: 'text', required: false, options: '' });
+    const [cfLoading, setCfLoading] = useState(false);
+
+    // Company settings state
+    const [companyName, setCompanyName] = useState('Pymetory Premium');
+    const [companyLogo, setCompanyLogo] = useState('');
+    const [companyAddress, setCompanyAddress] = useState('');
+    const [companyPhone, setCompanyPhone] = useState('');
+
 
     // Fetch local models on mount and when LLM tab is active
     useEffect(() => {
@@ -103,6 +115,55 @@ const FigmaSettings = () => {
             fetchGardenModels();
         }
     }, [llmSource]);
+
+    // Fetch custom fields
+    const fetchCustomFields = useCallback(async () => {
+        try {
+            const res = await fetch('/api/custom-fields');
+            const data = await res.json();
+            setCustomFields(data.fields || []);
+        } catch (err) { /* handle */ }
+    }, []);
+
+    useEffect(() => { if (activeTab === 'CUSTOMFIELDS') fetchCustomFields(); }, [activeTab, fetchCustomFields]);
+
+    const handleCreateField = async () => {
+        if (!newField.name || !newField.key) return;
+        setCfLoading(true);
+        try {
+            const csrf = (document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1];
+            const res = await fetch('/api/custom-fields', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-XSRF-TOKEN': decodeURIComponent(csrf ?? '') },
+                body: JSON.stringify({ ...newField, options: newField.options ? newField.options.split(',').map(s => s.trim()) : null }),
+            });
+            if (res.ok) { setNewField({ name: '', key: '', type: 'text', required: false, options: '' }); fetchCustomFields(); }
+        } finally { setCfLoading(false); }
+    };
+
+    const handleToggleField = async (field: CustomField) => {
+        try {
+            const csrf = (document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1];
+            await fetch(`/api/custom-fields/${field.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-XSRF-TOKEN': decodeURIComponent(csrf ?? '') },
+                body: JSON.stringify({ active: !field.active }),
+            });
+            fetchCustomFields();
+        } catch (err) { /* handle */ }
+    };
+
+    const handleDeleteField = async (id: number) => {
+        if (!confirm('¿Eliminar este campo personalizado?')) return;
+        try {
+            const csrf = (document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1];
+            await fetch(`/api/custom-fields/${id}`, {
+                method: 'DELETE',
+                headers: { 'Accept': 'application/json', 'X-XSRF-TOKEN': decodeURIComponent(csrf ?? '') },
+            });
+            fetchCustomFields();
+        } catch (err) { /* handle */ }
+    };
 
 
 
@@ -168,10 +229,12 @@ const FigmaSettings = () => {
             </div>
 
             {/* Tab System */}
-            <div className="flex bg-slate-800/50 border border-slate-100 rounded-[2.5rem] p-2 w-fit">
+            <div className="flex bg-slate-800/50 border border-slate-100 rounded-[2.5rem] p-2 w-fit flex-wrap">
                 <TabButton id="GENERAL"       label="General"   icon={Globe}       />
                 <TabButton id="LLM"           label="Núcleo IA" icon={Cpu}         />
                 <TabButton id="NOTIFICATIONS" label="Alertas"   icon={Bell}        />
+                <TabButton id="CUSTOMFIELDS"  label="Campos Extra" icon={Tag}      />
+                <TabButton id="COMPANY"       label="Empresa"   icon={Database}    />
                 <TabButton id="SECURITY"      label="Seguridad" icon={ShieldCheck} />
             </div>
 
@@ -180,7 +243,7 @@ const FigmaSettings = () => {
 
                 {/* ── 1. GENERAL ─────────────────────────────────────────── */}
                 {activeTab === 'GENERAL' && (
-                    <div key="general" className="space-y-12 max-w-2xl animate-in slide-in-from-bottom-8 duration-500">
+                    <div key="general" className="space-y-12 w-full animate-in slide-in-from-bottom-8 duration-500">
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-indigo-50 text-indigo-600 rounded-[1.5rem]"><Globe size={24} /></div>
                             <div>
@@ -228,7 +291,7 @@ const FigmaSettings = () => {
 
                 {/* ── 2. LLM ─────────────────────────────────────────────── */}
                 {activeTab === 'LLM' && (
-                    <div key="llm" className="space-y-12 max-w-2xl animate-in slide-in-from-bottom-8 duration-500">
+                    <div key="llm" className="space-y-12 w-full animate-in slide-in-from-bottom-8 duration-500">
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-violet-50 text-violet-600 rounded-[1.5rem]"><Cpu size={24} /></div>
                             <div>
@@ -607,7 +670,7 @@ const FigmaSettings = () => {
 
                 {/* ── 3. NOTIFICATIONS ───────────────────────────────────── */}
                 {activeTab === 'NOTIFICATIONS' && (
-                    <div key="notifications" className="space-y-12 max-w-2xl animate-in slide-in-from-bottom-8 duration-500">
+                    <div key="notifications" className="space-y-12 w-full animate-in slide-in-from-bottom-8 duration-500">
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-orange-50 text-orange-600 rounded-[1.5rem]"><Bell size={24} /></div>
                             <div>
@@ -751,7 +814,7 @@ const FigmaSettings = () => {
 
                 {/* ── 4. SECURITY ────────────────────────────────────────── */}
                 {activeTab === 'SECURITY' && (
-                    <div key="security" className="space-y-12 max-w-2xl animate-in slide-in-from-bottom-8 duration-500">
+                    <div key="security" className="space-y-12 w-full animate-in slide-in-from-bottom-8 duration-500">
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-emerald-50 text-emerald-600 rounded-[1.5rem]"><ShieldCheck size={24} /></div>
                             <div>
@@ -800,6 +863,125 @@ const FigmaSettings = () => {
                                     <div className="text-[10px] text-red-500 group-hover:text-white/70 font-bold uppercase tracking-widest transition-colors">Terminar sesión actual</div>
                                 </div>
                                 <LogOut className="text-red-600 group-hover:text-white transition-colors" size={28} />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── 5. CUSTOM FIELDS ─────────────────────────────────────── */}
+                {activeTab === 'CUSTOMFIELDS' && (
+                    <div key="customfields" className="space-y-10 w-full animate-in slide-in-from-bottom-8 duration-500">
+                        <div className="flex items-center gap-4">
+                            <div className="p-4 bg-purple-50 text-purple-600 rounded-[1.5rem]"><Tag size={24} /></div>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Campos Personalizados</h3>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Agrega campos extra a los materiales (color, proveedor, N° factura...)</p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-slate-800/50 border border-slate-100 rounded-[2rem] space-y-4">
+                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nuevo campo</div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <input type="text" placeholder="Nombre (ej: Color)" value={newField.name}
+                                    onChange={e => { const v = e.target.value; setNewField(p => ({...p, name: v, key: v.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'') })); }}
+                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-300 outline-none focus:border-purple-600" />
+                                <input type="text" placeholder="Clave (ej: color)" value={newField.key}
+                                    onChange={e => setNewField(p => ({...p, key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,'_')}))}
+                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-300 outline-none focus:border-purple-600" />
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <select value={newField.type} onChange={e => setNewField(p => ({...p, type: e.target.value}))}
+                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-purple-600">
+                                    <option value="text">Texto</option>
+                                    <option value="number">Número</option>
+                                    <option value="date">Fecha</option>
+                                    <option value="select">Selector</option>
+                                    <option value="boolean">Sí/No</option>
+                                    <option value="url">URL</option>
+                                </select>
+                                {newField.type === 'select' && (
+                                    <input type="text" placeholder="Opciones (rojo, azul, verde)" value={newField.options}
+                                        onChange={e => setNewField(p => ({...p, options: e.target.value}))}
+                                        className="flex-1 bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-300 outline-none focus:border-purple-600" />
+                                )}
+                                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 cursor-pointer">
+                                    <input type="checkbox" checked={newField.required} onChange={e => setNewField(p => ({...p, required: e.target.checked}))} /> Obligatorio
+                                </label>
+                            </div>
+                            <button onClick={handleCreateField} disabled={cfLoading || !newField.name || !newField.key}
+                                className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all">
+                                <Plus size={14} /> Agregar Campo
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {customFields.length === 0 && (
+                                <div className="p-8 text-center text-slate-400 bg-slate-800/50 rounded-[2rem] text-[10px] font-bold uppercase">
+                                    No hay campos personalizados. ¡Crea el primero!
+                                </div>
+                            )}
+                            {customFields.map((field) => (
+                                <div key={field.id} className="flex items-center gap-4 p-5 bg-slate-800/50 border border-slate-100 rounded-2xl">
+                                    <GripVertical size={16} className="text-slate-300" />
+                                    <div className="flex-1">
+                                        <div className="text-sm font-black text-slate-900">{field.name}</div>
+                                        <div className="text-[9px] font-bold text-slate-400 uppercase">{field.key} · {field.type}{field.required ? ' · obligatorio' : ''}</div>
+                                    </div>
+                                    <button onClick={() => handleToggleField(field)}
+                                        className={`w-10 h-5 rounded-full p-0.5 flex transition-all ${field.active ? 'bg-purple-600 justify-end' : 'bg-slate-300 justify-start'}`}>
+                                        <div className="w-4 h-4 bg-white rounded-full shadow" />
+                                    </button>
+                                    <button onClick={() => handleDeleteField(field.id)}
+                                        className="p-2 hover:bg-red-50 rounded-xl transition-colors">
+                                        <Trash2 size={16} className="text-slate-300 hover:text-red-500" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── 6. COMPANY ───────────────────────────────────────────── */}
+                {activeTab === 'COMPANY' && (
+                    <div key="company" className="space-y-10 w-full animate-in slide-in-from-bottom-8 duration-500">
+                        <div className="flex items-center gap-4">
+                            <div className="p-4 bg-blue-50 text-blue-600 rounded-[1.5rem]"><Database size={24} /></div>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Datos de la Empresa</h3>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Nombre, logo, dirección y contacto</p>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Nombre empresa</div>
+                                    <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)}
+                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Teléfono</div>
+                                    <input type="text" value={companyPhone} onChange={e => setCompanyPhone(e.target.value)} placeholder="+57 300 000 0000"
+                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Dirección</div>
+                                <input type="text" value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} placeholder="Calle 123 #45-67, Ciudad"
+                                    className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                            </div>
+                            <div className="space-y-1">
+                                <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">URL del Logo</div>
+                                <input type="text" value={companyLogo} onChange={e => setCompanyLogo(e.target.value)} placeholder="https://miapp.com/logo.png"
+                                    className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                            </div>
+                            <button onClick={() => handleSave({
+                                empresa_nombre: companyName,
+                                empresa_logo: companyLogo,
+                                empresa_direccion: companyAddress,
+                                empresa_telefono: companyPhone,
+                            })} disabled={saving}
+                                className="flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95">
+                                <Save size={14} /> Guardar Empresa
                             </button>
                         </div>
                     </div>

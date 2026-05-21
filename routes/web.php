@@ -12,6 +12,9 @@ use App\Http\Controllers\QRScanController;
 use App\Http\Controllers\AgentMonitorController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransferController;
+use App\Http\Controllers\CustomFieldController;
+use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\TagController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -161,10 +164,51 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);
 });
 
+// ── Custom Fields Management ─────────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('api/custom-fields')->group(function () {
+    Route::get('/',          [CustomFieldController::class, 'index']);
+    Route::post('/',         [CustomFieldController::class, 'store']);
+    Route::put('/{field}',   [CustomFieldController::class, 'update']);
+    Route::delete('/{field}', [CustomFieldController::class, 'destroy']);
+    Route::post('/reorder',  [CustomFieldController::class, 'reorder']);
+});
+
+// ── Purchase Orders ─────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified'])->prefix('api/purchase-orders')->group(function () {
+    Route::get('/',          [PurchaseOrderController::class, 'index']);
+    Route::post('/',         [PurchaseOrderController::class, 'store']);
+    Route::put('/{order}',   [PurchaseOrderController::class, 'update']);
+    Route::delete('/{order}',[PurchaseOrderController::class, 'destroy']);
+    Route::post('/{order}/receive', [PurchaseOrderController::class, 'receive']);
+    Route::get('/vendors',        [PurchaseOrderController::class, 'vendors']);
+    Route::post('/vendors',       [PurchaseOrderController::class, 'storeVendor']);
+});
+
 // ── Transferencias entre Bodegas ───────────────────────────────────────────
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/inventory/transfer', [TransferController::class, 'store'])
         ->name('inventory.transfer');
     Route::get('/inventory/transfers', [TransferController::class, 'index'])
         ->name('inventory.transfers');
+});
+
+// ── Custom Tags (Etiquetas) ────────────────────────────────────────────────
+Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    Route::get('/tags',                    [TagController::class, 'index']);
+    Route::post('/tags',                   [TagController::class, 'store']);
+    Route::put('/tags/{tag}',              [TagController::class, 'update']);
+    Route::delete('/tags/{tag}',           [TagController::class, 'destroy']);
+    Route::get('/materials/filter',        [TagController::class, 'filterByTag']);
+    Route::get('/materials/{id}/tags',     [TagController::class, 'materialTags']);
+    Route::post('/materials/{id}/tags',    [TagController::class, 'assignTags']);
+});
+
+// ── SORTLY-008: Barcode & QR Label Generation ──────────────────────────────
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/inventory/labels', [LabelController::class, 'index'])
+        ->name('inventory.labels');
+    Route::get('/inventory/labels/print', [LabelController::class, 'print'])
+        ->name('inventory.labels.print');
+    Route::post('/inventory/labels/generate', [LabelController::class, 'generate'])
+        ->name('inventory.labels.generate');
 });

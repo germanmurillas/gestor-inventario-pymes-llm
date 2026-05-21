@@ -50,7 +50,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 animate-in slide-in-from-right-4 duration-500 max-w-4xl mx-auto pb-20">
+        <form onSubmit={handleSubmit} className="space-y-8 animate-in slide-in-from-right-4 duration-500 max-w-7xl mx-auto pb-20">
             {/* Header (Mockup 14 Top) */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
