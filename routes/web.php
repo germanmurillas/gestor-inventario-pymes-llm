@@ -15,10 +15,16 @@ use App\Http\Controllers\TransferController;
 use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\LabelController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 });
+
+// ── Índice General de Enlaces ────────────────────────────────────────────────
+Route::get('/indice', function () {
+    return Inertia::render('Indice');
+})->name('indice');
 
 // Endpoint del Dashboard: Renderiza y escupe la lógica FEFO calculada en Base de Datos.
 Route::get('/dashboard', [InventoryController::class, 'index'])
