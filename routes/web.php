@@ -26,6 +26,11 @@ Route::get('/indice', function () {
     return Inertia::render('Indice');
 })->name('indice');
 
+// ── Hub de Oportunidades con IA ──────────────────────────────────────────────
+Route::get('/nicho', function () {
+    return Inertia::render('Nicho');
+})->name('nicho');
+
 // Endpoint del Dashboard: Renderiza y escupe la lógica FEFO calculada en Base de Datos.
 Route::get('/dashboard', [InventoryController::class, 'index'])
     ->middleware(['auth', 'verified'])
