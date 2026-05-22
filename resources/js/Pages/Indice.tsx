@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { Globe, GraduationCap, Server, Code, Github, Shield, Lock, ArrowRight, Box, LayoutGrid, Search, Tag, BarChart3, MessageSquare, Bell, Settings, ScanLine, History, ArrowRightLeft, Truck, Printer, FileText } from 'lucide-react';
+import PixelSnow from '../components/PixelSnow';
 
 const SECTIONS = [
     {
@@ -221,11 +222,27 @@ export default function Indice() {
     }
 
     return (
-        <div className="min-h-screen bg-obsidiana text-white pb-20">
+        <div className="min-h-screen bg-obsidiana text-white pb-20 relative">
             <Head title="Índice General | Pymetory" />
 
+            <PixelSnow
+                color="#ffc3c3"
+                flakeSize={0.011}
+                minFlakeSize={1}
+                pixelResolution={500}
+                speed={0.6}
+                depthFade={4}
+                farPlane={30}
+                brightness={3}
+                gamma={0.1}
+                density={0.3}
+                variant="round"
+                direction={260}
+                style={{ position: 'fixed' }}
+            />
+
             {/* Header */}
-            <div className="sticky top-0 z-40 bg-obsidiana/80 backdrop-blur-xl border-b border-slate-700/30">
+            <div className="sticky top-0 z-40 bg-obsidiana/80 backdrop-blur-xl border-b border-slate-700/30 relative z-10">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
@@ -242,7 +259,7 @@ export default function Indice() {
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-12">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12 space-y-12 relative z-10">
                 {SECTIONS.map((section, si) => (
                     <div key={si}>
                         <div className="flex items-center gap-3 mb-6">
@@ -307,7 +324,7 @@ export default function Indice() {
             </div>
 
             {/* Footer */}
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-12 text-center">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-12 text-center relative z-10">
                 <div className="text-[10px] font-bold text-slate-700 uppercase">
                     {SECTIONS.length} secciones · {SECTIONS.reduce((sum, s) => sum + (s.links?.length || 0) + (s.subsections?.reduce((a, b) => a + (b.links?.length || 0), 0) || 0), 0)} enlaces totales · DesktopTitan OCI A1.Flex
                 </div>
