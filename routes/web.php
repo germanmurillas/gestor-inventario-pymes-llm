@@ -16,6 +16,7 @@ use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\LabelController;
+use App\Http\Controllers\PageAccessController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -30,6 +31,9 @@ Route::get('/indice', function () {
 Route::get('/nicho', function () {
     return Inertia::render('Nicho');
 })->name('nicho');
+
+// ── Page Access Verification (sanitized — passwords not in client JS) ────────
+Route::post('/api/verify-page-access', [PageAccessController::class, 'verify']);
 
 // Endpoint del Dashboard: Renderiza y escupe la lógica FEFO calculada en Base de Datos.
 Route::get('/dashboard', [InventoryController::class, 'index'])
