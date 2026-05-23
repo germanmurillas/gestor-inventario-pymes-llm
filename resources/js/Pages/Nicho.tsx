@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
+import axios from 'axios';
 import { TrendingUp, DollarSign, Clock, Shield, Zap, Lock, Star, ArrowUp, Target, Cpu, Globe, Server, Gamepad, Bot, BarChart3, PenTool, Store, GraduationCap, ChartLine, Radio } from 'lucide-react';
 import PixelSnow from '../components/PixelSnow';
 
@@ -202,16 +203,19 @@ function ScoreDot({ score, max = 5 }: { score: number; max?: number }) {
 }
 
 export default function Nicho() {
-  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('nicho_unlocked') === '***REMOVED***');
+  const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('nicho_unlocked') === '1');
   const [pass, setPass] = useState('');
   const [error, setError] = useState(false);
 
-  const handleUnlock = () => {
-    if (pass === '***REMOVED***') {
-      sessionStorage.setItem('nicho_unlocked', '***REMOVED***');
-      setUnlocked(true);
-      setError(false);
-    } else {
+  const handleUnlock = async () => {
+    try {
+      const res = await axios.post('/api/verify-page-access', { page: 'nicho', password: pass });
+      if (res.data.valid) {
+        sessionStorage.setItem('nicho_unlocked', '1');
+        setUnlocked(true);
+        setError(false);
+      }
+    } catch {
       setError(true);
     }
   };

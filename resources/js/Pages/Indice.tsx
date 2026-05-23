@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import axios from 'axios';
 import { Globe, GraduationCap, Server, Code, Github, Shield, Lock, ArrowRight, Box, LayoutGrid, Search, Tag, BarChart3, MessageSquare, Bell, Settings, ScanLine, History, ArrowRightLeft, Truck, Printer, FileText } from 'lucide-react';
 import PixelSnow from '../components/PixelSnow';
 
@@ -174,16 +175,19 @@ const SECTIONS = [
 ];
 
 export default function Indice() {
-    const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('indice_unlocked') === '5500');
+    const [unlocked, setUnlocked] = useState(() => sessionStorage.getItem('indice_unlocked') === '1');
     const [pass, setPass] = useState('');
     const [error, setError] = useState(false);
 
-    const handleUnlock = () => {
-        if (pass === '5500') {
-            sessionStorage.setItem('indice_unlocked', '5500');
-            setUnlocked(true);
-            setError(false);
-        } else {
+    const handleUnlock = async () => {
+        try {
+            const res = await axios.post('/api/verify-page-access', { page: 'indice', password: pass });
+            if (res.data.valid) {
+                sessionStorage.setItem('indice_unlocked', '1');
+                setUnlocked(true);
+                setError(false);
+            }
+        } catch {
             setError(true);
         }
     };
