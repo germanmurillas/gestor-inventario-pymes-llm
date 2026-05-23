@@ -196,7 +196,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
     );
 
     return (
-        <div className="animate-in slide-in-from-right-4 duration-500 max-w-5xl mx-auto pb-20 space-y-6">
+        <div className="animate-in slide-in-from-right-4 duration-500 max-w-7xl mx-auto pb-20 space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
@@ -659,7 +659,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
 
             {/* ── STEP 4: Success ───────────────────────────────────────────── */}
             {step === 4 && consumptionResult && (
-                <div className="max-w-2xl mx-auto">
+                <div className="max-w-4xl mx-auto">
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-12 shadow-sm space-y-8 text-center">
                         {/* Success animation */}
                         <div className="relative">

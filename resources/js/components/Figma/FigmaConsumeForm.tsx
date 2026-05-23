@@ -28,7 +28,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
     const percentage = Math.min((data.quantity / lote.quantity) * 100, 100);
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 animate-in slide-in-from-right-4 duration-500 max-w-4xl mx-auto pb-20">
+        <form onSubmit={handleSubmit} className="space-y-8 animate-in slide-in-from-right-4 duration-500 max-w-7xl mx-auto pb-20">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">

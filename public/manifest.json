@@ -1,0 +1,26 @@
+{
+  "name": "Pymetory Premium",
+  "short_name": "Pymetory",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0f0f0f",
+  "background_color": "#0f0f0f",
+  "description": "Gestión de Inventarios con Inteligencia Artificial para PYMEs",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

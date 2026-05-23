@@ -12,6 +12,7 @@ class InventoryController extends Controller {
         $lotesActivos = Lote::with(['material', 'bodega'])->fefoOrder()->get()->map(function($lote) {
             return [
                 'id' => $lote->id,
+                'material_id' => $lote->material_id,
                 'codigo' => $lote->material->code,
                 'material_name' => $lote->material->name,
                 'unit' => $lote->material->unit ?? 'kg',

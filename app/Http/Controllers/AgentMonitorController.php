@@ -24,7 +24,7 @@ class AgentMonitorController extends Controller
         // 1. Obtener estado de MiniModelGarden
         try {
             $benchmark = Http::timeout(5)
-                ->get('http://SERVIDOR/api/models/benchmark')
+                ->get('/api/models/benchmark')
                 ->json();
 
             if ($benchmark) {
@@ -54,7 +54,7 @@ class AgentMonitorController extends Controller
         // 2. Obtener heartbeats de agentes
         try {
             $heartbeats = Http::timeout(5)
-                ->get('http://SERVIDOR/api/models/heartbeats')
+                ->get('/api/models/heartbeats')
                 ->json();
 
             if ($heartbeats && isset($heartbeats['heartbeats'])) {

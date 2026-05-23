@@ -1,7 +1,7 @@
 > ⚠️ **MIGRADO A DESKTOPTITAN** — Mayo 2026
 > Todo el contenido de este servidor fue consolidado en una sola máquina Oracle Always Free:
 > **DesktopTitan** · SERVIDOR · 4 OCPU ARM · 24 GB RAM · 200 GB SSD
-> Los servidores legacy cazador-2 (SERVIDOR) y cazador-3 (SERVIDOR) ya no están activos.
+> Los servidores legacy cazador-2 (SERVIDOR), cazador-3 (SERVIDOR), y cazador-1 (SERVIDOR) ya no están activos. Todo corre en DesktopTitan.
 > Toda la infraestructura, servicios y documentación migraron a DesktopTitan.
 
 <div align="center">
@@ -239,12 +239,12 @@ Password: Pymetory2026
 | Componente | Detalle |
 |-----------|---------|
 | **Proveedor** | Oracle Cloud Infrastructure (OCI) |
-| **Pymetory** | SERVIDOR · Ubuntu 22.04 · 956MB RAM · 50GB |
-| **MiniModelGarden** | SERVIDOR · Ubuntu 22.04 · 956MB RAM · 50GB · Ollama |
-| **Stack** | Nginx + PHP-FPM 8.3 + SQLite / MySQL 8 |
+| **DesktopTitan** | SERVIDOR · Ubuntu 22.04 · 24GB RAM · 200GB · ARM A1.Flex |
+| **MiniModelGarden** | Corre en DesktopTitan · Puerto 8080 → /api/models |
+| **Stack** | Nginx + PHP-FPM 8.3 + MySQL 8 + Docker + Ollama |
 
-### Instancia Objetivo (Titan ARM)
-Se está cazando automáticamente una instancia **VM.Standard.A1.Flex (4 OCPU / 24 GB RAM)** usando el sistema automatizado **Titan Predator** para LeatherModelGarden — modelos LLM grandes locales.
+### Instancia Titan ARM (CAPTURADA ✅)
+Instancia **VM.Standard.A1.Flex (4 OCPU / 24 GB RAM / 200 GB NVMe)** capturada y corriendo 24/7. El sistema de cacería (Hunter v3) monitorea y mantiene la instancia activa.
 
 ---
 
@@ -261,7 +261,7 @@ hunter.py ──→ OCI API ──→ LaunchInstance (4 OCPU / 24GB RAM)
                      Instancia creada + SSH key injected
 ```
 
-**Monitor en vivo:** `http://SERVIDOR/`
+**Monitor en vivo:** `http://SERVIDOR/monitor/`
 
 El sistema incluye:
 - 🎯 Bot de cacería (`hunter.py`) corriendo 24/7 en Oracle Cloud

@@ -13,12 +13,14 @@
         "follow-redirects": "^1.16.0",
         "framer-motion": "^12.38.0",
         "gsap": "^3.12.5",
+        "jsbarcode": "^3.12.3",
         "lucide-react": "^0.513.0",
         "postcss": "^8.5.14",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-qr-code": "^2.0.18",
-        "recharts": "^3.8.1"
+        "recharts": "^3.8.1",
+        "three": "^0.184.0"
     },
     "devDependencies": {
         "@playwright/test": "^1.59.1",

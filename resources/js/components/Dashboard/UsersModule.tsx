@@ -11,7 +11,7 @@ interface Operator {
 }
 
 const MOCK_OPERATORS: Operator[] = [
-    { id: '1', name: 'Germán David', email: 'correo-retirado@example.com', role: 'ADMIN', lastActive: 'Ahora', status: 'ONLINE' },
+    { id: '1', name: 'Germán David', email: 'admin@pymetory.com', role: 'ADMIN', lastActive: 'Ahora', status: 'ONLINE' },
     { id: '2', name: 'Laura Gómez', email: 'lgomez@planta.com', role: 'OPERARIO', lastActive: 'Hace 5 min', status: 'ONLINE' },
     { id: '3', name: 'Roberto Vásquez', email: 'rvasquez@planta.com', role: 'OPERARIO', lastActive: 'Ayer', status: 'OFFLINE' },
     { id: '4', name: 'Ana Silva', email: 'asilva@planta.com', role: 'ADMIN', lastActive: 'Hace 2 horas', status: 'OFFLINE' },

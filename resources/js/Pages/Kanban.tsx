@@ -13,21 +13,29 @@ import {
     Send,
     Tag,
     User,
+    Search,
+    Pencil,
+    Check,
+    Columns,
 } from 'lucide-react';
 import {
     DndContext,
     closestCorners,
     PointerSensor,
+    TouchSensor,
+    KeyboardSensor,
     useSensor,
     useSensors,
     DragOverlay,
 } from '@dnd-kit/core';
 import {
+    rectSortingStrategy,
     SortableContext,
-    verticalListSortingStrategy,
     useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDroppable } from '@dnd-kit/core';
 import axios from 'axios';
 import gsap from 'gsap';
 import Sidebar from '../Components/Sidebar';
@@ -239,13 +247,31 @@ function ColumnAddForm({ column, onAdd }: { column: string; onAdd: (title: strin
     );
 }
 
+function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+    const { setNodeRef, isOver } = useDroppable({ id: `drop-${id}` });
+    return (
+        <div
+            ref={setNodeRef}
+            className={`flex-1 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1 min-h-[100px] rounded-xl transition-all duration-200 ${isOver ? 'bg-champan/5 border border-champan/30' : ''}`}
+        >
+            {children}
+        </div>
+    );
+}
+
 export default function Kanban({ auth, columns: initialColumns }: { auth: any; columns: Record<string, any[]> }) {
     const [columns, setColumns] = useState<Record<string, any[]>>(initialColumns || {
         todo: [], in_progress: [], review: [], done: []
     });
     const [activeId, setActiveId] = useState<number | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [editingCol, setEditingCol] = useState<string | null>(null);
+    const [editingColName, setEditingColName] = useState('');
+    const [newColName, setNewColName] = useState('');
     const contentRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLInputElement>(null);
     const user = auth?.user || { name: 'Invitado', role: 'operario' };
 
     useEffect(() => {
@@ -262,8 +288,71 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
     }, []);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+        useSensor(KeyboardSensor)
     );
+
+    // ── Keyboard shortcuts ──
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            if (e.ctrlKey || e.metaKey) return;
+            if (e.key === 'n' || e.key === 'N') {
+                e.preventDefault();
+                const firstCol = Object.keys(columns)[0] || 'todo';
+                setNewColName('');
+                (document.querySelector(`[data-add="${firstCol}"]`) as HTMLButtonElement)?.focus();
+            }
+            if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                searchRef.current?.focus();
+            }
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [columns]);
+
+    // ── Column CRUD ──
+    const handleAddColumn = () => {
+        if (!newColName.trim()) return;
+        const key = newColName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        if (!key || columns[key]) return;
+        setColumns(prev => ({ ...prev, [key]: [] }));
+        setNewColName('');
+    };
+
+    const handleRenameColumn = (oldKey: string) => {
+        if (!editingColName.trim() || editingColName === oldKey) { setEditingCol(null); return; }
+        const newKey = editingColName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        if (!newKey || newKey === oldKey || columns[newKey]) { setEditingCol(null); return; }
+        setColumns(prev => {
+            const updated = { ...prev };
+            updated[newKey] = updated[oldKey] || [];
+            delete updated[oldKey];
+            return updated;
+        });
+        setEditingCol(null);
+    };
+
+    const handleDeleteColumn = (key: string) => {
+        if (columns[key]?.length && !confirm(`¿Eliminar columna "${key}" con ${columns[key].length} tarjetas?`)) return;
+        setColumns(prev => {
+            const updated = { ...prev };
+            delete updated[key];
+            return updated;
+        });
+    };
+
+    // ── Filter ──
+    const filterItems = (items: any[]) => {
+        if (!searchTerm) return items;
+        const term = searchTerm.toLowerCase();
+        return items.filter(i =>
+            i.title?.toLowerCase().includes(term) ||
+            i.description?.toLowerCase().includes(term)
+        );
+    };
 
     const handleDragStart = (event: any) => {
         setActiveId(event.active.id);
@@ -328,6 +417,10 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
 
     const findColumnByDroppableId = (id: number | string) => {
         const strId = String(id);
+        if (strId.startsWith('drop-')) {
+            const col = strId.replace('drop-', '');
+            if (Object.keys(columns).includes(col)) return col;
+        }
         if (strId.startsWith('col-')) {
             const col = strId.replace('col-', '');
             if (Object.keys(columns).includes(col)) return col;
@@ -459,16 +552,21 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
 
             <Sidebar
                 sidebarOpen={sidebarOpen}
+                mobileOpen={mobileOpen}
                 user={user}
                 activeView="/kanban"
-                mode="kanban"
+                mode="dashboard"
+                onMobileClose={() => setMobileOpen(false)}
             />
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
                 <header className="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white/40 backdrop-blur-md z-40">
                     <div className="flex items-center gap-6">
-                        <button onClick={() => setSidebarOpen(!sidebarOpen)} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:scale-110 active:scale-95">
+                        <button onClick={() => {
+                            if (window.innerWidth >= 1024) setSidebarOpen(!sidebarOpen);
+                            else setMobileOpen(!mobileOpen);
+                        }} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:scale-110 active:scale-95">
                             <Menu size={20} aria-hidden="true" />
                         </button>
                         <nav className="flex items-center gap-2" aria-label="Breadcrumb">
@@ -476,15 +574,51 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                             <h1 className="text-xs font-black uppercase tracking-widest text-slate-900">Kanban</h1>
                         </nav>
                     </div>
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                                ref={searchRef}
+                                type="text"
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                placeholder="Filtrar tarjetas..."
+                                className="pl-9 pr-3 py-2 bg-white/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-400 transition-colors w-48"
+                            />
+                            {searchTerm && (
+                                <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={12} /></button>
+                            )}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-bold hidden lg:block">
+                            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-mono">N</kbd> Nueva &nbsp;
+                            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-mono">F</kbd> Buscar
+                        </div>
+                    </div>
                 </header>
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     <div ref={contentRef} className="p-8 h-full">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-display font-black text-slate-900 tracking-tight">Tablero Kanban</h2>
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                Arrastra tarjetas para organizar tu flujo de trabajo
-                            </p>
+                        <div className="mb-6 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-3xl font-display font-black text-slate-900 tracking-tight">Tablero Kanban</h2>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                    Arrastra tarjetas para organizar tu flujo de trabajo
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={newColName}
+                                    onChange={e => setNewColName(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && handleAddColumn()}
+                                    placeholder="Nueva columna..."
+                                    className="px-3 py-1.5 bg-white/50 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-400 w-36"
+                                />
+                                <button onClick={handleAddColumn} disabled={!newColName.trim()}
+                                    className="p-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 transition-all">
+                                    <Plus size={14} />
+                                </button>
+                            </div>
                         </div>
 
                         <DndContext
@@ -494,33 +628,62 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                             onDragEnd={handleDragEnd}
                         >
                             <div className="flex gap-6 flex-1 min-h-0 overflow-x-auto pb-6 custom-scrollbar">
-                                {COLUMNS.map(col => {
-                                    const items = columns[col.key] || [];
+                                {Object.keys(columns).map(colKey => {
+                                    const colLabel = colKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                                    const items = filterItems(columns[colKey] || []);
                                     const ids = items.map(i => i.id);
+                                    const isEditing = editingCol === colKey;
+
+                                    const COLORS = ['#64748b', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+                                    const colorIndex = Object.keys(columns).indexOf(colKey) % COLORS.length;
 
                                     return (
                                         <div
-                                            key={col.key}
-                                            id={`col-${col.key}`}
+                                            key={colKey}
+                                            id={`col-${colKey}`}
                                             className="w-80 flex-shrink-0 flex flex-col"
                                         >
-                                            <div className={`p-3 rounded-2xl bg-gradient-to-r ${col.color} border border-white/5 flex items-center justify-between backdrop-blur-xl mb-4`}>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.accent }} />
-                                                    <span className="text-[10px] font-black tracking-[0.2em] text-white/80">
-                                                        {col.label}
-                                                    </span>
-                                                </div>
-                                                <span className="text-[10px] font-black text-white/40">
-                                                    {items.length}
-                                                </span>
+                                            <div className="p-3 rounded-2xl bg-gradient-to-r from-slate-800/50 to-slate-800/30 border border-white/5 flex items-center justify-between backdrop-blur-xl mb-4 group">
+                                                {isEditing ? (
+                                                    <div className="flex items-center gap-2 flex-1">
+                                                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[colorIndex] }} />
+                                                        <input
+                                                            autoFocus
+                                                            value={editingColName}
+                                                            onChange={e => setEditingColName(e.target.value)}
+                                                            onKeyDown={e => { if (e.key === 'Enter') handleRenameColumn(colKey); if (e.key === 'Escape') setEditingCol(null); }}
+                                                            onBlur={() => handleRenameColumn(colKey)}
+                                                            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs font-bold text-white outline-none"
+                                                        />
+                                                        <button onClick={() => handleRenameColumn(colKey)} className="text-emerald-400 hover:text-emerald-300"><Check size={14} /></button>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[colorIndex] }} />
+                                                            <span className="text-[10px] font-black tracking-[0.2em] text-white/80">
+                                                                {colLabel}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="text-[10px] font-black text-white/40">{items.length}</span>
+                                                            <button
+                                                                onClick={() => { setEditingCol(colKey); setEditingColName(colLabel); }}
+                                                                className="opacity-0 group-hover:opacity-100 p-1 text-white/40 hover:text-white/80 transition-all"
+                                                                title="Renombrar columna"
+                                                            ><Pencil size={11} /></button>
+                                                            <button
+                                                                onClick={() => handleDeleteColumn(colKey)}
+                                                                className="opacity-0 group-hover:opacity-100 p-1 text-red-400/50 hover:text-red-400 transition-all"
+                                                                title="Eliminar columna"
+                                                            ><Trash2 size={11} /></button>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
 
                                             <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-                                                <div
-                                                    id={`drop-${col.key}`}
-                                                    className="flex-1 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1 min-h-[100px]"
-                                                >
+                                                <DroppableColumn id={colKey}>
                                                     {items.map(item => (
                                                         <SortableCard
                                                             key={item.id}
@@ -531,10 +694,15 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                                                             onTitleChange={handleTitleChange}
                                                         />
                                                     ))}
-                                                </div>
+                                                    {items.length === 0 && searchTerm && (
+                                                        <div className="text-center py-6 text-[10px] text-slate-500 font-bold uppercase">
+                                                            Sin resultados
+                                                        </div>
+                                                    )}
+                                                </DroppableColumn>
                                             </SortableContext>
 
-                                            <ColumnAddForm column={col.key} onAdd={handleAdd} />
+                                            <ColumnAddForm column={colKey} onAdd={handleAdd} />
                                         </div>
                                     );
                                 })}

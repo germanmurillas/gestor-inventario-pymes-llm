@@ -73,7 +73,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto pb-20">
+        <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto pb-20">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
