@@ -33,7 +33,7 @@ const SECTIONS = [
             { href: '/monitor-status.php', label: 'Monitor Status API' },
             { href: '/chat/', label: 'Open WebUI Chat' },
             { href: '/magic/', label: 'React Bits Showcase' },
-            { href: 'http://SERVIDOR:8080/api/models', label: 'MiniModelGarden API', external: true },
+            { href: '/api/models', label: 'MiniModelGarden API' },
         ],
     },
     {

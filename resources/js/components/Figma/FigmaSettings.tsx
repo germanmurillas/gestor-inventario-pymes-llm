@@ -101,7 +101,7 @@ const FigmaSettings = () => {
         const fetchGardenModels = async () => {
             setGardenLoading(true);
             try {
-                const res = await fetch('http://SERVIDOR:8080/api/models/benchmark');
+                const res = await fetch('/api/models/benchmark');
                 const data = await res.json();
                 setGardenModels(data.models || []);
                 setGardenSystem(data.system || null);
