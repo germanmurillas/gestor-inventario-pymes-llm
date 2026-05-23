@@ -23,11 +23,13 @@ import {
     DragOverlay,
 } from '@dnd-kit/core';
 import {
+    rectSortingStrategy,
     SortableContext,
-    verticalListSortingStrategy,
     useSortable,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDroppable } from '@dnd-kit/core';
 import axios from 'axios';
 import gsap from 'gsap';
 import Sidebar from '../Components/Sidebar';
@@ -239,6 +241,18 @@ function ColumnAddForm({ column, onAdd }: { column: string; onAdd: (title: strin
     );
 }
 
+function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+    const { setNodeRef, isOver } = useDroppable({ id: `drop-${id}` });
+    return (
+        <div
+            ref={setNodeRef}
+            className={`flex-1 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1 min-h-[100px] rounded-xl transition-all duration-200 ${isOver ? 'bg-champan/5 border border-champan/30' : ''}`}
+        >
+            {children}
+        </div>
+    );
+}
+
 export default function Kanban({ auth, columns: initialColumns }: { auth: any; columns: Record<string, any[]> }) {
     const [columns, setColumns] = useState<Record<string, any[]>>(initialColumns || {
         todo: [], in_progress: [], review: [], done: []
@@ -329,6 +343,10 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
 
     const findColumnByDroppableId = (id: number | string) => {
         const strId = String(id);
+        if (strId.startsWith('drop-')) {
+            const col = strId.replace('drop-', '');
+            if (Object.keys(columns).includes(col)) return col;
+        }
         if (strId.startsWith('col-')) {
             const col = strId.replace('col-', '');
             if (Object.keys(columns).includes(col)) return col;
@@ -523,10 +541,7 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                                             </div>
 
                                             <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-                                                <div
-                                                    id={`drop-${col.key}`}
-                                                    className="flex-1 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1 min-h-[100px]"
-                                                >
+                                                <DroppableColumn id={col.key}>
                                                     {items.map(item => (
                                                         <SortableCard
                                                             key={item.id}
@@ -537,7 +552,7 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                                                             onTitleChange={handleTitleChange}
                                                         />
                                                     ))}
-                                                </div>
+                                                </DroppableColumn>
                                             </SortableContext>
 
                                             <ColumnAddForm column={col.key} onAdd={handleAdd} />
