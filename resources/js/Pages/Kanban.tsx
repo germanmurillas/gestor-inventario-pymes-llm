@@ -245,6 +245,7 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
     });
     const [activeId, setActiveId] = useState<number | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [mobileOpen, setMobileOpen] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
     const user = auth?.user || { name: 'Invitado', role: 'operario' };
 
@@ -459,16 +460,21 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
 
             <Sidebar
                 sidebarOpen={sidebarOpen}
+                mobileOpen={mobileOpen}
                 user={user}
                 activeView="/kanban"
-                mode="kanban"
+                mode="dashboard"
+                onMobileClose={() => setMobileOpen(false)}
             />
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden relative">
                 <header className="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white/40 backdrop-blur-md z-40">
                     <div className="flex items-center gap-6">
-                        <button onClick={() => setSidebarOpen(!sidebarOpen)} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:scale-110 active:scale-95">
+                        <button onClick={() => {
+                            if (window.innerWidth >= 1024) setSidebarOpen(!sidebarOpen);
+                            else setMobileOpen(!mobileOpen);
+                        }} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:scale-110 active:scale-95">
                             <Menu size={20} aria-hidden="true" />
                         </button>
                         <nav className="flex items-center gap-2" aria-label="Breadcrumb">
