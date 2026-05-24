@@ -196,6 +196,7 @@ class ChatLLMController extends Controller {
         $maxTokens = (int)($settings['llm_max_tokens'] ?? 1024);
         $llmSource = $settings['llm_source'] ?? 'local';
         $apiKey = $settings['llm_external_key'] ?? env('OPENAI_API_KEY');
+        $opencodeApiKey = $settings['llm_opencode_key'] ?? env('OPENCODE_API_KEY', '');
 
         $intent = $this->classifyQuery($query);
         $contextoRAG = $this->buildRagContext($query, $intent);
@@ -227,6 +228,40 @@ class ChatLLMController extends Controller {
                 }
             } catch (\Exception $e) {
                 \Log::error("Ollama error: " . $e->getMessage());
+            }
+        }
+
+        // ── OpenCode API (free tier) ──────────────────────────────────────────
+        if ($llmSource === 'opencode' && !empty($opencodeApiKey)) {
+            try {
+                $opencodeModel = $llmModelo !== 'pymetory-8b:latest' ? $llmModelo : 'big-pickle';
+                $opencodeResponse = Http::withToken($opencodeApiKey)
+                    ->timeout(30)
+                    ->post('https://opencode.ai/zen/go/v1/chat/completions', [
+                        'model' => $opencodeModel,
+                        'messages' => [
+                            ['role' => 'system', 'content' => $promptSistema],
+                            ['role' => 'user', 'content' => $query],
+                        ],
+                        'temperature' => $temperature,
+                        'max_tokens' => $maxTokens,
+                    ]);
+
+                if ($opencodeResponse->successful()) {
+                    $text = $opencodeResponse->json('choices.0.message.content');
+                    $this->recordChat($query, $text, 'opencode', $sessionId, $sessionTitle);
+                    return response()->json([
+                        'response' => trim($text),
+                        'intent' => $intent,
+                        'session_id' => $sessionId,
+                        'session_title' => $sessionTitle
+                    ]);
+                }
+
+                $errBody = $opencodeResponse->body();
+                \Log::error("OpenCode API error: " . $opencodeResponse->status() . " — " . mb_substr($errBody, 0, 300));
+            } catch (\Exception $e) {
+                \Log::error("OpenCode API error: " . $e->getMessage());
             }
         }
 

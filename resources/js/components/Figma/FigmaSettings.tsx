@@ -321,6 +321,7 @@ const FigmaSettings = () => {
                                 <div className="grid grid-cols-3 gap-3">
                                     {[
                                         { id: 'local', label: 'Local' },
+                                        { id: 'opencode', label: 'OpenCode' },
                                         { id: 'external', label: 'Manual' },
                                         { id: 'free', label: 'Gratuito' }
                                     ].map((s) => (
@@ -342,12 +343,12 @@ const FigmaSettings = () => {
                             {/* Entrada de API Key Externa o Gratuita */}
                             {llmSource !== 'local' && (
                                 <div className="space-y-2">
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">API Key / Token {llmSource === 'free' ? 'Gratuita' : 'Externa'}</div>
+                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">API Key / Token {llmSource === 'free' ? 'Gratuita' : llmSource === 'opencode' ? 'OpenCode' : 'Externa'}</div>
                                     <input
-                                        type="text"
+                                        type="password"
                                         value={llmExternalKey}
                                         onChange={(e) => setLlmExternalKey(e.target.value)}
-                                        placeholder={llmSource === 'free' ? 'Ingresa Token de HuggingFace...' : 'Ingresa API Key Externa de OpenAI...'}
+                                        placeholder={llmSource === 'free' ? 'Ingresa Token de HuggingFace...' : llmSource === 'opencode' ? 'Ingresa API Key de OpenCode Go...' : 'Ingresa API Key Externa de OpenAI...'}
                                         className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-xs font-bold text-slate-900 focus:border-indigo-600 focus:bg-slate-900/80 backdrop-blur-xl outline-none transition-all"
                                     />
                                     <p className="text-[9px] text-slate-400 font-bold uppercase">Clave para la comunicación con el proveedor seleccionado.</p>
@@ -655,6 +656,7 @@ const FigmaSettings = () => {
                                 llm_activo:       llmActive ? 'true' : 'false',
                                 llm_source:       llmSource,
                                 llm_external_key: llmExternalKey,
+                                llm_opencode_key: llmExternalKey,
                                 llm_num_ctx:      String(numCtx),
                                 llm_num_gpu:      String(numGpu),
                             })}
