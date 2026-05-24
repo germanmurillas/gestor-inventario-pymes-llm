@@ -182,7 +182,7 @@ class ChatLLMController extends Controller {
 
         $settings = DB::table('settings')->whereIn('clave', [
             'llm_activo', 'llm_modelo', 'llm_temperatura', 'llm_max_tokens',
-            'llm_source', 'llm_external_key', 'llm_num_ctx', 'llm_num_gpu'
+            'llm_source', 'llm_external_key', 'llm_opencode_key', 'llm_num_ctx', 'llm_num_gpu'
         ])->pluck('valor', 'clave');
 
         if (($settings['llm_activo'] ?? 'true') === 'false') {
@@ -207,85 +207,52 @@ class ChatLLMController extends Controller {
             "Solo menciona 'crítico' o 'urgente' si el usuario explícitamente te pregunta por alertas. " .
             "Usa el siguiente contexto de base de datos para responder:\n\n{$contextoRAG}";
 
+        // ── Unified LLM inference (local, opencode, external) ──────────────────
+        $endpoints = [
+            'local'    => ['url' => 'http://localhost:11434/v1/chat/completions', 'key' => ''],
+            'opencode' => ['url' => 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $opencodeApiKey],
+            'external' => ['url' => 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
+        ];
+
+        $cfg = $endpoints[$llmSource] ?? $endpoints['external'];
+
         if ($llmSource === 'local') {
-            try {
-                $ollamaResponse = Http::timeout(15)->post('http://localhost:11434/api/generate', [
-                    'model' => str_contains($llmModelo, ':') ? $llmModelo : "{$llmModelo}:latest",
-                    'prompt' => "{$promptSistema}\n\nPregunta del usuario: {$query}\n\nRespuesta:",
-                    'stream' => false,
-                    'options' => ['temperature' => $temperature, 'num_predict' => $maxTokens]
-                ]);
-
-                if ($ollamaResponse->successful()) {
-                    $text = $ollamaResponse->json('response');
-                    $this->recordChat($query, $text, 'local', $sessionId, $sessionTitle);
-                    return response()->json([
-                        'response' => trim($text),
-                        'intent' => $intent,
-                        'session_id' => $sessionId,
-                        'session_title' => $sessionTitle
-                    ]);
-                }
-            } catch (\Exception $e) {
-                \Log::error("Ollama error: " . $e->getMessage());
-            }
+            $llmModelo = str_contains($llmModelo, ':') ? $llmModelo : "{$llmModelo}:latest";
         }
-
-        // ── OpenCode API (free tier) ──────────────────────────────────────────
-        if ($llmSource === 'opencode' && !empty($opencodeApiKey)) {
-            try {
-                $opencodeModel = $llmModelo !== 'pymetory-8b:latest' ? $llmModelo : 'big-pickle';
-                $opencodeResponse = Http::withToken($opencodeApiKey)
-                    ->timeout(30)
-                    ->post('https://opencode.ai/zen/go/v1/chat/completions', [
-                        'model' => $opencodeModel,
-                        'messages' => [
-                            ['role' => 'system', 'content' => $promptSistema],
-                            ['role' => 'user', 'content' => $query],
-                        ],
-                        'temperature' => $temperature,
-                        'max_tokens' => $maxTokens,
-                    ]);
-
-                if ($opencodeResponse->successful()) {
-                    $text = $opencodeResponse->json('choices.0.message.content');
-                    $this->recordChat($query, $text, 'opencode', $sessionId, $sessionTitle);
-                    return response()->json([
-                        'response' => trim($text),
-                        'intent' => $intent,
-                        'session_id' => $sessionId,
-                        'session_title' => $sessionTitle
-                    ]);
-                }
-
-                $errBody = $opencodeResponse->body();
-                \Log::error("OpenCode API error: " . $opencodeResponse->status() . " — " . mb_substr($errBody, 0, 300));
-            } catch (\Exception $e) {
-                \Log::error("OpenCode API error: " . $e->getMessage());
-            }
+        if ($llmSource === 'opencode') {
+            $llmModelo = $llmModelo !== 'pymetory-8b:latest' ? $llmModelo : 'big-pickle';
         }
 
         try {
-            $response = Http::withToken($apiKey)->timeout(15)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $llmModelo,
-                'messages' => [
+            $payload = [
+                'model'       => $llmModelo,
+                'messages'    => [
                     ['role' => 'system', 'content' => $promptSistema],
-                    ['role' => 'user', 'content' => $query],
+                    ['role' => 'user',   'content' => $query],
                 ],
-            ]);
+                'temperature' => $temperature,
+                'max_tokens'  => $maxTokens,
+            ];
+
+            $response = Http::timeout(30)
+                ->withToken($cfg['key'] ?: null)
+                ->post($cfg['url'], $payload);
 
             if ($response->successful()) {
                 $text = $response->json('choices.0.message.content');
                 $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle);
                 return response()->json([
-                    'response' => trim($text),
-                    'intent' => $intent,
-                    'session_id' => $sessionId,
-                    'session_title' => $sessionTitle
+                    'response'    => trim($text),
+                    'intent'      => $intent,
+                    'session_id'  => $sessionId,
+                    'session_title' => $sessionTitle,
                 ]);
             }
+
+            $errBody = $response->body();
+            \Log::error("LLM inference error [{$llmSource}]: " . $response->status() . " — " . mb_substr($errBody, 0, 300));
         } catch (\Exception $e) {
-            return response()->json(['response' => "> ERROR DE CONEXIÓN: " . $e->getMessage()], 500);
+            \Log::error("LLM connection error [{$llmSource}]: " . $e->getMessage());
         }
 
         $fallbackLotes = Lote::with(['material', 'bodega'])->fefoOrder()->take(8)->get();
