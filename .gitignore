@@ -65,3 +65,4 @@ docs/omega-kanban-audit-*.md
 # Large binary files
 wheels/
 *.whl
+enjambre/
