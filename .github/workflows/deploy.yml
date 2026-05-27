@@ -17,10 +17,10 @@ jobs:
           php-version: '8.3'
       - name: PHP Syntax Check
         run: |
-          ERRORS=$(find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors" | grep -c "error")
+          ERRORS=$(find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax" | grep -c "." || true)
           if [ "$ERRORS" -gt 0 ]; then
-            echo "Found $ERRORS syntax errors"
-            find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors"
+            echo "Found $ERRORS lines with syntax issues:"
+            find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax"
             exit 1
           fi
           echo "All PHP files pass syntax check"
