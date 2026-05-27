@@ -40,6 +40,4 @@ jobs:
             sudo composer install --no-dev --optimize-autoloader --no-interaction
             sudo php artisan migrate --force
             sudo chown -R www-data:www-data .
-            pkill -f "artisan serve" || true
-            sudo -u www-data nohup php artisan serve --host=127.0.0.1 --port=8081 > /tmp/artisan-serve.log 2>&1 &
             echo "✅ Deploy completado"
