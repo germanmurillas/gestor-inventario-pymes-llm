@@ -17,7 +17,13 @@ jobs:
           php-version: '8.3'
       - name: PHP Syntax Check
         run: |
-          find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors"
+          ERRORS=$(find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors" | grep -c "error")
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "Found $ERRORS syntax errors"
+            find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors"
+            exit 1
+          fi
+          echo "All PHP files pass syntax check"
 
   # ── 2. Deploy to DesktopTitan (Oracle Cloud) ──
   deploy:
@@ -36,14 +42,10 @@ jobs:
           key: ${{ secrets.DESKTOPTITAN_KEY }}
           script: |
             cd /var/www/portafolio/SolucionesWeb/pymetoryTesis
-            git pull origin main
-            composer install --no-dev --optimize-autoloader --no-interaction
-            php artisan migrate --force
-            php artisan config:clear
-            php artisan cache:clear
-            npm ci
-            npx vite build
-            pkill -f 'artisan serve' || true
-            nohup php artisan serve --host=127.0.0.1 --port=8081 > /tmp/artisan-serve.log 2>&1 &
+            sudo git pull origin main
+            sudo composer install --no-dev --optimize-autoloader --no-interaction
+            sudo php artisan migrate --force
             sudo chown -R www-data:www-data .
+            pkill -f "artisan serve" || true
+            sudo -u www-data nohup php artisan serve --host=127.0.0.1 --port=8081 > /tmp/artisan-serve.log 2>&1 &
             echo "✅ Deploy completado"
