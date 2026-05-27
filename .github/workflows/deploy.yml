@@ -17,13 +17,7 @@ jobs:
           php-version: '8.3'
       - name: PHP Syntax Check
         run: |
-          ERRORS=$(find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax" | grep -c "." || true)
-          if [ "$ERRORS" -gt 0 ]; then
-            echo "Found $ERRORS lines with syntax issues:"
-            find app routes config database -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax"
-            exit 1
-          fi
-          echo "All PHP files pass syntax check"
+          find app routes config database -name "*.php" -print0 | xargs -0 -n1 php -l 2>&1 | grep -v "No syntax" | grep -qc "error" && exit 1 || exit 0
 
   # ── 2. Deploy to DesktopTitan (Oracle Cloud) ──
   deploy:
