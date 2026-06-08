@@ -25,7 +25,7 @@
 
 > **Proyecto de Grado — Universidad del Valle**
 >
-> *Germán David Murillas Mondragón · Jorge Augusto Estacio Almeciga*
+> *Germán David Murillas Mondragón · *
 >
 > *Director: Prof. Héctor Fabio Ocampo*
 
@@ -117,18 +117,18 @@ Las PYMEs colombianas gestionan su inventario con hojas de cálculo o software g
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    FRONTEND (React 19)                   │
-│         Inertia.js 2.0 · Tailwind CSS v4                │
-│              Tema Visual: Midnight Luxe 🌙               │
+│          FRONTEND (React 19)          │
+│     Inertia.js 2.0 · Tailwind CSS v4        │
+│       Tema Visual: Midnight Luxe 🌙        │
 ├─────────────────────────────────────────────────────────┤
-│                   BACKEND (Laravel 11)                   │
-│            PHP 8.3 · Slim Middleware · RBAC             │
+│          BACKEND (Laravel 11)          │
+│      PHP 8.3 · Slim Middleware · RBAC       │
 ├─────────────────────────────────────────────────────────┤
-│                  BASE DE DATOS (MySQL 8)                 │
-│     Materiales · Lotes · Bodegas · Movimientos          │
+│         BASE DE DATOS (MySQL 8)         │
+│   Materiales · Lotes · Bodegas · Movimientos     │
 ├─────────────────────────────────────────────────────────┤
-│              IA / LLM (OpenAI GPT-4o-mini)              │
-│         RAG · Contexto de Inventario en Tiempo Real     │
+│       IA / LLM (OpenAI GPT-4o-mini)       │
+│     RAG · Contexto de Inventario en Tiempo Real   │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -147,17 +147,17 @@ El sistema usa un tema visual premium de nombre **Midnight Luxe**:
 
 ```mermaid
 graph TD
-    Client["🖥️ Browser - React 19 + Inertia.js"]
-    Backend["⚙️ Laravel 11 Backend"]
-    DB[("🗄️ MySQL 8 Database")]
-    LLM["🤖 OpenAI GPT-4o-mini"]
-    RAG["📚 RAG Context Builder"]
+  Client["🖥️ Browser - React 19 + Inertia.js"]
+  Backend["⚙️ Laravel 11 Backend"]
+  DB[("🗄️ MySQL 8 Database")]
+  LLM["🤖 OpenAI GPT-4o-mini"]
+  RAG["📚 RAG Context Builder"]
 
-    Client <-->|"Inertia Protocol (SPA)"| Backend
-    Backend <-->|"Eloquent ORM"| DB
-    Backend -->|"Consulta Inventario"| RAG
-    RAG -->|"Contexto Enriquecido"| LLM
-    LLM -->|"Respuesta Estratégica"| Backend
+  Client <-->|"Inertia Protocol (SPA)"| Backend
+  Backend <-->|"Eloquent ORM"| DB
+  Backend -->|"Consulta Inventario"| RAG
+  RAG -->|"Contexto Enriquecido"| LLM
+  LLM -->|"Respuesta Estratégica"| Backend
 ```
 
 ### Seguridad — RBAC
@@ -220,13 +220,13 @@ php artisan key:generate
 php artisan migrate --seed
 
 # 7. Iniciar servidores de desarrollo
-php artisan serve          # Terminal 1 → http://localhost:8000
-npm run dev                # Terminal 2 → Vite HMR
+php artisan serve     # Terminal 1 → http://localhost:8000
+npm run dev        # Terminal 2 → Vite HMR
 ```
 
 ### Credenciales de acceso (demo)
 ```
-Email:    admin@pymetory.com
+Email:  admin@pymetory.com
 Password: Pymetory2026
 ```
 
@@ -254,11 +254,11 @@ Sistema de automatización para capturar una instancia ARM de Oracle Cloud Free 
 
 ```
 hunter.py ──→ OCI API ──→ LaunchInstance (4 OCPU / 24GB RAM)
-   ↑                              │
-   └──── Retry cada 60s ◄─────── Out of Capacity
-                                  │ VICTORIA
-                                  ↓
-                     Instancia creada + SSH key injected
+  ↑               │
+  └──── Retry cada 60s ◄─────── Out of Capacity
+                 │ VICTORIA
+                 ↓
+           Instancia creada + SSH key injected
 ```
 
 **Monitor en vivo:** `http://SERVIDOR/monitor/`
@@ -276,9 +276,9 @@ El sistema incluye:
 ### UC1 — Consulta RAG de Inventario
 ```
 Operario: "¿Cuánta harina de trigo tenemos disponible?"
-   ↓
+  ↓
 PYMETORY RAG: Consulta DB → Lote L-047: 850kg, vence en 12 días
-   ↓
+  ↓
 Respuesta: "Tienes 850kg en Bodega 2. ⚠️ Vence en 12 días. Prioriza su consumo."
 ```
 
@@ -307,12 +307,12 @@ Respuesta: "Tienes 850kg en Bodega 2. ⚠️ Vence en 12 días. Prioriza su cons
 ### Cronograma Universidad del Valle
 
 ```
-Sem 1-8   ████████████████ Requisitos y Mockups (Figma)        ✅
-Sem 9-11  ████████████     Backend Laravel + MySQL             ✅
-Sem 12    ████████         RAG/LLM + Frontend React 19         ✅
-Sem 13-14 ████████         Pruebas + Reportes                  ✅
-Sem 15    ████             Documentación + Tesis               🔄
-Sem 16    ██               Sustentación Final                  ⏳
+Sem 1-8  ████████████████ Requisitos y Mockups (Figma)    ✅
+Sem 9-11 ████████████   Backend Laravel + MySQL       ✅
+Sem 12  ████████     RAG/LLM + Frontend React 19     ✅
+Sem 13-14 ████████     Pruebas + Reportes         ✅
+Sem 15  ████       Documentación + Tesis        🔄
+Sem 16  ██        Sustentación Final         ⏳
 ```
 
 ### Ciclo Actual
@@ -333,18 +333,18 @@ Ver [KANBAN.md](KANBAN.md) para el tablero completo de tareas.
 ## 👥 Equipo
 
 <table>
-  <tr>
-    <td align="center">
-      <b>Germán David Murillas Mondragón</b><br/>
-      <sub>Desarrollador Principal · Ing. Sistemas en Formación</sub><br/>
-      <sub>Universidad del Valle</sub>
-    </td>
-    <td align="center">
-      <b>Jorge Augusto Estacio Almeciga</b><br/>
-      <sub>Arquitecto & Socio Estratégico · Ing. Sistemas en Formación</sub><br/>
-      <sub>Universidad del Valle</sub>
-    </td>
-  </tr>
+ <tr>
+  <td align="center">
+   <b>Germán David Murillas Mondragón</b><br/>
+   <sub>Desarrollador Principal · Ing. Sistemas en Formación</sub><br/>
+   <sub>Universidad del Valle</sub>
+  </td>
+  <td align="center">
+   <b></b><br/>
+   <sub>Arquitecto & Socio Estratégico · Ing. Sistemas en Formación</sub><br/>
+   <sub>Universidad del Valle</sub>
+  </td>
+ </tr>
 </table>
 
 **Director de Proyecto:** Prof. Héctor Fabio Ocampo — Universidad del Valle

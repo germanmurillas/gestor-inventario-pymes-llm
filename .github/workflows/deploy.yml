@@ -19,9 +19,36 @@ jobs:
         run: |
           find app routes config database -name "*.php" -print0 | xargs -0 -n1 php -l 2>&1 | grep -v "No syntax" | grep -qc "error" && exit 1 || exit 0
 
-  # ── 2. Deploy to DesktopTitan (Oracle Cloud) ──
-  deploy:
+  # ── 2. Run Unit & Feature Tests ──
+  test:
     needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite3, pdo_sqlite3
+
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Install Dependencies
+        run: composer install --no-ansi --no-interaction --no-progress
+
+      - name: Generate Key
+        run: php artisan key:generate
+
+      - name: Run Tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+          APP_ENV: testing
+        run: php artisan test --stop-on-failure
+
+  # ── 3. Deploy to DesktopTitan (Oracle Cloud) ──
+  deploy:
+    needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

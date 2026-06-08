@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+  # ──── PHP-FPM (Laravel 11) ────
+  php:
+    build: .
+    container_name: pymetory-php
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - pymetory_storage:/var/www/html/storage
+    environment:
+      APP_ENV: production
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-pymetory}
+      DB_USERNAME: ${DB_USERNAME:-pymetory}
+      DB_PASSWORD: ${DB_PASSWORD:-Pymetory2026}
+      INDICE_PASSWORD: ${INDICE_PASSWORD:-5500}
+      NICHO_PASSWORD: ${NICHO_PASSWORD:-***REMOVED***}
+      OPENCODE_API_KEY: ${OPENCODE_API_KEY:-}
+      OLLAMA_HOST: http://ollama:11434
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - pymetory
+
+  # ──── Nginx ────
+  nginx:
+    image: nginx:alpine
+    container_name: pymetory-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - php
+    networks:
+      - pymetory
+
+  # ──── MySQL 8.0 ────
+  mysql:
+    image: mysql:8.0
+    container_name: pymetory-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-PymetoryRoot2026}
+      MYSQL_DATABASE: ${DB_DATABASE:-pymetory}
+      MYSQL_USER: ${DB_USERNAME:-pymetory}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-Pymetory2026}
+    volumes:
+      - pymetory_mysql:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pymetory
+
+  # ──── Ollama (LLM local) ────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: pymetory-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - pymetory_ollama:/root/.ollama
+    networks:
+      - pymetory
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+          cpus: "3.0"
+
+networks:
+  pymetory:
+    driver: bridge
+
+volumes:
+  pymetory_mysql:
+  pymetory_ollama:
+  pymetory_storage:

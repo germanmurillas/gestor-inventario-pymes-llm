@@ -227,3 +227,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/inventory/labels/generate', [LabelController::class, 'generate'])
         ->name('inventory.labels.generate');
 });
+
+// ── API Keys CRUD ────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    Route::get('/api-keys',         [\App\Http\Controllers\ApiKeyController::class, 'index']);
+    Route::post('/api-keys',        [\App\Http\Controllers\ApiKeyController::class, 'store']);
+    Route::put('/api-keys/{apiKey}',[\App\Http\Controllers\ApiKeyController::class, 'update']);
+    Route::delete('/api-keys/{apiKey}',[\App\Http\Controllers\ApiKeyController::class, 'destroy']);
+    Route::get('/users',            [\App\Http\Controllers\UserController::class, 'index']);
+    Route::post('/users',           [\App\Http\Controllers\UserController::class, 'store']);
+    Route::put('/users/{user}',     [\App\Http\Controllers\UserController::class, 'update']);
+    Route::delete('/users/{user}',  [\App\Http\Controllers\UserController::class, 'destroy']);
+    Route::post('/users/{user}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword']);
+});
+
+// ── Settings Inertia page ──────────────────────────────────────────────────
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/settings-page', fn () => \Inertia\Inertia::render('Settings'))->name('settings.page');
+});

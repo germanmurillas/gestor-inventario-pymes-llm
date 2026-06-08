@@ -195,8 +195,12 @@ class ChatLLMController extends Controller {
         $temperature = (float)($settings['llm_temperatura'] ?? 0.3);
         $maxTokens = (int)($settings['llm_max_tokens'] ?? 1024);
         $llmSource = $settings['llm_source'] ?? 'local';
-        $apiKey = $settings['llm_external_key'] ?? env('OPENAI_API_KEY');
-        $opencodeApiKey = $settings['llm_opencode_key'] ?? env('OPENCODE_API_KEY', '');
+
+        // ── Obtener API key desde tabla api_keys (fuente unica de verdad) ──
+        $apiKeyRecord = \App\Models\ApiKey::where('tipo', $llmSource)->where('activo', true)->first();
+        $apiKey = $apiKeyRecord?->key ?? $settings['llm_external_key'] ?? env('OPENAI_API_KEY');
+        $apiBaseUrl = $apiKeyRecord?->base_url;
+        $apiModel = $apiKeyRecord?->model_name;
 
         $intent = $this->classifyQuery($query);
         $contextoRAG = $this->buildRagContext($query, $intent);
@@ -210,17 +214,18 @@ class ChatLLMController extends Controller {
         // ── Unified LLM inference (local, opencode, external) ──────────────────
         $endpoints = [
             'local'    => ['url' => 'http://localhost:11434/v1/chat/completions', 'key' => ''],
-            'opencode' => ['url' => 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $opencodeApiKey],
-            'external' => ['url' => 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
+            'opencode' => ['url' => $apiBaseUrl ?: 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $apiKey],
+            'external' => ['url' => $apiBaseUrl ?: 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
         ];
 
         $cfg = $endpoints[$llmSource] ?? $endpoints['external'];
 
+        // Usar modelo de api_keys si esta configurado
+        if ($apiModel) {
+            $llmModelo = $apiModel;
+        }
         if ($llmSource === 'local') {
             $llmModelo = str_contains($llmModelo, ':') ? $llmModelo : "{$llmModelo}:latest";
-        }
-        if ($llmSource === 'opencode') {
-            $llmModelo = $llmModelo !== 'pymetory-8b:latest' ? $llmModelo : 'big-pickle';
         }
 
         try {
@@ -234,18 +239,23 @@ class ChatLLMController extends Controller {
                 'max_tokens'  => $maxTokens,
             ];
 
-            $response = Http::timeout(30)
+            $response = Http::timeout(60)
                 ->withToken($cfg['key'] ?: null)
                 ->post($cfg['url'], $payload);
 
             if ($response->successful()) {
-                $text = $response->json('choices.0.message.content');
+                $text = $response->json('choices.0.message.content')
+                    ?: $response->json('choices.0.message.reasoning_content')
+                    ?: '';
                 $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle);
                 return response()->json([
                     'response'    => trim($text),
                     'intent'      => $intent,
                     'session_id'  => $sessionId,
                     'session_title' => $sessionTitle,
+                    'model'       => $llmModelo,
+                    'source'      => $llmSource,
+                    'key_name'    => $apiKeyRecord?->nombre ?? ($llmSource === 'local' ? 'Ollama Local' : '—'),
                 ]);
             }
 
@@ -261,7 +271,10 @@ class ChatLLMController extends Controller {
                 return "- {$l->material->name} [{$l->batch_number}]: {$l->quantity}u (Vence: " .
                     ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') . ")";
             })->join("\n"),
-            'intent' => $intent
+            'intent' => $intent,
+            'model'  => 'text-mode',
+            'source' => 'fallback',
+            'key_name' => '—',
         ], 200);
     }
 }
