@@ -555,7 +555,7 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                 mobileOpen={mobileOpen}
                 user={user}
                 activeView="/kanban"
-                mode="dashboard"
+                mode="kanban"
                 onMobileClose={() => setMobileOpen(false)}
             />
 

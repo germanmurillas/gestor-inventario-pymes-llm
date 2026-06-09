@@ -1,139 +1,142 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
+import { LayoutGrid, Box, ScanLine, MessageSquare, ChartBar, ArrowRight, Github, GraduationCap, Shield, Zap } from 'lucide-react';
+
+const features = [
+    { icon: LayoutGrid, title: 'Dashboard KPIs', desc: 'Insumos activos, lotes en bodega, críticos FEFO y valorización en tiempo real.' },
+    { icon: Box, title: 'Control FEFO', desc: 'First Expired First Out automático — sugerencia de lote y alertas de vencimiento.' },
+    { icon: ScanLine, title: 'Etiquetas QR', desc: 'Generación de códigos QR y CODE128, escáner integrado con historial.' },
+    { icon: MessageSquare, title: 'Asistente RAG', desc: 'Chat con IA que consulta tu inventario real — preguntas en español, 10 intenciones.' },
+    { icon: ChartBar, title: 'Reportes', desc: 'PDF y CSV con KPIs, valorización COP, consumo FEFO y gráficos.' },
+    { icon: LayoutGrid, title: 'Kanban', desc: 'Tablero de tareas con drag-and-drop, columnas personalizables y atajos de teclado.' },
+];
+
+const infra = [
+    { icon: Zap, label: '4 OCPU ARM' },
+    { icon: Box, label: '24 GB RAM' },
+    { icon: Shield, label: '200 GB SSD' },
+    { icon: Zap, label: '$0/mes' },
+];
 
 export default function Welcome() {
     return (
         <div className="min-h-screen bg-[#F3F4F6] text-[#111111] font-sans">
             <Head title="Pymetory | Inicio" />
 
-            {/* Figma Mockup 1 Header */}
+            {/* Navbar */}
             <nav className="bg-white border-b border-gray-200 py-4 px-8 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-8">
-                        <div className="flex items-center gap-1">
-                            <div className="w-8 h-8 flex items-center justify-center font-bold text-xl">
-                                <span className="rotate-[-10deg]">P</span>
-                            </div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-[#111111] rounded-xl flex items-center justify-center">
+                            <span className="text-white font-black text-lg">P</span>
                         </div>
-                        <div className="hidden lg:flex gap-6 text-sm font-medium text-gray-600">
-                            <a href="#" className="hover:text-black transition-colors">Products</a>
-                            <a href="#" className="hover:text-black transition-colors">Solutions</a>
-                            <a href="#" className="hover:text-black transition-colors">Community</a>
-                            <a href="#" className="hover:text-black transition-colors">Resources</a>
-                            <a href="#" className="hover:text-black transition-colors">Pricing</a>
-                            <a href="#" className="hover:text-black transition-colors">Contact</a>
-                            <a href="#" className="hover:text-black transition-colors">Link</a>
-                        </div>
+                        <span className="font-black text-lg uppercase tracking-tight">Pymetory</span>
+                        <span className="hidden sm:inline text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">v1.0</span>
                     </div>
                     <div className="flex gap-3">
-                        <Link href="/login" className="px-5 py-2 text-sm font-medium hover:bg-gray-100 rounded-md transition-colors">Sign in</Link>
-                        <Link href="/register" className="px-5 py-2 text-sm font-medium bg-[#111111] text-white rounded-md hover:opacity-90 transition-opacity">Register</Link>
+                        <Link href="/login" className="px-5 py-2 text-sm font-bold hover:bg-gray-100 rounded-lg transition-colors">Iniciar Sesión</Link>
+                        <Link href="/register" className="px-5 py-2 text-sm font-bold bg-[#111111] text-white rounded-lg hover:opacity-90 transition-opacity">Registrarse</Link>
                     </div>
                 </div>
             </nav>
 
-            {/* Main Content (Mockup 1 center) */}
-            <main className="max-w-4xl mx-auto py-20 px-6 space-y-12">
-                
-                {/* Hero Section Card 1 */}
-                <div className="bg-white border border-gray-200 rounded-lg p-10 flex flex-col md:flex-row gap-10 items-center shadow-sm">
-                    <div className="w-full md:w-48 h-48 bg-[#E5E7EB] rounded flex items-center justify-center">
-                        <div className="opacity-20">
-                            {/* Placeholder icon */}
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            {/* Hero */}
+            <section className="max-w-7xl mx-auto px-6 py-24 text-center">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
+                    Gestión de Inventarios
+                    <br />
+                    <span className="bg-gradient-to-r from-[#111111] to-gray-500 bg-clip-text text-transparent">
+                        con Inteligencia Artificial
+                    </span>
+                </h1>
+                <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Sistema de control de inventarios para PYMEs con trazabilidad FEFO, Kardex inmutable,
+                    etiquetas QR y un asistente RAG que conoce tu stock en tiempo real.
+                </p>
+
+                {/* Infra bar */}
+                <div className="flex flex-wrap justify-center gap-4 mb-12">
+                    {infra.map((i) => (
+                        <div key={i.label} className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm">
+                            <i.icon size={14} className="text-gray-400" />
+                            <span className="text-xs font-bold text-gray-600">{i.label}</span>
                         </div>
-                    </div>
-                    <div className="flex-1 space-y-4 text-center md:text-left">
-                        <h1 className="text-3xl font-extrabold tracking-tight">Title</h1>
-                        <p className="text-gray-500 leading-relaxed">
-                            Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.
-                        </p>
-                        <button className="bg-[#E5E7EB] text-gray-700 px-6 py-2 rounded font-bold hover:bg-[#D1D5DB] transition-colors border border-gray-300">
-                            Button
-                        </button>
-                    </div>
+                    ))}
                 </div>
 
-                {/* Hero Section Card 2 */}
-                <div className="bg-white border border-gray-200 rounded-lg p-10 flex flex-col md:flex-row gap-10 items-center shadow-sm">
-                    <div className="w-full md:w-48 h-48 bg-[#E5E7EB] rounded flex items-center justify-center">
-                        <div className="opacity-20">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                        </div>
-                    </div>
-                    <div className="flex-1 space-y-4 text-center md:text-left">
-                        <h2 className="text-3xl font-extrabold tracking-tight">Title</h2>
-                        <p className="text-gray-500 leading-relaxed">
-                            Body text for whatever you'd like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.
-                        </p>
-                        <button className="bg-[#E5E7EB] text-gray-700 px-6 py-2 rounded font-bold hover:bg-[#D1D5DB] transition-colors border border-gray-300">
-                            Button
-                        </button>
-                    </div>
+                <div className="flex justify-center gap-4">
+                    <Link href="/login" className="px-8 py-3 bg-[#111111] text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-colors inline-flex items-center gap-2">
+                        Acceder al Sistema <ArrowRight size={16} />
+                    </Link>
+                    <a href="https://github.com/germanmurillas/gestor-inventario-pymes-llm" target="_blank" rel="noopener noreferrer" className="px-8 py-3 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 transition-colors inline-flex items-center gap-2">
+                        <Github size={16} /> Ver en GitHub
+                    </a>
                 </div>
+            </section>
 
-            </main>
-
-            {/* Footer (Mockup 1 Bottom) */}
-            <footer className="bg-white border-t border-gray-200 py-20 px-8 mt-20">
-                <div className="max-w-7xl mx-auto flex flex-col items-center">
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-12 w-full text-sm">
-                        
-                        {/* Column Brand */}
-                        <div className="space-y-6">
-                            <div className="font-bold text-2xl">P</div>
-                            <div className="flex gap-4 opacity-70">
-                                <span className="hover:opacity-100 cursor-pointer">𝕏</span>
-                                <span className="hover:opacity-100 cursor-pointer">📷</span>
-                                <span className="hover:opacity-100 cursor-pointer">▶️</span>
-                                <span className="hover:opacity-100 cursor-pointer">💼</span>
+            {/* Features Grid */}
+            <section className="max-w-7xl mx-auto px-6 pb-24">
+                <h2 className="text-2xl font-black text-center mb-12 uppercase tracking-tight">Funcionalidades</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {features.map((f) => (
+                        <div key={f.title} className="bg-white border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors shadow-sm">
+                            <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+                                <f.icon size={20} className="text-gray-600" />
                             </div>
+                            <h3 className="font-black text-sm uppercase tracking-tight mb-2">{f.title}</h3>
+                            <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
                         </div>
+                    ))}
+                </div>
+            </section>
 
-                        {/* Col 2 */}
-                        <div className="space-y-4">
-                            <h4 className="font-bold">Use cases</h4>
-                            <ul className="space-y-2 text-gray-500">
-                                <li>UI design</li>
-                                <li>UX design</li>
-                                <li>Wireframing</li>
-                                <li>Diagramming</li>
-                                <li>Brainstorming</li>
-                                <li>Online whiteboard</li>
-                                <li>Team collaboration</li>
-                            </ul>
+            {/* Tesis + Académico */}
+            <section className="bg-white border-t border-gray-200 py-20 px-6">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div className="space-y-4">
+                        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                            <GraduationCap size={20} className="text-gray-600" />
                         </div>
-
-                        {/* Col 3 */}
-                        <div className="space-y-4">
-                            <h4 className="font-bold">Explore</h4>
-                            <ul className="space-y-2 text-gray-500">
-                                <li>Design</li>
-                                <li>Prototyping</li>
-                                <li>Development features</li>
-                                <li>Design systems</li>
-                                <li>Collaboration features</li>
-                                <li>Design process</li>
-                                <li>FigJam</li>
-                            </ul>
-                        </div>
-
-                        {/* Col 4 */}
-                        <div className="space-y-4">
-                            <h4 className="font-bold">Resources</h4>
-                            <ul className="space-y-2 text-gray-500">
-                                <li>Blog</li>
-                                <li>Best practices</li>
-                                <li>Colors</li>
-                                <li>Color wheel</li>
-                                <li>Support</li>
-                                <li>Developers</li>
-                                <li>Resource library</li>
-                            </ul>
-                        </div>
-
+                        <h2 className="text-2xl font-black uppercase tracking-tight">Proyecto de Grado</h2>
+                        <p className="text-gray-500 leading-relaxed">
+                            Universidad del Valle, 2026. Desarrollado por{' '}
+                            <strong>Germán David Murillas Mondragón</strong> y{' '}
+                            <strong>Jorge Augusto Estacio Almeciga</strong> bajo la dirección
+                            del profesor <strong>Héctor Fabio Ocampo</strong>.
+                        </p>
+                        <a href="/portafolio/SolucionesWeb/pymetoryTesis/tesis/" className="text-sm font-bold text-[#111111] hover:underline inline-flex items-center gap-1">
+                            Ver Tesis <ArrowRight size={14} />
+                        </a>
                     </div>
+                    <div className="space-y-4">
+                        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                            <Shield size={20} className="text-gray-600" />
+                        </div>
+                        <h2 className="text-2xl font-black uppercase tracking-tight">Infraestructura</h2>
+                        <p className="text-gray-500 leading-relaxed">
+                            Desplegado en <strong>Oracle Cloud Always Free</strong> sobre una instancia ARM Ampere A1
+                            con 4 OCPU, 24 GB RAM y 200 GB SSD. Cero costo mensual. Stack: Laravel 11,
+                            React 19, MySQL 8.0, Ollama.
+                        </p>
+                        <Link href="/indice" className="text-sm font-bold text-[#111111] hover:underline inline-flex items-center gap-1">
+                            Índice de Enlaces <ArrowRight size={14} />
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="py-12 px-6">
+                <div className="max-w-7xl mx-auto text-center space-y-2">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        Pymetory · Universidad del Valle · 2026
+                    </p>
+                    <p className="text-[11px] text-gray-300">
+                        Laravel 11 · React 19 · Inertia.js · MySQL 8.0 · Ollama · Oracle Cloud
+                    </p>
+                    <p className="text-[11px] text-gray-300">
+                        DesktopTitan · A1.Flex · 4 OCPU / 24 GB / 200 GB · Always Free Tier
+                    </p>
                 </div>
             </footer>
         </div>

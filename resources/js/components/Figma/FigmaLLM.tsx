@@ -12,6 +12,7 @@ const FigmaLLM = () => {
     const [input, setInput] = useState('');
     const [isThinking, setIsThinking] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [ragInfo, setRagInfo] = useState<{model:string,source:string,key_name:string}>({model:'—',source:'local',key_name:'Ollama Local'});
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const fetchSessions = async () => {
@@ -97,6 +98,8 @@ const FigmaLLM = () => {
             };
             setMessages(prev => [...prev, botMessage]);
 
+            setRagInfo({ model: response.data.model || '—', source: response.data.source || 'local', key_name: response.data.key_name || '—' });
+
             if (!activeSessionId && response.data.session_id) {
                 setActiveSessionId(response.data.session_id);
                 setActiveSessionTitle(response.data.session_title);
@@ -177,6 +180,11 @@ const FigmaLLM = () => {
                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     {isThinking ? 'Procesando RAG...' : 'En línea'}
                                 </span>
+                                {!isThinking && ragInfo.model !== '—' && (
+                                    <span className="text-[09px] font-mono text-gray-500 ml-2 truncate max-w-[280px]" title={`${ragInfo.model} · ${ragInfo.source} · ${ragInfo.key_name}`}>
+                                        {ragInfo.model} <span className="text-[#E63B2E]">·</span> {ragInfo.source} <span className="text-[#E63B2E]">·</span> {ragInfo.key_name}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -185,9 +193,9 @@ const FigmaLLM = () => {
                 <div ref={scrollRef} className="flex-1 overflow-auto p-6 space-y-6 scroll-smooth">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] p-4 rounded-xl text-sm ${msg.role === 'user' ? 'bg-[#111111] text-white shadow-md' : 'bg-slate-800/30 text-[#111111] border border-slate-700/30'}`}>
-                                <div className="font-bold text-[10px] mb-1 uppercase opacity-50 tracking-widest">{msg.role === 'user' ? 'Germán' : 'Pymetory LLM'}</div>
-                                <div className="leading-relaxed whitespace-pre-wrap font-mono text-[13px]">{msg.content}</div>
+                            <div className={`max-w-[80%] p-4 rounded-xl text-sm ${msg.role === 'user' ? 'bg-[#111111] text-white shadow-md' : 'bg-white text-[#111111] border border-slate-200 shadow-sm'}`}>
+                                <div className="font-bold text-[10px] mb-1 uppercase tracking-widest text-[#595959]">{msg.role === 'user' ? 'Germán' : 'Pymetory LLM'}</div>
+                                <div className="leading-relaxed whitespace-pre-wrap font-mono text-sm">{msg.content}</div>
                             </div>
                         </div>
                     ))}

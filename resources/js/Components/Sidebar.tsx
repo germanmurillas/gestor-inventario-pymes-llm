@@ -58,7 +58,7 @@ const DASHBOARD_SECTIONS: NavSection[] = [
             { icon: Truck, label: 'Órdenes Compra', view: 'PURCHASE_ORDERS' },
             { icon: Printer, label: 'Imprimir Labels', view: 'LABELS_PRINT' },
             { icon: Bell, label: 'Alertas', view: 'NOTIFICACIONES' },
-            { icon: Settings, label: 'Ajustes', view: 'CONFIGURACION' },
+            { icon: Settings, label: 'Ajustes', view: '/settings-page', href: '/settings-page' },
             { icon: LayoutGrid, label: 'Kanban', view: '/kanban', href: '/kanban' },
         ],
     },
@@ -69,21 +69,30 @@ const KANBAN_SECTIONS: NavSection[] = [
         title: 'Principal',
         items: [
             { icon: LayoutGrid, label: 'Tablero', view: '/dashboard', href: '/dashboard' },
-            { icon: LayoutGrid, label: 'Kanban', view: '/kanban', href: '/kanban' },
+            { icon: Box, label: 'Inventario', view: '/dashboard', href: '/dashboard' },
+            { icon: Search, label: 'Buscar', view: '/dashboard', href: '/dashboard' },
         ],
     },
     {
-        title: 'Análisis',
+        title: 'Analisis',
         items: [
             { icon: MessageSquare, label: 'Asistente RAG', view: '/dashboard', href: '/dashboard' },
             { icon: BarChart3, label: 'Reportes', view: '/dashboard', href: '/dashboard' },
+            { icon: LayoutGrid, label: 'Log Maestro', view: '/dashboard', href: '/dashboard' },
+            { icon: Tag, label: 'Etiquetas', view: '/dashboard', href: '/dashboard' },
+            { icon: ScanLine, label: 'Escaner QR', view: '/dashboard', href: '/dashboard' },
         ],
     },
     {
-        title: 'Gestión',
+        title: 'Gestion',
         items: [
+            { icon: History, label: 'Historial QR', view: '/dashboard', href: '/dashboard' },
+            { icon: ArrowRightLeft, label: 'Transferencias', view: '/dashboard', href: '/dashboard' },
+            { icon: Truck, label: 'Ordenes Compra', view: '/dashboard', href: '/dashboard' },
+            { icon: Printer, label: 'Imprimir Labels', view: '/dashboard', href: '/dashboard' },
             { icon: Bell, label: 'Alertas', view: '/dashboard', href: '/dashboard' },
-            { icon: Settings, label: 'Ajustes', view: '/dashboard', href: '/dashboard' },
+            { icon: Settings, label: 'Ajustes', view: '/settings-page', href: '/settings-page' },
+            { icon: LayoutGrid, label: 'Kanban', view: '/kanban', href: '/kanban' },
         ],
     },
 ];

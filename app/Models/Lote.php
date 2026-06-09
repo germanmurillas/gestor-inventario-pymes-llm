@@ -55,7 +55,6 @@ class Lote extends Model {
      */
     public function getIsCriticalAttribute(): bool {
         return $this->days_until_expiration <= 15
-            && $this->days_until_expiration >= 0
             && $this->status !== 'consumed';
     }
 

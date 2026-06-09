@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "workflow_name": "Pymetory Brand Generator",
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "inputs": { "ckpt_name": "v1-5-pruned-emaonly-fp16.safetensors" }
+    },
+    {
+      "id": 2,
+      "type": "CLIPTextEncode",
+      "inputs": {
+        "clip": ["1", 1],
+        "text": "pymetory inventory management system logo, modern tech brand, dark blue and cyan color scheme, minimalist, box warehouse icon, AI neural network subtle elements, professional, clean, white background"
+      }
+    },
+    {
+      "id": 3,
+      "type": "CLIPTextEncode",
+      "inputs": {
+        "clip": ["1", 1],
+        "text": "text, watermark, signature, blurry, low quality, distorted, messy"
+      }
+    },
+    {
+      "id": 4,
+      "type": "EmptyLatentImage",
+      "inputs": { "width": 768, "height": 768, "batch_size": 1 }
+    },
+    {
+      "id": 5,
+      "type": "KSampler",
+      "inputs": {
+        "model": ["1", 0],
+        "positive": ["2", 0],
+        "negative": ["3", 0],
+        "latent_image": ["4", 0],
+        "seed": 42,
+        "steps": 25,
+        "cfg": 7.5,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "normal",
+        "denoise": 1
+      }
+    },
+    {
+      "id": 6,
+      "type": "VAEDecode",
+      "inputs": { "samples": ["5", 0], "vae": ["1", 2] }
+    },
+    {
+      "id": 7,
+      "type": "PreviewImage",
+      "inputs": { "images": ["6", 0] }
+    }
+  ]
+}

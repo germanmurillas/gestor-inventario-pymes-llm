@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pymetory — Brand Templates</title>
+<style>
+:root{--bg:#0a0a0f;--surface:#151520;--text:#e8e8f0;--muted:#8888a0;--blue:#00A0E0;--green:#00c880;--pop:#00c8ff;--gold:#C8A800;--purple:#8844cc}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:40px}
+
+/* ── Hero Banner 1200x628 ── */
+.hero-banner{width:1200px;height:628px;margin:0 auto 40px;background:linear-gradient(135deg,#0a0a0f 0%,#151520 40%,#0d1a2d 100%);border-radius:24px;display:flex;align-items:center;padding:80px;position:relative;overflow:hidden;border:1px solid #1e1e35}
+.hero-banner::before{content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(0,160,224,.08) 0%,transparent 70%);border-radius:50%}
+.hero-banner::after{content:'';position:absolute;bottom:-30%;left:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(0,200,128,.06) 0%,transparent 70%);border-radius:50%}
+.hero-content{position:relative;z-index:1;flex:1}
+.hero-badge{display:inline-block;padding:6px 16px;border-radius:100px;background:rgba(0,160,224,.15);border:1px solid rgba(0,160,224,.3);color:var(--blue);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+.hero-title{font-size:56px;font-weight:900;line-height:1.1;margin-bottom:16px;letter-spacing:-2px}
+.hero-title span{background:linear-gradient(135deg,var(--blue),var(--pop));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:20px;color:var(--muted);line-height:1.6;margin-bottom:32px;max-width:500px}
+.hero-cta{display:inline-flex;gap:12px}
+.hero-btn{padding:14px 32px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.hero-btn-primary{background:linear-gradient(135deg,var(--blue),var(--pop));color:#fff}
+.hero-btn-secondary{background:rgba(255,255,255,.05);color:var(--text);border:1px solid rgba(255,255,255,.1)}
+.hero-logo{position:relative;z-index:1;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+.hero-logo svg{width:100%;height:100%}
+
+/* ── Feature Cards ── */
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1200px;margin:0 auto}
+.feature-card{background:var(--surface);border:1px solid #1e1e35;border-radius:16px;padding:32px}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
+.feature-card h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.feature-card p{font-size:14px;color:var(--muted);line-height:1.6}
+
+/* ── Social Post 1080x1080 ── */
+.social-post{width:1080px;height:1080px;margin:0 auto 40px;background:linear-gradient(135deg,#0a0a0f,#151520);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px;position:relative;overflow:hidden;border:1px solid #1e1e35}
+.social-post::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1.5' fill='%2300A0E0' opacity='0.15'/%3E%3C/svg%3E") repeat;opacity:.5}
+
+.social-title{font-size:72px;font-weight:900;line-height:1.1;margin-bottom:20px;position:relative;z-index:1}
+.social-title span{background:linear-gradient(135deg,var(--blue),var(--pop));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.social-desc{font-size:28px;color:var(--muted);margin-bottom:40px;position:relative;z-index:1;max-width:700px}
+.social-stats{display:flex;gap:60px;position:relative;z-index:1}
+.social-stat{text-align:center}
+.social-stat-num{font-size:48px;font-weight:900;color:var(--pop)}
+.social-stat-label{font-size:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;margin-top:4px}
+
+/* ── Export buttons ── */
+.toolbar{max-width:1200px;margin:0 auto 20px;display:flex;gap:12px}
+.toolbar button{padding:10px 20px;border-radius:8px;background:var(--surface);color:var(--text);border:1px solid #1e1e35;font-size:14px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button onclick="window.print()">🖨 Exportar todo</button>
+</div>
+
+<!-- HERO BANNER 1200x628 -->
+<div class="hero-banner" id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">PYMETORY · Gestión de Inventarios</div>
+    <h1 class="hero-title">Inventario<br><span>Inteligente</span></h1>
+    <p class="hero-sub">Control FEFO, Kardex inmutable, códigos QR y un asistente IA con RAG que consulta tu base de datos en tiempo real.</p>
+    <div class="hero-cta">
+      <a href="#" class="hero-btn hero-btn-primary">Ver Demo</a>
+      <a href="#" class="hero-btn hero-btn-secondary">Documentación</a>
+    </div>
+  </div>
+  <div class="hero-logo">
+    <img src="logo.svg" alt="Pymetory" style="width:100%;height:100%">
+  </div>
+</div>
+
+<br>
+
+<!-- SOCIAL POST 1080x1080 -->
+<div class="social-post">
+  <h1 class="social-title">PYMETORY<br><span>Está Vivo</span></h1>
+  <p class="social-desc">Sistema de gestión de inventarios con inteligencia artificial. FEFO, Kardex, QR, Kanban + RAG.</p>
+  <div class="social-stats">
+    <div class="social-stat"><div class="social-stat-num">17</div><div class="social-stat-label">Módulos</div></div>
+    <div class="social-stat"><div class="social-stat-num">11</div><div class="social-stat-label">Tests</div></div>
+    <div class="social-stat"><div class="social-stat-num">3</div><div class="social-stat-label">LLMs</div></div>
+  </div>
+</div>
+
+<!-- FEATURE CARDS -->
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(0,160,224,.15);color:var(--blue)">📦</div>
+    <h3>FEFO Automatizado</h3>
+    <p>Primeros en Vencer, Primeros en Salir. Alertas de vencimiento y consumo inteligente.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(0,200,128,.15);color:var(--green)">🤖</div>
+    <h3>Asistente RAG con IA</h3>
+    <p>Consultá tu inventario en lenguaje natural. El RAG consulta la base de datos real.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(200,168,0,.15);color:var(--gold)">🔒</div>
+    <h3>Kardex Inmutable</h3>
+    <p>Historial completo de movimientos. Cada entrada, salida y ajuste queda registrado.</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -182,7 +182,7 @@ class ChatLLMController extends Controller {
 
         $settings = DB::table('settings')->whereIn('clave', [
             'llm_activo', 'llm_modelo', 'llm_temperatura', 'llm_max_tokens',
-            'llm_source', 'llm_external_key', 'llm_num_ctx', 'llm_num_gpu'
+            'llm_source', 'llm_external_key', 'llm_opencode_key', 'llm_num_ctx', 'llm_num_gpu'
         ])->pluck('valor', 'clave');
 
         if (($settings['llm_activo'] ?? 'true') === 'false') {
@@ -195,7 +195,12 @@ class ChatLLMController extends Controller {
         $temperature = (float)($settings['llm_temperatura'] ?? 0.3);
         $maxTokens = (int)($settings['llm_max_tokens'] ?? 1024);
         $llmSource = $settings['llm_source'] ?? 'local';
-        $apiKey = $settings['llm_external_key'] ?? env('OPENAI_API_KEY');
+
+        // ── Obtener API key desde tabla api_keys (fuente unica de verdad) ──
+        $apiKeyRecord = \App\Models\ApiKey::where('tipo', $llmSource)->where('activo', true)->first();
+        $apiKey = $apiKeyRecord?->key ?? $settings['llm_external_key'] ?? env('OPENAI_API_KEY');
+        $apiBaseUrl = $apiKeyRecord?->base_url;
+        $apiModel = $apiKeyRecord?->model_name;
 
         $intent = $this->classifyQuery($query);
         $contextoRAG = $this->buildRagContext($query, $intent);
@@ -206,51 +211,58 @@ class ChatLLMController extends Controller {
             "Solo menciona 'crítico' o 'urgente' si el usuario explícitamente te pregunta por alertas. " .
             "Usa el siguiente contexto de base de datos para responder:\n\n{$contextoRAG}";
 
-        if ($llmSource === 'local') {
-            try {
-                $ollamaResponse = Http::timeout(15)->post('http://localhost:11434/api/generate', [
-                    'model' => str_contains($llmModelo, ':') ? $llmModelo : "{$llmModelo}:latest",
-                    'prompt' => "{$promptSistema}\n\nPregunta del usuario: {$query}\n\nRespuesta:",
-                    'stream' => false,
-                    'options' => ['temperature' => $temperature, 'num_predict' => $maxTokens]
-                ]);
+        // ── Unified LLM inference (local, opencode, external) ──────────────────
+        $endpoints = [
+            'local'    => ['url' => 'http://localhost:11434/v1/chat/completions', 'key' => ''],
+            'opencode' => ['url' => $apiBaseUrl ?: 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $apiKey],
+            'external' => ['url' => $apiBaseUrl ?: 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
+        ];
 
-                if ($ollamaResponse->successful()) {
-                    $text = $ollamaResponse->json('response');
-                    $this->recordChat($query, $text, 'local', $sessionId, $sessionTitle);
-                    return response()->json([
-                        'response' => trim($text),
-                        'intent' => $intent,
-                        'session_id' => $sessionId,
-                        'session_title' => $sessionTitle
-                    ]);
-                }
-            } catch (\Exception $e) {
-                \Log::error("Ollama error: " . $e->getMessage());
-            }
+        $cfg = $endpoints[$llmSource] ?? $endpoints['external'];
+
+        // Usar modelo de api_keys si esta configurado
+        if ($apiModel) {
+            $llmModelo = $apiModel;
+        }
+        if ($llmSource === 'local') {
+            $llmModelo = str_contains($llmModelo, ':') ? $llmModelo : "{$llmModelo}:latest";
         }
 
         try {
-            $response = Http::withToken($apiKey)->timeout(15)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $llmModelo,
-                'messages' => [
+            $payload = [
+                'model'       => $llmModelo,
+                'messages'    => [
                     ['role' => 'system', 'content' => $promptSistema],
-                    ['role' => 'user', 'content' => $query],
+                    ['role' => 'user',   'content' => $query],
                 ],
-            ]);
+                'temperature' => $temperature,
+                'max_tokens'  => $maxTokens,
+            ];
+
+            $response = Http::timeout(60)
+                ->withToken($cfg['key'] ?: null)
+                ->post($cfg['url'], $payload);
 
             if ($response->successful()) {
-                $text = $response->json('choices.0.message.content');
+                $text = $response->json('choices.0.message.content')
+                    ?: $response->json('choices.0.message.reasoning_content')
+                    ?: '';
                 $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle);
                 return response()->json([
-                    'response' => trim($text),
-                    'intent' => $intent,
-                    'session_id' => $sessionId,
-                    'session_title' => $sessionTitle
+                    'response'    => trim($text),
+                    'intent'      => $intent,
+                    'session_id'  => $sessionId,
+                    'session_title' => $sessionTitle,
+                    'model'       => $llmModelo,
+                    'source'      => $llmSource,
+                    'key_name'    => $apiKeyRecord?->nombre ?? ($llmSource === 'local' ? 'Ollama Local' : '—'),
                 ]);
             }
+
+            $errBody = $response->body();
+            \Log::error("LLM inference error [{$llmSource}]: " . $response->status() . " — " . mb_substr($errBody, 0, 300));
         } catch (\Exception $e) {
-            return response()->json(['response' => "> ERROR DE CONEXIÓN: " . $e->getMessage()], 500);
+            \Log::error("LLM connection error [{$llmSource}]: " . $e->getMessage());
         }
 
         $fallbackLotes = Lote::with(['material', 'bodega'])->fefoOrder()->take(8)->get();
@@ -259,7 +271,10 @@ class ChatLLMController extends Controller {
                 return "- {$l->material->name} [{$l->batch_number}]: {$l->quantity}u (Vence: " .
                     ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') . ")";
             })->join("\n"),
-            'intent' => $intent
+            'intent' => $intent,
+            'model'  => 'text-mode',
+            'source' => 'fallback',
+            'key_name' => '—',
         ], 200);
     }
 }
