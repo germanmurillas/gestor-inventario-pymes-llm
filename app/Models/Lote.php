@@ -90,4 +90,13 @@ class Lote extends Model {
                      ->whereDate('expiration_date', '<=', Carbon::now()->addDays($dias))
                      ->whereDate('expiration_date', '>=', Carbon::now());
     }
+
+    /**
+     * Lotes críticos según el modelo (consistente con getIsCriticalAttribute).
+     * Incluye lotes ya vencidos (días negativos). Umbral: 15 días.
+     */
+    public function scopeCriticos($query) {
+        return $query->where('status', '!=', 'consumed')
+                     ->whereDate('expiration_date', '<=', Carbon::now()->addDays(15));
+    }
 }
