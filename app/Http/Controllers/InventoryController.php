@@ -347,7 +347,7 @@ class InventoryController extends Controller {
                 $material = Material::create([
                     'name' => $validated['name'],
                     'code' => $validated['code'],
-                    'description' => $validated['description'],
+                    'description' => $validated['description'] ?? null,
                     'unit' => 'kg',
                     'stock_min' => 10,
                     'photo_path' => $photoPath,
