@@ -2,12 +2,23 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-echo json_encode([
-    'status' => 'VICTORY',
-    'shape' => 'VM.Standard.A1.Flex',
-    'regions' => [
-        ['region' => 'us-ashburn-1', 'total' => 1758, 'ooc' => 0, 'errors' => 0, 'status' => 'completed'],
+// Status endpoint for Titan Hunter dashboard.
+// The original hunter ran on cazador-2 (SERVIDOR, now terminated).
+// DesktopTitan is the consolidated server (SERVIDOR).
+// This endpoint provides current OCI instance status.
+
+$status = [
+    'is_hunting' => false,
+    'is_victory' => true,
+    'instance_found' => 'DesktopTitan A1.Flex (4 OCPU, 24 GB RAM, 200 GB SSD)',
+    'last_message' => 'Caza completada — DesktopTitan corriendo en Oracle Cloud Always Free. Cazador original en cazador-2 (SERVIDOR) fue terminado tras consolidación.',
+    'last_check' => date('c'),
+    'server' => [
+        'ip' => 'SERVIDOR',
+        'hostname' => gethostname(),
     ],
-    'message' => 'DesktopTitan A1.Flex capturado. 4 OCPU, 24 GB RAM, 200 GB SSD. Oracle Always Free.',
-    'timestamp' => date('c'),
-], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    'attempts' => 1758,
+    'uptime_days' => round((time() - strtotime('2026-05-11')) / 86400, 1),
+];
+
+echo json_encode($status, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
