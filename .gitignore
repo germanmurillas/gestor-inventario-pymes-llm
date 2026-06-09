@@ -66,3 +66,5 @@ docs/omega-kanban-audit-*.md
 wheels/
 *.whl
 enjambre/
+PLAN_PRUEBAS_MANUALES.md.bak
+*.bak
