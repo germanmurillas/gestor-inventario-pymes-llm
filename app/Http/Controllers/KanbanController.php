@@ -80,15 +80,14 @@ class KanbanController extends Controller
         $newPosition = $validated['position'];
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($item, $oldColumn, $newColumn, $newPosition) {
-            if ($oldColumn !== $newColumn) {
-                KanbanItem::where('user_id', Auth::id())
-                    ->where('column', $oldColumn)
-                    ->where('position', '>', $item->position)
-                    ->decrement('position');
-            }
+            KanbanItem::where('user_id', Auth::id())
+                ->where('column', $oldColumn)
+                ->where('position', '>', $item->position)
+                ->decrement('position');
 
             KanbanItem::where('user_id', Auth::id())
                 ->where('column', $newColumn)
+                ->where('id', '!=', $item->id)
                 ->where('position', '>=', $newPosition)
                 ->increment('position');
 

@@ -33,8 +33,14 @@ jobs:
       - name: Copy .env
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Install Dependencies
+      - name: Install Composer Dependencies
         run: composer install --no-ansi --no-interaction --no-progress
+
+      - name: Install npm Dependencies
+        run: npm ci --no-audit --no-fund --legacy-peer-deps
+
+      - name: Build Frontend Assets (Vite manifest required by Inertia tests)
+        run: npm run build
 
       - name: Generate Key
         run: php artisan key:generate

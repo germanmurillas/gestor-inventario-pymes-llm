@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('materials', function (Blueprint $table) {
             $table->string('unidad_medida', 20)->default('unidad')
-                  ->after('nombre')
+                  ->after('name')
                   ->comment('kg | g | l | ml | unidad | m | m2 | m3');
             $table->string('categoria', 60)->nullable()
                   ->after('unidad_medida')

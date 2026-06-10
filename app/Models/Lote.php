@@ -1,12 +1,14 @@
 <?php
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
 class Lote extends Model {
+    use HasFactory;
     protected $fillable = [
         'material_id', 'bodega_id', 'batch_number', 'quantity',
         'unit_cost', 'expiration_date', 'status', 'photo_path'
@@ -87,5 +89,14 @@ class Lote extends Model {
         return $query->where('status', 'active')
                      ->whereDate('expiration_date', '<=', Carbon::now()->addDays($dias))
                      ->whereDate('expiration_date', '>=', Carbon::now());
+    }
+
+    /**
+     * Lotes críticos según el modelo (consistente con getIsCriticalAttribute).
+     * Incluye lotes ya vencidos (días negativos). Umbral: 15 días.
+     */
+    public function scopeCriticos($query) {
+        return $query->where('status', '!=', 'consumed')
+                     ->whereDate('expiration_date', '<=', Carbon::now()->addDays(15));
     }
 }

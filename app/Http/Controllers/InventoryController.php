@@ -34,7 +34,7 @@ class InventoryController extends Controller {
         $stats = [
             'totalMaterials'      => \App\Models\Material::count(),
             'totalLotes'          => Lote::where('status', 'active')->count(),
-            'lotesCriticos'       => Lote::activos()->venceEn(15)->count(),
+            'lotesCriticos'       => Lote::criticos()->count(),
             'totalInventoryVolume'=> Lote::activos()->sum('quantity'),
             // Valorización real: SUM(quantity × unit_cost) para todos los lotes activos
             'totalInventoryValue' => (float) Lote::activos()
@@ -347,7 +347,7 @@ class InventoryController extends Controller {
                 $material = Material::create([
                     'name' => $validated['name'],
                     'code' => $validated['code'],
-                    'description' => $validated['description'],
+                    'description' => $validated['description'] ?? null,
                     'unit' => 'kg',
                     'stock_min' => 10,
                     'photo_path' => $photoPath,

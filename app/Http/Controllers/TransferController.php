@@ -96,7 +96,7 @@ class TransferController extends Controller
                 'type'        => 'salida',
                 'quantity'    => $validated['cantidad'],
                 'reason'      => 'transferencia',
-                'description' => "Transferencia a bodega destino (ID {$validated['to_bodega_id']}) — {$validated['reason']}",
+                'description' => "Transferencia a bodega destino (ID {$validated['to_bodega_id']}) — " . ($validated['reason'] ?? 'sin motivo'),
             ]);
 
             // ── 4. Buscar o crear lote destino ────────────────────────────────
@@ -130,7 +130,7 @@ class TransferController extends Controller
                 'type'        => 'entrada',
                 'quantity'    => $validated['cantidad'],
                 'reason'      => 'transferencia',
-                'description' => "Transferencia desde bodega origen (ID {$validated['from_bodega_id']}) — {$validated['reason']}",
+                'description' => "Transferencia desde bodega origen (ID {$validated['from_bodega_id']}) — " . ($validated['reason'] ?? 'sin motivo'),
             ]);
 
             // ── 7. Registrar transferencia ────────────────────────────────────
