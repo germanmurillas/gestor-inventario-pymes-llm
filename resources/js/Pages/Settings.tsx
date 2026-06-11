@@ -142,6 +142,19 @@ export default function Settings() {
         await loadProviders();
     };
 
+    const testRag = async (prompt: string) => {
+        const el = document.getElementById('ragTestResult');
+        if (!prompt) { if (el) el.textContent = 'Escribe una pregunta.'; return; }
+        if (el) el.textContent = 'Probando...';
+        try {
+            const { data } = await axios.post('/chat-rag', { prompt });
+            const resp = data.response || JSON.stringify(data);
+            if (el) el.innerHTML = `<b style="color:#1B7F3B">✅ ${data.model || 'RAG'} · ${data.source || ''}</b><br>${resp}`;
+        } catch (e: any) {
+            if (el) el.textContent = '❌ ' + (e?.response?.data?.message || e?.message || 'Error');
+        }
+    };
+
     // ── Users ──
     const [users, setUsers] = useState<UserRow[]>([]);
     const [nu, setNu] = useState({ name: '', email: '', password: '', role: 'operario' });
@@ -187,45 +200,77 @@ export default function Settings() {
                         <button className={`${btn} mt-4 bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['app_nombre','app_empresa','zona_horaria','fefo_dias_criticos','stock_umbral_bajo','sesion_timeout_min','max_intentos_login'])}><Save size={15} /> Guardar General</button>
                     </Section>
 
-                    {/* ── 2. NUCLEO IA ── */}
-                    <Section icon={Cpu} title="Nucleo IA / LLM" subtitle="Motor RAG, modelo, origen y parametros de inferencia" open={openSec === 'llm'} onToggle={() => toggle('llm')}>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div><label className={label}>Origen (source)</label>
-                                <select className={field} value={settings.llm_source ?? 'local'} onChange={e => setVal('llm_source', e.target.value)}>
-                                    <option value="local">local (Ollama)</option><option value="opencode">opencode</option><option value="external">external (OpenAI)</option>
-                                </select></div>
-                            <div><label className={label}>Activo</label>
-                                <select className={field} value={settings.llm_activo ?? 'true'} onChange={e => setVal('llm_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
-                            <div className="md:col-span-2">
-                                <div className="flex items-center justify-between mb-1"><label className={`${label} mb-0`}>Modelo</label><button onClick={loadOllama} className="inline-flex items-center gap-1 font-mono text-[10px] uppercase text-[#E63B2E] hover:underline"><RefreshCw size={11} /> Refrescar</button></div>
-                                <select className={field} value={settings.llm_modelo ?? ''} onChange={e => setVal('llm_modelo', e.target.value)}>
-                                    <option value="">— Seleccionar modelo —</option>
-                                    {ollamaModels.length > 0 && <optgroup label="▸ Ollama Local (Titan)">
-                                        {ollamaModels.map(m => <option key={m} value={m}>{m}</option>)}
-                                    </optgroup>}
-                                    {apiKeys.filter(k => k.activo && k.model_name).length > 0 && <optgroup label="▸ API Keys Registradas">
-                                        {apiKeys.filter(k => k.activo && k.model_name).map(k => <option key={`api-${k.id}`} value={k.model_name!}>{k.model_name} [{k.nombre} · {k.tipo}]</option>)}
-                                    </optgroup>}
-                                    <optgroup label="▸ OpenCode Cloud (gratis)">
-                                        <option value="deepseek-v4-pro">deepseek-v4-pro</option>
-                                        <option value="deepseek-v4-flash">deepseek-v4-flash</option>
-                                        <option value="qwen3.7-max">qwen3.7-max</option>
-                                        <option value="glm-5.1">glm-5.1</option>
-                                        <option value="minimax-m3">minimax-m3</option>
-                                        <option value="kimi-k2.6">kimi-k2.6</option>
-                                        <option value="mimo-v2-pro">mimo-v2-pro</option>
-                                    </optgroup>
-                                </select>
-                                <p className="font-mono text-[10px] text-[#4A4A4A] mt-1">
-                                    {ollamaModels.length > 0 && <span>{ollamaModels.length} local(es) · </span>}
-                                    {apiKeys.filter(k => k.activo).length} API key(s) activa(s)
-                                </p>
+                    {/* ── 2. MOTOR RAG ── */}
+                    <Section icon={Cpu} title="Motor RAG" subtitle="Configuracion centralizada del asistente IA: modelo, proveedor, parametros y test en vivo" open={openSec === 'llm'} onToggle={() => toggle('llm')}>
+                        {/* ── Proveedor + Key activa ── */}
+                        <div className="p-4 rounded-lg bg-[#E8E4DD]/30 border border-[#111111]/10 mb-4">
+                            <div className="flex items-center gap-3 mb-3">
+                                <span className="font-sans font-black text-[11px] uppercase tracking-wider text-[#595959]">Proveedor y Key activa</span>
+                                <span className="font-mono text-[10px] text-[#4A4A4A]">
+                                    {apiKeys.filter(k => k.activo && k.tipo === settings.llm_source).length > 0
+                                        ? `Usando: ${apiKeys.find(k => k.activo && k.tipo === settings.llm_source)?.nombre || '—'}`
+                                        : settings.llm_source === 'local' ? 'Ollama (sin key)' : '⚠ Sin key activa'}
+                                </span>
                             </div>
-                            <div><label className={label}>Temperatura</label><input type="number" step="0.1" min="0" max="1" className={field} value={settings.llm_temperatura ?? ''} onChange={e => setVal('llm_temperatura', e.target.value)} /></div>
-                            <div><label className={label}>Max Tokens</label><input type="number" className={field} value={settings.llm_max_tokens ?? ''} onChange={e => setVal('llm_max_tokens', e.target.value)} /></div>
-                            <div><label className={label}>Contexto Lotes</label><input type="number" className={field} value={settings.llm_contexto_lotes ?? ''} onChange={e => setVal('llm_contexto_lotes', e.target.value)} /></div>
+                            <div className="grid md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className={label}>Origen</label>
+                                    <select className={field} value={settings.llm_source ?? 'local'} onChange={e => setVal('llm_source', e.target.value)}>
+                                        <option value="local">Ollama (local)</option>
+                                        {Object.entries(providers).filter(([,p]:[string,any]) => p.enabled !== false).map(([k,v]:[string,any]) => (
+                                            <option key={k} value={k}>{v.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className={label}>Activo</label>
+                                    <select className={field} value={settings.llm_activo ?? 'true'} onChange={e => setVal('llm_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select>
+                                </div>
+                            </div>
                         </div>
-                        <button className={`${btn} mt-4 bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes','llm_external_key'])}><Save size={15} /> Guardar IA</button>
+
+                        {/* ── Modelo ── */}
+                        <div className="mb-4">
+                            <div className="flex items-center justify-between mb-1">
+                                <label className={`${label} mb-0`}>Modelo</label>
+                                <button onClick={loadOllama} className="inline-flex items-center gap-1 font-mono text-[10px] uppercase text-[#E63B2E] hover:underline"><RefreshCw size={11} /> Refrescar</button>
+                            </div>
+                            <select className={field} value={settings.llm_modelo ?? ''} onChange={e => setVal('llm_modelo', e.target.value)}>
+                                <option value="">— Seleccionar —</option>
+                                {settings.llm_source === 'local' && ollamaModels.length > 0 && <optgroup label="▸ Ollama Local">
+                                    {ollamaModels.map(m => <option key={m} value={m}>{m}</option>)}
+                                </optgroup>}
+                                {settings.llm_source !== 'local' && (providers[settings.llm_source]?.models || []).length > 0 && <optgroup label={`▸ ${providers[settings.llm_source]?.label || settings.llm_source}`}>
+                                    {(providers[settings.llm_source]?.models || []).map((m:string) => <option key={m} value={m}>{m}</option>)}
+                                </optgroup>}
+                                {settings.llm_source !== 'local' && apiKeys.filter(k => k.activo && k.tipo === settings.llm_source && k.model_name).length > 0 && <optgroup label="▸ Keys activas">
+                                    {apiKeys.filter(k => k.activo && k.tipo === settings.llm_source && k.model_name).map(k => <option key={`k-${k.id}`} value={k.model_name!}>{k.model_name} [{k.nombre}]</option>)}
+                                </optgroup>}
+                            </select>
+                            <p className="font-mono text-[10px] text-[#4A4A4A] mt-1">
+                                {ollamaModels.length > 0 && <span>{ollamaModels.length} locales · </span>}
+                                {apiKeys.filter(k => k.activo).length} keys activas · {(providers[settings.llm_source]?.models || []).length} modelos provider
+                            </p>
+                        </div>
+
+                        {/* ── Parametros ── */}
+                        <div className="grid md:grid-cols-3 gap-3 mb-4">
+                            <div><label className={label}>Temperatura</label><input type="number" step="0.1" min="0" max="2" className={field} value={settings.llm_temperatura ?? '0.3'} onChange={e => setVal('llm_temperatura', e.target.value)} /></div>
+                            <div><label className={label}>Max Tokens</label><input type="number" className={field} value={settings.llm_max_tokens ?? '1024'} onChange={e => setVal('llm_max_tokens', e.target.value)} /></div>
+                            <div><label className={label}>Contexto Lotes</label><input type="number" className={field} value={settings.llm_contexto_lotes ?? '20'} onChange={e => setVal('llm_contexto_lotes', e.target.value)} /></div>
+                        </div>
+
+                        {/* ── Test RAG en vivo ── */}
+                        <div className="p-4 rounded-lg bg-[#E8E4DD]/20 border border-[#111111]/10 mb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="font-sans font-black text-[11px] uppercase tracking-wider text-[#595959]">Probar RAG</span>
+                                <input id="ragTestInput" className={`${field} flex-1`} placeholder="Ej: ¿Cuál es el lote que vence primero?" onKeyDown={e => { if (e.key === 'Enter') { const i = (document.getElementById('ragTestInput') as HTMLInputElement); testRag(i.value); } }} />
+                                <button className={`${btn} bg-[#111111] text-[#F5F3EE]`} onClick={() => { const i = (document.getElementById('ragTestInput') as HTMLInputElement); testRag(i.value); }}><RefreshCw size={15} /> Probar</button>
+                            </div>
+                            <div id="ragTestResult" className="font-mono text-xs text-[#4A4A4A] mt-2 max-h-32 overflow-y-auto"></div>
+                        </div>
+
+                        <button className={`${btn} bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes'])}><Save size={15} /> Guardar Motor RAG</button>
                     </Section>
 
                     {/* ── 3. ALERTAS ── */}
