@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, User, Bot, Search, Plus, Filter, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, User, Bot, Search, Plus, Filter, Loader2, ChevronDown } from 'lucide-react';
 import axios from 'axios';
+
+const MODELS = {
+    local: ['gemma3:4b', 'smollm2:360m', 'qwen2.5:0.5b', 'qwen3:0.6b'],
+    opencode: ['deepseek-v4-flash', 'qwen3.7-plus', 'glm-5.1', 'minimax-m3', 'kimi-k2.6', 'hy3-preview'],
+};
 
 const FigmaLLM = () => {
     const [sessions, setSessions] = useState<any[]>([]);
@@ -13,7 +18,16 @@ const FigmaLLM = () => {
     const [isThinking, setIsThinking] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [ragInfo, setRagInfo] = useState<{model:string,source:string,key_name:string}>({model:'—',source:'local',key_name:'Ollama Local'});
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    const changeModel = async (source: string, model: string) => {
+        try {
+            await axios.put('/settings', { settings: { llm_modelo: model, llm_source: source } });
+            setRagInfo(r => ({ ...r, model, source }));
+            setDropdownOpen(false);
+        } catch {}
+    };
 
     const fetchSessions = async () => {
         try {
@@ -186,6 +200,37 @@ const FigmaLLM = () => {
                                     </span>
                                 )}
                             </div>
+                        </div>
+                        <div className="relative">
+                            <button
+                                onClick={() => setDropdownOpen(!dropdownOpen)}
+                                className="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/40 rounded-md px-2.5 py-1 text-[10px] font-bold text-gray-300 hover:border-slate-500 transition-colors"
+                            >
+                                <span className="text-[#E63B2E] uppercase tracking-wider">{ragInfo.source === 'opencode' ? 'OPENCODE' : 'LOCAL'}</span>
+                                <span className="text-slate-400">·</span>
+                                <span className="truncate max-w-[120px]">{ragInfo.model}</span>
+                                <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                            </button>
+                            {dropdownOpen && (
+                                <div className="absolute right-0 top-full mt-1 z-50 bg-slate-900 border border-slate-700/60 rounded-lg shadow-xl overflow-hidden min-w-[220px]">
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2 border-b border-slate-800">LOCAL · Ollama</div>
+                                    {MODELS.local.map(m => (
+                                        <button
+                                            key={m}
+                                            onClick={() => changeModel('local', m)}
+                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${ragInfo.source === 'local' && ragInfo.model === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
+                                        >{m}</button>
+                                    ))}
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2 border-b border-slate-800 border-t">OPENCODE · Remoto · $0</div>
+                                    {MODELS.opencode.map(m => (
+                                        <button
+                                            key={m}
+                                            onClick={() => changeModel('opencode', m)}
+                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${ragInfo.source === 'opencode' && ragInfo.model === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
+                                        >{m}</button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>
