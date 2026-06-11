@@ -227,11 +227,16 @@ class ChatLLMController extends Controller {
             'models' => 'nullable|array',
             'enabled' => 'sometimes|boolean',
         ]);
-        $data = [];
-        foreach (['label','base_url','enabled'] as $f) { if (isset($validated[$f])) $data[$f] = $validated[$f]; }
+        $config = config('llm_providers', [])[$key] ?? [];
+        $data = [
+            'key'      => $key,
+            'label'    => $validated['label'] ?? $config['label'] ?? $key,
+            'base_url' => $validated['base_url'] ?? $config['base_url'] ?? '',
+            'enabled'  => $validated['enabled'] ?? true,
+            'updated_at' => now(),
+        ];
         if (isset($validated['models'])) $data['models'] = json_encode($validated['models']);
-        $data['updated_at'] = now();
-        \Illuminate\Support\Facades\DB::table('llm_providers')->where('key', $key)->update($data);
+        \Illuminate\Support\Facades\DB::table('llm_providers')->updateOrInsert(['key' => $key], $data);
         return response()->json(['message' => 'Provider actualizado']);
     }
 
