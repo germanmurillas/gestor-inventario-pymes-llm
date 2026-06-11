@@ -205,11 +205,8 @@ class ChatLLMController extends Controller {
         $intent = $this->classifyQuery($query);
         $contextoRAG = $this->buildRagContext($query, $intent);
 
-        $promptSistema = "Eres Pymetory IA, asistente de inventarios para una PYME de construcción. " .
-            "IMPORTANTE: Responde EXACTAMENTE lo que el usuario pregunta. Si pregunta por un material específico, " .
-            "solo habla de ESE material. Si pregunta por vencimientos, solo muestra fechas. " .
-            "Solo menciona 'crítico' o 'urgente' si el usuario explícitamente te pregunta por alertas. " .
-            "Usa el siguiente contexto de base de datos para responder:\n\n{$contextoRAG}";
+        $promptSistema = "Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos.\n\n"
+            . "Contexto de la base de datos:\n{$contextoRAG}";
 
         // ── Unified LLM inference (local, opencode, external) ──────────────────
         $endpoints = [
@@ -229,27 +226,55 @@ class ChatLLMController extends Controller {
         }
 
         try {
+            $historial = ChatHistory::where('session_id', $sessionId ?? '')
+                ->orderBy('created_at', 'asc')
+                ->take(6)->get()
+                ->map(fn($h) => [['role' => 'user', 'content' => $h->user_message], ['role' => 'assistant', 'content' => $h->bot_message]])
+                ->flatten(1)->values()->toArray();
+
             $payload = [
                 'model'       => $llmModelo,
-                'messages'    => [
-                    ['role' => 'system', 'content' => $promptSistema],
-                    ['role' => 'user',   'content' => $query],
-                ],
+                'messages'    => array_merge(
+                    [['role' => 'system', 'content' => $promptSistema]],
+                    $historial,
+                    [['role' => 'user', 'content' => $query]]
+                ),
                 'temperature' => $temperature,
-                'max_tokens'  => $maxTokens,
+                'max_tokens'  => $llmSource === 'opencode' ? max($maxTokens, 2048) : $maxTokens,
             ];
+
+            $totalChars = mb_strlen($promptSistema) + array_sum(array_map(fn($m) => mb_strlen($m['content'] ?? ''), $historial)) + mb_strlen($query);
+            if ($totalChars > 18000) {
+                $lotesCortos = Lote::with('material')->fefoOrder()->take(4)->get()->map(fn($l) => "- {$l->material->name}: {$l->quantity}u")->join("\n");
+                $promptSistema = "Eres Pymetory IA. Responde conciso.\n\nInventario:\n{$lotesCortos}";
+            }
 
             $response = Http::timeout(60)
                 ->withToken($cfg['key'] ?: null)
                 ->post($cfg['url'], $payload);
 
             if ($response->successful()) {
-                $text = $response->json('choices.0.message.content')
-                    ?: $response->json('choices.0.message.reasoning_content')
-                    ?: '';
+                $text = trim((string) $response->json('choices.0.message.content'));
+                $text = preg_replace('#<think>.*?</think>#is', '', $text);
+                $text = trim($text);
+
+                if ($text === '' && $llmSource === 'opencode') {
+                    $fallback = Http::timeout(30)->post('http://localhost:11434/v1/chat/completions', [
+                        'model' => 'gemma3:4b', 'messages' => $payload['messages'],
+                        'temperature' => 0.3, 'max_tokens' => 512,
+                    ]);
+                    $alt = trim((string) $fallback->json('choices.0.message.content'));
+                    if ($alt !== '') { $text = $alt; $llmModelo = 'gemma3:4b (fallback)'; $llmSource = 'local'; }
+                }
+
+                if ($text === '') {
+                    $text = 'No pude generar una respuesta con este modelo de razonamiento. '
+                          . 'Probá con un modelo no-reasoning (gemma3:4b, qwen3, etc.) desde el selector de arriba.';
+                }
+
                 $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle);
                 return response()->json([
-                    'response'    => trim($text),
+                    'response'    => $text,
                     'intent'      => $intent,
                     'session_id'  => $sessionId,
                     'session_title' => $sessionTitle,
