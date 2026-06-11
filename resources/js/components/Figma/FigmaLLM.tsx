@@ -18,15 +18,18 @@ const FigmaLLM = () => {
     const [isThinking, setIsThinking] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [ragInfo, setRagInfo] = useState<{model:string,source:string,key_name:string}>({model:'—',source:'local',key_name:'Ollama Local'});
+    const [selectedModel, setSelectedModel] = useState('gemma3:4b');
+    const [selectedSource, setSelectedSource] = useState('local');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const changeModel = async (source: string, model: string) => {
+        setSelectedSource(source);
+        setSelectedModel(model);
         try {
             await axios.put('/settings', { settings: { llm_modelo: model, llm_source: source } });
-            setRagInfo(r => ({ ...r, model, source }));
-            setDropdownOpen(false);
         } catch {}
+        setDropdownOpen(false);
     };
 
     const fetchSessions = async () => {
@@ -206,9 +209,9 @@ const FigmaLLM = () => {
                                 onClick={() => setDropdownOpen(!dropdownOpen)}
                                 className="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/40 rounded-md px-2.5 py-1 text-[10px] font-bold text-gray-300 hover:border-slate-500 transition-colors"
                             >
-                                <span className="text-[#E63B2E] uppercase tracking-wider">{ragInfo.source === 'opencode' ? 'OPENCODE' : 'LOCAL'}</span>
+                                <span className="text-[#E63B2E] uppercase tracking-wider">{selectedSource === 'opencode' ? 'OPENCODE' : 'LOCAL'}</span>
                                 <span className="text-slate-400">·</span>
-                                <span className="truncate max-w-[120px]">{ragInfo.model}</span>
+                                <span className="truncate max-w-[120px]">{selectedModel}</span>
                                 <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {dropdownOpen && (
@@ -218,7 +221,7 @@ const FigmaLLM = () => {
                                         <button
                                             key={m}
                                             onClick={() => changeModel('local', m)}
-                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${ragInfo.source === 'local' && ragInfo.model === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
+                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${selectedSource === 'local' && selectedModel === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
                                         >{m}</button>
                                     ))}
                                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2 border-b border-slate-800 border-t">OPENCODE · Remoto · $0</div>
@@ -226,7 +229,7 @@ const FigmaLLM = () => {
                                         <button
                                             key={m}
                                             onClick={() => changeModel('opencode', m)}
-                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${ragInfo.source === 'opencode' && ragInfo.model === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
+                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${selectedSource === 'opencode' && selectedModel === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
                                         >{m}</button>
                                     ))}
                                 </div>
