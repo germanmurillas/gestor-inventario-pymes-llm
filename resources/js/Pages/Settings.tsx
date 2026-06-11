@@ -260,6 +260,15 @@ export default function Settings() {
                             <div><label className={label}>Contexto Lotes</label><input type="number" className={field} value={settings.llm_contexto_lotes ?? '20'} onChange={e => setVal('llm_contexto_lotes', e.target.value)} /></div>
                         </div>
 
+                        {/* ── System Prompt ── */}
+                        <div className="mb-4">
+                            <div className="flex items-center justify-between mb-1">
+                                <label className={label}>System Prompt</label>
+                                <button onClick={() => setVal('llm_prompt', 'Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos.')} className="font-mono text-[10px] uppercase text-[#E63B2E] hover:underline">Restaurar default</button>
+                            </div>
+                            <textarea className={`${field} font-mono text-xs h-24 resize-y`} value={settings.llm_prompt ?? ''} onChange={e => setVal('llm_prompt', e.target.value)} placeholder="Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos." />
+                        </div>
+
                         {/* ── Test RAG en vivo ── */}
                         <div className="p-4 rounded-lg bg-[#E8E4DD]/20 border border-[#111111]/10 mb-4">
                             <div className="flex items-center gap-3">
@@ -270,7 +279,7 @@ export default function Settings() {
                             <div id="ragTestResult" className="font-mono text-xs text-[#4A4A4A] mt-2 max-h-32 overflow-y-auto"></div>
                         </div>
 
-                        <button className={`${btn} bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes'])}><Save size={15} /> Guardar Motor RAG</button>
+                        <button className={`${btn} bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes','llm_prompt'])}><Save size={15} /> Guardar Motor RAG</button>
                     </Section>
 
                     {/* ── 3. ALERTAS ── */}

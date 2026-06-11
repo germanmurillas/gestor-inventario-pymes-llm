@@ -267,7 +267,7 @@ class ChatLLMController extends Controller {
 
         $settings = DB::table('settings')->whereIn('clave', [
             'llm_activo', 'llm_modelo', 'llm_temperatura', 'llm_max_tokens',
-            'llm_source', 'llm_external_key', 'llm_opencode_key', 'llm_num_ctx', 'llm_num_gpu'
+            'llm_source', 'llm_external_key', 'llm_opencode_key', 'llm_num_ctx', 'llm_num_gpu', 'llm_prompt'
         ])->pluck('valor', 'clave');
 
         if (($settings['llm_activo'] ?? 'true') === 'false') {
@@ -290,8 +290,9 @@ class ChatLLMController extends Controller {
         $intent = $this->classifyQuery($query);
         $contextoRAG = $this->buildRagContext($query, $intent);
 
-        $promptSistema = "Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos.\n\n"
-            . "Contexto de la base de datos:\n{$contextoRAG}";
+        $defaultPrompt = "Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos.";
+        $promptSistema = (!empty($settings['llm_prompt']) ? $settings['llm_prompt'] : $defaultPrompt)
+            . "\n\nContexto de la base de datos:\n{$contextoRAG}";
 
         // ── Unified LLM inference (local, opencode, external) ──────────────────
         $endpoints = [
