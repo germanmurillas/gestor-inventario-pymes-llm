@@ -41,25 +41,25 @@ const DASHBOARD_SECTIONS: NavSection[] = [
         ],
     },
     {
-        title: 'Análisis',
+        title: 'Analisis',
         items: [
             { icon: MessageSquare, label: 'Asistente RAG', view: 'LLM' },
             { icon: BarChart3, label: 'Reportes', view: 'REPORTES' },
             { icon: LayoutGrid, label: 'Log Maestro', view: 'LOG_MAESTRO' },
             { icon: Tag, label: 'Etiquetas', view: 'ETIQUETAS' },
-            { icon: ScanLine, label: 'Escáner QR', view: 'ESCANER' },
+            { icon: ScanLine, label: 'Escaner QR', view: 'ESCANER' },
         ],
     },
     {
-        title: 'Gestión',
+        title: 'Gestion',
         items: [
             { icon: History, label: 'Historial QR', view: 'SCAN_HISTORY' },
             { icon: ArrowRightLeft, label: 'Transferencias', view: 'TRANSFERENCIAS' },
-            { icon: Truck, label: 'Órdenes Compra', view: 'PURCHASE_ORDERS' },
+            { icon: Truck, label: 'Ordenes Compra', view: 'PURCHASE_ORDERS' },
             { icon: Printer, label: 'Imprimir Labels', view: 'LABELS_PRINT' },
             { icon: Bell, label: 'Alertas', view: 'NOTIFICACIONES' },
-            { icon: Settings, label: 'Ajustes', view: '/settings-page', href: '/settings-page' },
-            { icon: LayoutGrid, label: 'Kanban', view: '/kanban', href: '/kanban' },
+            { icon: Settings, label: 'Ajustes', href: '/settings-page' },
+            { icon: LayoutGrid, label: 'Kanban', href: '/kanban' },
         ],
     },
 ];
@@ -68,31 +68,31 @@ const KANBAN_SECTIONS: NavSection[] = [
     {
         title: 'Principal',
         items: [
-            { icon: LayoutGrid, label: 'Tablero',    view: '/dashboard', href: '/dashboard' },
-            { icon: Box,        label: 'Inventario',  view: '/dashboard', href: '/dashboard' },
-            { icon: Search,     label: 'Buscar',      view: '/dashboard', href: '/dashboard' },
+            { icon: LayoutGrid, label: 'Tablero',    href: '/dashboard' },
+            { icon: Box,        label: 'Inventario',  href: '/dashboard' },
+            { icon: Search,     label: 'Buscar',      href: '/dashboard' },
         ],
     },
     {
         title: 'Analisis',
         items: [
-            { icon: MessageSquare, label: 'Asistente RAG', view: '/dashboard', href: '/dashboard' },
-            { icon: BarChart3,     label: 'Reportes',      view: '/dashboard', href: '/dashboard' },
-            { icon: LayoutGrid,    label: 'Log Maestro',   view: '/dashboard', href: '/dashboard' },
-            { icon: Tag,           label: 'Etiquetas',     view: '/dashboard', href: '/dashboard' },
-            { icon: ScanLine,      label: 'Escaner QR',    view: '/dashboard', href: '/dashboard' },
+            { icon: MessageSquare, label: 'Asistente RAG', href: '/dashboard' },
+            { icon: BarChart3,     label: 'Reportes',      href: '/dashboard' },
+            { icon: LayoutGrid,    label: 'Log Maestro',   href: '/dashboard' },
+            { icon: Tag,           label: 'Etiquetas',     href: '/dashboard' },
+            { icon: ScanLine,      label: 'Escaner QR',    href: '/dashboard' },
         ],
     },
     {
         title: 'Gestion',
         items: [
-            { icon: History,        label: 'Historial QR',    view: '/dashboard', href: '/dashboard' },
-            { icon: ArrowRightLeft, label: 'Transferencias',  view: '/dashboard', href: '/dashboard' },
-            { icon: Truck,          label: 'Ordenes Compra',  view: '/dashboard', href: '/dashboard' },
-            { icon: Printer,        label: 'Imprimir Labels', view: '/dashboard', href: '/dashboard' },
-            { icon: Bell,           label: 'Alertas',         view: '/dashboard', href: '/dashboard' },
-            { icon: Settings,       label: 'Ajustes',         view: '/settings-page', href: '/settings-page' },
-            { icon: LayoutGrid,     label: 'Kanban',          view: '/kanban', href: '/kanban' },
+            { icon: History,        label: 'Historial QR',    href: '/dashboard' },
+            { icon: ArrowRightLeft, label: 'Transferencias',  href: '/dashboard' },
+            { icon: Truck,          label: 'Ordenes Compra',  href: '/dashboard' },
+            { icon: Printer,        label: 'Imprimir Labels', href: '/dashboard' },
+            { icon: Bell,           label: 'Alertas',         href: '/dashboard' },
+            { icon: Settings,       label: 'Ajustes',         href: '/settings-page' },
+            { icon: LayoutGrid,     label: 'Kanban',          href: '/kanban' },
         ],
     },
 ];
@@ -157,33 +157,33 @@ export default function Sidebar({
                             const isActive = activeView === item.view;
                             const itemClasses = `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-sans text-sm font-bold ${isActive ? 'bg-white/15 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`;
 
-                            if (item.href) {
+                            if (onNavigate && !item.href) {
                                 return (
-                                    <Link
+                                    <button
                                         key={item.label}
-                                        href={item.href}
-                                        className={itemClasses}
+                                        onClick={() => handleNav(item.view)}
                                         aria-label={`Ir a ${item.label}`}
                                         aria-current={isActive ? 'page' : undefined}
-                                        onClick={() => onMobileClose()}
+                                        className={itemClasses}
                                     >
-                                        <item.icon size={18} className={isActive ? 'text-champan' : 'text-slate-500'} aria-hidden="true" />
+                                        <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-500'} aria-hidden="true" />
                                         <span className={`${sidebarOpen ? 'block' : 'hidden lg:block'} tracking-tight`}>{item.label}</span>
-                                    </Link>
+                                    </button>
                                 );
                             }
 
                             return (
-                                <button
+                                <Link
                                     key={item.label}
-                                    onClick={() => handleNav(item.view)}
+                                    href={item.href || `/dashboard`}
+                                    className={itemClasses}
                                     aria-label={`Ir a ${item.label}`}
                                     aria-current={isActive ? 'page' : undefined}
-                                    className={itemClasses}
+                                    onClick={() => onMobileClose()}
                                 >
-                                    <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-500'} aria-hidden="true" />
+                                    <item.icon size={18} className={isActive ? 'text-champan' : 'text-slate-500'} aria-hidden="true" />
                                     <span className={`${sidebarOpen ? 'block' : 'hidden lg:block'} tracking-tight`}>{item.label}</span>
-                                </button>
+                                </Link>
                             );
                         })}
                     </React.Fragment>

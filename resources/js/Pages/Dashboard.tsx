@@ -9,11 +9,9 @@ import FigmaTablero from '../components/Figma/FigmaTablero';
 import FigmaInventario from '../components/Figma/FigmaInventario';
 import FigmaReports from '../components/Figma/FigmaReports';
 import FigmaLLM from '../components/Figma/FigmaLLM';
-import FigmaSettings from '../components/Figma/FigmaSettings';
 import FigmaNotifications from '../components/Figma/FigmaNotifications';
 import FigmaSearch from '../components/Figma/FigmaSearch';
 import FigmaLabels from '../components/Figma/FigmaLabels';
-import FigmaKanban from '../components/Figma/FigmaKanban';
 import FigmaLogMaestro from '../components/Figma/FigmaLogMaestro';
 import FigmaQRScanner from '../components/Figma/FigmaQRScanner';
 import FigmaScanHistory from '../components/Figma/FigmaScanHistory';
@@ -21,7 +19,7 @@ import FigmaTransferForm from '../components/Figma/FigmaTransferForm';
 import FigmaPurchaseOrders from '../components/Figma/FigmaPurchaseOrders';
 import FigmaLabelPrint from '../components/Figma/FigmaLabelPrint';
 
-type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'CONFIGURACION' | 'PROYECTO' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
+type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
 
 export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth: any, initialLotes: any[], dashboardStats: any }) {
     const [lotes, setLotes] = useState(initialLotes || []);
@@ -103,35 +101,13 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                         {activeView === 'REPORTES' && <FigmaReports stats={stats} />}
                         {activeView === 'LLM' && <FigmaLLM />}
                         {activeView === 'NOTIFICACIONES' && <FigmaNotifications />}
-                        {activeView === 'CONFIGURACION' && <FigmaSettings />}
-                        {activeView === 'PROYECTO' && <FigmaKanban />}
                         {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro movements={stats?.fullActivity || []} onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'ESCANER' && <FigmaQRScanner onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'SCAN_HISTORY' && <FigmaScanHistory onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'TRANSFERENCIAS' && <FigmaTransferForm bodegas={stats?.bodegas || []} lotes={lotes} onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'PURCHASE_ORDERS' && <FigmaPurchaseOrders />}
                         {activeView === 'LABELS_PRINT' && <FigmaLabelPrint initialLotes={lotes} />}
-                        {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro movements={stats?.fullActivity || []} onBack={() => setActiveView('TABLERO')} />}
-                        {activeView === 'ESCANER' && <FigmaQRScanner onBack={() => setActiveView('TABLERO')} />}
-                        {activeView === 'SCAN_HISTORY' && <FigmaScanHistory onBack={() => setActiveView('TABLERO')} />}
-                        {activeView === 'TRANSFERENCIAS' && (
-                            <FigmaTransferForm
-                                onBack={() => setActiveView('TABLERO')}
-                                bodegas={stats?.bodegas || []}
-                                lotes={(lotes || []).map((l: any) => ({
-                                    id: l.id,
-                                    batch_number: l.lote,
-                                    quantity: Number(l.cantidad || l.quantity || 0),
-                                    expiration_date: l.vencimiento || '',
-                                    material: l.material_name || l.codigo || '',
-                                    codigo: l.codigo || '',
-                                    bodega_id: Number(l.bodega_id || 0),
-                                }))}
-                            />
-                        )}
-                        {activeView === 'PURCHASE_ORDERS' && <FigmaPurchaseOrders />}
-                        {activeView === 'LABELS_PRINT' && <FigmaLabelPrint initialLotes={lotes} />}
-                        
+
                         {(['AYUDA'].includes(activeView)) && (
                             <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/30 rounded-3xl p-24 flex flex-col items-center justify-center text-slate-500">
                                 <div className="w-16 h-16 bg-slate-700/40 rounded-full flex items-center justify-center mb-6">

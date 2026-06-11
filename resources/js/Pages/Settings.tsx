@@ -105,7 +105,7 @@ export default function Settings() {
     return (
         <div className="flex h-screen bg-[#F5F3EE] text-[#111111] overflow-hidden">
             <Head title="Configuración" />
-            <Sidebar sidebarOpen={sidebarOpen} mobileOpen={mobileOpen} user={user} activeView="CONFIGURACION" mode="dashboard" onMobileClose={() => setMobileOpen(false)} />
+            <Sidebar sidebarOpen={sidebarOpen} mobileOpen={mobileOpen} user={user} activeView="CONFIGURACION" mode="kanban" onMobileClose={() => setMobileOpen(false)} />
             <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="h-16 border-b border-[#111111]/10 flex items-center justify-between px-8 bg-white/50 backdrop-blur-md">
                     <div><span className="text-[#4A4A4A] text-xs font-bold uppercase tracking-widest italic">Pymetory /</span><h1 className="text-xs font-black uppercase tracking-widest">Configuración</h1></div>
