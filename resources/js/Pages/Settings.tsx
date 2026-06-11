@@ -93,6 +93,39 @@ export default function Settings() {
     const toggleKey = async (k: ApiKey) => { await axios.put(`/api/api-keys/${k.id}`, { activo: !k.activo }); await loadKeys(); };
     const deleteKey = async (id: number) => { if (!confirm('¿Eliminar?')) return; await axios.delete(`/api/api-keys/${id}`); await loadKeys(); notify('Eliminada.'); };
 
+    // ── Providers CRUD ──
+    const [pk, setPk] = useState<any>({ key: '', label: '', base_url: '', models: '', enabled: true });
+    const [provEditKey, setProvEditKey] = useState<string | null>(null);
+    const saveProv = async () => {
+        if (!pk.key || !pk.label || !pk.base_url) return notify('Key, Label y Base URL requeridos.');
+        const payload = { ...pk, models: (pk.models || '').split(',').map((s:string) => s.trim()).filter(Boolean) };
+        if (provEditKey) {
+            await axios.put(`/api/llm-providers/${provEditKey}`, payload);
+            setProvEditKey(null);
+        } else {
+            await axios.post('/api/llm-providers', payload);
+        }
+        setPk({ key: '', label: '', base_url: '', models: '', enabled: true });
+        await loadProviders();
+        notify(provEditKey ? 'Provider actualizado.' : 'Provider creado.');
+    };
+    const editProv = (key: string) => {
+        const p = providers[key] || {};
+        setProvEditKey(key);
+        setPk({ key, label: p.label || '', base_url: p.base_url || '', models: (p.models || []).join(', '), enabled: p.enabled !== false });
+    };
+    const deleteProv = async (key: string) => {
+        if (!confirm(`¿Eliminar provider "${key}"?`)) return;
+        await axios.delete(`/api/llm-providers/${key}`);
+        await loadProviders();
+        notify('Provider eliminado.');
+    };
+    const toggleProv = async (key: string) => {
+        const p = providers[key] || {};
+        await axios.put(`/api/llm-providers/${key}`, { enabled: p.enabled === false });
+        await loadProviders();
+    };
+
     // ── Users ──
     const [users, setUsers] = useState<UserRow[]>([]);
     const [nu, setNu] = useState({ name: '', email: '', password: '', role: 'operario' });
@@ -244,6 +277,42 @@ export default function Settings() {
                                 {editingId ? <><Save size={15} /> Actualizar Key</> : <><Plus size={15} /> Nueva Key</>}
                             </button>
                             {editingId && <button className={`${btn} bg-[#111111]/10 text-[#111111] justify-center`} onClick={cancelEdit}>Cancelar</button>}
+                        </div>
+
+                        {/* ── Provider CRUD ── */}
+                        <div className="mt-5 pt-4 border-t border-[#111111]/10">
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="font-sans font-black text-[11px] uppercase tracking-wider text-[#595959]">Proveedores</span>
+                                <span className="font-mono text-[10px] text-[#4A4A4A]">{Object.keys(providers).length} configurados</span>
+                            </div>
+                            <div className="space-y-2 mb-4">
+                                {Object.entries(providers).map(([key, p]: [string, any]) => (
+                                    <div key={key} className="flex items-center gap-2 p-2 rounded-lg border border-[#111111]/10 bg-white">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-mono font-bold text-xs">{key}</span>
+                                                <span className="font-sans text-xs text-[#4A4A4A]">{p.label}</span>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${p.enabled !== false ? 'bg-green-500' : 'bg-[#111111]/20'}`}></span>
+                                            </div>
+                                            <p className="font-mono text-[10px] text-[#4A4A4A] truncate">{p.base_url} · {(p.models || []).length} modelos</p>
+                                        </div>
+                                        <button onClick={() => toggleProv(key)} title={p.enabled !== false ? 'Deshabilitar' : 'Habilitar'} className={`p-1.5 rounded ${p.enabled !== false ? 'text-green-600 bg-green-50' : 'text-[#111111]/20 bg-[#E8E4DD]'}`}><Power size={13} /></button>
+                                        <button onClick={() => editProv(key)} className="p-1.5 rounded text-[#595959] hover:bg-[#E8E4DD]" title="Editar"><Pencil size={13} /></button>
+                                        {p.from_db && <button onClick={() => deleteProv(key)} className="p-1.5 rounded text-[#E63B2E] hover:bg-[#E63B2E]/10" title="Eliminar"><Trash2 size={13} /></button>}
+                                    </div>
+                                ))}
+                                {Object.keys(providers).length === 0 && <p className="font-mono text-xs text-[#4A4A4A]">Cargando...</p>}
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-2 p-3 rounded-lg bg-[#E8E4DD]/20 border border-[#111111]/10">
+                                <input className={field} placeholder="Key (ej: groq)" value={pk.key} onChange={e => setPk({...pk, key: e.target.value})} disabled={!!provEditKey} />
+                                <input className={field} placeholder="Label (ej: Groq Cloud)" value={pk.label} onChange={e => setPk({...pk, label: e.target.value})} />
+                                <input className={`${field} md:col-span-2`} placeholder="Base URL" value={pk.base_url} onChange={e => setPk({...pk, base_url: e.target.value})} />
+                                <input className={`${field} md:col-span-2`} placeholder="Modelos (coma separados)" value={pk.models} onChange={e => setPk({...pk, models: e.target.value})} />
+                                <button className={`${btn} ${provEditKey ? 'bg-[#C42A1E]' : 'bg-[#111111]'} text-[#F5F3EE] justify-center`} onClick={saveProv}>
+                                    {provEditKey ? <><Save size={13} /> Actualizar Proveedor</> : <><Plus size={13} /> Nuevo Proveedor</>}
+                                </button>
+                                {provEditKey && <button className={`${btn} bg-[#111111]/10 text-[#111111] justify-center`} onClick={() => { setProvEditKey(null); setPk({ key: '', label: '', base_url: '', models: '', enabled: true }); }}>Cancelar</button>}
+                            </div>
                         </div>
                     </Section>
 
