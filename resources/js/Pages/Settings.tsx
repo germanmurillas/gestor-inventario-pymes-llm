@@ -70,8 +70,12 @@ export default function Settings() {
     // ── API Keys ──
     const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
     const [nk, setNk] = useState<any>({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true });
-    const [editingId, setEditingId] = useState<number|null>(null);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [providers, setProviders] = useState<Record<string,any>>({});
+    const [currentSource, setCurrentSource] = useState('local');
+
     const loadKeys = useCallback(async () => { const { data } = await axios.get('/api/api-keys'); setApiKeys(data.api_keys ?? []); }, []);
+    const loadProviders = useCallback(async () => { try { const {data} = await axios.get('/api/llm-providers'); setProviders(data); } catch {} }, []);
     const saveKey = async () => {
         if (!nk.nombre) return notify('Nombre requerido.');
         if (editingId) {
@@ -100,7 +104,9 @@ export default function Settings() {
     const resetPass = async (u: UserRow) => { const pw = prompt(`Nueva contraseña para ${u.name} (min 8):`); if (!pw || pw.length < 8) return notify('Minimo 8 caracteres.'); await axios.post(`/api/users/${u.id}/reset-password`, { password: pw }); notify('Reset OK.'); };
     const deleteUser = async (u: UserRow) => { if (!confirm(`¿Eliminar a ${u.name}?`)) return; try { await axios.delete(`/api/users/${u.id}`); await loadUsers(); notify('Eliminado.'); } catch (e: any) { notify(e?.response?.data?.message ?? 'Error.'); } };
 
-    useEffect(() => { loadSettings(); loadOllama(); loadKeys(); loadUsers(); }, [loadSettings, loadOllama, loadKeys, loadUsers]);
+    useEffect(() => { loadSettings(); loadOllama(); loadKeys(); loadUsers(); loadProviders(); }, [loadSettings, loadOllama, loadKeys, loadUsers, loadProviders]);
+
+    useEffect(() => { setCurrentSource(settings.llm_source || 'local'); }, [settings.llm_source]);
 
     return (
         <div className="flex h-screen bg-[#F5F3EE] text-[#111111] overflow-hidden">
@@ -182,29 +188,53 @@ export default function Settings() {
                     {/* ── 4. API KEYS ── */}
                     <Section icon={KeyRound} title="API Keys" subtitle="Credenciales de proveedores LLM (cifradas en reposo)" open={openSec === 'keys'} onToggle={() => toggle('keys')}>
                         {apiKeys.length === 0 && <p className="font-mono text-xs text-[#4A4A4A] mb-4">Sin API Keys registradas.</p>}
-                        <div className="space-y-2 mb-5">
-                            {apiKeys.map(k => (
-                                <div key={k.id} className="flex items-center gap-3 p-3 rounded-lg border border-[#111111]/10 bg-white">
+                        {(['opencode','openai','ollama','anthropic','google'] as const).filter(t => apiKeys.some(k => k.tipo === t)).map(tipo => {
+                          const provider = providers[tipo];
+                          const keys = apiKeys.filter(k => k.tipo === tipo);
+                          return (
+                            <div key={tipo} className="mb-5">
+                              <div className="flex items-center gap-2 mb-2 px-1">
+                                <span className="font-sans font-black text-[11px] uppercase tracking-wider text-[#595959]">{provider?.label || tipo}</span>
+                                <span className="font-mono text-[10px] text-[#4A4A4A]">{keys.length} key(s)</span>
+                              </div>
+                              <div className="space-y-2">
+                                {keys.map(k => (
+                                  <div key={k.id} className="flex items-center gap-3 p-3 rounded-lg border border-[#111111]/10 bg-white">
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2"><span className="font-sans font-bold text-sm truncate">{k.nombre}</span><span className="px-1.5 py-0.5 rounded bg-[#E8E4DD] font-mono text-[10px] uppercase">{k.tipo}</span></div>
-                                        <p className="font-mono text-[11px] text-[#4A4A4A] truncate">{k.key_masked} · {k.model_name || 'sin modelo'} · {k.base_url || 'sin url'}</p>
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-sans font-bold text-sm truncate">{k.nombre}</span>
+                                        {k.activo && tipo === currentSource && <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-mono text-[9px] font-black uppercase">● EN USO</span>}
+                                        <span className="px-1.5 py-0.5 rounded bg-[#E8E4DD] font-mono text-[10px] uppercase">{k.tipo}</span>
+                                        {k.activo && tipo !== currentSource && <span className="font-mono text-[10px] text-green-600">activa</span>}
+                                      </div>
+                                      <p className="font-mono text-[11px] text-[#4A4A4A] truncate">{k.key_masked} · {k.model_name || 'sin modelo'} · {k.base_url || 'sin url'}</p>
                                     </div>
-                                    <button onClick={() => toggleKey(k)} className={`p-2 rounded-lg ${k.activo ? 'text-green-600 bg-green-50' : 'text-[#111111]/30 bg-[#E8E4DD]'}`}><Power size={15} /></button>
+                                    <button onClick={() => toggleKey(k)} title={k.activo ? 'Desactivar' : 'Activar'} className={`p-2 rounded-lg ${k.activo ? 'text-green-600 bg-green-50' : 'text-[#111111]/30 bg-[#E8E4DD]'}`}><Power size={15} /></button>
                                     <button onClick={() => editKey(k)} className="p-2 rounded-lg text-[#595959] hover:bg-[#E8E4DD]" title="Editar"><Pencil size={15} /></button>
-                                    <button onClick={() => deleteKey(k.id)} className="p-2 rounded-lg text-[#E63B2E] hover:bg-[#E63B2E]/10"><Trash2 size={15} /></button>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-3 p-4 rounded-lg bg-[#E8E4DD]/40 border border-[#111111]/10">
+                                    <button onClick={() => deleteKey(k.id)} className="p-2 rounded-lg text-[#E63B2E] hover:bg-[#E63B2E]/10" title="Eliminar"><Trash2 size={15} /></button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div className="grid md:grid-cols-3 gap-3 p-4 rounded-lg bg-[#E8E4DD]/40 border border-[#111111]/10">
                             <input className={field} placeholder="Nombre *" value={nk.nombre} onChange={e => setNk({...nk, nombre: e.target.value})} />
-                            <input className={field} placeholder={editingId ? 'API Key (dejar vacio = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
-                            <input className={field} placeholder="Base URL" value={nk.base_url} onChange={e => setNk({...nk, base_url: e.target.value})} />
-                            <input className={field} placeholder="Model Name" value={nk.model_name} onChange={e => setNk({...nk, model_name: e.target.value})} />
-                            <select className={field} value={nk.tipo} onChange={e => setNk({...nk, tipo: e.target.value})}>
-                                <option value="opencode">opencode</option><option value="openai">openai</option><option value="ollama">ollama</option>
+                            <select className={field} value={nk.tipo} onChange={e => {
+                              const t = e.target.value;
+                              const p = providers[t];
+                              setNk({...nk, tipo: t, base_url: p?.base_url || '', model_name: p?.models?.[0] || ''});
+                            }}>
+                                {Object.entries(providers).filter(([,p]:[string,any]) => p.enabled).map(([k,v]:[string,any]) => <option key={k} value={k}>{v.label}</option>)}
                             </select>
+                            <input className={field} placeholder="Model Name" value={nk.model_name} list="model-datalist" onChange={e => setNk({...nk, model_name: e.target.value})} />
+                            <datalist id="model-datalist">
+                                {(providers[nk.tipo]?.models || []).map((m:string) => <option key={m} value={m} />)}
+                            </datalist>
+                            <input className={field} placeholder={editingId ? 'API Key (dejar vacio = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
+                            <input className={field} placeholder="Base URL" value={nk.base_url} readOnly className={`${field} bg-[#E8E4DD]/60 cursor-not-allowed`} />
                             <button className={`${btn} bg-[#E63B2E] text-white justify-center`} onClick={saveKey}>
-                                {editingId ? <><Save size={15} /> Actualizar Key</> : <><Plus size={15} /> Agregar Key</>}
+                                {editingId ? <><Save size={15} /> Actualizar Key</> : <><Plus size={15} /> Nueva Key</>}
                             </button>
                             {editingId && <button className={`${btn} bg-[#111111]/10 text-[#111111] justify-center`} onClick={cancelEdit}>Cancelar</button>}
                         </div>
