@@ -108,6 +108,12 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                         {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro movements={stats?.fullActivity || []} onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'ESCANER' && <FigmaQRScanner onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'SCAN_HISTORY' && <FigmaScanHistory onBack={() => setActiveView('TABLERO')} />}
+                        {activeView === 'TRANSFERENCIAS' && <FigmaTransferForm bodegas={stats?.bodegas || []} lotes={lotes} onBack={() => setActiveView('TABLERO')} />}
+                        {activeView === 'PURCHASE_ORDERS' && <FigmaPurchaseOrders />}
+                        {activeView === 'LABELS_PRINT' && <FigmaLabelPrint initialLotes={lotes} />}
+                        {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro movements={stats?.fullActivity || []} onBack={() => setActiveView('TABLERO')} />}
+                        {activeView === 'ESCANER' && <FigmaQRScanner onBack={() => setActiveView('TABLERO')} />}
+                        {activeView === 'SCAN_HISTORY' && <FigmaScanHistory onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'TRANSFERENCIAS' && (
                             <FigmaTransferForm
                                 onBack={() => setActiveView('TABLERO')}
