@@ -267,11 +267,12 @@ export default function Settings() {
                                 {Object.entries(providers).filter(([,p]:[string,any]) => p.enabled !== false).map(([k,v]:[string,any]) => <option key={k} value={k}>{v.label || k}</option>)}
                                 {Object.keys(providers).length === 0 && <option value="opencode">OpenCode</option>}
                             </select>
-                            <input className={field} placeholder="Model Name" value={nk.model_name} list="model-datalist" onChange={e => setNk({...nk, model_name: e.target.value})} />
-                            <datalist id="model-datalist">
-                                {(providers[nk.tipo]?.models || []).map((m:string) => <option key={m} value={m} />)}
-                                {nk.tipo === 'ollama' && ollamaModels.map((m:string) => <option key={m} value={m} />)}
-                            </datalist>
+                            <select className={field} value={nk.model_name} onChange={e => setNk({...nk, model_name: e.target.value})}>
+                                <option value="">— Modelo —</option>
+                                {(providers[nk.tipo]?.models || []).map((m:string) => <option key={m} value={m}>{m}</option>)}
+                                {nk.tipo === 'ollama' && ollamaModels.map((m:string) => <option key={m} value={m}>{m}</option>)}
+                                {((providers[nk.tipo]?.models || []).length === 0 && nk.tipo !== 'ollama') && <option value="">Sin modelos</option>}
+                            </select>
                             <input className={field} placeholder={editingId ? 'API Key (dejar vacio = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
                             <input className={field} placeholder="Base URL" value={nk.base_url} readOnly className={`${field} bg-[#E8E4DD]/60 cursor-not-allowed`} />
                             <button className={`${btn} bg-[#E63B2E] text-white justify-center`} onClick={saveKey}>
