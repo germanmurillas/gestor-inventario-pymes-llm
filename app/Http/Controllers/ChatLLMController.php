@@ -188,12 +188,15 @@ class ChatLLMController extends Controller {
         $config = config('llm_providers', []);
         $dbProviders = \Illuminate\Support\Facades\DB::table('llm_providers')->get();
         foreach ($dbProviders as $p) {
+            $dbModels = json_decode($p->models ?? '[]', true) ?: [];
+            $cfgModels = $config[$p->key]['models'] ?? [];
+            $mergedModels = !empty($dbModels) ? $dbModels : $cfgModels;
             $config[$p->key] = [
-                'label' => $p->label,
-                'base_url' => $p->base_url,
-                'enabled' => (bool) $p->enabled,
-                'models' => json_decode($p->models ?? '[]', true) ?: [],
-                'from_db' => true,
+                'label'    => $p->label ?: ($config[$p->key]['label'] ?? $p->key),
+                'base_url' => $p->base_url ?: ($config[$p->key]['base_url'] ?? ''),
+                'enabled'  => (bool) $p->enabled,
+                'models'   => $mergedModels,
+                'from_db'  => true,
             ];
         }
         return response()->json($config);

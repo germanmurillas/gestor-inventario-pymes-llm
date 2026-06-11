@@ -270,6 +270,7 @@ export default function Settings() {
                             <input className={field} placeholder="Model Name" value={nk.model_name} list="model-datalist" onChange={e => setNk({...nk, model_name: e.target.value})} />
                             <datalist id="model-datalist">
                                 {(providers[nk.tipo]?.models || []).map((m:string) => <option key={m} value={m} />)}
+                                {nk.tipo === 'ollama' && ollamaModels.map((m:string) => <option key={m} value={m} />)}
                             </datalist>
                             <input className={field} placeholder={editingId ? 'API Key (dejar vacio = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
                             <input className={field} placeholder="Base URL" value={nk.base_url} readOnly className={`${field} bg-[#E8E4DD]/60 cursor-not-allowed`} />
