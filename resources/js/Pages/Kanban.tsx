@@ -71,7 +71,8 @@ function SortableCard({ item, onDelete, onPin, onAskRag, onTitleChange }: {
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.4 : 1,
+        opacity: isDragging ? 0.3 : 1,
+        zIndex: isDragging ? 0 : 1,
     };
 
     useEffect(() => {
@@ -708,9 +709,9 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                                 })}
                             </div>
 
-                            <DragOverlay dropAnimation={null}>
+                            <DragOverlay dropAnimation={null} adjustScale={false}>
                                 {activeItem && (
-                                    <div className="w-80 bg-obsidiana/90 backdrop-blur-xl border border-champan/30 rounded-2xl p-4 shadow-2xl shadow-champan/10 rotate-2">
+                                    <div className="bg-obsidiana/95 backdrop-blur-xl border border-champan/30 rounded-2xl p-4 shadow-2xl shadow-champan/10 w-[340px]">
                                         <h4 className="text-sm font-bold text-white truncate">{activeItem.title}</h4>
                                         {activeItem.description && (
                                             <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{activeItem.description}</p>
