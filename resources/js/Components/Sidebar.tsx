@@ -66,10 +66,33 @@ const DASHBOARD_SECTIONS: NavSection[] = [
 
 const KANBAN_SECTIONS: NavSection[] = [
     {
-        title: 'Navegacion',
+        title: 'Principal',
         items: [
-            { icon: LayoutGrid, label: 'Tablero', view: '/dashboard', href: '/dashboard' },
-            { icon: LayoutGrid, label: 'Kanban',  view: '/kanban',    href: '/kanban' },
+            { icon: LayoutGrid, label: 'Tablero',    view: '/dashboard', href: '/dashboard' },
+            { icon: Box,        label: 'Inventario',  view: '/dashboard', href: '/dashboard' },
+            { icon: Search,     label: 'Buscar',      view: '/dashboard', href: '/dashboard' },
+        ],
+    },
+    {
+        title: 'Analisis',
+        items: [
+            { icon: MessageSquare, label: 'Asistente RAG', view: '/dashboard', href: '/dashboard' },
+            { icon: BarChart3,     label: 'Reportes',      view: '/dashboard', href: '/dashboard' },
+            { icon: LayoutGrid,    label: 'Log Maestro',   view: '/dashboard', href: '/dashboard' },
+            { icon: Tag,           label: 'Etiquetas',     view: '/dashboard', href: '/dashboard' },
+            { icon: ScanLine,      label: 'Escaner QR',    view: '/dashboard', href: '/dashboard' },
+        ],
+    },
+    {
+        title: 'Gestion',
+        items: [
+            { icon: History,        label: 'Historial QR',    view: '/dashboard', href: '/dashboard' },
+            { icon: ArrowRightLeft, label: 'Transferencias',  view: '/dashboard', href: '/dashboard' },
+            { icon: Truck,          label: 'Ordenes Compra',  view: '/dashboard', href: '/dashboard' },
+            { icon: Printer,        label: 'Imprimir Labels', view: '/dashboard', href: '/dashboard' },
+            { icon: Bell,           label: 'Alertas',         view: '/dashboard', href: '/dashboard' },
+            { icon: Settings,       label: 'Ajustes',         view: '/settings-page', href: '/settings-page' },
+            { icon: LayoutGrid,     label: 'Kanban',          view: '/kanban', href: '/kanban' },
         ],
     },
 ];
