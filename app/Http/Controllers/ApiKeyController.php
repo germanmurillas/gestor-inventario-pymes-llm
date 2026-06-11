@@ -80,6 +80,25 @@ class ApiKeyController extends Controller
         return response()->json(['message' => 'API Key eliminada']);
     }
 
+    /** POST /api/api-keys/{id}/test — verifica que la key funcione contra su provider */
+    public function test(ApiKey $apiKey)
+    {
+        $providers = config('llm_providers', []);
+        $cfg = $providers[$apiKey->tipo] ?? [];
+        $url = $apiKey->base_url ?: ($cfg['base_url'] ?? '');
+        if (!$url) return response()->json(['ok' => false, 'error' => 'Sin base URL configurada'], 422);
+
+        try {
+            $payload = ['model' => $apiKey->model_name ?: ($cfg['models'][0] ?? 'gpt-4o-mini'), 'messages' => [['role' => 'user', 'content' => 'hi']], 'max_tokens' => 5];
+            $resp = \Illuminate\Support\Facades\Http::timeout(10)->withToken($apiKey->key)->post($url, $payload);
+            $status = $resp->status();
+            $ok = $status >= 200 && $status < 300;
+            return response()->json(['ok' => $ok, 'status' => $status, 'detail' => $ok ? 'Conexión exitosa' : "HTTP $status"]);
+        } catch (\Exception $e) {
+            return response()->json(['ok' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
     /** Enmascara la clave dejando visibles los primeros y últimos 4 caracteres. */
     private function mask(?string $key): string
     {

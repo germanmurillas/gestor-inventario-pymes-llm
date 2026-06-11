@@ -99,7 +99,15 @@ export default function Settings() {
     const editKey = (k: ApiKey) => { setEditingId(k.id); setNk({ nombre: k.nombre, key: '', base_url: k.base_url || '', model_name: k.model_name || '', tipo: k.tipo, activo: k.activo }); };
     const cancelEdit = () => { setEditingId(null); setNk({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true }); };
     const toggleKey = async (k: ApiKey) => { await axios.put(`/api/api-keys/${k.id}`, { activo: !k.activo }); await loadKeys(); };
-    const deleteKey = async (id: number) => { if (!confirm('¿Eliminar?')) return; await axios.delete(`/api/api-keys/${id}`); await loadKeys(); notify('Eliminada.'); };
+    const testKey = async (id: number) => {
+        notify('Probando...');
+        try {
+            const { data } = await axios.post(`/api/api-keys/${id}/test`);
+            notify(data.ok ? '✅ Conexión OK' : `❌ ${data.detail || data.error || 'Falló'}`);
+        } catch (e: any) {
+            notify('❌ ' + (e?.response?.data?.error || e?.message || 'Error de conexión'));
+        }
+    };
 
     // ── Providers CRUD ──
     const [pk, setPk] = useState<any>({ key: '', label: '', base_url: '', models: '', enabled: true });
@@ -257,6 +265,7 @@ export default function Settings() {
                                       <p className="font-mono text-[11px] text-[#4A4A4A] truncate">{k.key_masked} · {k.model_name || 'sin modelo'} · {k.base_url || 'sin url'}</p>
                                     </div>
                                     <button onClick={() => toggleKey(k)} title={k.activo ? 'Desactivar' : 'Activar'} className={`p-2 rounded-lg ${k.activo ? 'text-green-600 bg-green-50' : 'text-[#111111]/30 bg-[#E8E4DD]'}`}><Power size={15} /></button>
+                                    <button onClick={() => testKey(k.id)} className="p-2 rounded-lg text-[#2563eb] hover:bg-[#2563eb]/10" title="Probar conexión"><RefreshCw size={15} /></button>
                                     <button onClick={() => editKey(k)} className="p-2 rounded-lg text-[#595959] hover:bg-[#E8E4DD]" title="Editar"><Pencil size={15} /></button>
                                     <button onClick={() => deleteKey(k.id)} className="p-2 rounded-lg text-[#E63B2E] hover:bg-[#E63B2E]/10" title="Eliminar"><Trash2 size={15} /></button>
                                   </div>

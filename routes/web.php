@@ -246,6 +246,7 @@ Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
     Route::post('/api-keys',        [\App\Http\Controllers\ApiKeyController::class, 'store']);
     Route::put('/api-keys/{apiKey}',[\App\Http\Controllers\ApiKeyController::class, 'update']);
     Route::delete('/api-keys/{apiKey}',[\App\Http\Controllers\ApiKeyController::class, 'destroy']);
+    Route::post('/api-keys/{apiKey}/test',[\App\Http\Controllers\ApiKeyController::class, 'test']);
     Route::get('/users',            [\App\Http\Controllers\UserController::class, 'index']);
     Route::post('/users',           [\App\Http\Controllers\UserController::class, 'store']);
     Route::put('/users/{user}',     [\App\Http\Controllers\UserController::class, 'update']);
