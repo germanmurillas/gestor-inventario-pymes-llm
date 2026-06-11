@@ -41,8 +41,13 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
         setData('action', action);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const qty = data.quantity || 0;
+        const msg = data.action === 'salida'
+            ? `¿Retirar ${qty} unidades del stock? Esta acción se registra en el Kardex.`
+            : `¿Ingresar ${qty} unidades al stock?`;
+        if (!confirm(msg)) return;
         post('/inventory/qr-scan', {
             onSuccess: () => {
                 reset();

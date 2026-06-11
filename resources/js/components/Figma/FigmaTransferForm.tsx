@@ -42,6 +42,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!confirm('¿Transferir este stock entre bodegas? Esta acción se registra en el Kardex.')) return;
         post('/inventory/transfer', {
             onSuccess: () => {
                 reset();

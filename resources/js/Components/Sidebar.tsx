@@ -24,6 +24,7 @@ interface NavItem {
     label: string;
     view: string;
     href?: string;
+    desc?: string;
 }
 
 interface NavSection {
@@ -34,32 +35,32 @@ interface NavSection {
 const DASHBOARD_SECTIONS: NavSection[] = [
     {
         title: 'Principal',
-        items: [
-            { icon: LayoutGrid, label: 'Tablero', view: 'TABLERO' },
-            { icon: Box, label: 'Inventario', view: 'INVENTARIO' },
-            { icon: Search, label: 'Buscar', view: 'BUSCAR' },
+                items: [
+            { icon: LayoutGrid, label: 'Tablero', view: 'TABLERO', desc: 'KPIs, métricas y Kardex en tiempo real' },
+            { icon: Box, label: 'Inventario', view: 'INVENTARIO', desc: 'Gestionar materiales, lotes y stock' },
+            { icon: Search, label: 'Buscar', view: 'BUSCAR', desc: 'Buscar por nombre, código o categoría' },
         ],
     },
     {
         title: 'Analisis',
         items: [
-            { icon: MessageSquare, label: 'Asistente RAG', view: 'LLM' },
-            { icon: BarChart3, label: 'Reportes', view: 'REPORTES' },
-            { icon: LayoutGrid, label: 'Log Maestro', view: 'LOG_MAESTRO' },
-            { icon: Tag, label: 'Etiquetas', view: 'ETIQUETAS' },
-            { icon: ScanLine, label: 'Escaner QR', view: 'ESCANER' },
+            { icon: MessageSquare, label: 'Asistente RAG', view: 'LLM', desc: 'Consultar el inventario con IA (RAG + LLM)' },
+            { icon: BarChart3, label: 'Reportes', view: 'REPORTES', desc: 'Exportar PDF y CSV del inventario' },
+            { icon: LayoutGrid, label: 'Log Maestro', view: 'LOG_MAESTRO', desc: 'Kardex: historial inmutable de movimientos' },
+            { icon: Tag, label: 'Etiquetas', view: 'ETIQUETAS', desc: 'Clasificar materiales con tags' },
+            { icon: ScanLine, label: 'Escaner QR', view: 'ESCANER', desc: 'Check-in/out de stock por código QR' },
         ],
     },
     {
         title: 'Gestion',
         items: [
-            { icon: History, label: 'Historial QR', view: 'SCAN_HISTORY' },
-            { icon: ArrowRightLeft, label: 'Transferencias', view: 'TRANSFERENCIAS' },
-            { icon: Truck, label: 'Ordenes Compra', view: 'PURCHASE_ORDERS' },
-            { icon: Printer, label: 'Imprimir Labels', view: 'LABELS_PRINT' },
-            { icon: Bell, label: 'Alertas', view: 'NOTIFICACIONES' },
-            { icon: Settings, label: 'Ajustes', href: '/settings-page' },
-            { icon: LayoutGrid, label: 'Kanban', href: '/kanban' },
+            { icon: History, label: 'Historial QR', view: 'SCAN_HISTORY', desc: 'Registro de todos los escaneos QR' },
+            { icon: ArrowRightLeft, label: 'Transferencias', view: 'TRANSFERENCIAS', desc: 'Mover stock entre bodegas' },
+            { icon: Truck, label: 'Ordenes Compra', view: 'PURCHASE_ORDERS', desc: 'Crear y recibir órdenes de compra' },
+            { icon: Printer, label: 'Imprimir Labels', view: 'LABELS_PRINT', desc: 'Generar etiquetas con QR para lotes' },
+            { icon: Bell, label: 'Alertas', view: 'NOTIFICACIONES', desc: 'Notificaciones de stock bajo y vencimientos' },
+            { icon: Settings, label: 'Ajustes', href: '/settings-page', desc: 'Configuración: API Keys, usuarios, LLM' },
+            { icon: LayoutGrid, label: 'Kanban', href: '/kanban', desc: 'Tablero Kanban drag & drop con @dnd-kit' },
         ],
     },
 ];
@@ -165,6 +166,7 @@ export default function Sidebar({
                                         aria-label={`Ir a ${item.label}`}
                                         aria-current={isActive ? 'page' : undefined}
                                         className={itemClasses}
+                                        title={item.desc || ''}
                                     >
                                         <item.icon size={18} className={isActive ? 'text-white' : 'text-slate-500'} aria-hidden="true" />
                                         <span className={`${sidebarOpen ? 'block' : 'hidden lg:block'} tracking-tight`}>{item.label}</span>
@@ -177,6 +179,7 @@ export default function Sidebar({
                                     key={item.label}
                                     href={item.href || `/dashboard`}
                                     className={itemClasses}
+                                    title={item.desc || ''}
                                     aria-label={`Ir a ${item.label}`}
                                     aria-current={isActive ? 'page' : undefined}
                                     onClick={() => onMobileClose()}
