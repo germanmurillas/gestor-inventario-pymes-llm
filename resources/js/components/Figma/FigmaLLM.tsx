@@ -2,10 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, User, Bot, Search, Plus, Filter, Loader2, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 
-const MODELS = {
-    local: ['gemma3:4b', 'smollm2:360m', 'qwen2.5:0.5b', 'qwen3:0.6b'],
-    opencode: ['deepseek-v4-flash', 'qwen3.7-plus', 'glm-5.1', 'minimax-m3', 'kimi-k2.6', 'hy3-preview'],
-};
+import axios from 'axios';
 
 const FigmaLLM = () => {
     const [sessions, setSessions] = useState<any[]>([]);
@@ -21,6 +18,7 @@ const FigmaLLM = () => {
     const [selectedModel, setSelectedModel] = useState('gemma3:4b');
     const [selectedSource, setSelectedSource] = useState('local');
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [models, setModels] = useState<{local:string[],opencode:string[]}>({local:[],opencode:[]});
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const changeModel = async (source: string, model: string) => {
@@ -45,6 +43,10 @@ const FigmaLLM = () => {
 
     useEffect(() => {
         fetchSessions();
+        axios.get('/api/llm-models').then(r => {
+            setModels(r.data);
+            if (r.data.local?.length) { setSelectedModel(r.data.local[0]); }
+        }).catch(() => {});
     }, []);
 
     const handleSelectSession = async (sessionId: string, sessionTitle: string) => {
@@ -217,7 +219,7 @@ const FigmaLLM = () => {
                             {dropdownOpen && (
                                 <div className="absolute right-0 top-full mt-1 z-50 bg-slate-900 border border-slate-700/60 rounded-lg shadow-xl overflow-hidden min-w-[220px]">
                                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2 border-b border-slate-800">LOCAL · Ollama</div>
-                                    {MODELS.local.map(m => (
+                                    {models.local.map(m => (
                                         <button
                                             key={m}
                                             onClick={() => changeModel('local', m)}
@@ -225,7 +227,7 @@ const FigmaLLM = () => {
                                         >{m}</button>
                                     ))}
                                     <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2 border-b border-slate-800 border-t">OPENCODE · Remoto · $0</div>
-                                    {MODELS.opencode.map(m => (
+                                    {models.opencode.map(m => (
                                         <button
                                             key={m}
                                             onClick={() => changeModel('opencode', m)}

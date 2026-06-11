@@ -127,6 +127,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::post('/chat-rag', [ChatLLMController::class, 'ask'])
     ->middleware(['auth', 'verified']);
 
+Route::get('/api/llm-models', [ChatLLMController::class, 'models'])
+    ->middleware(['auth', 'verified']);
+
 Route::get('/ollama-models', [ChatLLMController::class, 'getLocalOllamaModels'])
     ->middleware(['auth', 'verified']);
 

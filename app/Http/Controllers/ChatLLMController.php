@@ -164,6 +164,25 @@ class ChatLLMController extends Controller {
         return $context;
     }
 
+    /** GET /api/llm-models — lista dinamica de modelos disponibles */
+    public function models() {
+        $local = [];
+        try {
+            $ollama = Http::timeout(3)->get('http://localhost:11434/api/tags');
+            if ($ollama->successful()) {
+                $local = collect($ollama->json('models') ?? [])->pluck('name')->toArray();
+            }
+        } catch (\Exception $e) {}
+
+        $opencode = \App\Models\ApiKey::where('tipo', 'opencode')->where('activo', true)
+            ->pluck('model_name')->filter()->unique()->values()->toArray();
+        if (empty($opencode)) {
+            $opencode = ['deepseek-v4-flash', 'qwen3.7-plus', 'glm-5.1', 'minimax-m3', 'kimi-k2.6', 'hy3-preview'];
+        }
+
+        return response()->json(compact('local', 'opencode'));
+    }
+
     public function ask(Request $request) {
         $request->validate([
             'prompt' => 'required|string|max:500',
