@@ -183,6 +183,11 @@ class ChatLLMController extends Controller {
         return response()->json(compact('local', 'opencode'));
     }
 
+    /** GET /api/llm-providers — lista de proveedores LLM con sus configuraciones */
+    public function providers() {
+        return response()->json(config('llm_providers', []));
+    }
+
     public function ask(Request $request) {
         $request->validate([
             'prompt' => 'required|string|max:500',

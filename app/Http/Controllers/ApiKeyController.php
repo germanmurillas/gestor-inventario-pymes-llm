@@ -36,6 +36,10 @@ class ApiKeyController extends Controller
             'activo'     => 'boolean',
         ]);
 
+        if (!empty($validated['activo'])) {
+            ApiKey::where('tipo', $validated['tipo'])->update(['activo' => false]);
+        }
+
         $apiKey = ApiKey::create($validated);
         $this->audit('crear', $apiKey->id);
 
@@ -56,6 +60,10 @@ class ApiKeyController extends Controller
         // El formulario no reenvía la clave por seguridad: si viene vacía, no se sobreescribe.
         if (empty($validated['key'] ?? null)) {
             unset($validated['key']);
+        }
+
+        if (!empty($validated['activo'])) {
+            ApiKey::where('tipo', $apiKey->tipo)->where('id', '!=', $apiKey->id)->update(['activo' => false]);
         }
 
         $apiKey->update($validated);
