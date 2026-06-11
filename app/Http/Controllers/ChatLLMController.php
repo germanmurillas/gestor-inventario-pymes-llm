@@ -183,9 +183,62 @@ class ChatLLMController extends Controller {
         return response()->json(compact('local', 'opencode'));
     }
 
-    /** GET /api/llm-providers — lista de proveedores LLM con sus configuraciones */
+    /** GET /api/llm-providers — lista de proveedores (config + DB) */
     public function providers() {
-        return response()->json(config('llm_providers', []));
+        $config = config('llm_providers', []);
+        $dbProviders = \Illuminate\Support\Facades\DB::table('llm_providers')->get();
+        foreach ($dbProviders as $p) {
+            $config[$p->key] = [
+                'label' => $p->label,
+                'base_url' => $p->base_url,
+                'enabled' => (bool) $p->enabled,
+                'models' => json_decode($p->models ?? '[]', true) ?: [],
+                'from_db' => true,
+            ];
+        }
+        return response()->json($config);
+    }
+
+    /** POST /api/llm-providers — crear provider personalizado */
+    public function storeProvider(Request $request) {
+        $validated = $request->validate([
+            'key' => 'required|string|max:50|unique:llm_providers,key',
+            'label' => 'required|string|max:100',
+            'base_url' => 'required|url|max:500',
+            'models' => 'nullable|array',
+            'enabled' => 'boolean',
+        ]);
+        \Illuminate\Support\Facades\DB::table('llm_providers')->insert([
+            'key' => $validated['key'],
+            'label' => $validated['label'],
+            'base_url' => $validated['base_url'],
+            'models' => json_encode($validated['models'] ?? []),
+            'enabled' => $validated['enabled'] ?? true,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        return response()->json(['message' => 'Provider creado'], 201);
+    }
+
+    /** PUT /api/llm-providers/{key} */
+    public function updateProvider(Request $request, string $key) {
+        $validated = $request->validate([
+            'label' => 'sometimes|string|max:100',
+            'base_url' => 'sometimes|url|max:500',
+            'models' => 'nullable|array',
+            'enabled' => 'sometimes|boolean',
+        ]);
+        $data = [];
+        foreach (['label','base_url','enabled'] as $f) { if (isset($validated[$f])) $data[$f] = $validated[$f]; }
+        if (isset($validated['models'])) $data['models'] = json_encode($validated['models']);
+        $data['updated_at'] = now();
+        \Illuminate\Support\Facades\DB::table('llm_providers')->where('key', $key)->update($data);
+        return response()->json(['message' => 'Provider actualizado']);
+    }
+
+    /** DELETE /api/llm-providers/{key} */
+    public function destroyProvider(string $key) {
+        \Illuminate\Support\Facades\DB::table('llm_providers')->where('key', $key)->delete();
+        return response()->json(['message' => 'Provider eliminado']);
     }
 
     public function ask(Request $request) {

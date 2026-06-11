@@ -76,16 +76,14 @@ export default function Settings() {
 
     const loadKeys = useCallback(async () => { const { data } = await axios.get('/api/api-keys'); setApiKeys(data.api_keys ?? []); }, []);
     const loadProviders = useCallback(async () => { try { const {data} = await axios.get('/api/llm-providers'); setProviders(data); } catch {} }, []);
+
     const saveKey = async () => {
         if (!nk.nombre) return notify('Nombre requerido.');
         if (editingId) {
             await axios.put(`/api/api-keys/${editingId}`, { nombre: nk.nombre, key: nk.key || undefined, base_url: nk.base_url, model_name: nk.model_name, tipo: nk.tipo });
             setEditingId(null);
-            notify('API Key actualizada.');
         } else {
-            if (!nk.key) return notify('Key requerida para crear.');
             await axios.post('/api/api-keys', nk);
-            notify('API Key creada.');
         }
         setNk({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true });
         await loadKeys();
@@ -97,7 +95,7 @@ export default function Settings() {
 
     // ── Users ──
     const [users, setUsers] = useState<UserRow[]>([]);
-    const [nu, setNu] = useState<any>({ name: '', email: '', password: '', role: 'operario' });
+    const [nu, setNu] = useState({ name: '', email: '', password: '', role: 'operario' });
     const loadUsers = useCallback(async () => { const { data } = await axios.get('/api/users'); setUsers(data.users ?? []); }, []);
     const createUser = async () => { if (!nu.name || !nu.email || nu.password.length < 8) return notify('Nombre, email y contraseña (min 8).'); await axios.post('/api/users', nu); setNu({ name: '', email: '', password: '', role: 'operario' }); await loadUsers(); notify('Usuario creado.'); };
     const changeRole = async (u: UserRow, role: string) => { await axios.put(`/api/users/${u.id}`, { role }); await loadUsers(); };
@@ -107,6 +105,14 @@ export default function Settings() {
     useEffect(() => { loadSettings(); loadOllama(); loadKeys(); loadUsers(); loadProviders(); }, [loadSettings, loadOllama, loadKeys, loadUsers, loadProviders]);
 
     useEffect(() => { setCurrentSource(settings.llm_source || 'local'); }, [settings.llm_source]);
+
+    // Auto-fill base_url from provider on mount
+    useEffect(() => {
+        const p = providers[nk.tipo];
+        if (p?.base_url && !nk.base_url) {
+            setNk(prev => ({...prev, base_url: p.base_url, model_name: prev.model_name || (p.models || [])[0] || ''}));
+        }
+    }, [providers, nk.tipo]);
 
     return (
         <div className="flex h-screen bg-[#F5F3EE] text-[#111111] overflow-hidden">
@@ -222,10 +228,11 @@ export default function Settings() {
                             <input className={field} placeholder="Nombre *" value={nk.nombre} onChange={e => setNk({...nk, nombre: e.target.value})} />
                             <select className={field} value={nk.tipo} onChange={e => {
                               const t = e.target.value;
-                              const p = providers[t];
-                              setNk({...nk, tipo: t, base_url: p?.base_url || '', model_name: p?.models?.[0] || ''});
+                              const p = providers[t] || {};
+                              setNk(prev => ({...prev, tipo: t, base_url: p.base_url || '', model_name: (p.models || [])[0] || ''}));
                             }}>
-                                {Object.entries(providers).filter(([,p]:[string,any]) => p.enabled).map(([k,v]:[string,any]) => <option key={k} value={k}>{v.label}</option>)}
+                                {Object.entries(providers).filter(([,p]:[string,any]) => p.enabled !== false).map(([k,v]:[string,any]) => <option key={k} value={k}>{v.label || k}</option>)}
+                                {Object.keys(providers).length === 0 && <option value="opencode">OpenCode</option>}
                             </select>
                             <input className={field} placeholder="Model Name" value={nk.model_name} list="model-datalist" onChange={e => setNk({...nk, model_name: e.target.value})} />
                             <datalist id="model-datalist">

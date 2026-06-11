@@ -133,6 +133,12 @@ Route::get('/api/llm-models', [ChatLLMController::class, 'models'])
 Route::get('/api/llm-providers', [ChatLLMController::class, 'providers'])
     ->middleware(['auth', 'verified']);
 
+Route::middleware(['auth', 'verified'])->prefix('api/llm-providers')->group(function () {
+    Route::post('/', [ChatLLMController::class, 'storeProvider']);
+    Route::put('/{key}', [ChatLLMController::class, 'updateProvider'])->where('key', '[a-zA-Z0-9_-]+');
+    Route::delete('/{key}', [ChatLLMController::class, 'destroyProvider'])->where('key', '[a-zA-Z0-9_-]+');
+});
+
 Route::get('/ollama-models', [ChatLLMController::class, 'getLocalOllamaModels'])
     ->middleware(['auth', 'verified']);
 
