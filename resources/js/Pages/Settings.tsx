@@ -79,14 +79,22 @@ export default function Settings() {
 
     const saveKey = async () => {
         if (!nk.nombre) return notify('Nombre requerido.');
-        if (editingId) {
-            await axios.put(`/api/api-keys/${editingId}`, { nombre: nk.nombre, key: nk.key || undefined, base_url: nk.base_url, model_name: nk.model_name, tipo: nk.tipo });
-            setEditingId(null);
-        } else {
-            await axios.post('/api/api-keys', nk);
+        if (!nk.key && !editingId) return notify('API Key requerida.');
+        try {
+            const csrf = document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || CSRF;
+            axios.defaults.headers.common['X-CSRF-TOKEN'] = csrf;
+            if (editingId) {
+                await axios.put(`/api/api-keys/${editingId}`, { nombre: nk.nombre, key: nk.key || undefined, base_url: nk.base_url, model_name: nk.model_name, tipo: nk.tipo });
+                setEditingId(null);
+            } else {
+                await axios.post('/api/api-keys', nk);
+            }
+            notify(editingId ? 'Key actualizada.' : 'Key creada.');
+            setNk({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true });
+            await loadKeys();
+        } catch (e: any) {
+            notify(e?.response?.data?.message || e?.message || 'Error al guardar. Refresca la página (F5).');
         }
-        setNk({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true });
-        await loadKeys();
     };
     const editKey = (k: ApiKey) => { setEditingId(k.id); setNk({ nombre: k.nombre, key: '', base_url: k.base_url || '', model_name: k.model_name || '', tipo: k.tipo, activo: k.activo }); };
     const cancelEdit = () => { setEditingId(null); setNk({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true }); };
@@ -274,7 +282,7 @@ export default function Settings() {
                                 {((providers[nk.tipo]?.models || []).length === 0 && nk.tipo !== 'ollama') && <option value="">Sin modelos</option>}
                             </select>
                             <input className={field} placeholder={editingId ? 'API Key (dejar vacio = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
-                            <input className={field} placeholder="Base URL" value={nk.base_url} readOnly className={`${field} bg-[#E8E4DD]/60 cursor-not-allowed`} />
+                            <input className={`${field} bg-[#E8E4DD]/60 cursor-not-allowed`} placeholder="Base URL" value={nk.base_url} readOnly />
                             <button className={`${btn} bg-[#E63B2E] text-white justify-center`} onClick={saveKey}>
                                 {editingId ? <><Save size={15} /> Actualizar Key</> : <><Plus size={15} /> Nueva Key</>}
                             </button>
