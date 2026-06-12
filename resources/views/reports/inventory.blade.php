@@ -4,93 +4,73 @@
     <meta charset="UTF-8">
     <title>Reporte de Inventario - PYMETORY</title>
     <style>
-        @page { margin: 100px 25px; }
-        header { position: fixed; top: -60px; left: 0px; right: 0px; height: 50px; text-align: center; line-height: 35px; border-bottom: 1px solid #ddd; }
-        footer { position: fixed; bottom: -60px; left: 0px; right: 0px; height: 50px; text-align: center; line-height: 35px; border-top: 1px solid #ddd; font-size: 10px; color: #777; }
-        body { font-family: 'Helvetica', sans-serif; color: #333; font-size: 12px; }
-        .title { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #1e293b; }
-        .meta-info { margin-bottom: 30px; }
-        .meta-info table { width: 100%; }
-        .meta-info td { vertical-align: top; }
-        
-        table.inventory-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table.inventory-table th { background-color: #1e293b; color: white; text-align: left; padding: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        table.inventory-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
-        
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        .badge-optimal { background-color: #ecfdf5; color: #059669; }
-        .badge-critical { background-color: #fef2f2; color: #dc2626; }
-        
-        .footer-text { font-style: italic; font-size: 9px; margin-top: 40px; color: #64748b; }
+        @page { margin: 40px 30px; }
+        body { font-family: 'Helvetica', 'DejaVu Sans', sans-serif; color: #333; font-size: 12px; }
+        .header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { font-size: 18px; color: #1e293b; margin: 0; }
+        .header p { font-size: 10px; color: #666; margin: 4px 0 0; }
+        .meta { margin-bottom: 20px; font-size: 11px; }
+        .meta td { padding: 2px 10px; }
+        table.data { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table.data th { background-color: #1e293b; color: white; text-align: left; padding: 8px 10px; font-size: 10px; text-transform: uppercase; }
+        table.data td { padding: 7px 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+        .badge-critico { background: #fef2f2; color: #dc2626; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .badge-ok { background: #ecfdf5; color: #059669; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 9px; color: #888; text-align: center; }
     </style>
 </head>
 <body>
-    <header>
-        <strong>PYMETORY</strong> - Gestor de Inventario con Inteligencia Artificial
-    </header>
+    <div class="header">
+        <h1>PYMETORY — Reporte de Inventario</h1>
+        <p>Universidad del Valle · Generado: {{ now()->format('d/m/Y H:i') }}</p>
+    </div>
 
-    <footer>
-        Pymetory © {{ date('Y') }} - Universidad del Valle - Página <span class="pagenum"></span>
-    </footer>
+    <table class="meta" style="width:100%">
+        <tr>
+            <td><b>Responsable:</b> Germán David Murillas</td>
+            <td style="text-align:right"><b>Estado Bodega:</b> ACTIVO</td>
+        </tr>
+        <tr>
+            <td><b>Métrica:</b> Kilogramos (3 decimales)</td>
+            <td style="text-align:right"><b>Total lotes:</b> {{ count($lotes) }}</td>
+        </tr>
+    </table>
 
-    <main>
-        <div class="title">Reporte de Existencias - Materia Prima</div>
-        
-        <div class="meta-info">
-            <table>
-                <tr>
-                    <td>
-                        <strong>Fecha de generación:</strong> {{ now()->format('d/m/Y H:i') }}<br>
-                        <strong>Socio Responsable:</strong> Germán David Murillas<br>
-                        <strong>Institución:</strong> Universidad del Valle
-                    </td>
-                    <td style="text-align: right;">
-                        <strong>Estado de Bodega:</strong> ACTIVO<br>
-                        <strong>Métrica Principal:</strong> Kilogramos (3 decimales)
-                    </td>
-                </tr>
-            </table>
-        </div>
+    <table class="data">
+        <thead>
+            <tr>
+                <th>Material</th>
+                <th>Lote</th>
+                <th>Cantidad (kg)</th>
+                <th>Vencimiento</th>
+                <th>Días</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($lotes as $lote)
+            <tr>
+                <td><b>{{ $lote->material->name ?? '—' }}</b></td>
+                <td>{{ $lote->batch_number }}</td>
+                <td>{{ number_format($lote->quantity ?? 0, 3) }}</td>
+                <td>{{ optional($lote->expiration_date)->format('d/m/Y') ?? '—' }}</td>
+                <td>{{ $lote->days_until_expiration > 0 ? $lote->days_until_expiration : 'VENCIDO' }}</td>
+                <td>
+                    @if($lote->is_critical)
+                        <span class="badge-critico">CRÍTICO</span>
+                    @else
+                        <span class="badge-ok">ÓPTIMO</span>
+                    @endif
+                </td>
+            </tr>
+            @empty
+            <tr><td colspan="6" style="text-align:center;padding:30px;color:#999">Sin lotes en el inventario.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
 
-        <table class="inventory-table">
-            <thead>
-                <tr>
-                    <th>Material</th>
-                    <th>Lote</th>
-                    <th>Cantidad</th>
-                    <th>Vencimiento</th>
-                    <th>Días Restantes</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($lotes as $lote)
-                <tr>
-                    <td><strong>{{ $lote->material->name }}</strong></td>
-                    <td><code>{{ $lote->batch_number }}</code></td>
-                    <td>{{ number_format($lote->quantity, 3) }}</td>
-                    <td>{{ $lote->expiration_date->format('d/m/Y') }}</td>
-                    <td>
-                        @php
-                            $days = now()->diffInDays($lote->expiration_date, false);
-                        @endphp
-                        {{ $days > 0 ? $days : 'VENCIDO' }}
-                    </td>
-                    <td>
-                        @if($lote->is_critical)
-                            <span class="badge badge-critical">CRÍTICO FEFO</span>
-                        @else
-                            <span class="badge badge-optimal">ÓPTIMO</span>
-                        @endif
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <div class="footer-text">
-            * Este reporte es un avance técnico del proyecto de grado. La precisión de los datos está sujeta a la última conciliación física registrada.
-        </div>
-    </main>
+    <div class="footer">
+        Pymetory © {{ date('Y') }} — Universidad del Valle — Reporte generado automáticamente
+    </div>
 </body>
 </html>
