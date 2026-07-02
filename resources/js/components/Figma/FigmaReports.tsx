@@ -320,7 +320,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                         <TrendingUp size={14} className="text-indigo-600" /><span>Exactitud de Inventario</span>
                     </div>
                     <div className="flex items-end justify-between">
-                        <div className="text-5xl font-black text-slate-900 tracking-tighter">{efficiency.accuracy || 0}%</div>
+                        <div className="text-5xl font-black text-white tracking-tighter">{efficiency.accuracy || 0}%</div>
                         <div className="text-[10px] font-black text-indigo-600 uppercase mb-2">Objetivo: 99%</div>
                     </div>
                     <div className="relative h-2.5 bg-slate-100 rounded-full overflow-hidden">
@@ -334,7 +334,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         <Clock size={14} className="text-indigo-600" /><span>Índice de Rotación (FEFO)</span>
                     </div>
-                    <div className="text-5xl font-black text-slate-900 tracking-tighter">{efficiency.turnoverRatio || 0}x</div>
+                    <div className="text-5xl font-black text-white tracking-tighter">{efficiency.turnoverRatio || 0}x</div>
                     <p className="text-[10px] text-slate-400 font-bold leading-relaxed uppercase">
                         Velocidad promedio de despacho desde el ingreso del lote.
                     </p>
@@ -354,7 +354,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         <LayoutGrid size={14} className="text-indigo-600" /><span>Ocupación Global</span>
                     </div>
-                    <div className="text-4xl font-black text-slate-900 tracking-tighter">{Math.round(efficiency.occupancyTotal || 0)}%</div>
+                    <div className="text-4xl font-black text-white tracking-tighter">{Math.round(efficiency.occupancyTotal || 0)}%</div>
                     <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-slate-900 transition-all duration-1000"
                             style={{ width: `${efficiency.occupancyTotal || 0}%` }}></div>
@@ -366,7 +366,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
             <div className="border-t border-slate-200 pt-8">
                 <div className="flex items-center gap-2 mb-6">
                     <Layers size={18} className="text-indigo-600" />
-                    <h3 className="text-lg font-black uppercase tracking-tight text-slate-900">Reportes Avanzados</h3>
+                    <h3 className="text-lg font-black uppercase tracking-tight text-white">Reportes Avanzados</h3>
                 </div>
 
                 {/* Report Type Selector */}
@@ -524,7 +524,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                     <HistoryChart data={reportData} />
                 ) : (
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-800/50/50">
+                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-800/50">
                             <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                                 <Table size={12} />
                                 Vista Previa ({reportData?.length || 0} registros)
@@ -549,7 +549,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                     </thead>
                                     <tbody>
                                         {reportData.slice(0, 50).map((row, idx) => (
-                                            <tr key={idx} className="border-b border-slate-50 hover:bg-slate-800/50/50 transition-colors">
+                                            <tr key={idx} className="border-b border-slate-50 hover:bg-slate-800/50 transition-colors">
                                                 {Object.values(row).map((val: any, i) => (
                                                     <td key={i} className="px-4 py-2.5 text-xs text-slate-600 whitespace-nowrap max-w-[200px] truncate">
                                                         {val !== null && val !== undefined ? String(val) : '—'}

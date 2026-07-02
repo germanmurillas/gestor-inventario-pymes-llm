@@ -198,7 +198,7 @@ const FigmaSettings = () => {
             type="button"
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-3 px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-3xl ${
-                activeTab === id ? 'bg-slate-900 text-white shadow-2xl shadow-slate-200' : 'text-slate-400 hover:text-slate-900'
+                activeTab === id ? 'bg-slate-900 text-white shadow-2xl shadow-slate-200' : 'text-slate-400 hover:text-white'
             }`}
         >
             <Icon size={16} strokeWidth={3} />
@@ -222,7 +222,7 @@ const FigmaSettings = () => {
         <div className="space-y-12 animate-in fade-in duration-500 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-bold uppercase tracking-tight text-slate-900">Configuración Central</h2>
+                    <h2 className="text-xl font-bold uppercase tracking-tight text-white">Configuración Central</h2>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestión de parámetros del núcleo Pymetory</p>
                 </div>
                 <FeedbackBanner />
@@ -247,7 +247,7 @@ const FigmaSettings = () => {
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-indigo-50 text-indigo-600 rounded-[1.5rem]"><Globe size={24} /></div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Preferencias de Entorno</h3>
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Preferencias de Entorno</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Regionalización y parámetros operativos</p>
                             </div>
                         </div>
@@ -271,7 +271,7 @@ const FigmaSettings = () => {
                             {/* Timezone info */}
                             <div className="p-6 bg-slate-800/50 rounded-[2rem] flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <div className="text-sm font-black text-slate-900 uppercase">Zona Horaria</div>
+                                    <div className="text-sm font-black text-white uppercase">Zona Horaria</div>
                                     <div className="text-[10px] text-slate-400 font-bold uppercase">America/Bogota (UTC-5)</div>
                                 </div>
                                 <div className="text-[10px] font-black text-emerald-600 uppercase bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">Activa</div>
@@ -295,7 +295,7 @@ const FigmaSettings = () => {
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-violet-50 text-violet-600 rounded-[1.5rem]"><Cpu size={24} /></div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Núcleo de Inteligencia Artificial</h3>
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Núcleo de Inteligencia Artificial</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Parámetros del módulo RAG y LLM</p>
                             </div>
                         </div>
@@ -307,7 +307,7 @@ const FigmaSettings = () => {
                                 onClick={() => setLlmActive(!llmActive)}
                             >
                                 <div className="space-y-1">
-                                    <div className="text-lg font-black text-slate-900 uppercase">Módulo LLM</div>
+                                    <div className="text-lg font-black text-white uppercase">Módulo LLM</div>
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Activa el asistente de inventario por IA</div>
                                 </div>
                                 <div className={`w-14 h-8 rounded-full p-1 flex transition-all ${llmActive ? 'bg-indigo-600 justify-end' : 'bg-slate-200 justify-start'}`}>
@@ -349,7 +349,7 @@ const FigmaSettings = () => {
                                         value={llmExternalKey}
                                         onChange={(e) => setLlmExternalKey(e.target.value)}
                                         placeholder={llmSource === 'free' ? 'Ingresa Token de HuggingFace...' : llmSource === 'opencode' ? 'Ingresa API Key de OpenCode Go...' : 'Ingresa API Key Externa de OpenAI...'}
-                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-xs font-bold text-slate-900 focus:border-indigo-600 focus:bg-slate-900/80 backdrop-blur-xl outline-none transition-all"
+                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:border-indigo-600 focus:bg-slate-900/80 backdrop-blur-xl outline-none transition-all"
                                     />
                                     <p className="text-[9px] text-slate-400 font-bold uppercase">Clave para la comunicación con el proveedor seleccionado.</p>
                                 </div>
@@ -436,7 +436,7 @@ const FigmaSettings = () => {
                                                             {model.display.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div className="text-sm font-black text-slate-900">{model.display}</div>
+                                                            <div className="text-sm font-black text-white">{model.display}</div>
                                                             <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{model.source}</div>
                                                         </div>
                                                     </div>
@@ -676,7 +676,7 @@ const FigmaSettings = () => {
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-orange-50 text-orange-600 rounded-[1.5rem]"><Bell size={24} /></div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Centro de Alertas</h3>
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Centro de Alertas</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Configura cómo quieres ser notificado</p>
                             </div>
                         </div>
@@ -688,7 +688,7 @@ const FigmaSettings = () => {
                                 onClick={() => setNotifFefo(!notifFefo)}
                             >
                                 <div className="space-y-1">
-                                    <div className="text-lg font-black text-slate-900 uppercase">Alertas FEFO Crítico</div>
+                                    <div className="text-lg font-black text-white uppercase">Alertas FEFO Crítico</div>
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Notificaciones cuando un lote entra en período crítico</div>
                                 </div>
                                 <div className={`w-14 h-8 rounded-full p-1 flex transition-all ${notifFefo ? 'bg-indigo-600 justify-end' : 'bg-slate-200 justify-start'}`}>
@@ -702,7 +702,7 @@ const FigmaSettings = () => {
                                 onClick={() => setNotifStock(!notifStock)}
                             >
                                 <div className="space-y-1">
-                                    <div className="text-lg font-black text-slate-900 uppercase">Stock Bajo</div>
+                                    <div className="text-lg font-black text-white uppercase">Stock Bajo</div>
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Alerta cuando el stock cae por debajo del mínimo</div>
                                 </div>
                                 <div className={`w-14 h-8 rounded-full p-1 flex transition-all ${notifStock ? 'bg-indigo-600 justify-end' : 'bg-slate-200 justify-start'}`}>
@@ -753,7 +753,7 @@ const FigmaSettings = () => {
                                             value={notifEmailAdmin}
                                             onChange={(e) => setNotifEmailAdmin(e.target.value)}
                                             placeholder="admin@pymetory.com"
-                                            className="w-full bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 rounded-2xl px-5 py-3 text-xs font-bold text-slate-900 focus:border-indigo-600 outline-none transition-all"
+                                            className="w-full bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 rounded-2xl px-5 py-3 text-xs font-bold text-white focus:border-indigo-600 outline-none transition-all"
                                         />
                                     </div>
                                 )}
@@ -820,7 +820,7 @@ const FigmaSettings = () => {
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-emerald-50 text-emerald-600 rounded-[1.5rem]"><ShieldCheck size={24} /></div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Seguridad y Acceso</h3>
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Seguridad y Acceso</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Protección de credenciales y sesiones</p>
                             </div>
                         </div>
@@ -837,7 +837,7 @@ const FigmaSettings = () => {
                                         type="number" min="30" max="480" step="30"
                                         defaultValue={120}
                                         id="session-timeout"
-                                        className="w-32 bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-black text-slate-900 text-center"
+                                        className="w-32 bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-black text-white text-center"
                                     />
                                     <span className="text-[10px] font-bold text-slate-400 uppercase">minutos de inactividad</span>
                                 </div>
@@ -846,7 +846,7 @@ const FigmaSettings = () => {
                             {/* Log de Auditoría */}
                             <div className="p-8 bg-slate-800/50 border border-slate-100 rounded-[2.5rem] flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <div className="text-sm font-black text-slate-900 uppercase">Log de Auditoría</div>
+                                    <div className="text-sm font-black text-white uppercase">Log de Auditoría</div>
                                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Registra todas las acciones del sistema</div>
                                 </div>
                                 <div className="text-[10px] font-black text-emerald-600 uppercase bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100 flex items-center gap-2">
@@ -876,7 +876,7 @@ const FigmaSettings = () => {
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-purple-50 text-purple-600 rounded-[1.5rem]"><Tag size={24} /></div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Campos Personalizados</h3>
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Campos Personalizados</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Agrega campos extra a los materiales (color, proveedor, N° factura...)</p>
                             </div>
                         </div>
@@ -886,14 +886,14 @@ const FigmaSettings = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <input type="text" placeholder="Nombre (ej: Color)" value={newField.name}
                                     onChange={e => { const v = e.target.value; setNewField(p => ({...p, name: v, key: v.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'') })); }}
-                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-300 outline-none focus:border-purple-600" />
+                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white placeholder:text-slate-300 outline-none focus:border-purple-600" />
                                 <input type="text" placeholder="Clave (ej: color)" value={newField.key}
                                     onChange={e => setNewField(p => ({...p, key: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,'_')}))}
-                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-300 outline-none focus:border-purple-600" />
+                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white placeholder:text-slate-300 outline-none focus:border-purple-600" />
                             </div>
                             <div className="flex items-center gap-3">
                                 <select value={newField.type} onChange={e => setNewField(p => ({...p, type: e.target.value}))}
-                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-purple-600">
+                                    className="bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-purple-600">
                                     <option value="text">Texto</option>
                                     <option value="number">Número</option>
                                     <option value="date">Fecha</option>
@@ -904,7 +904,7 @@ const FigmaSettings = () => {
                                 {newField.type === 'select' && (
                                     <input type="text" placeholder="Opciones (rojo, azul, verde)" value={newField.options}
                                         onChange={e => setNewField(p => ({...p, options: e.target.value}))}
-                                        className="flex-1 bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-300 outline-none focus:border-purple-600" />
+                                        className="flex-1 bg-slate-900 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white placeholder:text-slate-300 outline-none focus:border-purple-600" />
                                 )}
                                 <label className="flex items-center gap-2 text-[10px] font-bold text-slate-400 cursor-pointer">
                                     <input type="checkbox" checked={newField.required} onChange={e => setNewField(p => ({...p, required: e.target.checked}))} /> Obligatorio
@@ -926,7 +926,7 @@ const FigmaSettings = () => {
                                 <div key={field.id} className="flex items-center gap-4 p-5 bg-slate-800/50 border border-slate-100 rounded-2xl">
                                     <GripVertical size={16} className="text-slate-300" />
                                     <div className="flex-1">
-                                        <div className="text-sm font-black text-slate-900">{field.name}</div>
+                                        <div className="text-sm font-black text-white">{field.name}</div>
                                         <div className="text-[9px] font-bold text-slate-400 uppercase">{field.key} · {field.type}{field.required ? ' · obligatorio' : ''}</div>
                                     </div>
                                     <button onClick={() => handleToggleField(field)}
@@ -949,7 +949,7 @@ const FigmaSettings = () => {
                         <div className="flex items-center gap-4">
                             <div className="p-4 bg-blue-50 text-blue-600 rounded-[1.5rem]"><Database size={24} /></div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Datos de la Empresa</h3>
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Datos de la Empresa</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Nombre, logo, dirección y contacto</p>
                             </div>
                         </div>
@@ -958,23 +958,23 @@ const FigmaSettings = () => {
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Nombre empresa</div>
                                     <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)}
-                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-600" />
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Teléfono</div>
                                     <input type="text" value={companyPhone} onChange={e => setCompanyPhone(e.target.value)} placeholder="+57 300 000 0000"
-                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                                        className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-600" />
                                 </div>
                             </div>
                             <div className="space-y-1">
                                 <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Dirección</div>
                                 <input type="text" value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} placeholder="Calle 123 #45-67, Ciudad"
-                                    className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                                    className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-600" />
                             </div>
                             <div className="space-y-1">
                                 <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">URL del Logo</div>
                                 <input type="text" value={companyLogo} onChange={e => setCompanyLogo(e.target.value)} placeholder="https://miapp.com/logo.png"
-                                    className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 outline-none focus:border-blue-600" />
+                                    className="w-full bg-slate-800/50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-600" />
                             </div>
                             <button onClick={() => handleSave({
                                 empresa_nombre: companyName,

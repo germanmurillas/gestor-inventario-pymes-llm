@@ -48,7 +48,7 @@ const FigmaKanban = () => {
         <div className="h-full flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Gestión de Proyecto</h2>
+                    <h2 className="text-2xl font-black text-white tracking-tight">Gestión de Proyecto</h2>
                     <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Sincronizado con KANBAN.md</p>
                 </div>
                 <div className="flex gap-2">
@@ -78,7 +78,7 @@ const FigmaKanban = () => {
                                             <MoreHorizontal size={14} />
                                         </button>
                                     </div>
-                                    <h4 className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{task.title}</h4>
+                                    <h4 className="text-sm font-black text-white group-hover:text-indigo-600 transition-colors">{task.title}</h4>
                                     <p className="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">{task.desc}</p>
                                     
                                     <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">

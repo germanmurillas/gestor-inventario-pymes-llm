@@ -204,7 +204,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
 
                                 {/* Material name */}
                                 <div>
-                                    <h3 className="font-black text-slate-900 uppercase leading-tight text-sm line-clamp-2">
+                                    <h3 className="font-black text-white uppercase leading-tight text-sm line-clamp-2">
                                         {item.material?.name || 'Producto'}
                                     </h3>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">
@@ -215,7 +215,7 @@ const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[
                                 {/* Stats row */}
                                 <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                                     <div className="text-center">
-                                        <div className="text-lg font-black text-slate-900">{item.cantidad}</div>
+                                        <div className="text-lg font-black text-white">{item.cantidad}</div>
                                         <div className="text-[8px] text-slate-400 font-bold uppercase">Cantidad</div>
                                     </div>
                                     <div className="text-center">

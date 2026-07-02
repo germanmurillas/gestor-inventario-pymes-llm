@@ -50,13 +50,13 @@
         <tbody>
             @forelse($lotes as $lote)
             <tr>
-                <td><b>{{ $lote->material->name ?? '—' }}</b></td>
-                <td>{{ $lote->batch_number }}</td>
-                <td>{{ number_format($lote->quantity ?? 0, 3) }}</td>
-                <td>{{ optional($lote->expiration_date)->format('d/m/Y') ?? '—' }}</td>
-                <td>{{ $lote->days_until_expiration > 0 ? $lote->days_until_expiration : 'VENCIDO' }}</td>
+                <td><b>{{ $lote['material'] ?? $lote->material->name ?? '—' }}</b></td>
+                <td>{{ $lote['batch_number'] ?? $lote->batch_number }}</td>
+                <td>{{ number_format(($lote['quantity'] ?? $lote->quantity) ?? 0, 3) }}</td>
+                <td>{{ ($lote['expiration_date'] ?? optional($lote->expiration_date)->format('d/m/Y')) ?? '—' }}</td>
+                <td>{{ ($lote['dias_restantes'] ?? $lote->days_until_expiration) > 0 ? ($lote['dias_restantes'] ?? $lote->days_until_expiration) : 'VENCIDO' }}</td>
                 <td>
-                    @if($lote->is_critical)
+                    @if(($lote['is_critical'] ?? $lote->is_critical) || (($lote['dias_restantes'] ?? $lote->days_until_expiration ?? 9999) <= 15))
                         <span class="badge-critico">CRÍTICO</span>
                     @else
                         <span class="badge-ok">ÓPTIMO</span>

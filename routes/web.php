@@ -258,3 +258,12 @@ Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/settings-page', fn () => \Inertia\Inertia::render('Settings'))->name('settings.page');
 });
+
+// ── MONITOR ──
+Route::get('/monitor', [\App\Http\Controllers\MonitorController::class, 'index']);
+Route::get('/api/monitor/stats', [\App\Http\Controllers\MonitorController::class, 'stats']);
+Route::post('/api/monitor/pulse', [\App\Http\Controllers\MonitorController::class, 'pulse']);
+
+// ── MILOTO ──
+Route::get('/api/miloto', [\App\Http\Controllers\MilotoController::class, 'index']);
+Route::get('/api/miloto/{id}', [\App\Http\Controllers\MilotoController::class, 'run']);

@@ -78,7 +78,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
             {!loading && !error && scans.length === 0 && (
                 <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-dashed border-slate-200 rounded-[3rem] py-32 flex flex-col items-center justify-center text-slate-300">
                     <ScanLine size={56} className="mb-6 opacity-20" />
-                    <p className="text-sm font-black uppercase tracking-[0.3em] opacity-40 text-slate-900">
+                    <p className="text-sm font-black uppercase tracking-[0.3em] opacity-40 text-white">
                         Sin escaneos QR registrados
                     </p>
                     <p className="text-[10px] text-slate-400 mt-2">
@@ -104,7 +104,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {scans.map((scan) => (
-                                    <tr key={scan.id} className="hover:bg-slate-800/50/50 transition-colors group">
+                                    <tr key={scan.id} className="hover:bg-slate-800/50 transition-colors group">
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2">
                                                 {scan.type === 'entrada' ? (
@@ -126,7 +126,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                                         </td>
                                         <td className="px-6 py-5">
                                             <div>
-                                                <div className="text-sm font-bold text-slate-900">{scan.material}</div>
+                                                <div className="text-sm font-bold text-white">{scan.material}</div>
                                                 <div className="text-[10px] text-slate-400 font-mono">{scan.code}</div>
                                             </div>
                                         </td>
@@ -134,7 +134,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                                             <span className="text-sm font-bold text-slate-700 font-mono">{scan.batch}</span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-sm font-black text-slate-900">{scan.quantity} kg</span>
+                                            <span className="text-sm font-black text-white">{scan.quantity} kg</span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Escaneos</div>
-                        <div className="text-2xl font-black text-slate-900 mt-2">{scans.length}</div>
+                        <div className="text-2xl font-black text-white mt-2">{scans.length}</div>
                     </div>
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entradas (Check-in)</div>

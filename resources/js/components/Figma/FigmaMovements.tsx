@@ -28,7 +28,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                     <ArrowLeft size={20} className="text-slate-600 group-hover:-translate-x-1 transition-transform" />
                 </button>
                 <div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight font-display">Auditoría de Lote</h2>
+                    <h2 className="text-2xl font-black text-white tracking-tight font-display">Auditoría de Lote</h2>
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">
                         <span className="text-indigo-600">Lote #{lote.lote || lote.id}</span>
                         <span className="opacity-30">•</span>
@@ -56,17 +56,17 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                         <div className="space-y-6 relative z-10">
                             <div>
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Material</label>
-                                <div className="text-lg font-black text-slate-900 leading-tight">{lote.material_name}</div>
+                                <div className="text-lg font-black text-white leading-tight">{lote.material_name}</div>
                             </div>
                             
                             <div className="grid grid-cols-1 gap-6">
                                 <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Stock Actual</label>
-                                    <div className="text-xl font-black text-slate-900">{lote.cantidad} <span className="text-[10px] text-slate-400 uppercase">KG</span></div>
+                                    <div className="text-xl font-black text-white">{lote.cantidad} <span className="text-[10px] text-slate-400 uppercase">KG</span></div>
                                 </div>
                                 <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Costo Unitario</label>
-                                    <div className="text-xl font-black text-slate-900">${new Intl.NumberFormat('es-CO').format(lote.unit_cost || 0)}</div>
+                                    <div className="text-xl font-black text-white">${new Intl.NumberFormat('es-CO').format(lote.unit_cost || 0)}</div>
                                 </div>
                             </div>
 
@@ -96,7 +96,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-800/50/50 border-b border-slate-100">
+                                    <tr className="bg-slate-800/50 border-b border-slate-100">
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Operación</th>
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Responsable</th>
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Fecha & Hora</th>
@@ -116,7 +116,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                         </tr>
                                     ) : movements.length > 0 ? (
                                         movements.map((mov, idx) => (
-                                            <tr key={mov.id} className="hover:bg-slate-800/50/50 transition-colors group">
+                                            <tr key={mov.id} className="hover:bg-slate-800/50 transition-colors group">
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
@@ -127,7 +127,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                                              mov.type === 'salida' ? <ArrowUpFromLine size={14} /> : <AlertCircle size={14} />}
                                                         </div>
                                                         <div>
-                                                            <div className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{mov.type}</div>
+                                                            <div className="text-[10px] font-black text-white uppercase tracking-tight">{mov.type}</div>
                                                             <div className="text-[9px] text-slate-400 font-medium">{mov.reason || 'Sin observación'}</div>
                                                         </div>
                                                     </div>
@@ -149,7 +149,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <div className="text-xs font-black text-slate-900">{mov.quantity_new} KG</div>
+                                                    <div className="text-xs font-black text-white">{mov.quantity_new} KG</div>
                                                 </td>
                                             </tr>
                                         ))

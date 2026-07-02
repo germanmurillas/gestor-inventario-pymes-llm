@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from '@inertiajs/react';
-import { ArrowLeft, ScanLine, Package, AlertTriangle, Loader2, CheckCircle, XCircle, Camera, Keyboard, QrCode, ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowLeft, ScanLine, Package, AlertTriangle, Loader2, CheckCircle, Camera, Keyboard, QrCode, ArrowDown, ArrowUp } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 interface FigmaQRScannerProps {
     onBack: () => void;
@@ -9,7 +10,8 @@ interface FigmaQRScannerProps {
 
 const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
     const [step, setStep] = useState<'SCAN' | 'ACTION' | 'DONE'>('SCAN');
-    const [inputMode, setInputMode] = useState<'manual'>('manual');
+    const [inputMode, setInputMode] = useState<'manual' | 'camera'>('manual');
+    const scannerRef = useRef<Html5Qrcode | null>(null);
     const [qrInput, setQrInput] = useState('');
     const [decodedLote, setDecodedLote] = useState<any>(prefillLote || null);
     const [scanError, setScanError] = useState('');
@@ -20,6 +22,57 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
         quantity: 0,
         description: '',
     });
+
+    // Camara: arrancar/parar segun modo — corregido contra StrictMode (auditado Opus 4.8)
+    useEffect(() => {
+        if (inputMode !== 'camera' || step !== 'SCAN') return;
+
+        let cancelled = false;
+        const scanner = new Html5Qrcode('qr-reader');
+        scannerRef.current = scanner;
+
+        const safeStop = () => {
+            if (scanner.getState && scanner.getState() === 2) {
+                return scanner.stop().then(() => scanner.clear()).catch(() => {});
+            }
+            return Promise.resolve();
+        };
+
+        const onScan = (decodedText: string) => {
+            safeStop();
+            try {
+                const parsed = JSON.parse(decodedText);
+                if (!parsed.id || !parsed.v) { setScanError('QR invalido'); return; }
+                setQrInput(decodedText);
+                setDecodedLote(parsed);
+                setData('qr_data', decodedText);
+                setStep('ACTION');
+            } catch { setScanError('No se pudo leer el codigo.'); }
+        };
+
+        scanner
+            .start({ facingMode: 'environment' },
+                   { fps: 10, qrbox: { width: 250, height: 250 } },
+                   onScan, undefined)
+            .then(() => { if (cancelled) safeStop(); })
+            .catch(async () => {
+                // Fallback: portatil sin camara trasera → usa la primera disponible
+                try {
+                    const cams = await Html5Qrcode.getCameras();
+                    if (cams.length && !cancelled) {
+                        await scanner.start(cams[0].id,
+                            { fps: 10, qrbox: { width: 250, height: 250 } },
+                            onScan, undefined);
+                    } else {
+                        setScanError('No se detecto ninguna camara.');
+                    }
+                } catch (e: any) {
+                    setScanError('Camara no disponible: ' + (e?.message || e));
+                }
+            });
+
+        return () => { cancelled = true; safeStop(); };
+    }, [inputMode, step]);
 
     const handleDecode = () => {
         setScanError('');
@@ -118,11 +171,25 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     }`}
                                 >
                                     <Keyboard size={16} />
-                                    <span>Ingreso Manual</span>
+                                    <span>Manual</span>
+                                </button>
+                                <button
+                                    onClick={() => setInputMode('camera')}
+                                    className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+                                        inputMode === 'camera'
+                                            ? 'bg-indigo-600 text-white shadow-lg'
+                                            : 'bg-slate-800/50 text-slate-400 hover:text-slate-600'
+                                    }`}
+                                >
+                                    <Camera size={16} />
+                                    <span>Camara</span>
                                 </button>
                             </div>
 
-                            {/* Visual QR Scanner Placeholder */}
+                            {/* Camera View o Placeholder */}
+                            {inputMode === 'camera' ? (
+                                <div id="qr-reader" className="w-full rounded-2xl overflow-hidden" />
+                            ) : (
                             <div className="relative bg-slate-900 rounded-[2rem] aspect-video flex flex-col items-center justify-center overflow-hidden">
                                 <div className="absolute inset-0 opacity-10">
                                     <div className="absolute top-0 left-0 w-full h-px bg-indigo-400 animate-pulse" />
@@ -138,9 +205,10 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     <QrCode size={80} className="text-indigo-400/40" />
                                 </div>
                                 <p className="relative z-10 text-white/40 text-[10px] font-black uppercase tracking-[0.3em] mt-6">
-                                    {inputMode === 'manual' ? 'Ingrese el código abajo' : 'Alinee el QR en el visor'}
+                                    Seleccione Camara para escanear
                                 </p>
                             </div>
+                            )}
 
                             {/* Manual Input */}
                             <div className="space-y-4">
@@ -190,11 +258,11 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div>
                                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SKU / Código</div>
-                                        <div className="text-lg font-black text-slate-900 mt-1">{decodedLote.sku || decodedLote.codigo || 'N/A'}</div>
+                                        <div className="text-lg font-black text-white mt-1">{decodedLote.sku || decodedLote.codigo || 'N/A'}</div>
                                     </div>
                                     <div>
                                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lote / Batch</div>
-                                        <div className="text-lg font-black text-slate-900 mt-1">{decodedLote.batch || decodedLote.lote || 'N/A'}</div>
+                                        <div className="text-lg font-black text-white mt-1">{decodedLote.batch || decodedLote.lote || 'N/A'}</div>
                                     </div>
                                 </div>
 
@@ -311,7 +379,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                 <CheckCircle size={40} className="text-white" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-slate-900 uppercase">Movimiento Registrado</h3>
+                                <h3 className="text-lg font-black text-white uppercase">Movimiento Registrado</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">
                                     El Kardex ha sido actualizado exitosamente
                                 </p>

@@ -29,7 +29,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <History size={20} className="text-indigo-600" />
-                            <h2 className="text-xl font-bold uppercase tracking-tight text-slate-900 font-display">Log Maestro de Movimientos</h2>
+                            <h2 className="text-xl font-bold uppercase tracking-tight text-white font-display">Log Maestro de Movimientos</h2>
                         </div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Kardex Histórico Completo de la PYME</p>
                     </div>
@@ -50,7 +50,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                     <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                         <button 
                             onClick={() => setFilterType('all')}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900/80 backdrop-blur-xl text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900/80 backdrop-blur-xl text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Todos
                         </button>
@@ -85,14 +85,14 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {filteredMovements.length > 0 ? filteredMovements.map((mov) => (
-                                <tr key={mov.id} className="hover:bg-slate-800/50/50 transition-all group">
+                                <tr key={mov.id} className="hover:bg-slate-800/50 transition-all group">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${mov.type === 'entrada' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                                                 {mov.type === 'entrada' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
                                             </div>
                                             <div>
-                                                <div className="text-sm font-black text-slate-900 uppercase tracking-tight">{mov.action}</div>
+                                                <div className="text-sm font-black text-white uppercase tracking-tight">{mov.action}</div>
                                                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{mov.reason || 'N/A'}</div>
                                             </div>
                                         </div>
@@ -101,7 +101,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                                         <div className="flex items-center gap-3">
                                             <Package size={16} className="text-slate-300" />
                                             <div>
-                                                <div className="text-sm font-bold text-slate-800">{mov.material}</div>
+                                                <div className="text-sm font-bold text-slate-300">{mov.material}</div>
                                                 <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Lote: {mov.batch}</div>
                                             </div>
                                         </div>
@@ -120,7 +120,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-right">
-                                        <div className="text-[11px] font-bold text-slate-900 uppercase tracking-tighter">{mov.date}</div>
+                                        <div className="text-[11px] font-bold text-white uppercase tracking-tighter">{mov.date}</div>
                                         <div className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">{mov.time}</div>
                                     </td>
                                 </tr>
@@ -146,11 +146,11 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                     <div className="flex gap-6">
                          <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Ingresos</span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Ingresos</span>
                          </div>
                          <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Salidas</span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Salidas</span>
                          </div>
                     </div>
                 </div>

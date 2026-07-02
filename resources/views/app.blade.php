@@ -7,12 +7,12 @@
     <meta name="keywords" content="inventario, PYME, gestión, FEFO, Kardex, QR, inteligencia artificial, LLM, RAG">
     <meta name="author" content="Germán David Murillas Mondragón — Universidad del Valle">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="http://SERVIDOR">
+    <link rel="canonical" href="https://app.pymetory.com">
 
     <meta property="og:title" content="Pymetory — Gestión de Inventarios con LLM">
     <meta property="og:description" content="Sistema inteligente de control de inventarios para PYMEs con IA generativa, código QR y trazabilidad FEFO.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="http://SERVIDOR">
+    <meta property="og:url" content="https://app.pymetory.com">
     <meta property="og:locale" content="es_CO">
 
     <meta name="twitter:card" content="summary">
@@ -33,7 +33,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+    <meta property="og:image" content="https://app.pymetory.com/images/generated/og-share-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <title inertia>Pymetory | Proyecto de Grado</title>
+    <link rel="icon" type="image/png" sizes="any" href="/images/generated/favicon-icon.png">
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])
     @inertiaHead

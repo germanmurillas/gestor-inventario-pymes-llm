@@ -3,12 +3,12 @@ import { Head, Link } from '@inertiajs/react';
 import { LayoutGrid, Box, ScanLine, MessageSquare, ChartBar, ArrowRight, Github, GraduationCap, Shield, Zap } from 'lucide-react';
 
 const features = [
-    { icon: LayoutGrid, title: 'Dashboard KPIs', desc: 'Insumos activos, lotes en bodega, críticos FEFO y valorización en tiempo real.' },
-    { icon: Box, title: 'Control FEFO', desc: 'First Expired First Out automático — sugerencia de lote y alertas de vencimiento.' },
-    { icon: ScanLine, title: 'Etiquetas QR', desc: 'Generación de códigos QR y CODE128, escáner integrado con historial.' },
-    { icon: MessageSquare, title: 'Asistente RAG', desc: 'Chat con IA que consulta tu inventario real — preguntas en español, 10 intenciones.' },
-    { icon: ChartBar, title: 'Reportes', desc: 'PDF y CSV con KPIs, valorización COP, consumo FEFO y gráficos.' },
-    { icon: LayoutGrid, title: 'Kanban', desc: 'Tablero de tareas con drag-and-drop, columnas personalizables y atajos de teclado.' },
+    { icon: LayoutGrid, img: '/images/generated/feature-inventario.webp', title: 'Dashboard KPIs', desc: 'Insumos activos, lotes en bodega, críticos FEFO y valorización en tiempo real.' },
+    { icon: Box, img: '/images/generated/feature-seguridad.webp', title: 'Control FEFO', desc: 'First Expired First Out automático — sugerencia de lote y alertas de vencimiento.' },
+    { icon: ScanLine, img: '/images/generated/feature-qr-scan.webp', title: 'Etiquetas QR', desc: 'Generación de códigos QR y CODE128, escáner integrado con historial.' },
+    { icon: MessageSquare, img: '/images/generated/feature-ia.webp', title: 'Asistente RAG', desc: 'Chat con IA que consulta tu inventario real — preguntas en español, 10 intenciones.' },
+    { icon: ChartBar, img: '/images/generated/feature-reportes.webp', title: 'Reportes', desc: 'PDF y CSV con KPIs, valorización COP, consumo FEFO y gráficos.' },
+    { icon: LayoutGrid, img: null, title: 'Kanban', desc: 'Tablero de tareas con drag-and-drop, columnas personalizables y atajos de teclado.' },
 ];
 
 const infra = [
@@ -54,6 +54,16 @@ export default function Welcome() {
                     etiquetas QR y un asistente RAG que conoce tu stock en tiempo real.
                 </p>
 
+                {/* Hero image */}
+                <div className="max-w-4xl mx-auto mb-12">
+                    <img
+                        src="/images/generated/hero-landing.webp"
+                        alt="PYMETORY — Gestión de inventarios con IA"
+                        className="w-full h-auto rounded-2xl border border-gray-200 shadow-lg"
+                        loading="eager"
+                    />
+                </div>
+
                 {/* Infra bar */}
                 <div className="flex flex-wrap justify-center gap-4 mb-12">
                     {infra.map((i) => (
@@ -74,15 +84,40 @@ export default function Welcome() {
                 </div>
             </section>
 
+            {/* Vista del Sistema */}
+            <section className="max-w-7xl mx-auto px-6 pb-24">
+                <h2 className="text-2xl font-black text-center mb-4 uppercase tracking-tight">Vista del Sistema</h2>
+                <p className="text-center text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed">
+                    Dashboard con KPIs en tiempo real, alertas FEFO y valorización de inventario.
+                </p>
+                <div className="max-w-5xl mx-auto">
+                    <img
+                        src="/images/generated/dashboard-preview.webp"
+                        alt="Vista previa del dashboard de PYMETORY"
+                        className="w-full h-auto rounded-2xl border border-gray-200 shadow-lg"
+                        loading="lazy"
+                    />
+                </div>
+            </section>
+
             {/* Features Grid */}
             <section className="max-w-7xl mx-auto px-6 pb-24">
                 <h2 className="text-2xl font-black text-center mb-12 uppercase tracking-tight">Funcionalidades</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {features.map((f) => (
                         <div key={f.title} className="bg-white border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors shadow-sm">
-                            <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
-                                <f.icon size={20} className="text-gray-600" />
-                            </div>
+                            {f.img ? (
+                                <img
+                                    src={f.img}
+                                    alt={f.title}
+                                    className="w-12 h-12 rounded-xl object-cover mb-4"
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+                                    <f.icon size={20} className="text-gray-600" />
+                                </div>
+                            )}
                             <h3 className="font-black text-sm uppercase tracking-tight mb-2">{f.title}</h3>
                             <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
                         </div>
@@ -94,14 +129,19 @@ export default function Welcome() {
             <section className="bg-white border-t border-gray-200 py-20 px-6">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div className="space-y-4">
+                        <img
+                            src="/images/generated/thesis-cover.webp"
+                            alt="Portada de la tesis PYMETORY"
+                            className="w-32 h-auto rounded-lg border border-gray-200 shadow-sm mb-2"
+                            loading="lazy"
+                        />
                         <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
                             <GraduationCap size={20} className="text-gray-600" />
                         </div>
                         <h2 className="text-2xl font-black uppercase tracking-tight">Proyecto de Grado</h2>
                         <p className="text-gray-500 leading-relaxed">
                             Universidad del Valle, 2026. Desarrollado por{' '}
-                            <strong>Germán David Murillas Mondragón</strong> y{' '}
-                            <strong>Jorge Augusto Estacio Almeciga</strong> bajo la dirección
+                            <strong>Germán David Murillas Mondragón</strong> bajo la dirección
                             del profesor <strong>Héctor Fabio Ocampo</strong>.
                         </p>
                         <a href="/portafolio/SolucionesWeb/pymetoryTesis/tesis/" className="text-sm font-bold text-[#111111] hover:underline inline-flex items-center gap-1">
@@ -109,6 +149,12 @@ export default function Welcome() {
                         </a>
                     </div>
                     <div className="space-y-4">
+                        <img
+                            src="/images/generated/feature-seguridad.webp"
+                            alt="Infraestructura segura de PYMETORY"
+                            className="w-32 h-auto rounded-lg border border-gray-200 shadow-sm mb-2"
+                            loading="lazy"
+                        />
                         <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
                             <Shield size={20} className="text-gray-600" />
                         </div>
@@ -120,6 +166,27 @@ export default function Welcome() {
                         </p>
                         <Link href="/indice" className="text-sm font-bold text-[#111111] hover:underline inline-flex items-center gap-1">
                             Índice de Enlaces <ArrowRight size={14} />
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section
+                className="relative py-24 px-6 bg-cover bg-center"
+                style={{ backgroundImage: "url('/images/generated/cta-section.webp')" }}
+            >
+                <div className="absolute inset-0 bg-black/60" />
+                <div className="relative max-w-3xl mx-auto text-center text-white space-y-6">
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+                        Empieza a controlar tu inventario hoy
+                    </h2>
+                    <p className="text-gray-200 leading-relaxed max-w-xl mx-auto">
+                        Trazabilidad FEFO, Kardex inmutable y un asistente RAG que conoce tu stock en tiempo real.
+                    </p>
+                    <div className="flex justify-center gap-4 pt-2">
+                        <Link href="/login" className="px-8 py-3 bg-white text-[#111111] text-sm font-bold rounded-xl hover:bg-gray-100 transition-colors inline-flex items-center gap-2">
+                            Acceder al Sistema <ArrowRight size={16} />
                         </Link>
                     </div>
                 </div>

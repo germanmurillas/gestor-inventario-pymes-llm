@@ -12,7 +12,7 @@ class ChatLLMController extends Controller {
 
     public function getLocalOllamaModels() {
         try {
-            $response = Http::timeout(4)->get('http://localhost:11434/api/tags');
+            $response = Http::timeout(15)->get(config('services.ollama.url') . '/api/tags');
             if ($response->successful()) {
                 $models = collect($response->json('models') ?: [])->map(function($m) {
                     return $m['name'];
@@ -168,7 +168,7 @@ class ChatLLMController extends Controller {
     public function models() {
         $local = [];
         try {
-            $ollama = Http::timeout(3)->get('http://localhost:11434/api/tags');
+            $ollama = Http::timeout(3)->get(config('services.ollama.url') . '/api/tags');
             if ($ollama->successful()) {
                 $local = collect($ollama->json('models') ?? [])->pluck('name')->toArray();
             }
@@ -291,12 +291,36 @@ class ChatLLMController extends Controller {
         $contextoRAG = $this->buildRagContext($query, $intent);
 
         $defaultPrompt = "Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos.";
+
+        // ── Privacy Mode: anonimizar con Ollama local antes de enviar a API externa ──
+        $privacyMode = !empty($settings['llm_privacy']) && $llmSource !== 'local';
+        if ($privacyMode && !empty($contextoRAG)) {
+            try {
+                $graphPrompt = "Resume este contexto de inventario en un grafo JSON anonimizado. "
+                    . "Reemplaza nombres reales de materiales por IDs (M1, M2...), lotes por (L1, L2...), "
+                    . "y cantidades exactas por rangos (bajo<50, medio<200, alto>200). "
+                    . "NO incluyas marcas, nombres reales ni datos sensibles. "
+                    . "Solo responde con el JSON. Contexto:\n{$contextoRAG}";
+                $anonResp = Http::timeout(20)
+                    ->post(config('services.ollama.url') . '/v1/chat/completions', [
+                        'model' => 'gemma3:4b', 'messages' => [['role' => 'user', 'content' => $graphPrompt]],
+                        'temperature' => 0.1, 'max_tokens' => 512,
+                    ]);
+                $anonGraph = trim((string) $anonResp->json('choices.0.message.content'));
+                if (!empty($anonGraph)) {
+                    $contextoRAG = "[MODO PRIVACIDAD — Grafo anonimizado generado por IA local en Titan]\n{$anonGraph}";
+                }
+            } catch (\Exception $e) {
+                \Log::warning("Privacy graph generation failed, using raw context: " . $e->getMessage());
+            }
+        }
+
         $promptSistema = (!empty($settings['llm_prompt']) ? $settings['llm_prompt'] : $defaultPrompt)
             . "\n\nContexto de la base de datos:\n{$contextoRAG}";
 
         // ── Unified LLM inference (local, opencode, external) ──────────────────
         $endpoints = [
-            'local'    => ['url' => 'http://localhost:11434/v1/chat/completions', 'key' => ''],
+            'local'    => ['url' => config('services.ollama.url') . '/v1/chat/completions', 'key' => ''],
             'opencode' => ['url' => $apiBaseUrl ?: 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $apiKey],
             'external' => ['url' => $apiBaseUrl ?: 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
         ];
@@ -345,7 +369,7 @@ class ChatLLMController extends Controller {
                 $text = trim($text);
 
                 if ($text === '' && $llmSource === 'opencode') {
-                    $fallback = Http::timeout(30)->post('http://localhost:11434/v1/chat/completions', [
+                    $fallback = Http::timeout(30)->post(config('services.ollama.url') . '/v1/chat/completions', [
                         'model' => 'gemma3:4b', 'messages' => $payload['messages'],
                         'temperature' => 0.3, 'max_tokens' => 512,
                     ]);

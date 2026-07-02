@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Printer, Barcode, QrCode, CheckSquare, Square, X, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import JsBarcode from 'jsbarcode';
 import QRCode from 'react-qr-code';
+import * as QRCodeLib from 'qrcode';
 
 interface LoteItem {
     id: number;
@@ -100,8 +101,63 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
         });
     };
 
-    const handlePrint = () => {
-        window.print();
+    const handlePrint = async () => {
+        // Cargar perfil activo (mismas keys que Settings → Impresion de Etiquetas)
+        let L: any = { labelW: 250, labelH: 150, qrSize: 100, qrX: 75, qrY: 25, nameX: 10, nameY: 10, skuX: 10, skuY: 110, loteX: 130, loteY: 110, venceX: 10, venceY: 128, showName: true, showSku: true, showLote: true, showVence: true, cols: 1, gapX: 10, gapY: 10, nameFontSize: 11, skuFontSize: 9, loteFontSize: 9, venceFontSize: 9, barcodeSize: 50, barcodeX: 75, barcodeY: 30 };
+        try {
+            const profiles = JSON.parse(window.localStorage.getItem('ensayo4_profiles') || '[]');
+            const active = parseInt(window.localStorage.getItem('ensayo4_activeProfile') || '0', 10);
+            if (profiles[active]?.config) L = { ...L, ...profiles[active].config };
+        } catch {}
+
+        const w = window.open('', '_blank', 'width=900,height=700');
+        if (!w) { alert('Permite ventanas emergentes para imprimir.'); return; }
+        w.document.write('<p style="font-family:Arial;padding:1in;text-align:center">Generando etiquetas…</p>');
+
+        const codes: Record<number, string> = {};
+        for (const l of selectedLotes) {
+            if (labelType === 'QR') {
+                codes[l.id] = await QRCodeLib.toDataURL(JSON.stringify({ id: l.id, sku: l.codigo, batch: l.lote, v: '1.0' }), { width: L.qrSize, margin: 2, color: { dark: '#000', light: '#fff' } });
+            } else {
+                const c = document.createElement('canvas');
+                JsBarcode(c, (l.codigo || '') + '-' + (l.lote || ''), { format: 'CODE128', width: 2, height: L.barcodeSize, displayValue: false, margin: 8, background: '#fff', lineColor: '#000' });
+                codes[l.id] = c.toDataURL('image/png');
+            }
+        }
+
+        const esc = (s: any) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        const cols = Math.max(1, L.cols || 1);
+        const gapX = L.gapX || 10;
+        const gapY = L.gapY || 10;
+        const rows = Math.ceil(selectedLotes.length / cols);
+
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + (cols * L.labelW + (cols - 1) * gapX) + '" height="' + (rows * L.labelH + (rows - 1) * gapY) + '">' +
+            selectedLotes.map((l, i) => {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const x = col * (L.labelW + gapX);
+                const y = row * (L.labelH + gapY);
+                return '<g transform="translate(' + x + ',' + y + ')">' +
+                '<rect width="' + L.labelW + '" height="' + L.labelH + '" fill="white" stroke="#ccc" stroke-width="1" rx="4"/>' +
+                (L.showName ? '<text x="' + L.nameX + '" y="' + (L.nameY + L.nameFontSize) +
+                    '" font-size="' + L.nameFontSize + '" font-weight="bold" fill="#000">' + esc(l.material_name) + '</text>' : '') +
+                '<image href="' + (codes[l.id] || '') + '" x="' + (labelType === 'QR' ? L.qrX : L.barcodeX) + '" y="' + (labelType === 'QR' ? L.qrY : L.barcodeY) +
+                    '" width="' + (labelType === 'QR' ? L.qrSize : L.qrSize) + '" height="' + (labelType === 'QR' ? L.qrSize : L.barcodeSize) + '"/>' +
+                (L.showSku ? '<text x="' + L.skuX + '" y="' + L.skuY +
+                    '" font-size="' + L.skuFontSize + '" font-weight="bold" fill="#000">' + esc(l.codigo) + '</text>' : '') +
+                (L.showLote ? '<text x="' + L.loteX + '" y="' + L.loteY +
+                    '" font-size="' + L.loteFontSize + '" fill="#000">Lote: ' + esc(l.lote) + '</text>' : '') +
+                (L.showVence ? '<text x="' + L.venceX + '" y="' + L.venceY +
+                    '" font-size="' + L.venceFontSize + '" fill="#c00">Vence: ' + esc(l.vencimiento) + '</text>' : '') +
+                '</g>';
+            }).join('') + '</svg>';
+
+        const isE2E = window.localStorage.getItem('e2e') === '1';
+
+        w.document.open();
+        w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>PYMETORY Labels</title><style>body{margin:20px}@page{size:auto;margin:10mm}</style></head><body>' + svg + (isE2E ? '' : '<script>setTimeout(function(){window.print()},600)</script>') + '</body></html>');
+        w.document.close();
     };
 
     useEffect(() => {
@@ -118,7 +174,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                 displayValue: false,
                                 margin: 8,
                                 background: undefined,
-                                lineColor: '#ffffff',
+                                lineColor: '#000000',
                             });
                         } catch (e) {
                             // Skip if already rendered
@@ -304,7 +360,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                             <div className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
                                                 Pymetory
                                             </div>
-                                            <div className="text-[10px] font-black text-slate-900 uppercase leading-tight truncate w-full">
+                                            <div className="text-[10px] font-black text-white uppercase leading-tight truncate w-full">
                                                 {lote.material_name}
                                             </div>
                                         </div>
@@ -329,11 +385,11 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                         <div className="w-full grid grid-cols-2 gap-2 border-t border-slate-200 pt-2">
                                             <div className="space-y-0.5">
                                                 <div className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Codigo</div>
-                                                <div className="text-[9px] font-bold text-slate-900 uppercase">{lote.codigo}</div>
+                                                <div className="text-[9px] font-bold text-white uppercase">{lote.codigo}</div>
                                             </div>
                                             <div className="space-y-0.5 text-right">
                                                 <div className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Lote</div>
-                                                <div className="text-[9px] font-bold text-slate-900 uppercase">{lote.lote}</div>
+                                                <div className="text-[9px] font-bold text-white uppercase">{lote.lote}</div>
                                             </div>
                                             <div className="space-y-0.5">
                                                 <div className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Vence</div>
@@ -341,7 +397,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                             </div>
                                             <div className="space-y-0.5 text-right">
                                                 <div className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Cant</div>
-                                                <div className="text-[9px] font-bold text-slate-900 uppercase">{lote.cantidad} {lote.unit}</div>
+                                                <div className="text-[9px] font-bold text-white uppercase">{lote.cantidad} {lote.unit}</div>
                                             </div>
                                         </div>
                                     </div>

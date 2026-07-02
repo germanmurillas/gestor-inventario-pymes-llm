@@ -9,7 +9,7 @@ const FigmaNotifications = () => {
                     <Bell size={24} className="opacity-50" />
                     <h2 className="text-xl font-bold uppercase tracking-tight">Notificaciones</h2>
                 </div>
-                <button className="text-xs font-bold text-gray-400 hover:text-black uppercase tracking-widest border-b border-transparent hover:border-black transition-all">
+                <button className="text-xs font-bold text-gray-400 hover:text-slate-200 uppercase tracking-widest border-b border-transparent hover:border-black transition-all">
                     Marcar todo como leído
                 </button>
             </div>
@@ -37,8 +37,8 @@ const FigmaNotifications = () => {
                                         : 'Se ha registrado el ingreso de 500 bultos de Materia Prima X.'}
                                 </p>
                                 <div className="flex items-center gap-4 mt-4 text-[10px] font-bold uppercase tracking-widest">
-                                    <button className="text-black hover:opacity-70 transition-opacity">Ver Detalles</button>
-                                    <button className="text-gray-400 hover:text-black transition-colors">Descartar</button>
+                                    <button className="text-slate-200 hover:opacity-70 transition-opacity">Ver Detalles</button>
+                                    <button className="text-gray-400 hover:text-slate-200 transition-colors">Descartar</button>
                                 </div>
                             </div>
                         </div>

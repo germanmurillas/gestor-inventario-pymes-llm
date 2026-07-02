@@ -331,7 +331,17 @@ class ReportController extends Controller
 
     private function exportPdf(string $type, array $data)
     {
-        $pdf = Pdf::loadView("reports.{$type}", [
+        $viewName = match ($type) {
+            'inventario'   => 'reports.inventory',
+            'movimientos'  => 'reports.movimientos',
+            'fefo'         => 'reports.fefo',
+            'consumo'      => 'reports.consumo',
+            'valorizacion' => 'reports.valorizacion',
+            default        => 'reports.inventory',
+        };
+
+        $pdf = Pdf::loadView($viewName, [
+            'lotes'   => $data,    // La vista espera $lotes por compatibilidad
             'data'    => $data,
             'summary' => $this->resolveSummary($type, $data),
         ]);

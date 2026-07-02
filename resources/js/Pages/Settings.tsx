@@ -4,7 +4,7 @@ import axios from 'axios';
 import {
     ChevronDown, ChevronRight, Save, Plus, Trash2, KeyRound, Users as UsersIcon,
     Cpu, SlidersHorizontal, RefreshCw, ShieldCheck, User as UserIcon, Power,
-    Bell, Pencil, Shield,
+    Bell, Pencil, Shield, QrCode, Printer,
 } from 'lucide-react';
 import Sidebar from '../Components/Sidebar';
 
@@ -99,6 +99,7 @@ export default function Settings() {
     const editKey = (k: ApiKey) => { setEditingId(k.id); setNk({ nombre: k.nombre, key: '', base_url: k.base_url || '', model_name: k.model_name || '', tipo: k.tipo, activo: k.activo }); };
     const cancelEdit = () => { setEditingId(null); setNk({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true }); };
     const toggleKey = async (k: ApiKey) => { await axios.put(`/api/api-keys/${k.id}`, { activo: !k.activo }); await loadKeys(); };
+    const deleteKey = async (id: number) => { if (!confirm('¿Eliminar esta API Key?')) return; await axios.delete(`/api/api-keys/${id}`); await loadKeys(); notify('API Key eliminada'); };
     const testKey = async (id: number) => {
         notify('Probando...');
         try {
@@ -253,6 +254,17 @@ export default function Settings() {
                             </p>
                         </div>
 
+                        {/* ── Privacy Mode (anonimizar datos antes de API externa) ── */}
+                        {settings.llm_source !== 'local' && (
+                            <label className="flex items-center gap-2 mb-4 cursor-pointer bg-indigo-600/10 border border-indigo-500/30 rounded-lg p-3">
+                                <input type="checkbox" checked={!!settings.llm_privacy} onChange={e => setVal('llm_privacy', e.target.checked ? '1' : '0')} />
+                                <div>
+                                    <span className="font-bold text-xs">🔒 Modo Privacidad</span>
+                                    <p className="text-[10px] text-[#888]">Ollama local anonimiza los datos en un grafo antes de enviarlos a la API externa. Los nombres reales nunca salen de Titan.</p>
+                                </div>
+                            </label>
+                        )}
+
                         {/* ── Parametros ── */}
                         <div className="grid md:grid-cols-3 gap-3 mb-4">
                             <div><label className={label}>Temperatura</label><input type="number" step="0.1" min="0" max="2" className={field} value={settings.llm_temperatura ?? '0.3'} onChange={e => setVal('llm_temperatura', e.target.value)} /></div>
@@ -279,7 +291,7 @@ export default function Settings() {
                             <div id="ragTestResult" className="font-mono text-xs text-[#4A4A4A] mt-2 max-h-32 overflow-y-auto"></div>
                         </div>
 
-                        <button className={`${btn} bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes','llm_prompt'])}><Save size={15} /> Guardar Motor RAG</button>
+                        <button className={`${btn} bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes','llm_prompt','llm_privacy'])}><Save size={15} /> Guardar Motor RAG</button>
                     </Section>
 
                     {/* ── 3. ALERTAS ── */}
@@ -423,6 +435,155 @@ export default function Settings() {
                             <div><label className={label}>Passwords en Backend</label><input className={field} value="✅ .env (nunca expuesto)" disabled /></div>
                         </div>
                         <button className={`${btn} mt-4 bg-[#111111] text-[#F5F3EE]`} onClick={() => saveSettings(['audit_log_activo','max_intentos_login','sesion_timeout_min'])}><Save size={15} /> Guardar Seguridad</button>
+                    </Section>
+
+                    {/* ── 7. CODIGOS QR ── */}
+                    <Section icon={QrCode} title="Codigos QR" subtitle="Configuracion de generacion de codigos QR para etiquetas" open={openSec === 'qr'} onToggle={() => toggle('qr')}>
+                        {(() => {
+                            const [qrLocal, setQrLocal] = useState(() => {
+                                const raw = localStorage.getItem('pymetory_qr_config');
+                                return raw ? JSON.parse(raw) : { size: 200, correction: 'H', payload: 'full' };
+                            });
+                            const saveQr = () => { localStorage.setItem('pymetory_qr_config', JSON.stringify(qrLocal)); notify('Configuracion QR guardada'); };
+                            return <>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div><label className={label}>Tamaño QR (px)</label><input type="number" className={field} value={qrLocal.size} onChange={e => setQrLocal({...qrLocal, size: parseInt(e.target.value) || 200})} /></div>
+                                    <div><label className={label}>Correccion de Error</label><select className={field} value={qrLocal.correction} onChange={e => setQrLocal({...qrLocal, correction: e.target.value})}>
+                                        <option value="L">L - Baja (7%)</option><option value="M">M - Media (15%)</option><option value="Q">Q - Alta (25%)</option><option value="H">H - Maxima (30% · Bodega)</option>
+                                    </select></div>
+                                    <div><label className={label}>Contenido del QR</label><select className={field} value={qrLocal.payload} onChange={e => setQrLocal({...qrLocal, payload: e.target.value})}>
+                                        <option value="full">JSON completo (id, SKU, lote)</option><option value="id">Solo ID del lote</option><option value="url">URL a ficha del lote</option>
+                                    </select></div>
+                                </div>
+                                <button className={`${btn} mt-4 bg-[#111111] text-[#F5F3EE]`} onClick={saveQr}><Save size={15} /> Guardar QR</button>
+                            </>;
+                        })()}
+                    </Section>
+
+                    {/* ── 8. IMPRESION DE ETIQUETAS (Ensayo 4 integrado) ── */}
+                    <Section icon={Printer} title="Impresion de Etiquetas" subtitle="Perfiles, posicion libre de elementos y preview en vivo" open={openSec === 'print'} onToggle={() => toggle('print')}>
+                        {(() => {
+                            interface LabelConfig {
+                                labelW: number; labelH: number; qrSize: number; qrX: number; qrY: number;
+                                nameX: number; nameY: number; skuX: number; skuY: number;
+                                loteX: number; loteY: number; venceX: number; venceY: number;
+                                cols: number; gapX: number; gapY: number; examples: number;
+                                nameFontSize: number; skuFontSize: number; loteFontSize: number; venceFontSize: number; barcodeSize: number; barcodeX: number; barcodeY: number;
+                                showName: boolean; showSku: boolean; showLote: boolean; showVence: boolean;
+                            }
+                            const defaults: LabelConfig = { labelW: 250, labelH: 150, qrSize: 100, qrX: 75, qrY: 25, nameX: 10, nameY: 10, skuX: 10, skuY: 110, loteX: 130, loteY: 110, venceX: 10, venceY: 128, cols: 1, gapX: 10, gapY: 10, nameFontSize: 11, skuFontSize: 9, loteFontSize: 9, venceFontSize: 9, barcodeSize: 50, barcodeX: 75, barcodeY: 30, examples: 3, showName: true, showSku: true, showLote: true, showVence: true };
+                            const personalizado1: LabelConfig = { labelW: 230, labelH: 200, qrSize: 135, qrX: 40, qrY: 25, nameX: 55, nameY: 10, skuX: 10, skuY: 180, loteX: 135, loteY: 180, venceX: 5, venceY: 168, cols: 2, gapX: 10, gapY: 10, nameFontSize: 11, skuFontSize: 9, loteFontSize: 9, venceFontSize: 9, barcodeSize: 50, barcodeX: 75, barcodeY: 30, examples: 3, showName: true, showSku: true, showLote: true, showVence: true };
+
+                            const [profiles, setProfiles] = useState<{name:string;config:LabelConfig}[]>(() => {
+                                try { const s = localStorage.getItem('ensayo4_profiles'); return s ? JSON.parse(s) : [{name:'Por Defecto',config:{...defaults}},{name:'Personalizado 1',config:{...personalizado1}}]; }
+                                catch { return [{name:'Por Defecto',config:{...defaults}},{name:'Personalizado 1',config:{...personalizado1}}]; }
+                            });
+                            const [activeIdx, setActiveIdx] = useState<number>(() => parseInt(localStorage.getItem('ensayo4_activeProfile') || '0'));
+                            const [newName, setNewName] = useState('');
+                            const [previewType, setPreviewType] = useState<'QR' | 'CODE128'>('QR');
+
+                            const active = profiles[activeIdx] || profiles[0];
+                            const cfg = active?.config || defaults;
+
+                            // Persist
+                            React.useEffect(() => { localStorage.setItem('ensayo4_profiles', JSON.stringify(profiles)); }, [profiles]);
+                            React.useEffect(() => { localStorage.setItem('ensayo4_activeProfile', String(activeIdx)); }, [activeIdx]);
+
+                            const updateCfg = (key: keyof LabelConfig, value: number | boolean) => {
+                                setProfiles(prev => { const c = [...prev]; c[activeIdx] = {...c[activeIdx], config: {...c[activeIdx].config, [key]: value}}; return c; });
+                            };
+                            const createProfile = () => {
+                                const name = newName.trim() || 'Nuevo Perfil';
+                                setProfiles(prev => [...prev, {name, config: {...active.config}}]);
+                                setActiveIdx(profiles.length); setNewName('');
+                                notify('Perfil creado: ' + name);
+                            };
+                            const duplicateProfile = () => {
+                                setProfiles(prev => [...prev, {name: active.name + ' (copia)', config: {...active.config}}]);
+                                setActiveIdx(profiles.length);
+                                notify('Perfil duplicado');
+                            };
+                            const deleteProfile = (i: number) => {
+                                if (profiles.length <= 1) return notify('Minimo 1 perfil');
+                                setProfiles(prev => prev.filter((_, x) => x !== i));
+                                if (activeIdx >= i) setActiveIdx(Math.max(0, activeIdx - 1));
+                            };
+
+                            return <>
+                                {/* ── Perfiles ── */}
+                                <div className="mb-6">
+                                    <h3 className="font-bold text-sm mb-2">📋 Perfiles de Etiqueta</h3>
+                                    <div className="space-y-1 mb-3 max-h-[200px] overflow-y-auto border border-[#111111]/10 rounded-lg">
+                                        {profiles.map((p, i) => (
+                                            <div key={i} className={`flex items-center gap-2 px-3 py-2 text-xs ${i === activeIdx ? 'bg-[#111111] text-[#F5F3EE]' : 'bg-white hover:bg-[#E8E4DD]/40'}`}>
+                                                <button onClick={() => setActiveIdx(i)} className="flex-1 text-left font-bold">{p.name}</button>
+                                                <button onClick={duplicateProfile} className="p-1 opacity-50 hover:opacity-100" title="Duplicar">📋</button>
+                                                <button onClick={() => deleteProfile(i)} className="p-1 opacity-50 hover:opacity-100" title="Eliminar">🗑️</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <input className={field} placeholder="Nombre..." value={newName} onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createProfile()} />
+                                        <button className={`${btn} bg-[#111111] text-[#F5F3EE] text-xs`} onClick={createProfile}>+ Crear</button>
+                                    </div>
+                                </div>
+
+                                {/* ── Config ── */}
+                                <div className="grid grid-cols-4 gap-2 mb-4">
+                                    {(['labelW','labelH','qrSize','qrX','qrY','nameX','nameY','skuX','skuY','loteX','loteY','venceX','venceY','cols','gapX','gapY','nameFontSize','skuFontSize','loteFontSize','venceFontSize','barcodeSize','barcodeX','barcodeY','examples'] as (keyof LabelConfig)[]).map(key => (
+                                        <div key={key}>
+                                            <label className="text-[9px] font-bold uppercase text-[#595959]">{key}</label>
+                                            <input type="number" className={field} value={cfg[key]} step="5" onChange={e => updateCfg(key, parseInt(e.target.value) || 0)} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-wrap gap-3 mb-4">
+                                    {(['showName','showSku','showLote','showVence'] as (keyof LabelConfig)[]).map(key => (
+                                        <label key={key} className="flex items-center gap-1 text-xs cursor-pointer">
+                                            <input type="checkbox" checked={!!cfg[key]} onChange={e => updateCfg(key, e.target.checked)} /> {key.replace('show','')}
+                                        </label>
+                                    ))}
+                                </div>
+
+                                {/* ── Preview ── */}
+                                <div className="border border-[#111111]/10 rounded-lg p-4 bg-[#E8E4DD]/20 overflow-auto">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-bold text-xs uppercase tracking-wider text-[#595959]">📐 Preview — {active.name}</h3>
+                                        <label className="flex items-center gap-2 text-[10px] cursor-pointer">
+                                            <span className={previewType === 'QR' ? 'font-bold text-[#595959]' : 'text-[#aaa]'}>QR</span>
+                                            <div className={`w-8 h-4 rounded-full relative transition-colors ${previewType === 'QR' ? 'bg-indigo-600' : 'bg-slate-600'}`} onClick={() => setPreviewType(prev => prev === 'QR' ? 'CODE128' : 'QR')}>
+                                                <div className={`w-3 h-3 rounded-full bg-white absolute top-0.5 transition-transform ${previewType === 'QR' ? 'left-0.5' : 'left-4'}`} />
+                                            </div>
+                                            <span className={previewType === 'CODE128' ? 'font-bold text-[#595959]' : 'text-[#aaa]'}>Barras</span>
+                                        </label>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cfg.cols}, ${cfg.labelW}px)`, gap: `${cfg.gapY}px ${cfg.gapX}px`, justifyContent: 'start' }}>
+                                        {Array.from({ length: cfg.examples || 3 }, (_, k) => k + 1).map(i => (
+                                            <div key={i} style={{ position: 'relative', width: cfg.labelW, height: cfg.labelH, background: '#fff', border: '1px solid rgba(17,17,17,.2)', borderRadius: 4, overflow: 'hidden' }}>
+                                                {/* ── ORDEN = orden de dibujo del SVG. Ultimo va ENCIMA. ── */}
+                                                {cfg.showName && <div style={{ position: 'absolute', left: cfg.nameX, top: cfg.nameY, fontSize: cfg.nameFontSize, fontWeight: 'bold', color: '#111', whiteSpace: 'nowrap' }}>MATERIAL {i}</div>}
+                                                {previewType === 'QR' ? (
+                                                    <div style={{ position: 'absolute', left: cfg.qrX, top: cfg.qrY, width: cfg.qrSize, height: cfg.qrSize, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <span style={{ fontSize: cfg.nameFontSize - 3, color: 'white', fontWeight: 'bold' }}>QR</span>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ position: 'absolute', left: cfg.barcodeX, top: cfg.barcodeY, width: cfg.qrSize, height: cfg.barcodeSize, background: '#fff', display: 'flex', alignItems: 'stretch', overflow: 'hidden', boxSizing: 'border-box', padding: '0 6px' }}>
+                                                        {[2,1,1,2,1,4, 1,2,3,1,1,2, 3,1,1,1,2,2, 1,3,1,2,1,2, 2,1,2,1,3,1, 1,1,2,3,1,2, 1,2,1,1,4,1, 2,3,3,1,1,1,2].map((w, j) => (
+                                                            <div key={j} style={{ flex: `${w} 0 0`, minWidth: 1, background: j % 2 === 0 ? '#111' : 'transparent' }} />
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {cfg.showSku && <div style={{ position: 'absolute', left: cfg.skuX, top: cfg.skuY, fontSize: cfg.skuFontSize, fontWeight: 'bold', color: '#111', whiteSpace: 'nowrap' }}>MAT-00{i}</div>}
+                                                {cfg.showLote && <div style={{ position: 'absolute', left: cfg.loteX, top: cfg.loteY, fontSize: cfg.loteFontSize, color: '#595959', whiteSpace: 'nowrap' }}>Lote: L-2026-A{i}</div>}
+                                                {cfg.showVence && <div style={{ position: 'absolute', left: cfg.venceX, top: cfg.venceY, fontSize: cfg.venceFontSize, color: '#C42A1E', whiteSpace: 'nowrap' }}>Vence: 2026-12-1{i}</div>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button className={`${btn} mt-4 bg-[#111111] text-[#F5F3EE]`} onClick={() => notify('Perfil activo: ' + active.name + ' — Los cambios se guardan automaticamente')}><Save size={15} /> Guardado Automatico</button>
+                            </>;
+                        })()}
                     </Section>
                 </div>
             </main>

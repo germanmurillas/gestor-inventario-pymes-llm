@@ -173,7 +173,7 @@ const FigmaLLM = () => {
                                 : 'bg-slate-900/80 backdrop-blur-xl border-gray-100 hover:border-slate-700/30'
                             }`}
                          >
-                             <div className="text-sm font-bold truncate text-slate-800">{s.session_title || 'Nueva Consulta'}</div>
+                             <div className="text-sm font-bold truncate text-slate-300">{s.session_title || 'Nueva Consulta'}</div>
                              <div className="text-[10px] text-gray-400 uppercase tracking-wider mt-1 truncate">
                                 {s.last_activity ? new Date(s.last_activity).toLocaleDateString() : 'Auditoría FEFO'}
                              </div>
@@ -252,14 +252,14 @@ const FigmaLLM = () => {
                     {isThinking && (
                         <div className="flex justify-start">
                             <div className="bg-slate-800/50 border border-gray-100 p-4 rounded-xl flex items-center gap-3">
-                                <Loader2 size={16} className="animate-spin text-black" />
+                                <Loader2 size={16} className="animate-spin text-slate-200" />
                                 <span className="text-xs font-bold uppercase tracking-widest opacity-40">Escaneando Lotes...</span>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <footer className="p-4 border-t border-gray-100 bg-slate-800/50/50">
+                <footer className="p-4 border-t border-gray-100 bg-slate-800/50">
                     <div className="relative">
                         <textarea 
                             value={input}

@@ -3,7 +3,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Lote;
 use App\Models\Material;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 
 class InventoryController extends Controller {
@@ -161,105 +160,25 @@ class InventoryController extends Controller {
     }
 
     public function exportPdf(\Illuminate\Http\Request $request) {
-        // Consultar con filtros dinámicos si se especifican
-        $query = Lote::with(['material', 'bodega'])->fefoOrder();
-
-        if ($request->filled('bodega_id')) {
-            $query->where('bodega_id', $request->input('bodega_id'));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-
-        $lotes = $query->get();
-
-        // Registrar en audit_log
-        \Illuminate\Support\Facades\DB::table('audit_log')->insert([
-            'user_id'       => \Illuminate\Support\Facades\Auth::id(),
-            'accion'        => 'exportar_pdf',
-            'modulo'        => 'Reportes',
-            'entidad_id'    => null,
-            'entidad_tipo'  => 'Reportes',
-            'datos_nuevos'  => json_encode($request->all()),
-            'ip_address'    => $request->ip(),
-            'user_agent'    => $request->userAgent(),
-            'observacion'   => 'Descarga de reporte de inventario PDF',
-            'created_at'    => now(),
-        ]);
-
-        // Generamos el PDF usando la vista reports.inventory
-        $pdf = Pdf::loadView('reports.inventory', [
-            'lotes' => $lotes
-        ]);
-
-        return $pdf->download('Reporte_Inventario_Pymetory_' . now()->format('Ymd') . '.pdf');
+        // Delegado al motor unificado de ReportController (6 tipos, mejor mantenibilidad)
+        // Mantiene la ruta /inventory/report por compatibilidad con el frontend
+        $request->merge(['type' => 'inventario', 'format' => 'pdf']);
+        
+        // Pasar filtros si vienen en el request original
+        if ($request->filled('bodega_id')) $request->merge(['bodega_id' => $request->input('bodega_id')]);
+        if ($request->filled('status')) $request->merge(['status' => $request->input('status')]);
+        
+        return app(ReportController::class)->export($request);
     }
 
     public function exportCsv(\Illuminate\Http\Request $request) {
-        $query = Lote::with(['material', 'bodega'])->fefoOrder();
-
-        if ($request->filled('bodega_id')) {
-            $query->where('bodega_id', $request->input('bodega_id'));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-
-        $lotes = $query->get();
-
-        // Registrar en audit_log
-        \Illuminate\Support\Facades\DB::table('audit_log')->insert([
-            'user_id'       => \Illuminate\Support\Facades\Auth::id(),
-            'accion'        => 'exportar_csv',
-            'modulo'        => 'Reportes',
-            'entidad_id'    => null,
-            'entidad_tipo'  => 'Reportes',
-            'datos_nuevos'  => json_encode($request->all()),
-            'ip_address'    => $request->ip(),
-            'user_agent'    => $request->userAgent(),
-            'observacion'   => 'Descarga de reporte de inventario CSV/Excel',
-            'created_at'    => now(),
-        ]);
-
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="Reporte_Inventario_Pymetory_' . now()->format('Ymd') . '.csv"',
-            'Pragma'              => 'no-cache',
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires'             => '0'
-        ];
-
-        $callback = function() use ($lotes) {
-            $file = fopen('php://output', 'w');
-            
-            // UTF-8 BOM
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-
-            fputcsv($file, [
-                'ID Lote', 'Material', 'Codigo', 'Lote / Batch', 'Cantidad', 'Costo Unitario', 'Valor Total', 'Fecha Vencimiento', 'Bodega', 'Estado'
-            ], ';');
-
-            foreach ($lotes as $l) {
-                fputcsv($file, [
-                    $l->id,
-                    $l->material->name ?? '',
-                    $l->material->code ?? '',
-                    $l->batch_number,
-                    $l->quantity,
-                    $l->unit_cost ?? 0,
-                    ($l->quantity * ($l->unit_cost ?? 0)),
-                    $l->expiration_date ? $l->expiration_date->format('Y-m-d') : '',
-                    $l->bodega->name ?? 'Sin asignar',
-                    $l->status
-                ], ';');
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        // Delegado al motor unificado de ReportController
+        $request->merge(['type' => 'inventario', 'format' => 'csv']);
+        
+        if ($request->filled('bodega_id')) $request->merge(['bodega_id' => $request->input('bodega_id')]);
+        if ($request->filled('status')) $request->merge(['status' => $request->input('status')]);
+        
+        return app(ReportController::class)->export($request);
     }
 
 
