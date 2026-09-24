@@ -1,556 +1,1325 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Head, router } from '@inertiajs/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Head } from '@inertiajs/react';
+import axios from 'axios';
+import gsap from 'gsap';
 import {
+    AlertTriangle,
+    Bot,
+    Check,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    GripVertical,
+    Keyboard,
     Menu,
-    MoreHorizontal,
     Pin,
     PinOff,
     Plus,
-    X,
-    Trash2,
-    Bot,
-    GripVertical,
-    Send,
-    Tag,
-    User,
+    Rows3,
+    Save,
     Search,
-    Pencil,
-    Check,
-    Columns,
+    Send,
+    Sparkles,
+    Trash2,
+    Undo2,
+    X,
 } from 'lucide-react';
 import {
     DndContext,
-    closestCorners,
+    DragOverlay,
+    KeyboardSensor,
     PointerSensor,
     TouchSensor,
-    KeyboardSensor,
+    closestCorners,
+    useDroppable,
     useSensor,
     useSensors,
-    DragOverlay,
 } from '@dnd-kit/core';
 import {
-    rectSortingStrategy,
     SortableContext,
+    arrayMove,
     useSortable,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useDroppable } from '@dnd-kit/core';
-import axios from 'axios';
-import gsap from 'gsap';
 import Sidebar from '../Components/Sidebar';
 
-const COLUMNS = [
-    { key: 'todo', label: 'Por hacer', color: 'from-slate-600/30 to-slate-800/30', accent: '#94A3B8' },
-    { key: 'in_progress', label: 'En progreso', color: 'from-blue-600/30 to-blue-800/30', accent: '#60A5FA' },
-    { key: 'review', label: 'En revisión', color: 'from-amber-600/30 to-amber-800/30', accent: '#FBBF24' },
-    { key: 'done', label: 'Completado', color: 'from-emerald-600/30 to-emerald-800/30', accent: '#34D399' },
-];
+/* ═══════════════════════════════════════════════════════════════════
+   TIPOS Y CONSTANTES
+   Las 4 columnas son canónicas: el enum de la DB no acepta más.
+   ═══════════════════════════════════════════════════════════════════ */
 
-function SortableCard({ item, onDelete, onPin, onAskRag, onTitleChange }: {
-    item: any;
-    onDelete: (id: number) => void;
-    onPin: (id: number) => void;
-    onAskRag: (item: any) => void;
-    onTitleChange: (id: number, title: string) => void;
-}) {
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [editing, setEditing] = useState(false);
-    const [editTitle, setEditTitle] = useState(item.title);
-    const menuRef = useRef<HTMLDivElement>(null);
+type ColumnKey = 'todo' | 'in_progress' | 'review' | 'done';
 
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: item.id });
+interface KanbanItemT {
+    id: number;
+    title: string;
+    description?: string | null;
+    column: ColumnKey;
+    position: number;
+    is_pinned?: boolean | number;
+    rag_context?: string | null;
+    created_at?: string | null;
+    updated_at?: string | null;
+    user?: { id?: number; name?: string } | null;
+}
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.3 : 1,
-        zIndex: isDragging ? 0 : 1,
-    };
+type Board = Record<ColumnKey, KanbanItemT[]>;
 
-    useEffect(() => {
-        function handleClickOutside(e: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setMenuOpen(false);
-            }
+interface RagMessage {
+    role: 'user' | 'ai';
+    content: string;
+}
+
+interface ToastT {
+    id: number;
+    kind: 'info' | 'error' | 'undo';
+    text: string;
+    actionLabel?: string;
+    onAction?: () => void;
+}
+
+/** Orden EXACTO en que KanbanController::index() devuelve las columnas. */
+const COLUMN_ORDER: ColumnKey[] = ['todo', 'in_progress', 'review', 'done'];
+
+const COLUMN_META: Record<ColumnKey, { label: string; hint: string }> = {
+    todo: { label: 'Por hacer', hint: 'Backlog priorizado' },
+    in_progress: { label: 'En progreso', hint: 'Trabajo activo' },
+    review: { label: 'En revisión', hint: 'Esperando validación' },
+    done: { label: 'Completado', hint: 'Cerrado' },
+};
+
+const LS_WIP = 'pymetory.kanban.wip';
+const LS_COLLAPSED = 'pymetory.kanban.collapsed';
+const LS_DENSITY = 'pymetory.kanban.density';
+
+const AGE_WARN = 3;
+const AGE_HOT = 7;
+const UNDO_MS = 6000;
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+
+const csrfToken = (): string =>
+    document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+
+const api = axios.create({
+    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+});
+
+api.interceptors.request.use((config) => {
+    config.headers = config.headers ?? {};
+    (config.headers as Record<string, string>)['X-CSRF-TOKEN'] = csrfToken();
+    return config;
+});
+
+function emptyBoard(): Board {
+    return { todo: [], in_progress: [], review: [], done: [] };
+}
+
+/** Normaliza cualquier payload del servidor a un Board de 4 llaves garantizadas. */
+function normalizeBoard(raw: unknown): Board {
+    const source = (raw ?? {}) as Record<string, unknown>;
+    const out = emptyBoard();
+    COLUMN_ORDER.forEach((key) => {
+        const list = Array.isArray(source[key]) ? (source[key] as KanbanItemT[]) : [];
+        out[key] = list.map((item, index) => ({
+            ...item,
+            column: key,
+            position: typeof item.position === 'number' ? item.position : index,
+            is_pinned: !!item.is_pinned,
+        }));
+    });
+    return out;
+}
+
+/** Resuelve a qué columna pertenece un id de dnd-kit (tarjeta numérica o `col:key`). */
+function resolveColumn(board: Board, overId: unknown): ColumnKey | null {
+    const raw = String(overId ?? '');
+    if (raw.startsWith('col:')) {
+        const key = raw.slice(4) as ColumnKey;
+        return COLUMN_ORDER.includes(key) ? key : null;
+    }
+    const numeric = Number(raw);
+    if (!Number.isNaN(numeric)) {
+        for (const key of COLUMN_ORDER) {
+            if (board[key].some((item) => item.id === numeric)) return key;
         }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }
+    return null;
+}
 
-    const handleSaveTitle = () => {
-        if (editTitle.trim() && editTitle !== item.title) {
-            onTitleChange(item.id, editTitle.trim());
-        }
-        setEditing(false);
-    };
+function findItem(board: Board, id: number | null): KanbanItemT | null {
+    if (id === null) return null;
+    for (const key of COLUMN_ORDER) {
+        const hit = board[key].find((item) => item.id === id);
+        if (hit) return hit;
+    }
+    return null;
+}
 
-    const col = COLUMNS.find(c => c.key === item.column);
+/** Días sin movimiento. Señal de aging: se calcula, no se persiste. */
+function ageDays(item: KanbanItemT): number {
+    const stamp = Date.parse(String(item.updated_at ?? item.created_at ?? ''));
+    if (Number.isNaN(stamp)) return 0;
+    return Math.max(0, Math.floor((Date.now() - stamp) / 86_400_000));
+}
+
+function readJSON<T>(key: string, fallback: T): T {
+    try {
+        const raw = window.localStorage.getItem(key);
+        return raw ? (JSON.parse(raw) as T) : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function writeJSON(key: string, value: unknown): void {
+    try {
+        window.localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+        /* modo privado / cuota: preferencia no crítica */
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TARJETA SORTABLE
+   ═══════════════════════════════════════════════════════════════════ */
+
+interface CardProps {
+    item: KanbanItemT;
+    index: number;
+    total: number;
+    focused: boolean;
+    compact: boolean;
+    onFocus: (id: number) => void;
+    onOpen: (item: KanbanItemT) => void;
+    onPin: (item: KanbanItemT) => void;
+    onAskRag: (item: KanbanItemT) => void;
+}
+
+function KanbanCard({
+    item,
+    index,
+    total,
+    focused,
+    compact,
+    onFocus,
+    onOpen,
+    onPin,
+    onAskRag,
+}: CardProps) {
+    const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+        useSortable({ id: item.id, data: { type: 'card', column: item.column } });
+
+    const days = ageDays(item);
+    const aging = item.column !== 'done' && days >= AGE_WARN;
+    const hot = item.column !== 'done' && days >= AGE_HOT;
+
+    const label = `${item.title}. ${COLUMN_META[item.column].label}, posición ${index + 1} de ${total}${
+        item.is_pinned ? ', fijada' : ''
+    }${aging ? `, sin movimiento ${days} días` : ''}.`;
 
     return (
-        <div
+        <article
             ref={setNodeRef}
-            style={style}
-            className="group relative bg-obsidiana/80 backdrop-blur-xl border border-white/5 rounded-2xl p-4 shadow-lg hover:border-white/10 transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(201,168,76,0.15)]"
+            id={`pm-kb-card-${item.id}`}
+            data-kb-card={item.id}
+            tabIndex={focused ? 0 : -1}
+            aria-label={label}
+            aria-roledescription="Tarjeta del tablero, arrastrable"
+            onFocus={() => onFocus(item.id)}
+            onDoubleClick={() => onOpen(item)}
+            style={{ transform: CSS.Transform.toString(transform), transition }}
+            className={[
+                'pm-card pm-kb-card',
+                compact ? 'pm-kb-card--compact' : '',
+                isDragging ? 'pm-kb-card--dragging' : '',
+                focused ? 'pm-kb-card--focused' : '',
+                item.is_pinned ? 'pm-kb-card--pinned' : '',
+                hot ? 'pm-kb-card--hot' : '',
+            ]
+                .filter(Boolean)
+                .join(' ')}
         >
-            <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <button
-                        {...attributes}
-                        {...listeners}
-                        aria-label="Arrastrar tarjeta"
-                        className="cursor-grab active:cursor-grabbing text-slate-600 hover:text-champan transition-colors touch-none"
-                    >
-                        <GripVertical size={14} />
-                    </button>
-                    {editing ? (
-                        <input
-                            autoFocus
-                            value={editTitle}
-                            onChange={e => setEditTitle(e.target.value)}
-                            onBlur={handleSaveTitle}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') handleSaveTitle();
-                                if (e.key === 'Escape') setEditing(false);
-                            }}
-                            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm text-white outline-none focus:border-champan/50 min-w-0"
-                        />
-                    ) : (
-                        <h4
-                            onClick={() => { setEditTitle(item.title); setEditing(true); }}
-                            className="text-sm font-bold text-white/90 truncate cursor-pointer hover:text-champan transition-colors flex-1 min-w-0"
-                        >
-                            {item.title}
-                        </h4>
-                    )}
-                </div>
+            <div className="flex items-start gap-2">
+                <button
+                    ref={setActivatorNodeRef}
+                    {...attributes}
+                    {...listeners}
+                    data-kb-grip="true"
+                    aria-label={`Arrastrar ${item.title}`}
+                    className="pm-kb-grip"
+                >
+                    <GripVertical size={14} aria-hidden="true" />
+                </button>
 
-                <div className="flex items-center gap-0.5 flex-shrink-0 relative" ref={menuRef}>
+                <button
+                    type="button"
+                    onClick={() => onOpen(item)}
+                    className="pm-kb-card__title flex-1 min-w-0 text-left"
+                >
+                    {item.title}
+                </button>
+
+                <div className="flex items-center gap-0.5 shrink-0">
                     <button
-                        onClick={() => onPin(item.id)}
-                        aria-label={item.is_pinned ? 'Desfijar tarjeta' : 'Fijar tarjeta'}
-                        className={`p-1.5 rounded-lg transition-all ${item.is_pinned ? 'text-champan bg-champan/10' : 'text-slate-600 hover:text-white hover:bg-white/5'}`}
-                        title={item.is_pinned ? 'Desfijar' : 'Fijar'}
+                        type="button"
+                        onClick={() => onPin(item)}
+                        aria-pressed={!!item.is_pinned}
+                        aria-label={item.is_pinned ? `Desfijar ${item.title}` : `Fijar ${item.title}`}
+                        title={item.is_pinned ? 'Desfijar (P)' : 'Fijar (P)'}
+                        className={`pm-kb-iconbtn ${item.is_pinned ? 'pm-kb-iconbtn--on' : ''}`}
                     >
                         {item.is_pinned ? <Pin size={13} aria-hidden="true" /> : <PinOff size={13} aria-hidden="true" />}
                     </button>
                     <button
+                        type="button"
                         onClick={() => onAskRag(item)}
-                        aria-label="Preguntar al RAG"
-                        className="p-1.5 rounded-lg text-slate-600 hover:text-indigo-400 hover:bg-white/5 transition-all"
-                        title="Preguntar al RAG"
+                        aria-label={`Consultar el motor RAG sobre ${item.title}`}
+                        title="Consultar RAG (A)"
+                        className={`pm-kb-iconbtn ${item.rag_context ? 'pm-kb-iconbtn--rag' : ''}`}
                     >
                         <Bot size={13} aria-hidden="true" />
                     </button>
-                    <button
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        aria-label="Más opciones"
-                        aria-haspopup="true"
-                        aria-expanded={menuOpen}
-                        className="p-1.5 rounded-lg text-slate-600 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                        <MoreHorizontal size={14} />
-                    </button>
-                    {menuOpen && (
-                        <div className="absolute right-0 top-full mt-1 w-36 bg-obsidiana border border-white/10 rounded-xl shadow-2xl py-1 z-50 backdrop-blur-xl">
-                            <button
-                                onClick={() => { onDelete(item.id); setMenuOpen(false); }}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
-                            >
-                                <Trash2 size={12} /> Eliminar
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {item.description && (
-                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 mt-1">
-                    {item.description}
-                </p>
-            )}
+            {!compact && item.description ? (
+                <p className="pm-kb-card__desc">{item.description}</p>
+            ) : null}
 
-            {item.is_pinned && (
-                <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-1.5">
-                    <div className="w-1 h-1 rounded-full bg-champan" />
-                    <span className="text-[9px] font-black text-champan/70 uppercase tracking-widest">Fijada</span>
+            {(aging || item.is_pinned || item.rag_context) && (
+                <div className="pm-kb-card__meta">
+                    {item.is_pinned ? (
+                        <span className="pm-kb-chip pm-kb-chip--pin">
+                            <Pin size={9} aria-hidden="true" /> Fijada
+                        </span>
+                    ) : null}
+                    {aging ? (
+                        <span className={`pm-kb-chip ${hot ? 'pm-kb-chip--hot' : 'pm-kb-chip--warn'}`}>
+                            <Clock size={9} aria-hidden="true" /> {days}d sin mover
+                        </span>
+                    ) : null}
+                    {item.rag_context ? (
+                        <span className="pm-kb-chip pm-kb-chip--rag">
+                            <Sparkles size={9} aria-hidden="true" /> Contexto IA
+                        </span>
+                    ) : null}
                 </div>
             )}
-        </div>
+        </article>
     );
 }
 
-function ColumnAddForm({ column, onAdd }: { column: string; onAdd: (title: string, column: string) => void }) {
+/* ═══════════════════════════════════════════════════════════════════
+   COMPOSER — alta rápida, permanece abierto para entrada en ráfaga
+   ═══════════════════════════════════════════════════════════════════ */
+
+function Composer({
+    column,
+    onCreate,
+}: {
+    column: ColumnKey;
+    onCreate: (title: string, description: string, column: ColumnKey) => void;
+}) {
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
-    const inputRef = useRef<HTMLInputElement>(null);
+    const [description, setDescription] = useState('');
+    const [withDesc, setWithDesc] = useState(false);
+    const titleRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
-        if (open && inputRef.current) inputRef.current.focus();
+        if (open) titleRef.current?.focus();
     }, [open]);
 
-    const handleSubmit = () => {
-        if (title.trim()) {
-            onAdd(title.trim(), column);
-            setTitle('');
-            setOpen(false);
-        }
+    const close = () => {
+        setOpen(false);
+        setTitle('');
+        setDescription('');
+        setWithDesc(false);
+    };
+
+    const submit = () => {
+        if (!title.trim()) return;
+        onCreate(title.trim(), description.trim(), column);
+        setTitle('');
+        setDescription('');
+        setWithDesc(false);
+        titleRef.current?.focus();
     };
 
     if (!open) {
         return (
             <button
+                type="button"
+                data-kb-add={column}
                 onClick={() => setOpen(true)}
-                className="mt-2 w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-white/10 text-slate-600 hover:text-champan hover:border-champan/30 transition-all text-xs font-bold uppercase tracking-wider group"
+                aria-label={`Agregar tarjeta en ${COLUMN_META[column].label}`}
+                className="pm-kb-add"
             >
-                <Plus size={14} className="group-hover:scale-110 transition-transform" />
-                Agregar
+                <Plus size={14} aria-hidden="true" />
+                Agregar tarjeta
             </button>
         );
     }
 
     return (
-        <div className="mt-2 bg-obsidiana/60 border border-white/10 rounded-xl p-3 space-y-2">
-            <input
-                ref={inputRef}
+        <div className="pm-kb-composer" role="group" aria-label={`Nueva tarjeta en ${COLUMN_META[column].label}`}>
+            <textarea
+                ref={titleRef}
+                data-kb-input={column}
+                rows={2}
                 value={title}
-                onChange={e => setTitle(e.target.value)}
-                onKeyDown={e => {
-                    if (e.key === 'Enter') handleSubmit();
-                    if (e.key === 'Escape') { setOpen(false); setTitle(''); }
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        submit();
+                    }
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        close();
+                    }
                 }}
-                placeholder="Nueva tarea..."
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-champan/50"
+                placeholder="Título de la tarea…"
+                aria-label="Título de la nueva tarjeta"
+                className="pm-kb-field pm-kb-field--title"
             />
-            <div className="flex gap-2">
-                <button
-                    onClick={handleSubmit}
-                    disabled={!title.trim()}
-                    className="flex-1 px-3 py-1.5 bg-champan/20 text-champan border border-champan/30 rounded-lg text-xs font-bold hover:bg-champan/30 transition-colors disabled:opacity-30"
-                >
-                    Guardar
+
+            {withDesc ? (
+                <textarea
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                            e.preventDefault();
+                            close();
+                        }
+                    }}
+                    placeholder="Descripción (opcional)…"
+                    aria-label="Descripción de la nueva tarjeta"
+                    className="pm-kb-field"
+                />
+            ) : (
+                <button type="button" onClick={() => setWithDesc(true)} className="pm-kb-linkbtn">
+                    + descripción
                 </button>
-                <button
-                    onClick={() => { setOpen(false); setTitle(''); }}
-                    className="px-3 py-1.5 bg-white/5 text-slate-400 border border-white/10 rounded-lg text-xs font-bold hover:bg-white/10 transition-colors"
-                >
-                    <X size={14} />
+            )}
+
+            <div className="flex items-center gap-2">
+                <button type="button" onClick={submit} disabled={!title.trim()} className="pm-kb-btn pm-kb-btn--primary flex-1">
+                    <Check size={13} aria-hidden="true" /> Crear
+                </button>
+                <button type="button" onClick={close} aria-label="Cancelar nueva tarjeta" className="pm-kb-btn pm-kb-btn--ghost">
+                    <X size={13} aria-hidden="true" />
                 </button>
             </div>
+            <p className="pm-kb-hint">
+                <kbd className="pm-kb-kbd">Enter</kbd> crea · <kbd className="pm-kb-kbd">Esc</kbd> cierra
+            </p>
         </div>
     );
 }
 
-function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
-    const { setNodeRef, isOver } = useDroppable({ id: `drop-${id}` });
-    return (
-        <div
-            ref={setNodeRef}
-            className={`flex-1 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1 min-h-[100px] rounded-xl transition-all duration-200 ${isOver ? 'bg-champan/5 border border-champan/30' : ''}`}
-        >
-            {children}
-        </div>
-    );
+/* ═══════════════════════════════════════════════════════════════════
+   COLUMNA
+   ═══════════════════════════════════════════════════════════════════ */
+
+interface ColumnProps {
+    colKey: ColumnKey;
+    items: KanbanItemT[];
+    totalCount: number;
+    wip: number;
+    collapsed: boolean;
+    compact: boolean;
+    filtering: boolean;
+    focusedId: number | null;
+    onToggleCollapse: (key: ColumnKey) => void;
+    onSetWip: (key: ColumnKey, value: number) => void;
+    onCreate: (title: string, description: string, column: ColumnKey) => void;
+    onFocusCard: (id: number) => void;
+    onOpenCard: (item: KanbanItemT) => void;
+    onPinCard: (item: KanbanItemT) => void;
+    onAskRag: (item: KanbanItemT) => void;
 }
 
-export default function Kanban({ auth, columns: initialColumns }: { auth: any; columns: Record<string, any[]> }) {
-    const [columns, setColumns] = useState<Record<string, any[]>>(initialColumns || {
-        todo: [], in_progress: [], review: [], done: []
+function BoardColumn(props: ColumnProps) {
+    const {
+        colKey,
+        items,
+        totalCount,
+        wip,
+        collapsed,
+        compact,
+        filtering,
+        focusedId,
+        onToggleCollapse,
+        onSetWip,
+        onCreate,
+        onFocusCard,
+        onOpenCard,
+        onPinCard,
+        onAskRag,
+    } = props;
+
+    const { setNodeRef, isOver } = useDroppable({
+        id: `col:${colKey}`,
+        data: { type: 'column', column: colKey },
     });
-    const [activeId, setActiveId] = useState<number | null>(null);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [editingCol, setEditingCol] = useState<string | null>(null);
-    const [editingColName, setEditingColName] = useState('');
-    const [newColName, setNewColName] = useState('');
-    const contentRef = useRef<HTMLDivElement>(null);
-    const searchRef = useRef<HTMLInputElement>(null);
-    const user = auth?.user || { name: 'Invitado', role: 'operario' };
 
-    useEffect(() => {
-        if (initialColumns) setColumns(initialColumns);
-    }, [initialColumns]);
+    const [editingWip, setEditingWip] = useState(false);
+    const [wipDraft, setWipDraft] = useState(String(wip || ''));
+    const meta = COLUMN_META[colKey];
+    const overLimit = wip > 0 && totalCount > wip;
+    const ids = useMemo(() => items.map((item) => item.id), [items]);
 
-    useEffect(() => {
-        if (contentRef.current) {
-            gsap.fromTo(contentRef.current,
-                { opacity: 0, y: 15, filter: 'blur(8px)' },
-                { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power3.out',
-                  // FIX offset Opus5: GSAP deja transform/filter inline (containing block del overlay fixed)
-                  clearProps: 'filter,transform,willChange' }
-            );
-        }
+    const commitWip = () => {
+        const parsed = Math.max(0, Math.min(99, parseInt(wipDraft, 10) || 0));
+        onSetWip(colKey, parsed);
+        setEditingWip(false);
+    };
+
+    if (collapsed) {
+        return (
+            <section
+                data-col={colKey}
+                aria-label={`${meta.label} (colapsada, ${totalCount} tarjetas)`}
+                className={`pm-kb-col pm-kb-col--collapsed ${isOver ? 'pm-kb-col--over' : ''}`}
+            >
+                <button
+                    type="button"
+                    onClick={() => onToggleCollapse(colKey)}
+                    aria-label={`Expandir columna ${meta.label}`}
+                    className="pm-kb-col__rail"
+                >
+                    <ChevronRight size={14} aria-hidden="true" />
+                    <span className="pm-kb-col__rail-label">{meta.label}</span>
+                    <span className="pm-kb-col__count">{totalCount}</span>
+                </button>
+                <div ref={setNodeRef} className="pm-kb-col__raildrop" aria-hidden="true" />
+            </section>
+        );
+    }
+
+    return (
+        <section
+            data-col={colKey}
+            aria-label={`${meta.label}, ${totalCount} tarjetas`}
+            className={`pm-kb-col ${isOver ? 'pm-kb-col--over' : ''} ${overLimit ? 'pm-kb-col--overlimit' : ''}`}
+        >
+            <header className="pm-panel pm-kb-col__head">
+                <div className="flex items-center gap-2 min-w-0">
+                    <span className="pm-kb-col__dot" aria-hidden="true" />
+                    <span className="pm-kb-col__label">{meta.label}</span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                    {editingWip ? (
+                        <input
+                            autoFocus
+                            inputMode="numeric"
+                            value={wipDraft}
+                            onChange={(e) => setWipDraft(e.target.value.replace(/\D/g, ''))}
+                            onBlur={commitWip}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') commitWip();
+                                if (e.key === 'Escape') setEditingWip(false);
+                            }}
+                            aria-label={`Límite WIP de ${meta.label}, 0 para sin límite`}
+                            className="pm-kb-wipinput"
+                        />
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setWipDraft(String(wip || ''));
+                                setEditingWip(true);
+                            }}
+                            title="Definir límite WIP (0 = sin límite)"
+                            aria-label={`${totalCount} tarjetas${wip ? ` de un límite de ${wip}` : ''}. Editar límite WIP`}
+                            className={`pm-kb-col__count ${overLimit ? 'pm-kb-col__count--over' : ''}`}
+                        >
+                            {overLimit ? <AlertTriangle size={9} aria-hidden="true" /> : null}
+                            {totalCount}
+                            {wip ? <span className="opacity-60">/{wip}</span> : null}
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => onToggleCollapse(colKey)}
+                        aria-label={`Colapsar columna ${meta.label}`}
+                        title="Colapsar columna"
+                        className="pm-kb-iconbtn"
+                    >
+                        <ChevronLeft size={13} aria-hidden="true" />
+                    </button>
+                </div>
+            </header>
+
+            {wip > 0 ? (
+                <div className="pm-kb-wipbar" role="presentation">
+                    <span style={{ width: `${Math.min(100, (totalCount / wip) * 100)}%` }} />
+                </div>
+            ) : (
+                <p className="pm-kb-col__hint">{meta.hint}</p>
+            )}
+
+            <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+                <div ref={setNodeRef} className={`pm-kb-list ${compact ? 'pm-kb-list--compact' : ''}`} role="list">
+                    {items.map((item, index) => (
+                        <div role="listitem" key={item.id}>
+                            <KanbanCard
+                                item={item}
+                                index={index}
+                                total={items.length}
+                                focused={focusedId === item.id}
+                                compact={compact}
+                                onFocus={onFocusCard}
+                                onOpen={onOpenCard}
+                                onPin={onPinCard}
+                                onAskRag={onAskRag}
+                            />
+                        </div>
+                    ))}
+
+                    {items.length === 0 ? (
+                        <p className="pm-kb-empty">{filtering ? 'Sin resultados en esta columna' : 'Columna vacía'}</p>
+                    ) : null}
+                </div>
+            </SortableContext>
+
+            <Composer column={colKey} onCreate={onCreate} />
+        </section>
+    );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PÁGINA
+   ═══════════════════════════════════════════════════════════════════ */
+
+export default function Kanban({
+    auth,
+    columns: initialColumns,
+}: {
+    auth: { user?: { name?: string; role?: string } };
+    columns: Record<string, KanbanItemT[]>;
+}) {
+    const user = auth?.user ?? { name: 'Invitado', role: 'operario' };
+
+    /* ── Board: state + ref espejo para cálculos deterministas en DnD ── */
+    const [board, setBoardState] = useState<Board>(() => normalizeBoard(initialColumns));
+    const boardData = useRef<Board>(board);
+    const setBoard = useCallback((next: Board | ((current: Board) => Board)) => {
+        const value = typeof next === 'function' ? (next as (c: Board) => Board)(boardData.current) : next;
+        boardData.current = value;
+        setBoardState(value);
     }, []);
 
+    /* ── UI state ── */
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const [pinnedOnly, setPinnedOnly] = useState(false);
+    const [compact, setCompact] = useState(false);
+    const [collapsed, setCollapsed] = useState<ColumnKey[]>([]);
+    const [wip, setWip] = useState<Record<ColumnKey, number>>({ todo: 0, in_progress: 0, review: 0, done: 0 });
+    const [focusedId, setFocusedId] = useState<number | null>(null);
+    const [activeId, setActiveId] = useState<number | null>(null);
+    const [helpOpen, setHelpOpen] = useState(false);
+    const [toasts, setToasts] = useState<ToastT[]>([]);
+
+    /* ── Inspector ── */
+    const [inspectId, setInspectId] = useState<number | null>(null);
+    const [draftTitle, setDraftTitle] = useState('');
+    const [draftDesc, setDraftDesc] = useState('');
+    const [saving, setSaving] = useState(false);
+
+    /* ── RAG ── */
+    const [ragItemId, setRagItemId] = useState<number | null>(null);
+    const [ragMessages, setRagMessages] = useState<RagMessage[]>([]);
+    const [ragLoading, setRagLoading] = useState(false);
+    const [ragInput, setRagInput] = useState('');
+    const ragBaseContext = useRef<string>('');
+    const ragEndRef = useRef<HTMLDivElement>(null);
+
+    const boardElRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLInputElement>(null);
+    const dragSnapshot = useRef<Board | null>(null);
+    const pendingDeletes = useRef<Map<number, { timer: number; item: KanbanItemT; index: number }>>(new Map());
+    const toastSeq = useRef(1);
+
+    /* ═══ Preferencias locales (no hay endpoint para esto: localStorage) ═══ */
+    useEffect(() => {
+        setWip((prev) => ({ ...prev, ...readJSON<Partial<Record<ColumnKey, number>>>(LS_WIP, {}) }));
+        setCollapsed(readJSON<ColumnKey[]>(LS_COLLAPSED, []).filter((k) => COLUMN_ORDER.includes(k)));
+        setCompact(readJSON<string>(LS_DENSITY, 'cozy') === 'compact');
+    }, []);
+
+    /* ═══ Sincronización con Inertia (nunca durante un drag) ═══ */
+    useEffect(() => {
+        if (activeId !== null) return;
+        if (initialColumns) setBoard(normalizeBoard(initialColumns));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialColumns]);
+
+    /* ═══ Reveal. clearProps:'all' es obligatorio: un transform inline
+           residual crea containing block y descuadra overlays fixed.  ═══ */
+    useEffect(() => {
+        if (!boardElRef.current) return;
+        const columnsEl = boardElRef.current.querySelectorAll('[data-col]');
+        gsap.fromTo(
+            columnsEl,
+            { opacity: 0, y: 14 },
+            { opacity: 1, y: 0, duration: 0.42, stagger: 0.06, ease: 'power3.out', clearProps: 'all' }
+        );
+    }, []);
+
+    /* ═══ Toasts ═══ */
+    const pushToast = useCallback((toast: Omit<ToastT, 'id'>, ttl = 4000) => {
+        const id = toastSeq.current++;
+        setToasts((prev) => [...prev, { ...toast, id }]);
+        window.setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), ttl);
+        return id;
+    }, []);
+
+    const dropToast = useCallback((id: number) => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, []);
+
+    /* ═══ Sensores ═══ */
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
         useSensor(KeyboardSensor)
     );
 
-    // ── Keyboard shortcuts ──
-    useEffect(() => {
-        const handleKey = (e: KeyboardEvent) => {
-            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-            if (e.ctrlKey || e.metaKey) return;
-            if (e.key === 'n' || e.key === 'N') {
-                e.preventDefault();
-                const firstCol = Object.keys(columns)[0] || 'todo';
-                setNewColName('');
-                (document.querySelector(`[data-add="${firstCol}"]`) as HTMLButtonElement)?.focus();
-            }
-            if (e.key === 'f' || e.key === 'F') {
-                e.preventDefault();
-                searchRef.current?.focus();
-            }
-        };
-        window.addEventListener('keydown', handleKey);
-        return () => window.removeEventListener('keydown', handleKey);
-    }, [columns]);
+    /* ═══ Filtrado ═══ */
+    const filtering = query.trim().length > 0 || pinnedOnly;
 
-    // ── Column CRUD ──
-    const handleAddColumn = () => {
-        if (!newColName.trim()) return;
-        const key = newColName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-        if (!key || columns[key]) return;
-        setColumns(prev => ({ ...prev, [key]: [] }));
-        setNewColName('');
-    };
-
-    const handleRenameColumn = (oldKey: string) => {
-        if (!editingColName.trim() || editingColName === oldKey) { setEditingCol(null); return; }
-        const newKey = editingColName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-        if (!newKey || newKey === oldKey || columns[newKey]) { setEditingCol(null); return; }
-        setColumns(prev => {
-            const updated = { ...prev };
-            updated[newKey] = updated[oldKey] || [];
-            delete updated[oldKey];
-            return updated;
-        });
-        setEditingCol(null);
-    };
-
-    const handleDeleteColumn = (key: string) => {
-        if (columns[key]?.length && !confirm(`¿Eliminar columna "${key}" con ${columns[key].length} tarjetas?`)) return;
-        setColumns(prev => {
-            const updated = { ...prev };
-            delete updated[key];
-            return updated;
-        });
-    };
-
-    // ── Filter ──
-    const filterItems = (items: any[]) => {
-        if (!searchTerm) return items;
-        const term = searchTerm.toLowerCase();
-        return items.filter(i =>
-            i.title?.toLowerCase().includes(term) ||
-            i.description?.toLowerCase().includes(term)
-        );
-    };
-
-    const handleDragStart = (event: any) => {
-        setActiveId(event.active.id);
-    };
-
-    const handleDragEnd = async (event: any) => {
-        setActiveId(null);
-        const { active, over } = event;
-        if (!over || active.id === over.id) return;
-
-        const activeItem = findItem(active.id);
-        if (!activeItem) return;
-
-        const overItem = findItem(over.id);
-        const targetColumn = overItem
-            ? overItem.column
-            : findColumnByDroppableId(over.id);
-
-        if (!targetColumn) return;
-
-        const newPosition = overItem
-            ? overItem.position
-            : columns[targetColumn]?.length ?? 0;
-
-        // Optimistic update
-        const newColumns = { ...columns };
-        const srcItems = [...(newColumns[activeItem.column] || [])];
-        const activeIndex = srcItems.findIndex(i => i.id === active.id);
-        if (activeIndex !== -1) {
-            srcItems.splice(activeIndex, 1);
-            newColumns[activeItem.column] = srcItems;
-        }
-
-        const dstItems = [...(newColumns[targetColumn] || [])];
-        const overIndex = dstItems.findIndex(i => i.id === (overItem?.id ?? null));
-        const insertAt = overIndex !== -1 ? overIndex : dstItems.length;
-
-        const updatedItem = { ...activeItem, column: targetColumn, position: insertAt };
-        dstItems.splice(insertAt, 0, updatedItem);
-        newColumns[targetColumn] = dstItems;
-
-        setColumns(newColumns);
-
-        try {
-            await axios.post('/kanban/reorder', {
-                item_id: active.id,
-                column: targetColumn,
-                position: insertAt,
-            });
-        } catch {
-            setColumns(columns);
-        }
-    };
-
-    const findItem = (id: number) => {
-        for (const key of Object.keys(columns)) {
-            const found = columns[key].find(i => i.id === id);
-            if (found) return found;
-        }
-        return null;
-    };
-
-    const findColumnByDroppableId = (id: number | string) => {
-        const strId = String(id);
-        if (strId.startsWith('drop-')) {
-            const col = strId.replace('drop-', '');
-            if (Object.keys(columns).includes(col)) return col;
-        }
-        if (strId.startsWith('col-')) {
-            const col = strId.replace('col-', '');
-            if (Object.keys(columns).includes(col)) return col;
-        }
-        return null;
-    };
-
-    const handleAdd = async (title: string, column: string) => {
-        try {
-            const res = await axios.post('/kanban', { title, column });
-            const newColumns = { ...columns };
-            newColumns[column] = [...(newColumns[column] || []), res.data];
-            setColumns(newColumns);
-        } catch {
-            // silent
-        }
-    };
-
-    const handleDelete = async (id: number) => {
-        const item = findItem(id);
-        if (!item) return;
-
-        const newColumns = { ...columns };
-        newColumns[item.column] = (newColumns[item.column] || []).filter(i => i.id !== id);
-        setColumns(newColumns);
-
-        try {
-            await axios.delete(`/kanban/${id}`);
-        } catch {
-            setColumns(columns);
-        }
-    };
-
-    const handlePin = async (id: number) => {
-        try {
-            const res = await axios.post(`/kanban/${id}/pin`);
-            const updated = res.data;
-            const newColumns = { ...columns };
-            for (const key of Object.keys(newColumns)) {
-                newColumns[key] = (newColumns[key] || []).map(i =>
-                    i.id === updated.id ? { ...i, is_pinned: updated.is_pinned } : i
+    const visible = useMemo<Board>(() => {
+        const term = query.trim().toLowerCase();
+        const out = emptyBoard();
+        COLUMN_ORDER.forEach((key) => {
+            out[key] = board[key].filter((item) => {
+                if (pinnedOnly && !item.is_pinned) return false;
+                if (!term) return true;
+                return (
+                    item.title?.toLowerCase().includes(term) ||
+                    (item.description ?? '').toLowerCase().includes(term) ||
+                    (item.rag_context ?? '').toLowerCase().includes(term)
                 );
-                newColumns[key].sort((a, b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0) || a.position - b.position);
+            });
+        });
+        return out;
+    }, [board, query, pinnedOnly]);
+
+    const totals = useMemo(() => {
+        const all = COLUMN_ORDER.reduce((sum, key) => sum + board[key].length, 0);
+        const done = board.done.length;
+        const shown = COLUMN_ORDER.reduce((sum, key) => sum + visible[key].length, 0);
+        return { all, done, shown, pct: all === 0 ? 0 : Math.round((done / all) * 100) };
+    }, [board, visible]);
+
+    /* ═══ Persistencia de reorder ═══ */
+    const persistReorder = useCallback(
+        async (itemId: number, column: ColumnKey, position: number, rollback: Board) => {
+            try {
+                const res = await api.post('/kanban/reorder', { item_id: itemId, column, position });
+                if (res.data?.columns) setBoard(normalizeBoard(res.data.columns));
+            } catch {
+                setBoard(rollback);
+                pushToast({ kind: 'error', text: 'No se pudo guardar el movimiento. Tablero restaurado.' });
             }
-            setColumns(newColumns);
-        } catch {
-            // silent
-        }
+        },
+        [pushToast, setBoard]
+    );
+
+    /* ═══ Drag & drop ═══ */
+    const handleDragStart = (event: { active: { id: number | string } }) => {
+        dragSnapshot.current = boardData.current;
+        setActiveId(Number(event.active.id));
+        setFocusedId(Number(event.active.id));
     };
 
-    const handleTitleChange = async (id: number, title: string) => {
-        const item = findItem(id);
-        if (!item) return;
+    const handleDragOver = (event: { active: { id: number | string }; over: { id: number | string } | null }) => {
+        const { active, over } = event;
+        if (!over) return;
+        const current = boardData.current;
+        const from = resolveColumn(current, active.id);
+        const to = resolveColumn(current, over.id);
+        if (!from || !to || from === to) return;
 
-        const newColumns = { ...columns };
-        newColumns[item.column] = (newColumns[item.column] || []).map(i =>
-            i.id === id ? { ...i, title } : i
-        );
-        setColumns(newColumns);
+        const moving = current[from].find((item) => item.id === Number(active.id));
+        if (!moving) return;
 
+        const overIndex = current[to].findIndex((item) => item.id === Number(over.id));
+        const target = [...current[to]];
+        target.splice(overIndex === -1 ? target.length : overIndex, 0, { ...moving, column: to });
+
+        setBoard({
+            ...current,
+            [from]: current[from].filter((item) => item.id !== moving.id),
+            [to]: target,
+        } as Board);
+    };
+
+    const handleDragEnd = (event: { active: { id: number | string }; over: { id: number | string } | null }) => {
+        const { active, over } = event;
+        setActiveId(null);
+        const snapshot = dragSnapshot.current;
+        dragSnapshot.current = null;
+
+        if (!over || !snapshot) {
+            if (snapshot) setBoard(snapshot);
+            return;
+        }
+
+        const current = boardData.current;
+        const column = resolveColumn(current, active.id);
+        if (!column) {
+            setBoard(snapshot);
+            return;
+        }
+
+        const id = Number(active.id);
+        const oldIndex = current[column].findIndex((item) => item.id === id);
+        let newIndex = oldIndex;
+
+        if (resolveColumn(current, over.id) === column) {
+            const overIndex = current[column].findIndex((item) => item.id === Number(over.id));
+            if (overIndex !== -1) newIndex = overIndex;
+        }
+
+        const next: Board =
+            oldIndex === newIndex
+                ? current
+                : ({ ...current, [column]: arrayMove(current[column], oldIndex, newIndex) } as Board);
+        setBoard(next);
+
+        const prevColumn = resolveColumn(snapshot, id);
+        const prevIndex = prevColumn ? snapshot[prevColumn].findIndex((item) => item.id === id) : -1;
+        if (prevColumn === column && prevIndex === newIndex) return;
+
+        void persistReorder(id, column, newIndex, snapshot);
+    };
+
+    const handleDragCancel = () => {
+        setActiveId(null);
+        if (dragSnapshot.current) setBoard(dragSnapshot.current);
+        dragSnapshot.current = null;
+    };
+
+    /* ═══ CRUD ═══ */
+    const handleCreate = useCallback(
+        async (title: string, description: string, column: ColumnKey) => {
+            try {
+                const res = await api.post('/kanban', {
+                    title,
+                    description: description || null,
+                    column,
+                });
+                const created: KanbanItemT = res.data?.item ?? res.data;
+                setBoard((current) => ({
+                    ...current,
+                    [column]: [...current[column], { ...created, column, is_pinned: !!created.is_pinned }],
+                }));
+                setFocusedId(created.id);
+            } catch {
+                pushToast({ kind: 'error', text: 'No se pudo crear la tarjeta.' });
+            }
+        },
+        [pushToast, setBoard]
+    );
+
+    /** DELETE diferido: undo real sin endpoint nuevo. */
+    const handleDelete = useCallback(
+        (item: KanbanItemT) => {
+            const current = boardData.current;
+            const index = current[item.column].findIndex((entry) => entry.id === item.id);
+            if (index === -1) return;
+
+            setBoard({
+                ...current,
+                [item.column]: current[item.column].filter((entry) => entry.id !== item.id),
+            } as Board);
+            if (inspectId === item.id) setInspectId(null);
+
+            const toastId = pushToast(
+                {
+                    kind: 'undo',
+                    text: `"${item.title}" eliminada`,
+                    actionLabel: 'Deshacer',
+                    onAction: () => {
+                        const pending = pendingDeletes.current.get(item.id);
+                        if (pending) {
+                            window.clearTimeout(pending.timer);
+                            pendingDeletes.current.delete(item.id);
+                        }
+                        setBoard((live) => {
+                            const list = [...live[item.column]];
+                            list.splice(Math.min(index, list.length), 0, item);
+                            return { ...live, [item.column]: list } as Board;
+                        });
+                        dropToast(toastId);
+                    },
+                },
+                UNDO_MS + 400
+            );
+
+            const timer = window.setTimeout(() => {
+                pendingDeletes.current.delete(item.id);
+                api.delete(`/kanban/${item.id}`).catch(() => {
+                    setBoard((live) => {
+                        const list = [...live[item.column]];
+                        list.splice(Math.min(index, list.length), 0, item);
+                        return { ...live, [item.column]: list } as Board;
+                    });
+                    pushToast({ kind: 'error', text: 'El servidor rechazó el borrado. Tarjeta restaurada.' });
+                });
+            }, UNDO_MS);
+
+            pendingDeletes.current.set(item.id, { timer, item, index });
+        },
+        [dropToast, inspectId, pushToast, setBoard]
+    );
+
+    /* Los borrados pendientes se confirman si el usuario navega. */
+    useEffect(
+        () => () => {
+            pendingDeletes.current.forEach(({ timer, item }) => {
+                window.clearTimeout(timer);
+                api.delete(`/kanban/${item.id}`).catch(() => {});
+            });
+            pendingDeletes.current.clear();
+        },
+        []
+    );
+
+    const handlePin = useCallback(
+        async (item: KanbanItemT) => {
+            const optimistic = !item.is_pinned;
+            setBoard((current) => ({
+                ...current,
+                [item.column]: current[item.column].map((entry) =>
+                    entry.id === item.id ? { ...entry, is_pinned: optimistic } : entry
+                ),
+            }));
+            try {
+                const res = await api.post(`/kanban/${item.id}/pin`);
+                const server: KanbanItemT = res.data?.item ?? res.data;
+                setBoard((current) => ({
+                    ...current,
+                    [item.column]: current[item.column].map((entry) =>
+                        entry.id === item.id ? { ...entry, is_pinned: !!server.is_pinned } : entry
+                    ),
+                }));
+            } catch {
+                setBoard((current) => ({
+                    ...current,
+                    [item.column]: current[item.column].map((entry) =>
+                        entry.id === item.id ? { ...entry, is_pinned: !optimistic } : entry
+                    ),
+                }));
+                pushToast({ kind: 'error', text: 'No se pudo cambiar el pin.' });
+            }
+        },
+        [pushToast, setBoard]
+    );
+
+    const patchItem = useCallback(
+        (id: number, patch: Partial<KanbanItemT>) => {
+            setBoard((current) => {
+                const next = { ...current } as Board;
+                COLUMN_ORDER.forEach((key) => {
+                    next[key] = current[key].map((entry) => (entry.id === id ? { ...entry, ...patch } : entry));
+                });
+                return next;
+            });
+        },
+        [setBoard]
+    );
+
+    /* ═══ Mover con teclado ═══ */
+    const moveAcross = useCallback(
+        (item: KanbanItemT, delta: number) => {
+            const fromIdx = COLUMN_ORDER.indexOf(item.column);
+            const toIdx = fromIdx + delta;
+            if (toIdx < 0 || toIdx >= COLUMN_ORDER.length) return;
+
+            const target = COLUMN_ORDER[toIdx];
+            const snapshot = boardData.current;
+            const position = snapshot[target].length;
+
+            setBoard({
+                ...snapshot,
+                [item.column]: snapshot[item.column].filter((entry) => entry.id !== item.id),
+                [target]: [...snapshot[target], { ...item, column: target }],
+            } as Board);
+
+            if (collapsed.includes(target)) {
+                setCollapsed((prev) => {
+                    const next = prev.filter((key) => key !== target);
+                    writeJSON(LS_COLLAPSED, next);
+                    return next;
+                });
+            }
+
+            void persistReorder(item.id, target, position, snapshot);
+        },
+        [collapsed, persistReorder, setBoard]
+    );
+
+    const nudgeWithin = useCallback(
+        (item: KanbanItemT, delta: number) => {
+            const snapshot = boardData.current;
+            const list = snapshot[item.column];
+            const from = list.findIndex((entry) => entry.id === item.id);
+            const to = from + delta;
+            if (from === -1 || to < 0 || to >= list.length) return;
+
+            setBoard({ ...snapshot, [item.column]: arrayMove(list, from, to) } as Board);
+            void persistReorder(item.id, item.column, to, snapshot);
+        },
+        [persistReorder, setBoard]
+    );
+
+    /* ═══ Inspector ═══ */
+    const openInspector = useCallback((item: KanbanItemT) => {
+        setInspectId(item.id);
+        setDraftTitle(item.title);
+        setDraftDesc(item.description ?? '');
+    }, []);
+
+    const inspectItem = findItem(board, inspectId);
+    const dirty = !!inspectItem && (draftTitle !== inspectItem.title || draftDesc !== (inspectItem.description ?? ''));
+
+    const saveInspector = useCallback(async () => {
+        if (!inspectItem || !draftTitle.trim() || !dirty) return;
+        setSaving(true);
+        const patch = { title: draftTitle.trim(), description: draftDesc.trim() || null };
+        patchItem(inspectItem.id, patch);
         try {
-            await axios.put(`/kanban/${id}`, { title });
+            await api.put(`/kanban/${inspectItem.id}`, patch);
+            pushToast({ kind: 'info', text: 'Tarjeta actualizada.' }, 2200);
         } catch {
-            setColumns(columns);
+            patchItem(inspectItem.id, { title: inspectItem.title, description: inspectItem.description ?? null });
+            pushToast({ kind: 'error', text: 'No se pudo guardar la tarjeta.' });
+        } finally {
+            setSaving(false);
         }
-    };
+    }, [dirty, draftDesc, draftTitle, inspectItem, patchItem, pushToast]);
 
-    const [ragModal, setRagModal] = useState<{ open: boolean; item: any }>({ open: false, item: null });
-    const [ragMessages, setRagMessages] = useState<{ role: 'user' | 'ai'; content: string }[]>([]);
-    const [ragLoading, setRagLoading] = useState(false);
-    const [ragInput, setRagInput] = useState('');
-    const ragEndRef = useRef<HTMLDivElement>(null);
+    /* ═══ RAG: ask-rag → chat-rag → rag-context ═══ */
+    const ragItem = findItem(board, ragItemId);
 
     useEffect(() => {
-        if (ragEndRef.current) {
-            ragEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
+        ragEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, [ragMessages, ragLoading]);
 
-    const handleAskRag = async (item: any) => {
-        setRagModal({ open: true, item });
-        const prompt = `Analiza el estado de la tarea: ${item.title}. ¿Qué insumos del inventario están relacionados?`;
-        setRagMessages([{ role: 'user', content: prompt }]);
+    const callChatRag = useCallback(
+        async (question: string, history: RagMessage[]) => {
+            const transcript = history
+                .map((msg) => `${msg.role === 'user' ? 'Usuario' : 'Asistente'}: ${msg.content}`)
+                .join('\n');
+            const prompt = [ragBaseContext.current, transcript, `Usuario: ${question}`, 'Asistente:']
+                .filter(Boolean)
+                .join('\n\n');
+            const res = await api.post('/chat-rag', { prompt });
+            return String(res.data?.response ?? 'Sin respuesta del motor RAG.');
+        },
+        []
+    );
+
+    const handleAskRag = useCallback(
+        async (item: KanbanItemT) => {
+            setRagItemId(item.id);
+            setRagInput('');
+            setRagMessages([]);
+            setRagLoading(true);
+            const opener = '¿Qué insumos del inventario se relacionan con esta tarea y qué riesgos FEFO debo considerar?';
+            try {
+                const ctx = await api.post('/kanban/ask-rag', { item_id: item.id });
+                ragBaseContext.current = String(ctx.data?.rag_prompt ?? `Tarea: ${item.title}`);
+                setRagMessages([{ role: 'user', content: opener }]);
+                const answer = await callChatRag(opener, []);
+                setRagMessages([{ role: 'user', content: opener }, { role: 'ai', content: answer }]);
+            } catch {
+                setRagMessages([
+                    { role: 'user', content: opener },
+                    { role: 'ai', content: 'No se pudo contactar el motor LLM. Reintenta en unos segundos.' },
+                ]);
+            } finally {
+                setRagLoading(false);
+            }
+        },
+        [callChatRag]
+    );
+
+    const handleRagFollowUp = useCallback(async () => {
+        const question = ragInput.trim();
+        if (!question || ragLoading) return;
+        const history = ragMessages;
+        setRagMessages([...history, { role: 'user', content: question }]);
         setRagInput('');
         setRagLoading(true);
-        const token = document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         try {
-            const res = await fetch('/chat-rag', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
-                body: JSON.stringify({ prompt }),
-            });
-            const data = await res.json();
-            setRagMessages(prev => [...prev, { role: 'ai', content: data.response || 'Sin respuesta del motor RAG.' }]);
+            const answer = await callChatRag(question, history);
+            setRagMessages((prev) => [...prev, { role: 'ai', content: answer }]);
         } catch {
-            setRagMessages(prev => [...prev, { role: 'ai', content: '> ERROR: No se pudo contactar el motor LLM.' }]);
+            setRagMessages((prev) => [...prev, { role: 'ai', content: 'Fallo en la comunicación con el motor LLM.' }]);
         } finally {
             setRagLoading(false);
         }
-    };
+    }, [callChatRag, ragInput, ragLoading, ragMessages]);
 
-    const handleRagFollowUp = async () => {
-        if (!ragInput.trim() || ragLoading) return;
-        const prompt = ragInput.trim();
-        setRagMessages(prev => [...prev, { role: 'user', content: prompt }]);
-        setRagInput('');
-        setRagLoading(true);
-        const token = document.head.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const saveRagContext = useCallback(async () => {
+        const lastAi = [...ragMessages].reverse().find((msg) => msg.role === 'ai');
+        if (!ragItem || !lastAi) return;
         try {
-            const res = await fetch('/chat-rag', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
-                body: JSON.stringify({ prompt }),
-            });
-            const data = await res.json();
-            setRagMessages(prev => [...prev, { role: 'ai', content: data.response || 'Sin respuesta.' }]);
+            await api.post(`/kanban/${ragItem.id}/rag-context`, { rag_context: lastAi.content });
+            patchItem(ragItem.id, { rag_context: lastAi.content });
+            pushToast({ kind: 'info', text: 'Contexto IA guardado en la tarjeta.' }, 2600);
         } catch {
-            setRagMessages(prev => [...prev, { role: 'ai', content: '> ERROR: Fallo en la comunicación.' }]);
-        } finally {
-            setRagLoading(false);
+            pushToast({ kind: 'error', text: 'No se pudo guardar el contexto IA.' });
         }
-    };
+    }, [patchItem, pushToast, ragItem, ragMessages]);
 
-    const activeItem = activeId ? findItem(activeId) : null;
+    /* ═══ Preferencias ═══ */
+    const toggleCollapse = useCallback((key: ColumnKey) => {
+        setCollapsed((prev) => {
+            const next = prev.includes(key) ? prev.filter((entry) => entry !== key) : [...prev, key];
+            writeJSON(LS_COLLAPSED, next);
+            return next;
+        });
+    }, []);
+
+    const setColumnWip = useCallback((key: ColumnKey, value: number) => {
+        setWip((prev) => {
+            const next = { ...prev, [key]: value };
+            writeJSON(LS_WIP, next);
+            return next;
+        });
+    }, []);
+
+    const toggleDensity = useCallback(() => {
+        setCompact((prev) => {
+            writeJSON(LS_DENSITY, prev ? 'cozy' : 'compact');
+            return !prev;
+        });
+    }, []);
+
+    /* ═══ Roving focus ═══ */
+    useEffect(() => {
+        if (focusedId === null || activeId !== null) return;
+        const node = document.getElementById(`pm-kb-card-${focusedId}`);
+        if (node && document.activeElement !== node) node.focus({ preventScroll: false });
+    }, [focusedId, activeId, visible]);
+
+    const moveFocus = useCallback(
+        (axis: 'v' | 'h', delta: number) => {
+            const openColumns = COLUMN_ORDER.filter((key) => !collapsed.includes(key));
+            const current = findItem(visible, focusedId);
+
+            if (!current) {
+                for (const key of openColumns) {
+                    if (visible[key].length) {
+                        setFocusedId(visible[key][0].id);
+                        return;
+                    }
+                }
+                return;
+            }
+
+            if (axis === 'v') {
+                const list = visible[current.column];
+                const index = list.findIndex((entry) => entry.id === current.id);
+                const target = list[index + delta];
+                if (target) setFocusedId(target.id);
+                return;
+            }
+
+            const colIdx = openColumns.indexOf(current.column);
+            for (let step = colIdx + delta; step >= 0 && step < openColumns.length; step += delta) {
+                const list = visible[openColumns[step]];
+                if (list.length) {
+                    const index = visible[current.column].findIndex((entry) => entry.id === current.id);
+                    setFocusedId(list[Math.min(index, list.length - 1)].id);
+                    return;
+                }
+            }
+        },
+        [collapsed, focusedId, visible]
+    );
+
+    /* ═══ Atajos globales ═══ */
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement | null;
+            const typing =
+                target instanceof HTMLInputElement ||
+                target instanceof HTMLTextAreaElement ||
+                target?.isContentEditable;
+
+            if (event.key === 'Escape') {
+                if (helpOpen) setHelpOpen(false);
+                else if (ragItemId !== null) setRagItemId(null);
+                else if (inspectId !== null) setInspectId(null);
+                else if (typing) (target as HTMLElement)?.blur();
+                else if (query) setQuery('');
+                return;
+            }
+
+            if (typing || event.ctrlKey || event.metaKey || event.altKey) return;
+            if (target?.closest('[data-kb-grip]')) return; // el KeyboardSensor manda
+            if (ragItemId !== null || inspectId !== null || helpOpen) return;
+
+            const focused = findItem(board, focusedId);
+
+            switch (event.key) {
+                case '/':
+                    event.preventDefault();
+                    searchRef.current?.focus();
+                    return;
+                case '?':
+                    event.preventDefault();
+                    setHelpOpen(true);
+                    return;
+                case 'j':
+                case 'ArrowDown':
+                    event.preventDefault();
+                    if (event.shiftKey && focused) nudgeWithin(focused, 1);
+                    else moveFocus('v', 1);
+                    return;
+                case 'k':
+                case 'ArrowUp':
+                    event.preventDefault();
+                    if (event.shiftKey && focused) nudgeWithin(focused, -1);
+                    else moveFocus('v', -1);
+                    return;
+                case 'h':
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    moveFocus('h', -1);
+                    return;
+                case 'l':
+                case 'ArrowRight':
+                    event.preventDefault();
+                    moveFocus('h', 1);
+                    return;
+                case '[':
+                    if (focused) {
+                        event.preventDefault();
+                        moveAcross(focused, -1);
+                    }
+                    return;
+                case ']':
+                    if (focused) {
+                        event.preventDefault();
+                        moveAcross(focused, 1);
+                    }
+                    return;
+                default:
+                    break;
+            }
+
+            const key = event.key.toLowerCase();
+
+            if (key === 'n') {
+                event.preventDefault();
+                const column = focused?.column ?? COLUMN_ORDER.find((entry) => !collapsed.includes(entry)) ?? 'todo';
+                const input = document.querySelector<HTMLTextAreaElement>(`[data-kb-input="${column}"]`);
+                if (input) input.focus();
+                else document.querySelector<HTMLButtonElement>(`[data-kb-add="${column}"]`)?.click();
+                return;
+            }
+            if (!focused) return;
+            if (key === 'e') {
+                event.preventDefault();
+                openInspector(focused);
+            } else if (key === 'p') {
+                event.preventDefault();
+                void handlePin(focused);
+            } else if (key === 'a') {
+                event.preventDefault();
+                void handleAskRag(focused);
+            } else if (key === 'c') {
+                event.preventDefault();
+                toggleCollapse(focused.column);
+            } else if (event.key === 'Delete' || event.key === 'Backspace') {
+                event.preventDefault();
+                handleDelete(focused);
+            }
+        };
+
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [
+        board,
+        collapsed,
+        focusedId,
+        handleAskRag,
+        handleDelete,
+        handlePin,
+        helpOpen,
+        inspectId,
+        moveAcross,
+        moveFocus,
+        nudgeWithin,
+        openInspector,
+        query,
+        ragItemId,
+        toggleCollapse,
+    ]);
+
+    /* ═══ Anuncios de lector de pantalla ═══ */
+    const announcements = useMemo(
+        () => ({
+            onDragStart({ active }: { active: { id: number | string } }) {
+                const item = findItem(boardData.current, Number(active.id));
+                return item ? `Tomaste la tarjeta ${item.title}.` : undefined;
+            },
+            onDragOver({ over }: { over: { id: number | string } | null }) {
+                if (!over) return 'Fuera de una columna válida.';
+                const column = resolveColumn(boardData.current, over.id);
+                return column ? `Sobre la columna ${COLUMN_META[column].label}.` : undefined;
+            },
+            onDragEnd({ active }: { active: { id: number | string } }) {
+                const column = resolveColumn(boardData.current, active.id);
+                const item = findItem(boardData.current, Number(active.id));
+                return item && column
+                    ? `${item.title} quedó en ${COLUMN_META[column].label}.`
+                    : 'Movimiento finalizado.';
+            },
+            onDragCancel() {
+                return 'Movimiento cancelado. La tarjeta volvió a su lugar.';
+            },
+        }),
+        []
+    );
+
+    const dragged = findItem(board, activeId);
+
+    const SHORTCUTS: [string, string][] = [
+        ['j / k', 'Bajar / subir el foco'],
+        ['h / l', 'Columna anterior / siguiente'],
+        ['Shift + ↑ / ↓', 'Reordenar dentro de la columna'],
+        ['[ / ]', 'Mover la tarjeta de columna'],
+        ['n', 'Nueva tarjeta en la columna enfocada'],
+        ['e', 'Abrir el inspector'],
+        ['p', 'Fijar / desfijar'],
+        ['a', 'Consultar el motor RAG'],
+        ['c', 'Colapsar la columna enfocada'],
+        ['Supr', 'Eliminar (6 s para deshacer)'],
+        ['/', 'Buscar'],
+        ['?', 'Esta ayuda'],
+        ['Esc', 'Cerrar / limpiar'],
+    ];
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] text-[#0F172A] overflow-hidden font-sans radial-decor">
+        <div className={`pm-chrome pm-kb ${compact ? 'pm-kb--compact' : ''} flex h-screen overflow-hidden`}>
             <Head title="Kanban | Pymetory Premium" />
 
             <Sidebar
@@ -562,261 +1331,394 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
                 onMobileClose={() => setMobileOpen(false)}
             />
 
-            {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden relative">
-                <header className="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white/40 backdrop-blur-md z-40">
-                    <div className="flex items-center gap-6">
-                        <button onClick={() => {
-                            if (window.innerWidth >= 1024) setSidebarOpen(!sidebarOpen);
-                            else setMobileOpen(!mobileOpen);
-                        }} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-500 hover:scale-110 active:scale-95">
-                            <Menu size={20} aria-hidden="true" />
+            <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+                {/* ── TOPBAR ── */}
+                <header className="pm-kb-topbar">
+                    <div className="flex items-center gap-4 min-w-0">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (window.innerWidth >= 1024) setSidebarOpen((prev) => !prev);
+                                else setMobileOpen((prev) => !prev);
+                            }}
+                            aria-label={sidebarOpen ? 'Cerrar menú lateral' : 'Abrir menú lateral'}
+                            className="pm-kb-iconbtn pm-kb-iconbtn--lg"
+                        >
+                            <Menu size={18} aria-hidden="true" />
                         </button>
-                        <nav className="flex items-center gap-2" aria-label="Breadcrumb">
-                            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest italic">Pymetory /</span>
-                            <h1 className="text-xs font-black uppercase tracking-widest text-slate-900">Kanban</h1>
+
+                        <nav aria-label="Ruta de navegación" className="flex items-center gap-2 min-w-0">
+                            <span className="pm-kb-crumb">Pymetory /</span>
+                            <h1 className="pm-kb-title">Flow Board</h1>
                         </nav>
+
+                        <div className="hidden xl:flex items-center gap-3 pl-4">
+                            <div
+                                className="pm-kb-progress"
+                                role="progressbar"
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-valuenow={totals.pct}
+                                aria-label="Progreso del tablero"
+                            >
+                                <span style={{ width: `${totals.pct}%` }} />
+                            </div>
+                            <span className="pm-kb-progress__label">
+                                {totals.done}/{totals.all} · {totals.pct}%
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                    <div className="flex items-center gap-2">
+                        <div className="pm-kb-search">
+                            <Search size={13} aria-hidden="true" />
                             <input
                                 ref={searchRef}
-                                type="text"
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                placeholder="Filtrar tarjetas..."
-                                className="pl-9 pr-3 py-2 bg-white/50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-400 transition-colors w-48"
+                                type="search"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="Filtrar tarjetas…"
+                                aria-label="Filtrar tarjetas por título, descripción o contexto IA"
+                                className="pm-kb-search__input"
                             />
-                            {searchTerm && (
-                                <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X size={12} /></button>
-                            )}
+                            {query ? (
+                                <button type="button" onClick={() => setQuery('')} aria-label="Limpiar filtro" className="pm-kb-iconbtn">
+                                    <X size={12} aria-hidden="true" />
+                                </button>
+                            ) : null}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-bold hidden lg:block">
-                            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-mono">N</kbd> Nueva &nbsp;
-                            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-mono">F</kbd> Buscar
-                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setPinnedOnly((prev) => !prev)}
+                            aria-pressed={pinnedOnly}
+                            title="Mostrar solo tarjetas fijadas"
+                            className={`pm-kb-iconbtn pm-kb-iconbtn--lg ${pinnedOnly ? 'pm-kb-iconbtn--on' : ''}`}
+                        >
+                            <Pin size={15} aria-hidden="true" />
+                            <span className="sr-only">Solo tarjetas fijadas</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={toggleDensity}
+                            aria-pressed={compact}
+                            title="Alternar densidad"
+                            className={`pm-kb-iconbtn pm-kb-iconbtn--lg ${compact ? 'pm-kb-iconbtn--on' : ''}`}
+                        >
+                            <Rows3 size={15} aria-hidden="true" />
+                            <span className="sr-only">Densidad compacta</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setHelpOpen(true)}
+                            title="Atajos de teclado (?)"
+                            className="pm-kb-iconbtn pm-kb-iconbtn--lg"
+                        >
+                            <Keyboard size={15} aria-hidden="true" />
+                            <span className="sr-only">Atajos de teclado</span>
+                        </button>
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-auto custom-scrollbar">
-                    <div ref={contentRef} className="p-8 h-full">
-                        <div className="mb-6 flex items-center justify-between">
-                            <div>
-                                <h2 className="text-3xl font-display font-black text-slate-900 tracking-tight">Tablero Kanban</h2>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                    Arrastra tarjetas para organizar tu flujo de trabajo
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    value={newColName}
-                                    onChange={e => setNewColName(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleAddColumn()}
-                                    placeholder="Nueva columna..."
-                                    className="px-3 py-1.5 bg-white/50 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-400 w-36"
+                {filtering ? (
+                    <p className="pm-kb-filterbar" role="status">
+                        {totals.shown} de {totals.all} tarjetas coinciden con el filtro activo.
+                    </p>
+                ) : null}
+
+                {/* ── TABLERO ── */}
+                <div className="flex-1 overflow-hidden">
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCorners}
+                        accessibility={{
+                            announcements,
+                            screenReaderInstructions: {
+                                draggable:
+                                    'Presiona espacio para tomar la tarjeta. Usa las flechas para moverla entre columnas y posiciones. Espacio para soltar, Escape para cancelar.',
+                            },
+                        }}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onDragEnd={handleDragEnd}
+                        onDragCancel={handleDragCancel}
+                    >
+                        <div ref={boardElRef} className="pm-kb-board pm-kb-scroll">
+                            {COLUMN_ORDER.map((colKey) => (
+                                <BoardColumn
+                                    key={colKey}
+                                    colKey={colKey}
+                                    items={visible[colKey]}
+                                    totalCount={board[colKey].length}
+                                    wip={wip[colKey] ?? 0}
+                                    collapsed={collapsed.includes(colKey)}
+                                    compact={compact}
+                                    filtering={filtering}
+                                    focusedId={focusedId}
+                                    onToggleCollapse={toggleCollapse}
+                                    onSetWip={setColumnWip}
+                                    onCreate={handleCreate}
+                                    onFocusCard={setFocusedId}
+                                    onOpenCard={openInspector}
+                                    onPinCard={handlePin}
+                                    onAskRag={handleAskRag}
                                 />
-                                <button onClick={handleAddColumn} disabled={!newColName.trim()}
-                                    className="p-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 transition-all">
-                                    <Plus size={14} />
-                                </button>
-                            </div>
+                            ))}
                         </div>
 
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCorners}
-                            onDragStart={handleDragStart}
-                            onDragEnd={handleDragEnd}
-                        >
-                            <div className="flex gap-6 flex-1 min-h-0 overflow-x-auto pb-6 custom-scrollbar">
-                                {Object.keys(columns).map(colKey => {
-                                    const colLabel = colKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                                    const items = filterItems(columns[colKey] || []);
-                                    const ids = items.map(i => i.id);
-                                    const isEditing = editingCol === colKey;
-
-                                    const COLORS = ['#64748b', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
-                                    const colorIndex = Object.keys(columns).indexOf(colKey) % COLORS.length;
-
-                                    return (
-                                        <div
-                                            key={colKey}
-                                            id={`col-${colKey}`}
-                                            className="w-80 flex-shrink-0 flex flex-col"
-                                        >
-                                            <div className="p-3 rounded-2xl bg-gradient-to-r from-slate-800/50 to-slate-800/30 border border-white/5 flex items-center justify-between backdrop-blur-xl mb-4 group">
-                                                {isEditing ? (
-                                                    <div className="flex items-center gap-2 flex-1">
-                                                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[colorIndex] }} />
-                                                        <input
-                                                            autoFocus
-                                                            value={editingColName}
-                                                            onChange={e => setEditingColName(e.target.value)}
-                                                            onKeyDown={e => { if (e.key === 'Enter') handleRenameColumn(colKey); if (e.key === 'Escape') setEditingCol(null); }}
-                                                            onBlur={() => handleRenameColumn(colKey)}
-                                                            className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs font-bold text-white outline-none"
-                                                        />
-                                                        <button onClick={() => handleRenameColumn(colKey)} className="text-emerald-400 hover:text-emerald-300"><Check size={14} /></button>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[colorIndex] }} />
-                                                            <span className="text-[10px] font-black tracking-[0.2em] text-white/80">
-                                                                {colLabel}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-[10px] font-black text-white/40">{items.length}</span>
-                                                            <button
-                                                                onClick={() => { setEditingCol(colKey); setEditingColName(colLabel); }}
-                                                                className="opacity-0 group-hover:opacity-100 p-1 text-white/40 hover:text-white/80 transition-all"
-                                                                title="Renombrar columna"
-                                                            ><Pencil size={11} /></button>
-                                                            <button
-                                                                onClick={() => handleDeleteColumn(colKey)}
-                                                                className="opacity-0 group-hover:opacity-100 p-1 text-red-400/50 hover:text-red-400 transition-all"
-                                                                title="Eliminar columna"
-                                                            ><Trash2 size={11} /></button>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-
-                                            <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-                                                <DroppableColumn id={colKey}>
-                                                    {items.map(item => (
-                                                        <SortableCard
-                                                            key={item.id}
-                                                            item={item}
-                                                            onDelete={handleDelete}
-                                                            onPin={handlePin}
-                                                            onAskRag={handleAskRag}
-                                                            onTitleChange={handleTitleChange}
-                                                        />
-                                                    ))}
-                                                    {items.length === 0 && searchTerm && (
-                                                        <div className="text-center py-6 text-[10px] text-slate-500 font-bold uppercase">
-                                                            Sin resultados
-                                                        </div>
-                                                    )}
-                                                </DroppableColumn>
-                                            </SortableContext>
-
-                                            <ColumnAddForm column={colKey} onAdd={handleAdd} />
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <DragOverlay dropAnimation={null} adjustScale={false}>
-                                {activeItem && (
-                                    <div className="bg-obsidiana/95 backdrop-blur-xl border border-champan/30 rounded-2xl p-4 shadow-2xl shadow-champan/10 w-[340px]">
-                                        <h4 className="text-sm font-bold text-white truncate">{activeItem.title}</h4>
-                                        {activeItem.description && (
-                                            <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{activeItem.description}</p>
-                                        )}
-                                    </div>
-                                )}
-                            </DragOverlay>
-                        </DndContext>
-                    </div>
+                        <DragOverlay dropAnimation={null} adjustScale={false}>
+                            {dragged ? (
+                                <div className="pm-card pm-kb-card pm-kb-card--overlay">
+                                    <h4 className="pm-kb-card__title">{dragged.title}</h4>
+                                    {dragged.description ? <p className="pm-kb-card__desc">{dragged.description}</p> : null}
+                                </div>
+                            ) : null}
+                        </DragOverlay>
+                    </DndContext>
                 </div>
             </main>
 
-            {/* RAG Chat Modal */}
-            {ragModal.open && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setRagModal({ open: false, item: null })}>
-                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-                    <div
-                        onClick={e => e.stopPropagation()}
-                        className="relative w-full max-w-2xl h-[80vh] flex flex-col rounded-3xl border border-champan/20 bg-[#0a0a0f]/95 backdrop-blur-2xl shadow-2xl shadow-champan/5 overflow-hidden animate-in zoom-in-95 fade-in duration-200"
-                    >
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-black/40 shrink-0">
-                            <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-champan/30 to-champan/5 border border-champan/20 flex items-center justify-center text-champan">
-                                    <Bot size={18} aria-hidden="true" />
-                                </div>
-                                <div className="min-w-0">
-                                    <h3 className="text-sm font-bold text-[#faf9f6] truncate">Motor RAG — {ragModal.item?.title}</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Análisis del Kanban</p>
-                                </div>
-                            </div>
+            {/* ── INSPECTOR ── */}
+            {inspectItem ? (
+                <aside className="pm-panel pm-kb-drawer" role="dialog" aria-modal="false" aria-label={`Inspector de ${inspectItem.title}`}>
+                    <header className="pm-kb-drawer__head">
+                        <div className="min-w-0">
+                            <p className="pm-kb-drawer__eyebrow">{COLUMN_META[inspectItem.column].label}</p>
+                            <h2 className="pm-kb-drawer__title">Inspector de tarjeta</h2>
+                        </div>
+                        <button type="button" onClick={() => setInspectId(null)} aria-label="Cerrar inspector" className="pm-kb-iconbtn pm-kb-iconbtn--lg">
+                            <X size={16} aria-hidden="true" />
+                        </button>
+                    </header>
+
+                    <div className="pm-kb-drawer__body pm-kb-scroll">
+                        <label className="pm-kb-label" htmlFor="pm-kb-title">
+                            Título
+                        </label>
+                        <textarea
+                            id="pm-kb-title"
+                            rows={2}
+                            value={draftTitle}
+                            onChange={(e) => setDraftTitle(e.target.value)}
+                            className="pm-kb-field pm-kb-field--title"
+                        />
+
+                        <label className="pm-kb-label" htmlFor="pm-kb-desc">
+                            Descripción
+                        </label>
+                        <textarea
+                            id="pm-kb-desc"
+                            rows={6}
+                            value={draftDesc}
+                            onChange={(e) => setDraftDesc(e.target.value)}
+                            placeholder="Detalle, criterios de aceptación, insumos involucrados…"
+                            className="pm-kb-field"
+                        />
+
+                        <div className="pm-kb-drawer__row">
                             <button
-                                onClick={() => setRagModal({ open: false, item: null })}
-                                aria-label="Cerrar chat RAG"
-                                className="p-2 rounded-xl text-slate-500 hover:text-white hover:bg-white/5 transition-colors"
+                                type="button"
+                                onClick={saveInspector}
+                                disabled={!dirty || saving || !draftTitle.trim()}
+                                className="pm-kb-btn pm-kb-btn--primary flex-1"
                             >
-                                <X size={18} aria-hidden="true" />
+                                <Save size={13} aria-hidden="true" /> {saving ? 'Guardando…' : 'Guardar'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const target = inspectItem;
+                                    setInspectId(null);
+                                    void handleAskRag(target);
+                                }}
+                                className="pm-kb-btn pm-kb-btn--ghost"
+                            >
+                                <Bot size={13} aria-hidden="true" /> RAG
                             </button>
                         </div>
 
-                        {/* Chat Messages */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-                            {ragMessages.map((msg, idx) => (
-                                <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                                    <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border ${msg.role === 'ai' ? 'bg-champan/10 border-champan/20 text-champan' : 'bg-white/5 border-white/10 text-white/60'}`}>
-                                        {msg.role === 'ai' ? <Bot size={14} aria-hidden="true" /> : <User size={14} aria-hidden="true" />}
-                                    </div>
-                                    <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-indigo-600/20 border border-indigo-500/20 text-white/90' : 'bg-white/5 border border-white/5 text-white/80'}`}>
-                                        <div className="whitespace-pre-wrap font-mono text-[13px]">{msg.content}</div>
-                                    </div>
+                        <dl className="pm-kb-facts">
+                            <div>
+                                <dt>Posición</dt>
+                                <dd>
+                                    {board[inspectItem.column].findIndex((entry) => entry.id === inspectItem.id) + 1} de{' '}
+                                    {board[inspectItem.column].length}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>Sin movimiento</dt>
+                                <dd>{ageDays(inspectItem)} días</dd>
+                            </div>
+                            <div>
+                                <dt>Autor</dt>
+                                <dd>{inspectItem.user?.name ?? user.name}</dd>
+                            </div>
+                            <div>
+                                <dt>Estado</dt>
+                                <dd>{inspectItem.is_pinned ? 'Fijada' : 'Normal'}</dd>
+                            </div>
+                        </dl>
+
+                        {inspectItem.rag_context ? (
+                            <section className="pm-kb-ragbox">
+                                <h3 className="pm-kb-label">
+                                    <Sparkles size={11} aria-hidden="true" /> Contexto IA guardado
+                                </h3>
+                                <p>{inspectItem.rag_context}</p>
+                            </section>
+                        ) : null}
+
+                        <div className="pm-kb-drawer__row">
+                            <button
+                                type="button"
+                                onClick={() => moveAcross(inspectItem, -1)}
+                                disabled={inspectItem.column === COLUMN_ORDER[0]}
+                                className="pm-kb-btn pm-kb-btn--ghost flex-1"
+                            >
+                                <ChevronLeft size={13} aria-hidden="true" /> Atrás
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => moveAcross(inspectItem, 1)}
+                                disabled={inspectItem.column === COLUMN_ORDER[COLUMN_ORDER.length - 1]}
+                                className="pm-kb-btn pm-kb-btn--ghost flex-1"
+                            >
+                                Avanzar <ChevronRight size={13} aria-hidden="true" />
+                            </button>
+                        </div>
+
+                        <button type="button" onClick={() => handleDelete(inspectItem)} className="pm-kb-btn pm-kb-btn--danger w-full">
+                            <Trash2 size={13} aria-hidden="true" /> Eliminar tarjeta
+                        </button>
+                    </div>
+                </aside>
+            ) : null}
+
+            {/* ── MODAL RAG ── */}
+            {ragItem ? (
+                <div className="pm-kb-overlay" role="presentation" onClick={() => setRagItemId(null)}>
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={`Motor RAG sobre ${ragItem.title}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="pm-panel pm-kb-modal"
+                    >
+                        <header className="pm-kb-modal__head">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <span className="pm-kb-modal__badge">
+                                    <Bot size={16} aria-hidden="true" />
+                                </span>
+                                <div className="min-w-0">
+                                    <h2 className="pm-kb-modal__title">{ragItem.title}</h2>
+                                    <p className="pm-kb-modal__sub">
+                                        Motor RAG · {COLUMN_META[ragItem.column].label}
+                                    </p>
                                 </div>
+                            </div>
+                            <button type="button" onClick={() => setRagItemId(null)} aria-label="Cerrar el chat RAG" className="pm-kb-iconbtn pm-kb-iconbtn--lg">
+                                <X size={16} aria-hidden="true" />
+                            </button>
+                        </header>
+
+                        <div className="pm-kb-modal__body pm-kb-scroll" aria-live="polite" aria-busy={ragLoading}>
+                            {ragMessages.map((msg, index) => (
+                                <article key={index} className={`pm-kb-msg ${msg.role === 'user' ? 'pm-kb-msg--user' : 'pm-kb-msg--ai'}`}>
+                                    <p className="pm-kb-msg__who">{msg.role === 'user' ? 'Tú' : 'Pymetory IA'}</p>
+                                    <p className="pm-kb-msg__body">{msg.content}</p>
+                                </article>
                             ))}
-                            {ragLoading && (
-                                <div className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-champan/10 border border-champan/20 flex items-center justify-center text-champan shrink-0">
-                                        <Bot size={14} aria-hidden="true" />
-                                    </div>
-                                    <div className="bg-white/5 border border-white/5 rounded-2xl px-4 py-3">
-                                        <span className="text-champan/70 text-xs animate-pulse font-mono">Consultando el inventario...</span>
-                                    </div>
-                                </div>
-                            )}
+                            {ragLoading ? (
+                                <p className="pm-kb-msg pm-kb-msg--ai pm-kb-msg--loading">Consultando el inventario…</p>
+                            ) : null}
                             <div ref={ragEndRef} />
                         </div>
 
-                        {/* Quick context badge */}
-                        {ragModal.item && (
-                            <div className="px-6 py-2 border-t border-white/5 bg-black/40 flex items-center gap-2 text-[10px] text-slate-500 shrink-0">
-                                <Tag size={12} aria-hidden="true" />
-                                <span className="font-bold uppercase tracking-wider">Columna: {COLUMNS.find(c => c.key === ragModal.item.column)?.label || ragModal.item.column}</span>
-                                {ragModal.item.description && (
-                                    <span className="truncate max-w-[300px] opacity-50">— {ragModal.item.description}</span>
-                                )}
-                            </div>
-                        )}
+                        <footer className="pm-kb-modal__foot">
+                            <button
+                                type="button"
+                                onClick={saveRagContext}
+                                disabled={ragLoading || !ragMessages.some((msg) => msg.role === 'ai')}
+                                className="pm-kb-btn pm-kb-btn--ghost"
+                            >
+                                <Sparkles size={13} aria-hidden="true" /> Guardar como contexto
+                            </button>
 
-                        {/* Input */}
-                        <form
-                            onSubmit={e => { e.preventDefault(); handleRagFollowUp(); }}
-                            className="p-4 border-t border-white/5 bg-black/40 shrink-0"
-                        >
-                            <div className="relative">
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    void handleRagFollowUp();
+                                }}
+                                className="pm-kb-modal__form"
+                            >
                                 <input
                                     type="text"
                                     value={ragInput}
-                                    onChange={e => setRagInput(e.target.value)}
-                                    placeholder="Haz una pregunta de seguimiento..."
+                                    onChange={(e) => setRagInput(e.target.value)}
                                     disabled={ragLoading}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-sm text-white placeholder-slate-600 outline-none focus:border-champan/50 transition-colors disabled:opacity-50"
+                                    placeholder="Pregunta de seguimiento…"
+                                    aria-label="Pregunta de seguimiento al motor RAG"
+                                    className="pm-kb-field pm-kb-field--inline"
                                 />
                                 <button
                                     type="submit"
                                     disabled={ragLoading || !ragInput.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-champan/20 text-champan hover:bg-champan/30 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
                                     aria-label="Enviar consulta"
+                                    className="pm-kb-btn pm-kb-btn--primary"
                                 >
-                                    <Send size={16} aria-hidden="true" />
+                                    <Send size={14} aria-hidden="true" />
                                 </button>
-                            </div>
-                        </form>
+                            </form>
+                        </footer>
                     </div>
                 </div>
-            )}
+            ) : null}
+
+            {/* ── AYUDA ── */}
+            {helpOpen ? (
+                <div className="pm-kb-overlay" role="presentation" onClick={() => setHelpOpen(false)}>
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Atajos de teclado"
+                        onClick={(e) => e.stopPropagation()}
+                        className="pm-panel pm-kb-help"
+                    >
+                        <header className="pm-kb-modal__head">
+                            <h2 className="pm-kb-modal__title">Atajos de teclado</h2>
+                            <button type="button" onClick={() => setHelpOpen(false)} aria-label="Cerrar la ayuda" className="pm-kb-iconbtn pm-kb-iconbtn--lg">
+                                <X size={16} aria-hidden="true" />
+                            </button>
+                        </header>
+                        <ul className="pm-kb-help__list">
+                            {SHORTCUTS.map(([keys, description]) => (
+                                <li key={keys}>
+                                    <kbd className="pm-kb-kbd">{keys}</kbd>
+                                    <span>{description}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            ) : null}
+
+            {/* ── TOASTS ── */}
+            <div className="pm-kb-toasts" role="region" aria-live="polite" aria-label="Notificaciones del tablero">
+                {toasts.map((toast) => (
+                    <div key={toast.id} className={`pm-panel pm-kb-toast pm-kb-toast--${toast.kind}`}>
+                        {toast.kind === 'error' ? <AlertTriangle size={13} aria-hidden="true" /> : null}
+                        {toast.kind === 'undo' ? <Trash2 size={13} aria-hidden="true" /> : null}
+                        <span className="flex-1">{toast.text}</span>
+                        {toast.onAction ? (
+                            <button type="button" onClick={toast.onAction} className="pm-kb-toast__action">
+                                <Undo2 size={12} aria-hidden="true" /> {toast.actionLabel}
+                            </button>
+                        ) : null}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
