@@ -427,7 +427,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                     )) : (
                         <div className="col-span-full py-32 flex flex-col items-center justify-center text-slate-300 glass-morphism rounded-[3rem] border-2 border-dashed border-slate-200">
                             <Box size={56} className="mb-6 opacity-20 text-indigo-600" />
-                            <p className="text-xs font-black uppercase tracking-[0.3em] opacity-40 text-white text-center">Sin existencias en {selectedBodega?.name || 'inventario'}<br/><span className="text-[10px] font-bold">Ubicación vacía o filtrada</span></p>
+                            <p className="text-xs font-black uppercase tracking-[0.3em] pm-text-muted text-center"><span className="pm-text font-black">Sin existencias en {selectedBodega?.name || 'inventario'}</span><br/><span className="text-[10px] pm-text-muted font-bold">Ubicación vacía o filtrada</span></p>
                         </div>
                     )}
                 </div>

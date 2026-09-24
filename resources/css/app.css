@@ -572,3 +572,25 @@ nav[aria-label="Breadcrumb"] h1{ color: var(--pm-text); }
 /* KANBAN cards (rediseño Opus): fondo temático no-el-rail */
 .pm-kcard{ background-color: var(--pm-panel); color: var(--pm-text); }
 [data-theme="paper-light"] .pm-kcard{ box-shadow: 0 1px 3px rgb(15 17 23 / .08); }
+
+/* Kanban RAG dialog: el chat usa bg-white/5 (remapeado a panel claro por data-theme)
+   pero el texto queda text-white/80 y text-white/90 sin remapear → invisible */
+[data-theme] .bg-white\/5.text-white\/80,
+[data-theme] .border-white\/5 .text-white\/80{ color: var(--pm-text); }
+[data-theme] .bg-white\/5.text-white\:90,
+[data-theme] .text-white\/90{ color: var(--pm-text); }
+[data-theme] .text-white\/60{ color: var(--pm-on-card-muted); }
+[data-theme] .text-white\/60{ color: var(--pm-on-card-muted); }
+[data-theme] .text-champan\/70{ color: var(--pm-accent); }
+[data-theme] .bg-black\/40{ background-color: var(--pm-panel-2); }
+[data-theme] .bg-champan\/10{ background-color: color-mix(in oklab, var(--pm-accent) 12%, var(--pm-panel)); }
+[data-theme] .border-champan\/20{ border-color: var(--pm-border); }
+[data-theme] .text-champan{ color: var(--pm-accent); }
+
+/* Kanban RAG — burbuja del USUARIO: bg-indigo-600/20 quedó oscuro; texto ya remapeado oscuro.
+   Subir el fondo a tinte claro del accent (coherente con la app) para contraste 10:1 */
+[data-theme] .bg-indigo-600\/20{
+  background-color: color-mix(in oklab, var(--pm-accent) 14%, var(--pm-panel)) !important;
+  border-color: color-mix(in oklab, var(--pm-accent) 30%, var(--pm-panel)) !important;
+}
+[data-theme] .border-indigo-500\/20{ border-color: color-mix(in oklab, var(--pm-accent) 30%, var(--pm-panel)); }
