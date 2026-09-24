@@ -283,7 +283,9 @@ export default function Kanban({ auth, columns: initialColumns }: { auth: any; c
         if (contentRef.current) {
             gsap.fromTo(contentRef.current,
                 { opacity: 0, y: 15, filter: 'blur(8px)' },
-                { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power3.out' }
+                { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power3.out',
+                  // FIX offset Opus5: GSAP deja transform/filter inline (containing block del overlay fixed)
+                  clearProps: 'filter,transform,willChange' }
             );
         }
     }, []);
