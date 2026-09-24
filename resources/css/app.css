@@ -568,3 +568,7 @@ nav[aria-label="Breadcrumb"] h1{ color: var(--pm-text); }
 [data-theme="paper-light"] .bg-slate-800\/50.text-white,
 [data-theme="paper-light"] .text-champan{ color: #8a6d1c; }  /* champán en claro: duplica ratio */
 [data-theme="paper-light"] .from-white\/5{ --tw-gradient-from: transparent; }
+
+/* KANBAN cards (rediseño Opus): fondo temático no-el-rail */
+.pm-kcard{ background-color: var(--pm-panel); color: var(--pm-text); }
+[data-theme="paper-light"] .pm-kcard{ box-shadow: 0 1px 3px rgb(15 17 23 / .08); }
