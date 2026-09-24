@@ -182,11 +182,15 @@ class ChatLLMController extends Controller {
 
         // FIX-UI: replicar la resolucion real de ask() para no mostrar
         // un modelo que el motor va a sobreescribir con api_keys.model_name.
+        // FIX-UI(v2) — precedencia corregida para coincidir con ask() (~línea 346):
+        // settings.llm_modelo es lo ACTIVO; api_keys.model_name solo si no hay selección.
+        // Antes el pill calculaba effective_model con api_keys ganando => volvería a mentir.
         $s = DB::table('settings')->whereIn('clave', ['llm_modelo', 'llm_source'])->pluck('valor', 'clave');
         $activeSource = $s['llm_source'] ?? 'local';
         $activeModel  = $s['llm_modelo'] ?? '';
         $rec = \App\Models\ApiKey::where('tipo', $activeSource)->where('activo', true)->first();
-        $effectiveModel = $rec?->model_name ?: $activeModel;
+        $effectiveModel = ($activeModel !== '' && $activeModel !== null) ? $activeModel : ($rec?->model_name ?: '');
+        $localUnavailable = empty($local);
 
         return response()->json([
             'local'            => $local,
@@ -195,6 +199,7 @@ class ChatLLMController extends Controller {
             'active_model'     => $activeModel,
             'effective_model'  => $effectiveModel,
             'can_change_model' => auth()->user()?->role === 'admin',
+            'local_unavailable' => $localUnavailable,
         ]);
     }
 
@@ -354,11 +359,22 @@ class ChatLLMController extends Controller {
         }
 
         try {
-            $historial = ChatHistory::where('session_id', $sessionId ?? '')
-                ->orderBy('created_at', 'asc')
-                ->take(6)->get()
-                ->map(fn($h) => [['role' => 'user', 'content' => $h->user_message], ['role' => 'assistant', 'content' => $h->bot_message]])
-                ->flatten(1)->values()->toArray();
+            // FIX-UI(v2): el historial mapeaba user_message/bot_message (columnas inexistentes)
+            // cuando recordChat() guarda prompt/response => cada turno iba con content null.
+            // Ademas: recortado a 2 turnos + truncado a 300 chars (un turno largo con la
+            // lista completa actuaba como few-shot para repetir el formato).
+            $historial = ChatHistory::where('user_id', Auth::id())
+                ->where('session_id', $sessionId ?? '')
+                ->orderBy('created_at', 'desc')
+                ->take(2)->get()
+                ->reverse()->values()
+                ->map(fn($h) => [
+                    ['role' => 'user', 'content' => (string) $h->prompt],
+                    ['role' => 'assistant', 'content' => (string) $h->response],
+                ])
+                ->flatten(1)
+                ->reject(fn($m) => trim($m['content']) === '')
+                ->values()->toArray();
 
             $payload = [
                 'model'       => $llmModelo,
