@@ -69,8 +69,13 @@ jobs:
           key: ${{ secrets.DESKTOPTITAN_KEY }}
           script: |
             cd /var/www/portafolio/SolucionesWeb/pymetoryTesis
+            # FIX-CI: el repo clonado en Titan usa https sin credenciales => git pull fallaba
+            # "could not read Username". Se autentica con token efimero de este run
+            # (repo privado; token nunca se escribe a disco).
+            git remote set-url origin https://x-access-token:${{ secrets.DEPLOY_GH_TOKEN }}@github.com/germanmurillas/gestor-inventario-pymes-llm.git
             sudo git pull origin main
             sudo composer install --no-dev --optimize-autoloader --no-interaction
             sudo php artisan migrate --force
             sudo chown -R www-data:www-data .
             echo "✅ Deploy completado"
+
