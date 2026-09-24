@@ -1,0 +1,18 @@
+digraph SEQ {
+  rankdir=TB; bgcolor=white; fontname="Helvetica"; fontsize=9; splines=ortho;
+  node [shape=box, fontname="Helvetica", fillcolor="#F3F3F3", style=filled];
+  edge [arrowsize=.7];
+
+  Op [label="Operario", shape=box, style="rounded,filled", fillcolor="#F5E7C1"];
+  SYS [label="Sistema UI"];
+  CTL [label="LoteController"];
+  DB  [label="MySQL", shape=cylinder, fillcolor="#DDE7F5"];
+
+  Op -> SYS [label="1. crear lote (fecha venc.)"];
+  SYS -> CTL [label="2. store()"];
+  CTL -> CTL [label="3. validar FEFO:\nfecha > menor vigente"];
+  CTL -> DB [label="4. INSERT lote + kardex"];
+  DB -> CTL [label="5. OK"];
+  CTL -> SYS [label="6. confirmación + traza"];
+  SYS -> Op [label="7. 'Lote registrado'"];
+}

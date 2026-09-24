@@ -1,0 +1,107 @@
+{
+  "algoritmo": "Peso Exponencial (\u03b1=0.95) - Ganador del benchmark",
+  "backtest_walk_forward": "5/318 = 1.57% (1.6x azar)",
+  "generated": "2026-06-26",
+  "predictions": [
+    {
+      "rank": 1,
+      "number": "2506",
+      "d1": 2,
+      "d2": 5,
+      "d3": 0,
+      "d4": 6,
+      "score": 1.039,
+      "triplet_freq": 5.197495502499301
+    },
+    {
+      "rank": 2,
+      "number": "6079",
+      "d1": 6,
+      "d2": 0,
+      "d3": 7,
+      "d4": 9,
+      "score": 0.95,
+      "triplet_freq": 4.750000590834251
+    },
+    {
+      "rank": 3,
+      "number": "5627",
+      "d1": 5,
+      "d2": 6,
+      "d3": 2,
+      "d4": 7,
+      "score": 0.902,
+      "triplet_freq": 4.512500028622264
+    },
+    {
+      "rank": 4,
+      "number": "4313",
+      "d1": 4,
+      "d2": 3,
+      "d3": 1,
+      "d4": 3,
+      "score": 0.857,
+      "triplet_freq": 4.28687502719115
+    },
+    {
+      "rank": 5,
+      "number": "9134",
+      "d1": 9,
+      "d2": 1,
+      "d3": 3,
+      "d4": 4,
+      "score": 0.815,
+      "triplet_freq": 4.072531275831592
+    },
+    {
+      "rank": 6,
+      "number": "7631",
+      "d1": 7,
+      "d2": 6,
+      "d3": 3,
+      "d4": 1,
+      "score": 0.774,
+      "triplet_freq": 3.8689049029948075
+    },
+    {
+      "rank": 7,
+      "number": "3386",
+      "d1": 3,
+      "d2": 3,
+      "d3": 8,
+      "d4": 6,
+      "score": 0.771,
+      "triplet_freq": 3.853699138821366
+    },
+    {
+      "rank": 8,
+      "number": "6771",
+      "d1": 6,
+      "d2": 7,
+      "d3": 7,
+      "d4": 1,
+      "score": 0.698,
+      "triplet_freq": 3.4918221180417306
+    },
+    {
+      "rank": 9,
+      "number": "7215",
+      "d1": 7,
+      "d2": 2,
+      "d3": 1,
+      "d4": 5,
+      "score": 0.663,
+      "triplet_freq": 3.317231012139644
+    },
+    {
+      "rank": 10,
+      "number": "5192",
+      "d1": 5,
+      "d2": 1,
+      "d3": 9,
+      "d4": 2,
+      "score": 0.63,
+      "triplet_freq": 3.1512470686110396
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+digraph SEQ_FEFO {
+  rankdir=TB; bgcolor=white; fontname="Helvetica"; fontsize=9;
+  node [shape=box, fontname="Helvetica", fillcolor="#F3F3F3", style=filled];
+  edge [arrowsize=.7];
+
+  U [label="Operario", style="rounded,filled", fillcolor="#F5E7C1"];
+  V [label="Vista Despacho"];
+  C [label="DespachoController"];
+  L [label="fefoOrder() scope"];
+  DB [label="MySQL", shape=cylinder, fillcolor="#DDE7F5"];
+
+  U -> V [label="1. despachar producto"];
+  V -> C [label="2. request despacho"];
+  C -> L [label="3. ordenar por\nfecha venc. ASC"];
+  L -> DB [label="4. SELECT"];
+  DB -> L -> C [label="5. lote con menor\nfecha vencimiento"];
+  C -> DB [label="6. UPDATE cantidad +\nkardex inmutable"];
+  C -> U [label="7. confirmación"];
+}

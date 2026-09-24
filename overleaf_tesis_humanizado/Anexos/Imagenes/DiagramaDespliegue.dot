@@ -1,0 +1,31 @@
+digraph DESPLIEGUE {
+  rankdir=TB; bgcolor=white; nodesep=.5; fontname="Helvetica"; fontsize=10;
+  node [shape=box, fontname="Helvetica", style=filled];
+
+  subgraph cluster_user {
+    label="Cliente"; fillcolor="#FDF6E3"; style=filled;
+    BROWSER [label="Navegador\n(de bodega / remoto)"];
+    TG [label="Telegram bot"];
+  }
+  subgraph cluster_titan {
+    label="Titán (Oracle ARM Ashburn — 4 OCPU / 24GB)"; fillcolor="#EFF7EF";
+    TUNNEL [label="cloudflared\n(Cloudflare Tunnel)"];
+    NGINX [label="nginx:80"];
+    APP [label="Laravel 11\n(puerto 8081)"];
+    OLLAMA [label="Ollama :11434\n(gemma3 / qwen3)"];
+    MYSQL [label="MySQL 8.0", shape=cylinder];
+    CRON [label="cron (miloto-sync,\nauditorías)"];
+  }
+  subgraph cluster_cf {
+    label="Cloudflare"; fillcolor="#F7F0F7";
+    DNS [label="DNS + Tunnel\npymetory.com"];
+  }
+  OPENAI [label="OpenAI API\n(remoto)"];
+
+  BROWSER -> DNS [label="HTTPS"];
+  DNS -> TUNNEL [label="tunnel"];
+  TG -> APP [label="API (bot)"];
+  TUNNEL -> NGINX -> APP;
+  APP -> MYSQL; APP -> OLLAMA; APP -> OPENAI [style=dashed, label="fallback"];
+  CRON -> APP [style=dotted];
+}

@@ -133,7 +133,7 @@ export default function Sidebar({
                     </div>
                     <Link
                         href="/dashboard"
-                        className={`font-display text-2xl tracking-tighter text-white ${sidebarOpen ? 'block' : 'hidden lg:block'}`}
+                        className={`pm-logo font-display text-2xl tracking-tighter text-white ${sidebarOpen ? 'block' : 'hidden lg:block'}`}
                         role="banner"
                     >
                         Pymetory
@@ -164,7 +164,7 @@ export default function Sidebar({
                             // FIX-UI: py-3 -> py-2.5 y transition-all -> transition-colors.
                             // 'transition-all' animaba también width/padding, lo que producía
                             // el temblor de los items al aparecer el scrollbar.
-                            const itemClasses = `w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors font-sans text-sm font-bold ${isActive ? 'bg-white/15 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`;
+                            const itemClasses = `pm-nav-item w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors font-sans text-sm font-bold ${isActive ? 'bg-white/15 text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]' : 'text-slate-400 hover:text-white hover:bg-white/5'}`;
 
                             if (onNavigate && !item.href) {
                                 return (
@@ -239,7 +239,7 @@ export default function Sidebar({
                 + transition-[width] en vez de transition-all que re-animaba color/sombra de todo el subárbol. */}
             <aside
                 aria-label="Navegación principal"
-                className={`h-full shrink-0 bg-obsidiana flex-col z-40 border-r border-white/5 hidden lg:flex overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${sidebarOpen ? 'w-64' : 'w-20'}`}
+                className={`pm-chrome h-full shrink-0 bg-obsidiana flex-col z-40 border-r border-white/5 hidden lg:flex overflow-hidden transition-[width] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${sidebarOpen ? 'w-64' : 'w-20'}`}
             >
                 {sidebarContent}
             </aside>
@@ -247,7 +247,7 @@ export default function Sidebar({
             {/* Mobile sidebar (slide-in overlay) */}
             <aside
                 aria-label="Navegación principal móvil"
-                className={`h-full bg-obsidiana flex-col z-50 border-r border-white/5 lg:hidden fixed inset-y-0 left-0 w-72 transition-transform duration-300 ease-out flex ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`pm-chrome h-full bg-obsidiana flex-col z-50 border-r border-white/5 lg:hidden fixed inset-y-0 left-0 w-72 transition-transform duration-300 ease-out flex ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 {sidebarContent}
             </aside>

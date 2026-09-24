@@ -266,3 +266,305 @@
   animation: gradient-x 3s ease infinite;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   PYMETORY · CHROME & CHAT FINISH LAYER
+   Pegar AL FINAL de app.css. Debe quedar FUERA de todo @layer:
+   así gana a las utilities de Tailwind v4 sin !important.
+   Decisión de producto: rail oscuro #0A0A0B permanente en TODOS
+   los temas. El contenido central sigue los tokens del tema.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ───────── 2a · TOKENS DE CHROME (rail oscuro, todos los temas) ───────── */
+:root{
+  /* superficie del rail — invariante */
+  --pm-chrome-bg:           #0A0A0B;
+  --pm-chrome-bg-95:        rgb(10 10 11 / .95);
+  --pm-chrome-bg-soft:      #101116;
+  --pm-chrome-border:       rgb(255 255 255 / .06);
+  --pm-chrome-border-strong:rgb(255 255 255 / .12);
+
+  /* texto sobre #0A0A0B (ratios medidos vs #0A0A0B) */
+  --pm-chrome-text-strong:  #F5F7FA;   /* 19.1:1  logo, ítem activo */
+  --pm-chrome-text:         #C3C9D5;   /* 11.8:1  ítem idle, usuario */
+  --pm-chrome-text-muted:   #8A93A3;   /*  6.3:1  labels sección, rol */
+  --pm-chrome-text-faint:   #767E8D;   /*  4.9:1  mínimo AA 10px */
+  --pm-chrome-danger:       #FF6B6B;   /*  7.0:1  cerrar sesión */
+  --pm-chrome-danger-bg:    rgb(255 107 107 / .10);
+
+  /* estados */
+  --pm-chrome-item-hover-bg:  rgb(255 255 255 / .06);
+  --pm-chrome-item-active-bg: rgb(255 255 255 / .12);
+  --pm-chrome-item-active-in: inset 0 1px 0 0 rgb(255 255 255 / .10);
+
+  /* acento del rail (único token que cambia por tema) */
+  --pm-chrome-accent:      #8B7CF6;  /* midnight-luxe (default) */
+  --pm-chrome-accent-weak: rgb(139 124 246 / .18);
+
+  /* superficies claras/temáticas del contenido */
+  --pm-on-card:        var(--pm-text);
+  --pm-on-card-muted:  color-mix(in oklab, var(--pm-text) 62%, var(--pm-panel));
+  --pm-on-card-faint:  color-mix(in oklab, var(--pm-text) 48%, var(--pm-panel));
+  --pm-on-accent:      var(--pm-accent-fg);
+  --pm-on-accent-muted:color-mix(in srgb, var(--pm-accent-fg) 74%, var(--pm-panel-2));
+
+  /* historial activo = acento suave del tema (sustituye bg-indigo-50) */
+  --pm-hist-active-bg:     color-mix(in oklab, var(--pm-accent) 12%, var(--pm-panel));
+  --pm-hist-active-border: color-mix(in oklab, var(--pm-accent) 38%, var(--pm-panel));
+  --pm-hist-active-bar:    var(--pm-accent);
+
+  --pm-placeholder: color-mix(in oklab, var(--pm-text) 45%, var(--pm-panel));
+  --pm-focus-ring:  color-mix(in oklab, var(--pm-accent) 70%, white);
+}
+
+/* acento del rail por tema (el rail sigue oscuro en todos) */
+[data-theme="midnight-luxe"], .theme-midnight-luxe{
+  --pm-chrome-accent:#8B7CF6; --pm-chrome-accent-weak:rgb(139 124 246 / .18);
+}
+[data-theme="obsidian-teal"], .theme-obsidian-teal{
+  --pm-chrome-accent:#2DD4BF; --pm-chrome-accent-weak:rgb(45 212 191 / .18);
+}
+[data-theme="carbon-amber"], .theme-carbon-amber{
+  --pm-chrome-accent:#F5A524; --pm-chrome-accent-weak:rgb(245 165 36 / .18);
+}
+[data-theme="royal-plum"], .theme-royal-plum{
+  --pm-chrome-accent:#C084FC; --pm-chrome-accent-weak:rgb(192 132 252 / .18);
+}
+[data-theme="nordic-steel"], .theme-nordic-steel{
+  --pm-chrome-accent:#8FB3D9; --pm-chrome-accent-weak:rgb(143 179 217 / .18);
+}
+/* paper-light: contenido claro, rail igualmente oscuro (decisión tomada) */
+[data-theme="paper-light"], .theme-paper-light{
+  --pm-chrome-accent:#6366F1; --pm-chrome-accent-weak:rgb(99 102 241 / .20);
+  --pm-on-card-muted:#5A616E;  /* 6.2:1 sobre blanco, explícito */
+  --pm-on-card-faint:#6B7280;  /* 4.8:1 */
+  --pm-focus-ring:  #4338CA;
+}
+
+/* ───────── 2b · REMAP DENTRO DEL RAIL (inmune al tema) ───────── */
+:is(.pm-chrome, aside[aria-label^="Navegación"]){
+  background-color: var(--pm-chrome-bg);
+  border-color: var(--pm-chrome-border);
+  color: var(--pm-chrome-text);
+  color-scheme: dark;               /* scrollbars/autofill oscuros aquí */
+}
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .border-white\/5{
+  border-color: var(--pm-chrome-border);
+}
+
+/* label sticky de sección: define la clase aunque el JIT no la genere */
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .bg-obsidiana\/95{
+  background-color: var(--pm-chrome-bg-95);
+}
+/* jerarquía de texto */
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .text-slate-400{ color: var(--pm-chrome-text-muted); }
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .text-slate-500{ color: var(--pm-chrome-text-faint); }
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .text-white,
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .pm-logo,
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .font-display{
+  color: var(--pm-chrome-text-strong);
+}
+/* ítem de nav idle: el label de sección usa text-slate-400 (muted) y el
+   ítem también; separamos subiendo el ítem a --pm-chrome-text */
+:is(.pm-chrome, aside[aria-label^="Navegación"]) :is(.pm-nav-item, a[href]).text-slate-400{
+  color: var(--pm-chrome-text);
+}
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .hover\:text-white:hover{ color: var(--pm-chrome-text-strong); }
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .hover\:bg-white\/5:hover{ background-color: var(--pm-chrome-item-hover-bg); }
+
+/* ítem activo — hook semántico aria-current, sin clase extra */
+:is(.pm-chrome, aside[aria-label^="Navegación"]) [aria-current="page"]{
+  position: relative;
+  background-color: var(--pm-chrome-item-active-bg);
+  color: var(--pm-chrome-text-strong);
+  box-shadow: var(--pm-chrome-item-active-in);
+}
+:is(.pm-chrome, aside[aria-label^="Navegación"]) [aria-current="page"]::before{
+  content:""; position:absolute; left:0; top:50%; translate:0 -50%;
+  width:3px; height:1.15rem; border-radius:0 3px 3px 0;
+  background: var(--pm-chrome-accent);
+  box-shadow: 0 0 10px var(--pm-chrome-accent-weak);
+}
+:is(.pm-chrome, aside[aria-label^="Navegación"]) [aria-current="page"] svg{ color: var(--pm-chrome-text-strong); }
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .bg-white\/15{ background-color: var(--pm-chrome-item-active-bg); }
+
+/* destructivo */
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .text-red-400\/80{ color: color-mix(in srgb, var(--pm-chrome-danger) 85%, transparent); }
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .hover\:text-red-400:hover{ color: var(--pm-chrome-danger); }
+:is(.pm-chrome, aside[aria-label^="Navegación"]) .hover\:bg-red-500\/5:hover{ background-color: var(--pm-chrome-danger-bg); }
+
+/* foco visible sobre fondo oscuro (blanco, no acento del tema) */
+:is(.pm-chrome, aside[aria-label^="Navegación"]) :is(a,button):focus-visible{
+  outline: 2px solid #FFFFFF; outline-offset: 2px; border-radius: .75rem;
+}
+
+/* ───────── 2c · CHATLIST ASIDE (sí respira con el tema) ───────── */
+:is(.pm-chatlist, aside.w-80.border-r.pr-8){
+  border-color: var(--pm-border);
+  color: var(--pm-text);
+}
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) h2{ color: var(--pm-text); }
+/* item 10: text-slate-300 invisible sobre panel claro */
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) .text-slate-300{ color: var(--pm-on-card); }
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) .text-gray-400,
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) .text-slate-500{ color: var(--pm-on-card-muted); }
+
+/* card de historial */
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) :is(.pm-history-card, .bg-slate-900\/80, .bg-indigo-50){
+  position: relative;
+  background-color: var(--pm-panel);
+  border-color: var(--pm-border);
+  transition: background-color .15s ease, border-color .15s ease;
+}
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) :is(.pm-history-card, .bg-slate-900\/80):hover{
+  background-color: var(--pm-panel-2);
+}
+/* activo: acento suave del tema en vez de bg-indigo-50 fijo */
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) :is(.pm-history-card.is-active, .bg-indigo-50){
+  background-color: var(--pm-hist-active-bg);
+  border-color: var(--pm-hist-active-border);
+}
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) .border-indigo-200{ border-color: var(--pm-hist-active-border); }
+/* redundancia no-cromática (WCAG 1.4.1) */
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) :is(.pm-history-card.is-active, .bg-indigo-50)::before{
+  content:""; position:absolute; left:0; top:.5rem; bottom:.5rem; width:3px;
+  border-radius:0 3px 3px 0; background: var(--pm-hist-active-bar);
+}
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) :is(.pm-history-card, .bg-indigo-50):focus-visible{
+  outline: 2px solid var(--pm-focus-ring); outline-offset: 2px;
+}
+
+/* ───────── 2d · BURBUJAS Y SUS LABELS ───────── */
+/* "Germán" sobre burbuja de acento */
+.pm-bubble-user{ color: var(--pm-on-accent); }
+.pm-bubble-user .pm-text-muted,
+.pm-bubble-user .pm-text-muted *{ color: var(--pm-on-accent-muted); }
+/* "Pymetory LLM" sobre burbuja clara/panel */
+.pm-bubble-ai{ color: var(--pm-text); border-color: var(--pm-border); }
+.pm-bubble-ai .pm-text-muted,
+.pm-bubble-ai .pm-text-muted *{ color: var(--pm-on-card-muted); }
+/* links y código dentro de burbujas */
+.pm-bubble-user a{ color: var(--pm-on-accent); text-decoration: underline; text-underline-offset:2px; }
+.pm-bubble-ai a{ color: var(--pm-accent); text-decoration: underline; text-underline-offset:2px; }
+.pm-bubble-ai :is(code,pre){ background: var(--pm-panel-2); color: var(--pm-text); }
+
+/* header del chat: bg-slate-800/40 se ve como banda gris en paper-light */
+header.bg-slate-800\/40{
+  background-color: var(--pm-panel-2);
+  border-color: var(--pm-border);
+}
+header.bg-slate-800\/40, .border-slate-700\/40, .border-slate-700\/30{ border-color: var(--pm-border); }
+
+/* ───────── 2e · BREADCRUMB GLOBAL ───────── */
+:is(.pm-breadcrumb, nav[aria-label="Breadcrumb"]){ color: var(--pm-on-card-muted); }
+:is(.pm-breadcrumb, nav[aria-label="Breadcrumb"]) a{ color: var(--pm-on-card-muted); text-decoration:none; }
+:is(.pm-breadcrumb, nav[aria-label="Breadcrumb"]) a:hover{ color: var(--pm-text); text-decoration: underline; }
+:is(.pm-breadcrumb, nav[aria-label="Breadcrumb"]) [aria-current="page"]{ color: var(--pm-text); font-weight:700; }
+:is(.pm-breadcrumb, nav[aria-label="Breadcrumb"]) .pm-sep{ color: var(--pm-on-card-faint); }
+
+/* ───────── 2f · PLACEHOLDERS, HTML BASE, FALLBACK ───────── */
+html{ background-color: var(--pm-bg); color: var(--pm-text); }
+[data-theme="paper-light"], .theme-paper-light{ color-scheme: light; }
+:is(input,textarea,select)::placeholder{ color: var(--pm-placeholder); opacity:1; }
+:is(.pm-chrome, aside[aria-label^="Navegación"]) :is(input,textarea)::placeholder{ color: var(--pm-chrome-text-faint); }
+::selection{ background: var(--pm-chrome-accent-weak); color: var(--pm-text); }
+
+/* fallback para motores sin color-mix (valores literales seguros) */
+@supports not (color: color-mix(in oklab, red, blue)){
+  :root{
+    --pm-on-card-muted:#9AA3B2; --pm-on-card-faint:#7C8595;
+    --pm-on-accent-muted:rgb(255 255 255 / .78);
+    --pm-hist-active-bg:#181B24; --pm-hist-active-border:#2C3140;
+    --pm-placeholder:#8A93A3; --pm-focus-ring:#A5B4FC;
+  }
+  [data-theme="paper-light"], .theme-paper-light{
+    --pm-on-card-muted:#5A616E; --pm-on-card-faint:#6B7280;
+    --pm-on-accent-muted:rgb(255 255 255 / .82);
+    --pm-hist-active-bg:#EEF0FF; --pm-hist-active-border:#C3C9F5;
+    --pm-placeholder:#6B7280;
+  }
+}
+
+/* respeto de preferencias */
+@media (prefers-reduced-motion: reduce){
+  :is(.pm-chatlist, aside.w-80.border-r.pr-8) .pm-history-card{ transition:none; }
+}
+@media print{
+  :is(.pm-chrome, aside[aria-label^="Navegación"]){ display:none !important; }
+}
+
+
+
+
+
+/* FIX FINAL (post-verificación): panel chatlist en tema claro — el aside .pm-chatlist
+   YA NO está sobre el rail oscuro (es columna central); sus contenedores padre son
+   bg-slate-900/80 remapeados a --pm-panel claro. El h2 heredaba --pm-text correcto,
+   pero el card INACTIVO posee panel blanco correcto... el problema era el ancestro:
+   el <aside class="pm-chatlist"> NO tiene fondo y heredaba el RAIL oscuro en la pila
+   del compose de visión. Fuerza contexto claro explícito: */
+:is(.pm-chatlist, aside.w-80.border-r.pr-8){ background-color: transparent; }
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) :is(h2, h3){ color: var(--pm-text); }
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) .text-gray-400,
+:is(.pm-chatlist, aside.w-80.border-r.pr-8) .text-slate-400{ color: var(--pm-on-card-muted); }
+
+/* Breadcrumb en temas oscuros: 'LLM' segment activo tenue en gris — subir a muted */
+nav[aria-label="Breadcrumb"]{ letter-spacing: .02em; }
+nav[aria-label="Breadcrumb"] .text-slate-500,
+nav[aria-label="Breadcrumb"] .text-slate-600,
+nav[aria-label="Breadcrumb"] .text-slate-400{ color: var(--pm-on-card-muted); }
+nav[aria-label="Breadcrumb"] .text-white,
+nav[aria-label="Breadcrumb"] .font-bold,
+nav[aria-label="Breadcrumb"] h1{ color: var(--pm-text); }
+
+/* FIX RAÍZ (Opus decisión 1 aplicada de verdad): el ROOT de la app usa
+   bg-obsidiana (#0A0A0B fijo) — en temas oscuros OK, pero en paper-light todo lo
+   que no tiene panel propio cae sobre negro con texto oscuro (CHAT PYMETORY,
+   breadcrumb). El root debe respirar el tema: */
+[data-theme="paper-light"] .bg-obsidiana{
+  background-color: var(--pm-bg);               /* #F7F8FB claro */
+}
+[data-theme="paper-light"].bg-obsidiana{
+  background-color: var(--pm-bg);
+}
+/* excepción: el RAIL del sidebar SÍ permanece oscuro por decisión de diseño */
+[data-theme="paper-light"] aside.pm-chrome.bg-obsidiana,
+[data-theme="paper-light"] aside[aria-label^="Navegación"].bg-obsidiana{
+  background-color: var(--pm-chrome-bg) !important;   /* #0A0A0B */
+}
+/* textos directos dentro del root claro: el top bar y columnas heredan bien */
+[data-theme="paper-light"] .bg-obsidiana .text-white{ color: var(--pm-text); }
+[data-theme="paper-light"] .bg-obsidiana .text-slate-500,
+[data-theme="paper-light"] .bg-obsidiana .text-slate-400{ color: var(--pm-on-card-muted); }
+/* topbar (hamburger-bar) en claro: el header alrededor del breadcrumb hereda bg-obsidiana vía padre — cubierto */
+/* section sticky labels bg-obsidiana/95 en la columna central (chatlist) */
+[data-theme="paper-light"] .bg-obsidiana\/95{
+  background-color: color-mix(in oklab, var(--pm-bg) 95%, white);
+}
+
+/* TOP BAR claro (bg-obsidiana/60 sobre root claro se ve barroso + texto tenue) */
+[data-theme="paper-light"] .bg-obsidiana\/60{
+  background-color: color-mix(in oklab, var(--pm-panel) 92%, var(--pm-bg));
+  border-color: var(--pm-border);
+}
+[data-theme="paper-light"] .bg-obsidiana\/60 .text-slate-500,
+[data-theme="paper-light"] .bg-obsidiana\/60 .text-slate-400,
+[data-theme="paper-light"] .bg-obsidiana\/60 .text-slate-300{ color: var(--pm-on-card-muted); }
+[data-theme="paper-light"] .bg-obsidiana\/60 .text-white{ color: var(--pm-text); }
+
+/* timestamp pills del Kardex ('3 months ago') y deltas: base clara coherente */
+[data-theme="paper-light"] .bg-slate-900\/60,
+[data-theme="paper-light"] .bg-slate-800\/60,
+[data-theme="paper-light"] .bg-slate-700\/40,
+[data-theme="paper-light"] .bg-slate-700\/30{ background-color: var(--pm-panel-2); }
+[data-theme="paper-light"] .bg-slate-800\/40{ background-color: var(--pm-panel-2); }
+
+/* — FINAL v2: QuickActions + KPI (bg-slate-800/50, kbd bg-slate-700/50) — */
+[data-theme="paper-light"] .bg-slate-800\/50,
+[data-theme="paper-light"] .bg-slate-700\/50{ background-color: var(--pm-panel-2); }
+[data-theme="paper-light"] .bg-slate-800\/50 .text-slate-400,
+[data-theme="paper-light"] .bg-slate-800\/50 .text-slate-500,
+[data-theme="paper-light"] .bg-slate-700\/50 .text-slate-400{ color: var(--pm-on-card-muted); }
+[data-theme="paper-light"] .bg-slate-800\/50 .border-slate-600\/30{ border-color: var(--pm-border); }
+[data-theme="paper-light"] .bg-slate-800\/50.text-white,
+[data-theme="paper-light"] .text-champan{ color: #8a6d1c; }  /* champán en claro: duplica ratio */
+[data-theme="paper-light"] .from-white\/5{ --tw-gradient-from: transparent; }

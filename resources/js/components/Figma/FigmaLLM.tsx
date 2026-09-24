@@ -192,7 +192,7 @@ const FigmaLLM = () => {
     return (
         <div className="flex h-full gap-8 animate-in fade-in duration-500">
             {/* Chat List Sidebar (Mockup 10 Left) */}
-            <aside className="w-80 border-r border-slate-700/30 pr-8 space-y-6 flex flex-col h-full">
+            <aside className="pm-chatlist w-80 border-r border-slate-700/30 pr-8 space-y-6 flex flex-col h-full">
                  <div className="flex items-center justify-between">
                      <h2 className="text-xl font-bold uppercase tracking-tight">Chat Pymetory</h2>
                      <button onClick={handleNewChat} className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm" title="Nuevo Chat">
@@ -306,7 +306,7 @@ const FigmaLLM = () => {
                 <div ref={scrollRef} className="flex-1 overflow-auto p-6 space-y-6 scroll-smooth">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] p-4 rounded-xl text-sm ${msg.role === 'user' ? 'pm-panel2-plain pm-accent-fg shadow-md' : 'pm-panel pm-text pm-border border shadow-sm'}`}>
+                            <div className={`max-w-[80%] p-4 rounded-xl text-sm ${msg.role === 'user' ? 'pm-bubble-user pm-panel2-plain pm-accent-fg shadow-md' : 'pm-bubble-ai pm-panel pm-text pm-border border shadow-sm'}`}>
                                 <div className="font-bold text-[10px] mb-1 uppercase tracking-widest pm-text-muted">{msg.role === 'user' ? 'Germán' : 'Pymetory LLM'}</div>
                                 <div className="leading-relaxed whitespace-pre-wrap font-mono text-sm">{msg.content}</div>
                             </div>

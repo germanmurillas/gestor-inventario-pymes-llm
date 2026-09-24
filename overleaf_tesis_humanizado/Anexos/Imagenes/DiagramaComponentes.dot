@@ -1,0 +1,33 @@
+digraph COMP {
+  rankdir=TB; bgcolor=white; nodesep=.4; fontname="Helvetica"; fontsize=10;
+  node [shape=box, fontname="Helvetica", style=filled];
+
+  subgraph cluster_front {
+    label="Frontend (React 19 + Inertia 2.0)"; fillcolor="#FDF6E3"; style=filled;
+    PAGES [label="Páginas React\n(Dashboard, Inventario,\nReportes, Settings)"];
+    COMP [label="Componentes Figma*\n(impresión QR, kardex)"];
+  }
+  subgraph cluster_back {
+    label="Backend (Laravel 11 / PHP 8.3)"; fillcolor="#EFF7EF";
+    CTL [label="Controladores\n(Lote, Bodega, Reportes)"];
+    RAG [label="ChatLLMController\n(RAG)"];
+    FALL [label="Fallback Chain"];
+    MODELS [label="Eloquent Models"];
+  }
+  subgraph cluster_data {
+    label="Datos + IA"; fillcolor="#F7F0F7";
+    MYSQL [label="MySQL 8.0", shape=cylinder];
+    OLLAMA [label="Ollama local\n(gemma3, qwen3)"];
+    OPENAI [label="OpenAI API", shape=box3d];
+  }
+
+  PAGES -> CTL [label="Inertia HTTP"];
+  COMP -> PAGES [style=dashed];
+  CTL -> MODELS [label="Eloquent ORM"];
+  RAG -> CTX [lhead=cluster_data];
+  MODELS -> MYSQL;
+  RAG -> FALL [label="upon error"];
+  FALL -> OLLAMA [label="1º"]; FALL -> OPENAI [label="2º"];
+  RAG -> OLLAMA [style=dashed]; RAG -> OPENAI [style=dashed];
+  OLLAMA -> MYSQL [label="contexto BD", style=dotted];
+}

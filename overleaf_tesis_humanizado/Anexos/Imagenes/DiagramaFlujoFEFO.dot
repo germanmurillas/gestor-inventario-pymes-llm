@@ -1,0 +1,16 @@
+digraph FEFO {
+  rankdir=TB; bgcolor=white; fontname="Helvetica"; fontsize=10;
+  node [fontname="Helvetica", style=filled];
+  start [shape=oval, fillcolor="#DFF5DF", label="Registrar\nmovimiento"];
+  q1 [shape=diamond, fillcolor="#FFF7D6", label="¿Entrada o\ndespacho?"];
+  q2 [shape=diamond, fillcolor="#FFE9E9", label="Despacho:\n¿fecha venc.\n> hoy?"];
+  q3 [shape=diamond, fillcolor="#FFE9E9", label="¿lote con menor\nfecha venc.?"];
+  K [shape=box, label="INSERT Kardex\n(inmutable: user,\ntimestamp, razón)"];
+  OK [shape=oval, fillcolor="#DFF5DF", label="Confirmado"];
+  ERR [shape=oval, fillcolor="#FFE9E9", label="Rechazado:\nlote fuera de FEFO"];
+
+  start->q1; q1->q3 [label="despacho"]; q1->q2 [label="entrada"];
+  q2->q3 [style=dotted, label="comparar con\nvigente menor"];
+  q3->K [label="sí"]; q3->err [label="no", color=red];
+  K->OK;
+}

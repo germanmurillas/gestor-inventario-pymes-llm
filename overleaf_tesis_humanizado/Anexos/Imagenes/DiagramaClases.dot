@@ -1,0 +1,20 @@
+digraph CLASES {
+  rankdir=TB; bgcolor=white; fontname="Helvetica"; fontsize=10; nodesep=.35; ranksep=.55;
+
+  node [shape=record, fontname="Helvetica", style=filled, fillcolor="#F3F3F3", fontsize=9];
+
+  User        [label="{User|+ id : bigint\l+ name : string\l+ email : string\l+ role : enum(admin, operario)\l|+ isAdmin()\l}"];
+  Material    [label="{Material|+ id\l+ nombre\l+ unidad_medida\l+ min_stock\l|}"];
+  Bodega      [label="{Bodega|+ id\l+ nombre\l+ capacidad_maxima\l|+ lotes() : hasMany\l}"];
+  Lote        [label="{Lote|+ id\l+ material_id\l+ bodega_id\l+ numero\l+ cantidad\l+ expiration_date\l|+ scope fefoOrder()\l}"];
+  Movimiento  [label="{Movimiento (Kardex)|+ id\l+ lote_id\l+ tipo : enum\l+ cantidad_anterior\l+ cantidad_nueva\l+ user_id\l+ razon\l+ created_at\l|INMUTABLE (no update/delete)\l}"];
+  ChatHistory [label="{ChatHistory|+ session_id\l+ prompt\l+ response\l+ source\l}"];
+  CheckRole   [label="{CheckRole (middleware)|verifica role en rutas protegidas\l}", fillcolor="#E7F0E7"];
+
+  Lote -> Material   [arrowhead=onone, label="n:1"];
+  Lote -> Bodega     [arrowhead=onone, label="n:1"];
+  Lote -> Movimiento [arrowhead=onone, label="1:n"];
+  User -> Movimiento [arrowhead=onone, label="auditoría"];
+  User -> ChatHistory;
+  CheckRole -> User  [style=dashed, label="role check"];
+}

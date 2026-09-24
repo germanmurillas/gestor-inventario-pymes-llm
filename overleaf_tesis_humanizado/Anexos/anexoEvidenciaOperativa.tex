@@ -1,0 +1,37 @@
+% -------------------------------------------------
+% Anexo G — Evidencia Operativa del Sistema (screenshots reales)
+% Fuente: capturas de app.pymetory.com tomadas 19-sep-2026
+% -------------------------------------------------
+
+\section{Evidencia Operativa del Sistema}
+\label{anexo:evidencia-operativa}
+
+Las siguientes capturas fueron tomadas sobre la instancia de producción (\url{https://app.pymetory.com}) con la cuenta de rol Admin, y documentan el funcionamiento real de los módulos críticos descritos en los capítulos de diseño, implementación y pruebas:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/kardex_log_maestro.png}
+    \caption{Log Maestro de Movimientos --- Kardex histórico completo de la PYME. Cada entrada/salida registra material y lote, responsable, cantidad con signo, fecha y hora exacta, y razón del movimiento (venta o escaneo QR). Imposible de editar o eliminar por diseño (triggers de base de datos).}
+    \label{fig:kardex-maestro}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Imagenes/qr_escaner_manual.png}
+    \caption{Escáner QR en modo manual. Acepta el JSON generado por el módulo de Etiquetas \& QR (\texttt{sku}, \texttt{batch}, \texttt{v}) y también ofrece modo con la cámara del dispositivo para operarios en piso.}
+    \label{fig:qr-escaner}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Imagenes/qr_checkin_form.png}
+    \caption{Formulario de check-in (Entrada) prellenado tras leer el código QR. El usuario solo ingresa la cantidad y una observación opcional --- el lote y el material están fijados por el código verificado.}
+    \label{fig:qr-checkin}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/qr_historial.png}
+    \caption{Historial de Escaneos QR --- registro consolidado de check-ins y check-outs. La primera fila muestra el movimiento de entrada de 8.5 kg de Cemento Argos Gris (lote LT-CENT-001) registrado endi-to-end durante una prueba real de este flujo.}
+    \label{fig:qr-historial}
+\end{figure}

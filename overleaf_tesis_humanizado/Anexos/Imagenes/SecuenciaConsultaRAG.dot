@@ -1,0 +1,19 @@
+digraph SEQ_RAG {
+  rankdir=TB; bgcolor=white; fontname="Helvetica"; fontsize=9;
+  node [shape=box, fontname="Helvetica", fillcolor="#F3F3F3", style=filled];
+  edge [arrowsize=.7];
+
+  U [label="Usuario", style="rounded,filled", fillcolor="#F5E7C1"];
+  CHAT [label="ChatLLMController"];
+  CTX [label="buildRagContext()"];
+  DB [label="MySQL", shape=cylinder, fillcolor="#DDE7F5"];
+  LLM [label="LLM (Ollama / OpenAI)"];
+
+  U -> CHAT [label="1. pregunta en\nlenguaje natural"];
+  CHAT -> CHAT [label="2. classifyQuery()"];
+  CHAT -> DB [label="3. contexto real\n(lotes FEFO)"];
+  DB -> CHAT [label="4. datos"];
+  CHAT -> LLM [label="5. prompt BD+reglas", shape=oval, fillcolor="#E7F0E7"];
+  LLM -> CHAT [label="6. respuesta natural"];
+  CHAT -> U [label="7. response JSON"];
+}

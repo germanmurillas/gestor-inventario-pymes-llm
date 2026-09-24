@@ -1,0 +1,23 @@
+digraph CU {
+  rankdir=LR; bgcolor="white"; fontname="Helvetica";
+  node [shape=ellipse, style=filled, fillcolor="#E8EEF7", fontname="Helvetica", fontsize=11];
+  actor_operario [shape=box, style=rounded, fillcolor="#F5E7C1", label="Operario"];
+  actor_admin [shape=box, style=rounded, fillcolor="#F5E7C1", label="Administrador"];
+  actor_dir [shape=box, style=rounded, fillcolor="#DFF5DF", label="Director TG"];
+
+  actor_operario -> cu1; actor_operario -> cu2; actor_operario -> cu3; actor_operario -> cu8;
+  actor_admin -> cu4; actor_admin -> cu5; actor_admin -> cu6; actor_admin -> cu7; actor_admin -> cu3;
+  actor_dir -> cu9;
+
+  cu1 [fillcolor="#fff", style="filled,dashed", label="Consultar lote\n(hereda)"];
+  cu1 [label="Registrar entrada\n(FEFO)"];
+  cu2 [label="Registrar despacho\n(FEFO)"];
+  cu3 [label="Consultar inventario\n/ Kardex"];
+  cu4 [label="Generar reportes\n(CSV)"];
+  cu5 [label="Gestionar bodegas"];
+  cu6 [label="Ajustar inventario\n(conciliación)"];
+  cu7 [label="Configurar sistema\n(campos/API)"];
+  cu8 [label="Consultar\nPymetory IA (RAG)"];
+  cu9 [label="Revisar\ntrazabilidad"];
+  cu8 -> cu1 [style=dashed, label="«include»"];
+}
