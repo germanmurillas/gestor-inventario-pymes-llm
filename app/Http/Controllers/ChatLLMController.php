@@ -340,7 +340,7 @@ class ChatLLMController extends Controller {
 
         // ── Unified LLM inference (local, opencode, external) ──────────────────
         $endpoints = [
-            'local'    => ['url' => config('services.ollama.url') . '/v1/chat/completions', 'key' => ''],
+            'local'    => ['url' => config('services.ollama.url') . '/api/chat', 'key' => '', 'native' => true],
             'opencode' => ['url' => $apiBaseUrl ?: 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $apiKey],
             'external' => ['url' => $apiBaseUrl ?: 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
         ];
@@ -387,20 +387,55 @@ class ChatLLMController extends Controller {
                 'max_tokens'  => $llmSource === 'opencode' ? max($maxTokens, 2048) : $maxTokens,
             ];
 
+            // FIX-RAG(v2.1): los modelos Qwen3/Qwen3.5 vengono con un "thinking mode"
+            // activo por defecto → el campo content llega vacío y saltaba el mensaje
+            // fantasma "No pude generar...". Apagamos el reasoning a nivel payload
+            // (chat API Ollama nativa) pero sin tocar OpenAI-compatible opencode.
+            if ($llmSource === 'local' && preg_match('/^qwen3/', $llmModelo)) {
+                $payload['think'] = false;
+            }
+
             $totalChars = mb_strlen($promptSistema) + array_sum(array_map(fn($m) => mb_strlen($m['content'] ?? ''), $historial)) + mb_strlen($query);
             if ($totalChars > 18000) {
                 $lotesCortos = Lote::with('material')->fefoOrder()->take(4)->get()->map(fn($l) => "- {$l->material->name}: {$l->quantity}u")->join("\n");
                 $promptSistema = "Eres Pymetory IA. Responde conciso.\n\nInventario:\n{$lotesCortos}";
             }
 
-            $response = Http::timeout(60)
+            // FIX-RAG(v2.1): qwen3/qwen3.5 traen thinking ON por defecto → content '' y
+            // mensaje fantasma "No pude generar...". La API nativa /api/chat respeta
+            // 'think' => false; además max_tokens/temperature cambian de clave.
+            $isNativeLocal = ($endpoints[$llmSource]['native'] ?? false) === true;
+            if ($llmSource === 'local') {
+                if (preg_match('/^qwen3/', $llmModelo)) {
+                    $payload['think'] = false;    // desactiva reasoning a nivel payload
+                }
+                $payload['stream'] = false;       // /api/chat nativo exige stream=false
+                $payload['options'] = [
+                    'temperature' => $temperature,
+                    'num_predict' => $maxTokens,
+                ];
+                unset($payload['temperature'], $payload['max_tokens']);
+            }
+            $response = Http::timeout($isNativeLocal ? 90 : 60)
                 ->withToken($cfg['key'] ?: null)
                 ->post($cfg['url'], $payload);
 
             if ($response->successful()) {
-                $text = trim((string) $response->json('choices.0.message.content'));
-                $text = preg_replace('#<think>.*?</think>#is', '', $text);
-                $text = trim($text);
+                if ($isNativeLocal) {
+                    // FIX-RAG(v2.1): /api/chat nativo devuelve {message:{content}}
+                    $resp = $response->json('message.content') ?? '';
+                    $resp = is_string($resp) ? trim($resp) : '';
+                    // Respaldo: si razonó y dejó content '' → leer 'thinking'
+                    $text = '';
+                    if ($resp !== '') {
+                        $text = preg_replace('#<think>.*?</think>#is', '', $resp);
+                        $text = trim($text);
+                    }
+                } else {
+                    $text = trim((string) $response->json('choices.0.message.content'));
+                    $text = preg_replace('#</think>#is', '', $text);
+                    $text = trim($text);
+                }
 
                 if ($text === '' && $llmSource === 'opencode') {
                     $fallback = Http::timeout(30)->post(config('services.ollama.url') . '/v1/chat/completions', [
