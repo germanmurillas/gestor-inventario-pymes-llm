@@ -7,13 +7,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
+/**
+ * @property int $id
+ * @property int $material_id
+ * @property int $bodega_id
+ * @property string $batch_number
+ * @property float $quantity
+ * @property float $unit_cost
+ * @property \Carbon\CarbonInterface|null $expiration_date
+ * @property string $status
+ * @property Material|null $material
+ * @property Bodega|null $bodega
+ * @property \Illuminate\Database\Eloquent\Collection<int, Movimiento> $movimientos
+ * @property-read int $days_until_expiration
+ * @property-read bool $is_critical
+ * @property-read float $valor_total
+ * @property-read string|null $photo_url
+ */
 class Lote extends Model {
     use HasFactory;
+
+    /** @var list<string> */
     protected $fillable = [
         'material_id', 'bodega_id', 'batch_number', 'quantity',
         'unit_cost', 'expiration_date', 'status', 'photo_path'
     ];
 
+    /** @var list<string> */
     protected $appends = [
         'days_until_expiration',
         'is_critical',
@@ -21,6 +41,7 @@ class Lote extends Model {
         'photo_url',
     ];
 
+    /** @return array<string, string|float> */
     protected function casts(): array {
         return [
             'expiration_date' => 'date',
@@ -29,16 +50,17 @@ class Lote extends Model {
         ];
     }
 
-    // ── Relationships ─────────────────────────────────────────────────────────
-
+    /** @return BelongsTo<Material, $this> */
     public function material(): BelongsTo {
         return $this->belongsTo(Material::class);
     }
 
+    /** @return BelongsTo */
     public function bodega(): BelongsTo {
         return $this->belongsTo(Bodega::class);
     }
 
+    /** @return HasMany */
     public function movimientos(): HasMany {
         return $this->hasMany(Movimiento::class);
     }

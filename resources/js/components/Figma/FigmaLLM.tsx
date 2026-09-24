@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, User, Bot, Search, Plus, Filter, Loader2, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 
-import axios from 'axios';
+
 
 const FigmaLLM = () => {
     const [sessions, setSessions] = useState<any[]>([]);
@@ -243,8 +243,8 @@ const FigmaLLM = () => {
                 <div ref={scrollRef} className="flex-1 overflow-auto p-6 space-y-6 scroll-smooth">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] p-4 rounded-xl text-sm ${msg.role === 'user' ? 'bg-[#111111] text-white shadow-md' : 'bg-white text-[#111111] border border-slate-200 shadow-sm'}`}>
-                                <div className="font-bold text-[10px] mb-1 uppercase tracking-widest text-[#595959]">{msg.role === 'user' ? 'Germán' : 'Pymetory LLM'}</div>
+                            <div className={`max-w-[80%] p-4 rounded-xl text-sm ${msg.role === 'user' ? 'pm-panel2-plain pm-accent-fg shadow-md' : 'pm-panel pm-text pm-border border shadow-sm'}`}>
+                                <div className="font-bold text-[10px] mb-1 uppercase tracking-widest pm-text-muted">{msg.role === 'user' ? 'Germán' : 'Pymetory LLM'}</div>
                                 <div className="leading-relaxed whitespace-pre-wrap font-mono text-sm">{msg.content}</div>
                             </div>
                         </div>

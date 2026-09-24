@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Globe, Cpu, Bell, ShieldCheck, Save, LogOut, Key, Zap, Database, CheckCircle, AlertTriangle, ExternalLink, Server, HardDrive, Loader2, Plus, Trash2, GripVertical, ToggleLeft, ToggleRight, Tag } from 'lucide-react';
+import { Globe, Palette, Check, Cpu, Bell, ShieldCheck, Save, LogOut, Key, Zap, Database, CheckCircle, AlertTriangle, ExternalLink, Server, HardDrive, Loader2, Plus, Trash2, GripVertical, ToggleLeft, ToggleRight, Tag } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import { THEMES, DEFAULT_THEME, applyTheme } from '@/lib/theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Tab = 'GENERAL' | 'LLM' | 'NOTIFICATIONS' | 'SECURITY' | 'CUSTOMFIELDS' | 'COMPANY';
+type Tab = 'GENERAL' | 'THEMES' | 'LLM' | 'NOTIFICATIONS' | 'SECURITY' | 'CUSTOMFIELDS' | 'COMPANY';
 
 interface ModelInfo {
   name: string;
@@ -45,6 +46,8 @@ const classifyContext = (ctx: number) => {
 // ─── Component ────────────────────────────────────────────────────────────────
 const FigmaSettings = () => {
     const [activeTab, setActiveTab]     = useState<Tab>('GENERAL');
+    const [pmTheme, setPmTheme]         = useState<string>(() =>
+        (document.documentElement.dataset.theme as string) || 'midnight-luxe');
     const [temperature, setTemperature] = useState(0.3);
     const [llmModel, setLlmModel]       = useState('pymetory-8b:latest');
     const [maxTokens, setMaxTokens]     = useState(1024);
@@ -192,6 +195,12 @@ const FigmaSettings = () => {
         }
     }, []);
 
+    const handleSaveTheme = useCallback(async () => {
+        const current = document.documentElement.dataset.theme || 'midnight-luxe';
+        setPmTheme(current);
+        await handleSave({ 'ui.theme': current });
+    }, [handleSave]);
+
     // ── Tab Button ────────────────────────────────────────────────────────────
     const TabButton = ({ id, label, icon: Icon }: { id: Tab; label: string; icon: any }) => (
         <button
@@ -231,6 +240,7 @@ const FigmaSettings = () => {
             {/* Tab System */}
             <div className="flex bg-slate-800/50 border border-slate-100 rounded-[2.5rem] p-2 w-fit flex-wrap">
                 <TabButton id="GENERAL"       label="General"   icon={Globe}       />
+                <TabButton id="THEMES"        label="Temas"     icon={Palette}     />
                 <TabButton id="LLM"           label="Núcleo IA" icon={Cpu}         />
                 <TabButton id="NOTIFICATIONS" label="Alertas"   icon={Bell}        />
                 <TabButton id="CUSTOMFIELDS"  label="Campos Extra" icon={Tag}      />
@@ -240,6 +250,45 @@ const FigmaSettings = () => {
 
             {/* Tab Content */}
             <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-slate-50 rounded-[3rem] p-12 shadow-sm min-h-[500px]">
+
+                {/* ── 2. THEMES ─────────────────────────────────────────── */}
+                {activeTab === 'THEMES' && (
+                    <div key="themes" className="space-y-12 w-full animate-in slide-in-from-bottom-8 duration-500">
+                        <div className="flex items-center gap-4">
+                            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-[1.5rem]"><Palette size={24} /></div>
+                            <div>
+                                <h3 className="text-xl font-black text-white tracking-tighter uppercase">Tema Visual</h3>
+                                <p className="text-xs text-slate-400 font-medium mt-1">Elige la paleta de la interfaz. Se aplica al instante y queda guardada en tu cuenta.</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                            {THEMES.map(t => (
+                                <button key={t.id} type="button" onClick={() => applyTheme(t.id)}
+                                    aria-pressed={pmTheme === t.id} aria-label={`Tema ${t.name}`}
+                                    className={`relative rounded-3xl border-2 p-6 text-left transition-all ${pmTheme === t.id ? 'border-indigo-500 bg-slate-900' : 'border-slate-800 hover:border-indigo-500/40'}`}>
+                                    {pmTheme === t.id && <Check size={16} className="absolute top-4 right-4 text-indigo-400" />}
+                                    <div className="flex gap-2 mb-4">
+                                        {[t.bg, t.panel, t.accent].map(c => (
+                                            <span key={c} style={{ background: c }} className="w-8 h-8 rounded-full border border-white/20" />
+                                        ))}
+                                    </div>
+                                    <p className="text-sm font-black text-white uppercase tracking-wider">{t.name}</p>
+                                    <p className="text-[10px] text-slate-400 font-mono mt-1">{t.id}</p>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap gap-4">
+                            <button type="button" onClick={handleSaveTheme} disabled={saving}
+                                className="flex items-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-3xl transition-all disabled:opacity-50">
+                                <Save size={16} strokeWidth={3} /> Aplicar y guardar
+                            </button>
+                            <button type="button" onClick={() => applyTheme(DEFAULT_THEME)}
+                                className="px-8 py-4 bg-slate-900 text-slate-300 text-[10px] font-black uppercase tracking-[0.2em] rounded-3xl border border-slate-700">
+                                Restablecer default
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── 1. GENERAL ─────────────────────────────────────────── */}
                 {activeTab === 'GENERAL' && (

@@ -25,6 +25,7 @@ class CheckFefoAlerts extends Command
         }
 
         foreach ($lotesCriticos as $lote) {
+            /** @var \App\Models\Lote $lote */
             $material = $lote->material;
             $dias     = $lote->days_until_expiration;
             $fecha    = $lote->expiration_date->format('d/m/Y');

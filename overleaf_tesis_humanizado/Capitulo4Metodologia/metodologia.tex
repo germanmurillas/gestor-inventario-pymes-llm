@@ -1,7 +1,7 @@
 %========= INICIO DEL CÓDIGO PARA metodologia.tex =========
 
 
-% ─────────────────────────────────────────────────
+% -------------------------------------------------
 % VERSION TRACKER — No modificar este bloque
 % Versión:    Tesis Técnica (para jurados)
 % Archivo:    Capitulo4Metodologia/metodologia.tex
@@ -9,12 +9,32 @@
 % Git commit:  cc9c766f @ main
 % Audiencia:   académico
 % Verificar antes de editar: bash check_tesis_version.sh overleaf_tesis/Capitulo4Metodologia/metodologia.tex
-% ─────────────────────────────────────────────────
+% -------------------------------------------------
 
 
 \section{Tipo de Investigación}
 \label{sec:tipo_investigacion}
 Este proyecto se enmarca en la \textbf{investigación aplicada}, ya que su fin es utilizar el conocimiento de la ingeniería de sistemas para desarrollar una solución tecnológica a un problema práctico y concreto del entorno empresarial. Se apoya también en la \textbf{investigación proyectiva}, al proponer y construir un artefacto de software funcional. El proyecto sigue los lineamientos de la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle para trabajos de grado en la modalidad de Trabajo de Investigación \cite{univalle_resolucion137}.
+
+\section{Triangulación Metodológica}
+\label{sec:triangulacion}
+
+La validez de los resultados de este trabajo no descansa sobre una sola herramienta de análisis, sino sobre la \textbf{combinación de tres capas complementarias} de observación sobre el mismo objeto de estudio ---el código del sistema---. La triangulación, entendida como el uso de múltiples métodos independientes para contrastar un mismo fenómeno \cite{denzin_creswell}, es lo que permite afirmar conclusiones con mayor confianza que cualquiera de las capas por separado.
+
+\begin{description}
+    \item[Capa 1 --- Memoria semántica del codebase (análisis estático semántico):] El codebase completo del proyecto (2.490 archivos, ~69.000 nodos de estructura) se indexó con un analizador semántico persistente (codebase-memory-mcp). Esta capa permitió responder preguntas de arquitectura real: cuántos archivos dependen de \texttt{Lote}, qué rutas llaman a la lógica FEFO, dónde está duplicada una constante. Su limitación es similar a la de otras herramientas estáticas: no ve el comportamiento en runtime.
+    \item[Capa 2 --- PHPStan/Larastan (análisis estático formal):] Sobre el mismo código se corrió análisis estático de nivel 5 con reglas de tipado (-98\% de falsos positivos gracias a docblocks reales de los modelos). El primer pase arrojó \textbf{103 hallazgos} clasificados en tres buckets (críticos funcionales, falsos positivos de Laravel, ruido con baseline). El resultado detallado está en el capítulo 7 y formalmente en la \texttt{phpstan-baseline.neon}.
+    \item[Capa 3 --- Xdebug (análisis dinámico)] Con instrumentación de cobertura se capturaron \textbf{7.4M llamadas} de ejecución reales. Esta capa detecta lo que la estática no puede: costos por relación Eloquent, es decir, dónde ``pesa'' realmente FEFO/Kardex cuando se procesa un despacho. Concreta el costo operativo en funciones concretas \cite{xdebug_docs}.
+\end{description}
+
+La triangulación reveló tres conclusiones que ninguna capa alcanzaba sola:
+\begin{enumerate}
+    \item El análisis semántico (capa 1) identificaba qué módulos estaban acoplados, pero no detectaba errores de tipado como la variable \texttt{\$oldQuantity} no capturada en un cierre de transacción --- eso lo trajo la capa 2.
+    \item PHPStan (capa 2) alerta de un método \texttt{format()} sobre posible \texttt{string}, pero solo la capa 3 verificó que ese costo se concentra en el mapper del Dashboard y no en la capa de dominio.
+    \item Ninguna herramienta por sí sola garantiza que el invariante del Kardex (inmutabilidad) se respete --- esa propiedad solo se pruebo con las suites de PHPUnit (comportamiento) y las pruebas manuales (contexto real).
+\end{enumerate}
+
+La lección metodológica que este proyecto documenta es que la validez de una tesis de ingeniería no se sostiene sobre ``el sistema funciona'' (afirmación de la capa 1) ni ``el static analitics no reportaIssues'' (capa 2) ni ``los test poden verde'' (capa 3) por separado, sino sobre la convergencia de las tres: \textbf{sin triangulación metodológica, las afirmaciones quedan sin evidencia suficiente}.
 
 \section{Enfoque Metodológico (SCRUM)}
 \label{sec:scrum}
@@ -22,7 +42,7 @@ Para la gestión del proyecto se adoptó una metodología de desarrollo Ágil, l
 
 Aunque SCRUM define roles como Product Owner, Scrum Master y Equipo de Desarrollo, para este proyecto se adaptaron de la siguiente manera: para obtener una retroalimentación crítica y asegurar que el desarrollo se alineara con los objetivos, el Director de Trabajo de Grado (Prof. Héctor Fabio Ocampo) actuó como el principal \textit{stakeholder} y su perspectiva en las revisiones de sprint cumplió una función análoga a la del Product Owner, validando los incrementos de software y ajustando prioridades según los objetivos académicos y técnicos del proyecto.
 
-Los autores (Germán David Murillas Mondragón y Jorge Augusto Estacio Almeciga), por su parte, asumieron de manera conjunta las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso, eliminando impedimentos y asegurando la adherencia a las ceremonias de SCRUM.
+El autor (Germán David Murillas Mondragón) asumió, de manera unipersonal, las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso, eliminando impedimentos y asegurando la adherencia a las ceremonias de SCRUM.
 
 El flujo de trabajo se organizó en Sprints, que son ciclos de trabajo iterativos de dos semanas de duración. Cada sprint siguió los eventos clave del framework:
 
@@ -213,8 +233,8 @@ El desarrollo de este proyecto se rigió por principios de integridad académica
 
 \begin{itemize}
     \item \textbf{Confidencialidad de datos empresariales}: Los datos proporcionados por la panificadora caso de estudio (nombres de materiales, cantidades, precios) fueron anonimizados en los seeders de la base de datos y en toda la documentación pública. La empresa autorizó el uso de sus procesos operativos como referencia para el levantamiento de requisitos, pero los datos específicos de su operación comercial no se divulgan.
-    \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, los autores utilizaron asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) como herramientas de productividad para generación de código, depuración y documentación. Todo el código generado fue revisado, comprendido y validado por los autores antes de su inclusión en el proyecto, en cumplimiento de las políticas de integridad académica de la Universidad del Valle.
-    \item \textbf{Licencias de software}: Todas las tecnologías utilizadas en el proyecto ---Laravel, React, Inertia.js, Tailwind CSS, GSAP, MySQL, Playwright--- son de código abierto y cuentan con licencias que permiten su uso en proyectos académicos y comerciales sin costo. La API de OpenAI se utilizó bajo el plan de pago por uso (\textit{pay-as-you-go}), con créditos proporcionados por los autores.
+    \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, el autor utilizó asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) como herramientas de productividad para generación de código, depuración y documentación. Todo el código generado fue revisado, comprendido y validado por el autor antes de su inclusión en el proyecto, en cumplimiento de las políticas de integridad académica de la Universidad del Valle.
+    \item \textbf{Licencias de software}: Todas las tecnologías utilizadas en el proyecto ---Laravel, React, Inertia.js, Tailwind CSS, GSAP, MySQL, Playwright--- son de código abierto y cuentan con licencias que permiten su uso en proyectos académicos y comerciales sin costo. La API de OpenAI se utilizó bajo el plan de pago por uso (\textit{pay-as-you-go}), con créditos proporcionados por el autor.
     \item \textbf{Cumplimiento normativo}: El proyecto se acoge a la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle, que establece los lineamientos para trabajos de grado en la modalidad de Trabajo de Investigación.
 \end{itemize}
 

@@ -20,7 +20,10 @@
   body {
     @apply bg-[#F8FAFC] text-[#0F172A] font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900;
   }
-  
+  /* Tema: cuando hay data-theme (.midnight-luxe por default), el body sigue el token */
+  [data-theme="midnight-luxe"] body,
+  html[data-theme="midnight-luxe"] > body { background-color: var(--pm-bg); color: var(--pm-text); }
+
   h1, h2, h3, h4, .font-display {
     @apply font-display tracking-tight font-black uppercase;
   }
@@ -61,6 +64,115 @@
   filter: blur(0px);
   transform: translateY(0px);
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   SISTEMA DE TEMAS VISUALES — Pymetory (presets en Settings > Temas)
+   Arquitectura: CSS custom variables + atributo data-theme en <html>.
+   Default = Midnight Luxe (:root) — el look actual, sin cambios.
+   ════════════════════════════════════════════════════════════════════════ */
+:root,
+[data-theme="midnight-luxe"] {
+  color-scheme: dark;
+  --pm-bg: #0A0E1A;
+  --pm-panel: #141A2E;
+  --pm-panel-2: #1B2238;
+  --pm-border: #232B45;
+  --pm-accent: #7C6CF5;
+  --pm-accent-fg: #FFFFFF;
+  --pm-grad-from: #7C6CF5;
+  --pm-grad-to: #4F46E5;
+  --pm-text: #E8EAF6;
+  --pm-text-muted: #8B93B0;
+  --pm-success: #34D399;
+  --pm-danger: #F87171;
+  --pm-warn: #FBBF24;
+}
+[data-theme="obsidian-teal"] {
+  --pm-panel-2: #153036;
+  --pm-bg: #071316; --pm-panel: $; --pm-border: #1C3A40;
+  --pm-accent: #2DD4BF; --pm-accent-fg: #04211F;
+  --pm-grad-from: #2DD4BF; --pm-grad-to: #0E7490;
+  --pm-text: #E6F4F1; --pm-text-muted: #7FA3A0;
+  --pm-success: #4ADE80; --pm-danger: #FB7185; --pm-warn: #FCD34D;
+}
+[data-theme="carbon-amber"] {
+  --pm-panel-2: #1E2022;
+  --pm-bg: #0C0C0D; --pm-panel: $; --pm-border: #27282C;
+  --pm-accent: #F59E0B; --pm-accent-fg: #1A1206;
+  --pm-grad-from: #F59E0B; --pm-grad-to: #B45309;
+  --pm-text: #EDEDEF; --pm-text-muted: #9B9CA3;
+  --pm-success: #22C55E; --pm-danger: #EF4444; --pm-warn: #FDBA74;
+}
+[data-theme="royal-plum"] {
+  --pm-panel-2: #2A1840;
+  --pm-bg: #12091B; --pm-panel: $; --pm-border: #2E1B40;
+  --pm-accent: #C084FC; --pm-accent-fg: #1B0B27;
+  --pm-grad-from: #C084FC; --pm-grad-to: #7E22CE;
+  --pm-text: #F2E9FB; --pm-text-muted: #A98FC0;
+  --pm-success: #4ADE80; --pm-danger: #F472B6; --pm-warn: #FACC15;
+}
+[data-theme="nordic-steel"] {
+  --pm-panel-2: #1C2330;
+  --pm-bg: #0D1117; --pm-panel: $; --pm-border: #30363D;
+  --pm-accent: #3B82F6; --pm-accent-fg: #FFFFFF;
+  --pm-grad-from: #3B82F6; --pm-grad-to: #1D4ED8;
+  --pm-text: #E6EDF3; --pm-text-muted: #8B949E;
+  --pm-success: #3FB950; --pm-danger: #F85149; --pm-warn: #D29922;
+}
+[data-theme="paper-light"] {
+  color-scheme: light;
+  --pm-panel-2: #EBEEF5;
+  --pm-bg: #F7F8FB; --pm-panel: $; --pm-border: #E2E6EF;
+  --pm-accent: #5A4BD6; --pm-accent-fg: #FFFFFF;
+  --pm-grad-from: #6366F1; --pm-grad-to: #4338CA;
+  --pm-text: #16181D; --pm-text-muted: #5A6172;
+  --pm-success: #059669; --pm-danger: #DC2626; --pm-warn: #D97706;
+}
+
+/* Capa de compatibilidad ampliada (auditoría Opus 5, Fase 1):
+   todas las clases neutras de las 21 vistas se remapean a tokens del tema activo.
+   Solo aplica cuando hay [data-theme] en <html>. */
+[data-theme] .bg-slate-950, [data-theme] .bg-\[\#0a0e1a\], [data-theme] .bg-\[\#0A0E1A\] { background-color: var(--pm-bg); }
+[data-theme] .bg-slate-900, [data-theme] .bg-\[\#111111\] { background-color: var(--pm-panel); }
+[data-theme] .bg-slate-800, [data-theme] .bg-slate-700 { background-color: var(--pm-panel-2); }
+[data-theme] .bg-slate-100, [data-theme] .bg-slate-200, [data-theme] .bg-slate-50,
+[data-theme] .bg-indigo-50, [data-theme] .bg-amber-50, [data-theme] .bg-red-50, [data-theme] .bg-red-100 { background-color: var(--pm-panel); }
+[data-theme] .bg-white\/5, [data-theme] .bg-white\/10 { background-color: var(--pm-panel-2); }
+[data-theme] .bg-white { background-color: var(--pm-panel); }
+[data-theme] .border-slate-800, [data-theme] .border-slate-700, [data-theme] .border-slate-600,
+[data-theme] .border-slate-500, [data-theme] .border-slate-200, [data-theme] .border-slate-100, [data-theme] .border-slate-50 { border-color: var(--pm-border); }
+[data-theme] .text-white { color: var(--pm-text); }
+[data-theme] .text-slate-100, [data-theme] .text-slate-200, [data-theme] .text-slate-300 { color: var(--pm-text); }
+[data-theme] .text-slate-400, [data-theme] .text-slate-500, [data-theme] .text-slate-600 { color: var(--pm-text-muted); }
+[data-theme] .text-indigo-600, [data-theme] .text-indigo-500, [data-theme] .text-indigo-700,
+[data-theme] .text-indigo-800, [data-theme] .text-indigo-900, [data-theme] .text-violet-600 { color: var(--pm-accent); }
+[data-theme] .bg-indigo-600, [data-theme] .bg-indigo-500, [data-theme] .bg-indigo-700, [data-theme] .bg-indigo-400,
+[data-theme] .bg-amber-500, [data-theme] .bg-red-600 { background-color: var(--pm-accent); }
+[data-theme] .bg-emerald-500, [data-theme] .bg-emerald-600, [data-theme] .bg-green-600,
+[data-theme] .bg-green-500 { background-color: var(--pm-success); }
+[data-theme] .text-indigo-50, [data-theme] .text-red-50, [data-theme] .text-red-700 { color: var(--pm-text); }
+
+/* Texto oscuro residual (etiquetas que se volvían invisibles sobre paneles oscuros) */
+[data-theme] .text-slate-700, [data-theme] .text-gray-700,
+[data-theme] .text-slate-800, [data-theme] .text-slate-900,
+[data-theme] .text-black, [data-theme] .text-gray-800, [data-theme] .text-gray-900 {
+  color: var(--pm-text);
+}
+[data-theme] .text-gray-500, [data-theme] .text-gray-600, [data-theme] .text-gray-400 { color: var(--pm-text-muted); }
+
+/* Tokens semánticos para código nuevo (Tailwind v4 @theme ya está arriba).
+   Utilidades runtime: */
+.pm-bg { background-color: var(--pm-bg); }
+.pm-panel { background-color: var(--pm-panel); }
+.pm-border { border-color: var(--pm-border); }
+.pm-accent { background-color: var(--pm-accent); }
+.pm-panel2-plain { background-color: var(--pm-accent); }
+.pm-accent-hover { background-color: var(--pm-accent); opacity: .9; }
+.pm-accent-text { color: var(--pm-accent); }
+.pm-accent-fg { color: var(--pm-accent-fg); }
+.pm-text { color: var(--pm-text); }
+.pm-text-muted { color: var(--pm-text-muted); }
+.pm-grad { background-image: linear-gradient(to right, var(--pm-grad-from), var(--pm-grad-to)); }
 
 /* ── Print styles for QR labels ─────────────────────────────────────────── */
 @media print {

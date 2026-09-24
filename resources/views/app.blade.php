@@ -21,6 +21,12 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <script>
+      /* Tema Pymetory: anti-FOUC — corre antes del bundle JS */
+      try { document.documentElement.dataset.theme = localStorage.getItem('pymetory.theme') || 'midnight-luxe'; }
+      catch(e) { document.documentElement.dataset.theme = 'midnight-luxe'; }
+    </script>
+
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0f0f0f">

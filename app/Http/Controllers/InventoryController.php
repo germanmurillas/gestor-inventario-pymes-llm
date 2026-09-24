@@ -8,7 +8,7 @@ use Inertia\Inertia;
 class InventoryController extends Controller {
     public function index() {
         // Enlaza la DB filtrando FEFO directo a la Data Estructurada del Componente Dashboard
-        $lotesActivos = Lote::with(['material', 'bodega'])->fefoOrder()->get()->map(function($lote) {
+        $lotesActivos = Lote::with(['material', 'bodega'])->fefoOrder()->get()->map(function(\App\Models\Lote $lote) {
             return [
                 'id' => $lote->id,
                 'material_id' => $lote->material_id,
@@ -61,7 +61,7 @@ class InventoryController extends Controller {
         ];
 
         // Actividad Reciente (Cargada desde el Kardex de Movimientos)
-        $recentActivity = \App\Models\Movimiento::with(['lote.material', 'user'])->latest()->take(5)->get()->map(function($mov) {
+        $recentActivity = \App\Models\Movimiento::with(['lote.material', 'user'])->latest()->take(5)->get()->map(function(\App\Models\Movimiento $mov) {
             return [
                 'id' => $mov->id,
                 'material' => $mov->lote->material->name,
@@ -76,7 +76,7 @@ class InventoryController extends Controller {
         });
 
         // Actividad Completa (Log Maestro / Kardex Histórico)
-        $fullActivity = \App\Models\Movimiento::with(['lote.material', 'user'])->latest()->get()->map(function($mov) {
+        $fullActivity = \App\Models\Movimiento::with(['lote.material', 'user'])->latest()->get()->map(function(\App\Models\Movimiento $mov) {
             return [
                 'id' => $mov->id,
                 'material' => $mov->lote->material->name,
@@ -195,7 +195,7 @@ class InventoryController extends Controller {
         $oldQuantity = $lote->quantity;
         $diff = $validated['new_quantity'] - $oldQuantity;
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($lote, $validated, $diff) {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($lote, $validated, $diff, $oldQuantity) {
             $lote->quantity = $validated['new_quantity'];
             if ($lote->quantity <= 0) {
                 $lote->status = 'consumed';
