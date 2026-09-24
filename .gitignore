@@ -69,3 +69,7 @@ enjambre/
 PLAN_PRUEBAS_MANUALES.md.bak
 *.bak
 docs/ENLACES_Y_CREDENCIALES.md
+.env
+.env.*
+!*.env.example
+backups/**/.env
