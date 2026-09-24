@@ -98,7 +98,7 @@
 }
 [data-theme="obsidian-teal"] {
   --pm-panel-2: #153036;
-  --pm-bg: #071316; --pm-panel: $; --pm-border: #1C3A40;
+  --pm-bg: #071316; --pm-panel: #0E2226; --pm-border: #1C3A40;
   --pm-accent: #2DD4BF; --pm-accent-fg: #04211F;
   --pm-grad-from: #2DD4BF; --pm-grad-to: #0E7490;
   --pm-text: #E6F4F1; --pm-text-muted: #7FA3A0;
@@ -106,7 +106,7 @@
 }
 [data-theme="carbon-amber"] {
   --pm-panel-2: #1E2022;
-  --pm-bg: #0C0C0D; --pm-panel: $; --pm-border: #27282C;
+  --pm-bg: #0C0C0D; --pm-panel: #141518; --pm-border: #27282C;
   --pm-accent: #F59E0B; --pm-accent-fg: #1A1206;
   --pm-grad-from: #F59E0B; --pm-grad-to: #B45309;
   --pm-text: #EDEDEF; --pm-text-muted: #9B9CA3;
@@ -114,7 +114,7 @@
 }
 [data-theme="royal-plum"] {
   --pm-panel-2: #2A1840;
-  --pm-bg: #12091B; --pm-panel: $; --pm-border: #2E1B40;
+  --pm-bg: #12091B; --pm-panel: #1A1229; --pm-border: #2E1B40;
   --pm-accent: #C084FC; --pm-accent-fg: #1B0B27;
   --pm-grad-from: #C084FC; --pm-grad-to: #7E22CE;
   --pm-text: #F2E9FB; --pm-text-muted: #A98FC0;
@@ -122,7 +122,7 @@
 }
 [data-theme="nordic-steel"] {
   --pm-panel-2: #1C2330;
-  --pm-bg: #0D1117; --pm-panel: $; --pm-border: #30363D;
+  --pm-bg: #0D1117; --pm-panel: #161C25; --pm-border: #30363D;
   --pm-accent: #3B82F6; --pm-accent-fg: #FFFFFF;
   --pm-grad-from: #3B82F6; --pm-grad-to: #1D4ED8;
   --pm-text: #E6EDF3; --pm-text-muted: #8B949E;
@@ -131,7 +131,7 @@
 [data-theme="paper-light"] {
   color-scheme: light;
   --pm-panel-2: #EBEEF5;
-  --pm-bg: #F7F8FB; --pm-panel: $; --pm-border: #E2E6EF;
+  --pm-bg: #F7F8FB; --pm-panel: #FFFFFF; --pm-border: #E2E6EF;
   --pm-accent: #5A4BD6; --pm-accent-fg: #FFFFFF;
   --pm-grad-from: #6366F1; --pm-grad-to: #4338CA;
   --pm-text: #16181D; --pm-text-muted: #5A6172;
@@ -168,6 +168,29 @@
   color: var(--pm-text);
 }
 [data-theme] .text-gray-500, [data-theme] .text-gray-600, [data-theme] .text-gray-400 { color: var(--pm-text-muted); }
+
+/* FIX(v2.2): variantes con opacidad /70,/80,/90 de slate-950/900 quedaban sin remap
+   (el selector .bg-slate-900 no matchea .bg-slate-900/80) → panel oscuro sobre tema
+   claro con texto oscuro remapeado = letras invisibles en el chat RAG. */
+[data-theme] .bg-slate-950\/70, [data-theme] .bg-slate-950\/80, [data-theme] .bg-slate-950\/90,
+[data-theme] .bg-slate-900\/70, [data-theme] .bg-slate-900\/80, [data-theme] .bg-slate-900\/90 {
+  background-color: var(--pm-panel);
+  backdrop-filter: none;
+}
+[data-theme] .bg-slate-950\/60, [data-theme] .bg-slate-900\/60 {
+  background-color: color-mix(in srgb, var(--pm-panel) 80%, transparent);
+  backdrop-filter: none;
+}
+/* backdrop translúcidos leves (30-50%): mantener sensación de vidrio pero con base clara */
+[data-theme] .bg-slate-950\/30, [data-theme] .bg-slate-900\/30,
+[data-theme] .bg-slate-900\/40, [data-theme] .bg-slate-900\/50,
+[data-theme] .bg-slate-900\/30 {
+  background-color: color-mix(in srgb, var(--pm-panel) 85%, transparent);
+}
+/* paneles opacos hardcodeados que escaparon del remap (dropdown RAG bg-[#0b0d13]) */
+[data-theme] .bg-\[\#0b0d13\], [data-theme] .bg-\[\#0B0D13\],
+[data-theme] .bg-\[\#0f1117\], [data-theme] .bg-\[\#1a1a1a\],
+[data-theme] .bg-\[\#111111\] { background-color: var(--pm-panel); }
 
 /* Tokens semánticos para código nuevo (Tailwind v4 @theme ya está arriba).
    Utilidades runtime: */
