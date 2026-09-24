@@ -180,7 +180,22 @@ class ChatLLMController extends Controller {
             $opencode = ['deepseek-v4-flash', 'qwen3.7-plus', 'glm-5.1', 'minimax-m3', 'kimi-k2.6', 'hy3-preview'];
         }
 
-        return response()->json(compact('local', 'opencode'));
+        // FIX-UI: replicar la resolucion real de ask() para no mostrar
+        // un modelo que el motor va a sobreescribir con api_keys.model_name.
+        $s = DB::table('settings')->whereIn('clave', ['llm_modelo', 'llm_source'])->pluck('valor', 'clave');
+        $activeSource = $s['llm_source'] ?? 'local';
+        $activeModel  = $s['llm_modelo'] ?? '';
+        $rec = \App\Models\ApiKey::where('tipo', $activeSource)->where('activo', true)->first();
+        $effectiveModel = $rec?->model_name ?: $activeModel;
+
+        return response()->json([
+            'local'            => $local,
+            'opencode'         => $opencode,
+            'active_source'    => $activeSource,
+            'active_model'     => $activeModel,
+            'effective_model'  => $effectiveModel,
+            'can_change_model' => auth()->user()?->role === 'admin',
+        ]);
     }
 
     /** GET /api/llm-providers — lista de proveedores (config + DB) */
@@ -327,8 +342,11 @@ class ChatLLMController extends Controller {
 
         $cfg = $endpoints[$llmSource] ?? $endpoints['external'];
 
-        // Usar modelo de api_keys si esta configurado
-        if ($apiModel) {
+        // FIX-UI: api_keys.model_name pisaba SIEMPRE la selección del usuario,
+        // por eso el dropdown "no servía": elegir glm-5.1 seguía inferenciando
+        // con el model_name del registro api_keys. Ahora settings.llm_modelo manda
+        // y api_keys solo actúa como fallback cuando no hay selección.
+        if (empty($llmModelo) && $apiModel) {
             $llmModelo = $apiModel;
         }
         if ($llmSource === 'local') {

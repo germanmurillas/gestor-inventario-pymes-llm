@@ -40,13 +40,25 @@ class SettingsController extends Controller
 
         DB::beginTransaction();
         try {
+            // FIX-UI: antes un ->update() sobre una clave inexistente afectaba 0 filas
+            // y el endpoint respondia success:true => el frontend creía haber guardado.
+            $aplicadas = [];
+            $ignoradas = [];
             foreach ($validated['settings'] as $clave => $valor) {
-                DB::table('settings')
+                $filas = DB::table('settings')
                     ->where('clave', $clave)
                     ->update([
                         'valor'      => $valor,
                         'updated_at' => now(),
                     ]);
+                $filas > 0 ? $aplicadas[] = $clave : $ignoradas[] = $clave;
+            }
+            if (!empty($ignoradas)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Claves inexistentes en settings: ' . implode(', ', $ignoradas),
+                ], 422);
             }
             DB::commit();
 
@@ -67,6 +79,7 @@ class SettingsController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Configuración guardada correctamente.',
+                'aplicadas' => $aplicadas,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

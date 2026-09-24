@@ -19,15 +19,53 @@ const FigmaLLM = () => {
     const [selectedSource, setSelectedSource] = useState('local');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [models, setModels] = useState<{local:string[],opencode:string[]}>({local:[],opencode:[]});
+    // FIX-UI: true cuando la seleccion NO se pudo persistir => el pill se marca en rojo
+    // en vez de mostrar un modelo que el backend no usa.
+    const [modelDirty, setModelDirty] = useState(false);
+    const [canChangeModel, setCanChangeModel] = useState(true);
     const scrollRef = useRef<HTMLDivElement>(null);
 
+    // FIX-UI: el dropdown solo se cerraba al elegir un modelo; quedaba tapando
+    // el texto de la respuesta del chat si el usuario hacía click en otro lado.
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!dropdownOpen) return;
+        const onDocClick = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setDropdownOpen(false);
+            }
+        };
+        const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setDropdownOpen(false); };
+        document.addEventListener('mousedown', onDocClick);
+        document.addEventListener('keydown', onEsc);
+        return () => {
+            document.removeEventListener('mousedown', onDocClick);
+            document.removeEventListener('keydown', onEsc);
+        };
+    }, [dropdownOpen]);
+
     const changeModel = async (source: string, model: string) => {
+        const prevSource = selectedSource;
+        const prevModel  = selectedModel;
         setSelectedSource(source);
         setSelectedModel(model);
-        try {
-            await axios.put('/settings', { settings: { llm_modelo: model, llm_source: source } });
-        } catch {}
         setDropdownOpen(false);
+        try {
+            const r = await axios.put('/settings', { settings: { llm_modelo: model, llm_source: source } });
+            // FIX-UI: el endpoint puede responder 200 sin haber escrito nada -> verificar
+            if (r.data?.success === false) throw new Error(r.data?.message || 'no persistido');
+            setModelDirty(false);
+        } catch (e: any) {
+            // FIX-UI: antes 'catch {}' se comía el 403 (PUT /settings es role:admin)
+            // y el pill quedaba mintiendo. Ahora revertimos y avisamos en la UI.
+            setSelectedSource(prevSource);
+            setSelectedModel(prevModel);
+            setModelDirty(true);
+            const motivo = e?.response?.status === 403
+                ? 'Solo un administrador puede cambiar el modelo LLM.'
+                : (e?.response?.data?.message || 'No se pudo guardar la selección.');
+            setMessages(prev => [...prev, { id: Date.now() + 2, role: 'bot', content: `> AVISO: ${motivo} El motor sigue usando ${prevSource} · ${prevModel}.` }]);
+        }
     };
 
     const fetchSessions = async () => {
@@ -45,7 +83,12 @@ const FigmaLLM = () => {
         fetchSessions();
         axios.get('/api/llm-models').then(r => {
             setModels(r.data);
-            if (r.data.local?.length) { setSelectedModel(r.data.local[0]); }
+            // FIX-UI: antes se pintaba local[0] (p.ej. qwen3:30b) como modelo activo,
+            // aunque settings.llm_modelo fuera otro. Ahora sincronizamos con la DB.
+            if (r.data.active_source) setSelectedSource(r.data.active_source);
+            const activo = r.data.effective_model || r.data.active_model;
+            if (activo) setSelectedModel(activo);
+            setCanChangeModel(r.data.can_change_model !== false);
         }).catch(() => {});
     }, []);
 
@@ -118,6 +161,12 @@ const FigmaLLM = () => {
             setMessages(prev => [...prev, botMessage]);
 
             setRagInfo({ model: response.data.model || '—', source: response.data.source || 'local', key_name: response.data.key_name || '—' });
+            // FIX-UI: si el backend inferenció con otro modelo (fallback, api_keys),
+            // el pill se corrige solo en vez de seguir mostrando la selección teórica.
+            if (response.data.model && response.data.model !== selectedModel) {
+                setSelectedModel(response.data.model);
+                setSelectedSource(response.data.source || selectedSource);
+            }
 
             if (!activeSessionId && response.data.session_id) {
                 setActiveSessionId(response.data.session_id);
@@ -158,7 +207,7 @@ const FigmaLLM = () => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Buscar auditoría..." 
-                        className="w-full bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
+                        className="w-full bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                      />
                  </div>
 
@@ -170,7 +219,7 @@ const FigmaLLM = () => {
                             className={`p-4 rounded-lg border cursor-pointer transition-all ${
                                 activeSessionId === s.session_id 
                                 ? 'bg-indigo-50 border-indigo-200 shadow-sm' 
-                                : 'bg-slate-900/80 backdrop-blur-xl border-gray-100 hover:border-slate-700/30'
+                                : 'bg-slate-900/80 backdrop-blur-xl border-slate-700/40 hover:border-slate-600'
                             }`}
                          >
                              <div className="text-sm font-bold truncate text-slate-300">{s.session_title || 'Nueva Consulta'}</div>
@@ -187,7 +236,7 @@ const FigmaLLM = () => {
 
             {/* Chat Window (Mockup 10 Center) */}
             <div className="flex-1 flex flex-col bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-xl overflow-hidden shadow-sm">
-                <header className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-800/50/30">
+                <header className="px-6 py-4 border-b border-slate-700/40 flex items-center justify-between bg-slate-800/40 relative z-20">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-black rounded flex items-center justify-center text-white">
                             <Bot size={18} />
@@ -206,32 +255,46 @@ const FigmaLLM = () => {
                                 )}
                             </div>
                         </div>
-                        <div className="relative">
+                        {/* FIX-UI: ref para click-outside (cerrar al pulsar fuera) */}
+                        <div className="relative" ref={dropdownRef}>
                             <button
-                                onClick={() => setDropdownOpen(!dropdownOpen)}
-                                className="flex items-center gap-1.5 bg-slate-900/80 border border-slate-700/40 rounded-md px-2.5 py-1 text-[10px] font-bold text-gray-300 hover:border-slate-500 transition-colors"
+                                onClick={() => canChangeModel && setDropdownOpen(!dropdownOpen)}
+                                aria-haspopup="listbox"
+                                aria-expanded={dropdownOpen}
+                                aria-label={`Modelo activo: ${selectedSource} ${selectedModel}. Cambiar modelo`}
+                                title={modelDirty ? 'No se pudo guardar la selección — el motor sigue usando el modelo anterior' : `Modelo persistido en settings: ${selectedModel}`}
+                                className={`flex items-center gap-1.5 bg-slate-950 border rounded-md px-2.5 py-1 text-[10px] font-bold text-slate-200 transition-colors ${modelDirty ? 'border-[#E63B2E]' : 'border-slate-600 hover:border-slate-400'}`}
                             >
                                 <span className="text-[#E63B2E] uppercase tracking-wider">{selectedSource === 'opencode' ? 'OPENCODE' : 'LOCAL'}</span>
-                                <span className="text-slate-400">·</span>
+                                <span className="text-slate-500">·</span>
                                 <span className="truncate max-w-[120px]">{selectedModel}</span>
+                                {modelDirty && <span className="text-[#E63B2E] font-black" aria-hidden="true">!</span>}
                                 <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {dropdownOpen && (
-                                <div className="absolute right-0 top-full mt-1 z-50 bg-slate-900 border border-slate-700/60 rounded-lg shadow-xl overflow-hidden min-w-[220px]">
-                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2 border-b border-slate-800">LOCAL · Ollama</div>
+                                <div
+                                    role="listbox"
+                                    aria-label="Seleccionar modelo LLM"
+                                    className="absolute right-0 top-full mt-2 z-50 bg-[#0b0d13] border border-slate-600 rounded-lg shadow-2xl min-w-[240px] max-h-[min(60vh,420px)] overflow-y-auto custom-scrollbar"
+                                >
+                                    <div className="sticky top-0 z-10 bg-slate-800/95 backdrop-blur-sm text-[10px] leading-4 font-black uppercase tracking-widest text-slate-300 px-3 py-2 border-b border-slate-600">LOCAL · Ollama</div>
                                     {models.local.map(m => (
                                         <button
                                             key={m}
+                                            role="option"
+                                            aria-selected={selectedSource === 'local' && selectedModel === m}
                                             onClick={() => changeModel('local', m)}
-                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${selectedSource === 'local' && selectedModel === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
+                                            className={`w-full text-left px-3 py-2 text-[11px] text-slate-200 hover:bg-slate-700 transition-colors ${selectedSource === 'local' && selectedModel === m ? 'bg-slate-700 border-l-2 border-[#E63B2E] font-bold' : ''}`}
                                         >{m}</button>
                                     ))}
-                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-2 border-b border-slate-800 border-t">OPENCODE · Remoto · $0</div>
+                                    <div className="sticky z-10 bg-slate-800/95 backdrop-blur-sm text-[10px] leading-4 font-black uppercase tracking-widest text-slate-300 px-3 py-2 border-y border-slate-600">OPENCODE · Remoto · $0</div>
                                     {models.opencode.map(m => (
                                         <button
                                             key={m}
+                                            role="option"
+                                            aria-selected={selectedSource === 'opencode' && selectedModel === m}
                                             onClick={() => changeModel('opencode', m)}
-                                            className={`w-full text-left px-3 py-1.5 text-[11px] text-gray-300 hover:bg-slate-800 transition-colors ${selectedSource === 'opencode' && selectedModel === m ? 'bg-slate-800 border-l-2 border-[#E63B2E]' : ''}`}
+                                            className={`w-full text-left px-3 py-2 text-[11px] text-slate-200 hover:bg-slate-700 transition-colors ${selectedSource === 'opencode' && selectedModel === m ? 'bg-slate-700 border-l-2 border-[#E63B2E] font-bold' : ''}`}
                                         >{m}</button>
                                     ))}
                                 </div>
@@ -251,7 +314,7 @@ const FigmaLLM = () => {
                     ))}
                     {isThinking && (
                         <div className="flex justify-start">
-                            <div className="bg-slate-800/50 border border-gray-100 p-4 rounded-xl flex items-center gap-3">
+                            <div className="bg-slate-800/50 border border-slate-700/40 p-4 rounded-xl flex items-center gap-3">
                                 <Loader2 size={16} className="animate-spin text-slate-200" />
                                 <span className="text-xs font-bold uppercase tracking-widest opacity-40">Escaneando Lotes...</span>
                             </div>
@@ -259,14 +322,14 @@ const FigmaLLM = () => {
                     )}
                 </div>
 
-                <footer className="p-4 border-t border-gray-100 bg-slate-800/50">
+                <footer className="p-4 border-t border-slate-700/40 bg-slate-800/40">
                     <div className="relative">
                         <textarea 
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
                             placeholder="Ej: ¿Qué lotes vencen esta semana?" 
-                            className="w-full bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-black min-h-[50px] max-h-[150px] resize-none"
+                            className="w-full bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[50px] max-h-[150px] resize-none"
                             rows={1}
                         />
                         <button 

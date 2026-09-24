@@ -57,6 +57,15 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
   @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
 }
+/* FIX-UI: el scrollbar de 5px NO es overlay; al aparecer robaba 5px al content-box
+   y todos los items del sidebar reflowaban horizontalmente ("el menu se deforma").
+   scrollbar-gutter:stable reserva el canal siempre => cero layout shift. */
+.custom-scrollbar {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;                 /* Firefox */
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  overscroll-behavior: contain;          /* no propaga el scroll al <main> */
+}
 
 /* GSAP Helper */
 .reveal-visible {
