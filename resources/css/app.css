@@ -594,3 +594,8 @@ nav[aria-label="Breadcrumb"] h1{ color: var(--pm-text); }
   border-color: color-mix(in oklab, var(--pm-accent) 30%, var(--pm-panel)) !important;
 }
 [data-theme] .border-indigo-500\/20{ border-color: color-mix(in oklab, var(--pm-accent) 30%, var(--pm-panel)); }
+
+/* FIX: glass-morphism bg-white/80 crea panel CLARO en temas oscuros por defecto
+   (el capa data-theme remapea .bg-white pero no .glass-morphism con @apply interno
+   - en runtime el style queda bg rgba(255,255,255,.8)) */
+[data-theme] .glass-morphism{ background-color: var(--pm-panel); border-color: var(--pm-border); }
