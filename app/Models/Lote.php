@@ -78,8 +78,14 @@ class Lote extends Model {
      * (Umbral ajustado de 7 a 15 días según criterio Prof. Héctor — auditabilidad temprana)
      */
     public function getIsCriticalAttribute(): bool {
-        return $this->days_until_expiration <= 15
+        return $this->days_until_expiration <= self::diasCriticos()
             && $this->status !== 'consumed';
+    }
+
+    /** Umbral FEFO configurable en Ajustes (settings.fefo_dias_criticos); 15 días por defecto. */
+    public static function diasCriticos(): int {
+        return once(fn () => max(1, (int) (\Illuminate\Support\Facades\DB::table('settings')
+            ->where('clave', 'fefo_dias_criticos')->value('valor') ?: 15)));
     }
 
     /** Valor económico total del lote: quantity × unit_cost */
@@ -119,6 +125,6 @@ class Lote extends Model {
      */
     public function scopeCriticos($query) {
         return $query->where('status', '!=', 'consumed')
-                     ->whereDate('expiration_date', '<=', Carbon::now()->addDays(15));
+                     ->whereDate('expiration_date', '<=', Carbon::now()->addDays(self::diasCriticos()));
     }
 }
