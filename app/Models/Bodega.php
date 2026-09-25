@@ -14,8 +14,20 @@ class Bodega extends Model
         'code',
         'description',
         'capacity',
-        'status'
+        'status',
+        'image_path',
     ];
+
+    protected $appends = ['image_url'];
+
+    /** Imagen subida por el administrador; si no hay, la foto por defecto de su código (catálogo demo). */
+    public function getImageUrlAttribute(): ?string
+    {
+        if ($this->image_path) {
+            return asset('storage/' . $this->image_path);
+        }
+        return is_file(public_path("images/bodegas/{$this->code}.webp")) ? asset("images/bodegas/{$this->code}.webp") : null;
+    }
 
     public function lotes(): HasMany
     {

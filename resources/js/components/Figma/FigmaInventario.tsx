@@ -7,13 +7,13 @@ import FigmaConsumeForm from './FigmaConsumeForm';
 import FigmaConsumeWizard from './FigmaConsumeWizard';
 import FigmaFefoBadge from './FigmaFefoBadge';
 
-const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes?: any[], bodegas?: any[], user?: any, onNavigate?: (view: string) => void }) => {
+const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBodegaCode, onManageBodegas }: { lotes?: any[], bodegas?: any[], user?: any, onNavigate?: (view: string) => void, initialBodegaCode?: string | null, onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
     const [viewMode, setViewMode] = useState<'GRID' | 'DETAIL' | 'FORM' | 'CONSUME' | 'WIZARD'>('GRID');
     const [showModal, setShowModal] = useState(false);
     const [showBodegaModal, setShowBodegaModal] = useState(false);
     const [showAdjustModal, setShowAdjustModal] = useState(false);
     const [selectedLote, setSelectedLote] = useState<any>(null);
-    const [selectedBodega, setSelectedBodega] = useState<any>(null);
+    const [selectedBodega, setSelectedBodega] = useState<any>(() => bodegas.find((b: any) => b.code === initialBodegaCode) ?? null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTag, setSelectedTag] = useState<string>('');
     const [categoria, setCategoria] = useState('');
@@ -81,7 +81,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
         const map = new Map<string, any>();
         filteredLotes.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
             if (!map.has(l.codigo)) map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg',
-                foto: l.photo_url, minimo: Number(l.stock_minimo || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
+                foto: l.photo_url, minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
             const m = map.get(l.codigo);
             m.lotes.push(l);
             if (l.estado === 'quarantined') m.cuarentena++; else m.stock += Number(l.cantidad) || 0;
@@ -234,7 +234,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                         </Chip>
                     ))}
                     {user?.role === 'admin' && (
-                        <button onClick={() => setShowBodegaModal(true)} className="shrink-0 rounded-full border border-dashed border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-400">+ Bodega</button>
+                        <button onClick={() => onManageBodegas ? onManageBodegas(null) : setShowBodegaModal(true)} className="shrink-0 rounded-full border border-dashed border-indigo-400/50 px-3 py-1.5 text-xs font-semibold text-indigo-200">Gestionar bodegas</button>
                     )}
                 </div>
                 {categorias.length > 1 && (
@@ -245,11 +245,35 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                 )}
             </div>
 
+            {/* Bodega seleccionada: imagen y resumen real */}
+            {selectedBodega && (
+                <div className="relative overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900">
+                    {selectedBodega.image_url && <img src={selectedBodega.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-50" />}
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-950/20" />
+                    <div className="relative flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:justify-between">
+                        <div className="min-w-0">
+                            <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{selectedBodega.code}</p>
+                            <h2 className="text-2xl font-bold normal-case text-white">{selectedBodega.name}</h2>
+                            {selectedBodega.description && <p className="mt-1 max-w-md text-sm text-slate-300">{selectedBodega.description}</p>}
+                        </div>
+                        <div className="flex gap-4 text-sm text-slate-300">
+                            <span><b className="text-white">{selectedBodega.lotes ?? 0}</b> lotes</span>
+                            <span><b className="text-white">{selectedBodega.insumos ?? 0}</b> insumos</span>
+                            <span><b className={selectedBodega.criticos ? 'text-rose-300' : 'text-white'}>{selectedBodega.criticos ?? 0}</b> por vencer</span>
+                            {user?.role === 'admin' && onManageBodegas && (
+                                <button onClick={() => onManageBodegas(selectedBodega.id)} className="font-semibold text-indigo-300">Editar</button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Insumos */}
             {materiales.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {materiales.map((m) => {
-                        const bajo = m.minimo > 0 && m.stock < m.minimo;
+                        // El mínimo se compara con el stock total del insumo en todas las bodegas, no solo el filtrado.
+                        const bajo = m.minimo > 0 && m.stockGlobal < m.minimo;
                         return (
                             <button key={m.codigo} onClick={() => setMaterialAbierto(m.codigo)}
                                 className="group flex items-center gap-4 rounded-3xl border border-slate-700/30 bg-slate-800/40 p-3 text-left transition hover:border-indigo-400/40 active:scale-[0.99]">

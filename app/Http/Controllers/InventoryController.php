@@ -114,11 +114,25 @@ class InventoryController extends Controller {
         });
 
         // Estadísticas de Bodegas Reales
-        $bodegaStats = \App\Models\Bodega::all()->map(function($bodega) {
+        // Resumen real del inventario de cada bodega (lotes activos, insumos, críticos y valor).
+        $porBodega = Lote::activos()->selectRaw('bodega_id, COUNT(*) as lotes, COUNT(DISTINCT material_id) as insumos, COALESCE(SUM(quantity * unit_cost), 0) as valor')
+            ->groupBy('bodega_id')->get()->keyBy('bodega_id');
+        $criticosPorBodega = Lote::criticos()->where('status', 'active')->selectRaw('bodega_id, COUNT(*) as n')->groupBy('bodega_id')->pluck('n', 'bodega_id');
+        $cuarentenaPorBodega = Lote::where('status', 'quarantined')->selectRaw('bodega_id, COUNT(*) as n')->groupBy('bodega_id')->pluck('n', 'bodega_id');
+
+        $bodegaStats = \App\Models\Bodega::orderBy('id')->get()->map(function($bodega) use ($porBodega, $criticosPorBodega, $cuarentenaPorBodega) {
+            $r = $porBodega[$bodega->id] ?? null;
             return [
+                'lotes' => (int) ($r->lotes ?? 0),
+                'insumos' => (int) ($r->insumos ?? 0),
+                'valor' => (float) ($r->valor ?? 0),
+                'criticos' => (int) ($criticosPorBodega[$bodega->id] ?? 0),
+                'cuarentena' => (int) ($cuarentenaPorBodega[$bodega->id] ?? 0),
                 'name' => $bodega->name,
                 'id' => $bodega->id,
                 'code' => $bodega->code,
+                'description' => $bodega->description,
+                'image_url' => $bodega->image_url,
                 'capacity' => $bodega->capacity,
                 'occupied' => $bodega->occupied_capacity,
                 'percentage' => $bodega->occupancy_percentage,
@@ -243,18 +257,40 @@ class InventoryController extends Controller {
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:20|unique:bodegas,code',
             'capacity' => 'required|numeric|min:1',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string|max:500',
+            'image' => 'nullable|image|max:6144',
         ]);
 
         \App\Models\Bodega::create([
             'name' => $validated['name'],
-            'code' => $validated['code'],
+            'code' => strtoupper($validated['code']),
             'capacity' => $validated['capacity'],
-            'description' => $validated['description'] ?? "Bodega creada el " . now()->format('Y-m-d'),
-            'status' => 'active'
+            'description' => $validated['description'] ?? null,
+            'status' => 'active',
+            'image_path' => $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public') : null,
         ]);
 
         return back()->with('success', 'Nueva bodega creada exitosamente.');
+    }
+
+    /** Editar datos e imagen de fondo de una bodega (solo administrador). */
+    public function updateBodega(\Illuminate\Http\Request $request, \App\Models\Bodega $bodega) {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'capacity' => 'required|numeric|min:1',
+            'description' => 'nullable|string|max:500',
+            'status' => 'required|in:active,full,maintenance',
+            'image' => 'nullable|image|max:6144',
+            'remove_image' => 'nullable|boolean',
+        ]);
+
+        if ($request->hasFile('image') || $request->boolean('remove_image')) {
+            if ($bodega->image_path) \Illuminate\Support\Facades\Storage::disk('public')->delete($bodega->image_path);
+            $bodega->image_path = $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public') : null;
+        }
+        $bodega->fill(collect($validated)->only(['name', 'capacity', 'description', 'status'])->all())->save();
+
+        return back()->with('success', 'Bodega actualizada.');
     }
 
     /**

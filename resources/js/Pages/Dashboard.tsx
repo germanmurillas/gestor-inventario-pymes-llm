@@ -20,6 +20,7 @@ import FigmaScanHistory from '../components/Figma/FigmaScanHistory';
 import FigmaTransferForm from '../components/Figma/FigmaTransferForm';
 import FigmaPurchaseOrders from '../components/Figma/FigmaPurchaseOrders';
 import FigmaLabelPrint from '../components/Figma/FigmaLabelPrint';
+import FigmaBodegaManager from '../components/Figma/FigmaBodegaManager';
 
 type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
 
@@ -42,6 +43,9 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
         return (v && v in VIEW_LABELS ? v : 'TABLERO') as ViewMode;
     });
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [bodegaFiltro, setBodegaFiltro] = useState<string | null>(null);
+    const [gestorBodegas, setGestorBodegas] = useState<'nueva' | number | null | false>(false);
+    const abrirBodega = (code: string) => { setBodegaFiltro(code); setActiveView('INVENTARIO'); };
     const [mobileOpen, setMobileOpen] = useState(false);
     const viewRef = useRef<HTMLDivElement>(null);
     const user = auth?.user || { name: 'Invitado', role: 'operario' };
@@ -101,8 +105,8 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     <div ref={viewRef} className="px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:p-8 min-h-full">
-                        {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} onViewChange={setActiveView} />}
-                        {activeView === 'INVENTARIO' && <FigmaInventario lotes={lotes} bodegas={stats?.bodegas || []} user={user} onNavigate={setActiveView} />}
+                        {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} onViewChange={setActiveView} onOpenBodega={abrirBodega} onManageBodegas={setGestorBodegas} />}
+                        {activeView === 'INVENTARIO' && <FigmaInventario key={bodegaFiltro ?? 'todas'} lotes={lotes} bodegas={stats?.bodegas || []} user={user} onNavigate={setActiveView} initialBodegaCode={bodegaFiltro} onManageBodegas={setGestorBodegas} />}
                         {activeView === 'BUSCAR' && <FigmaSearch lotes={lotes} />}
                         {activeView === 'ETIQUETAS' && <FigmaLabels lotes={lotes} />}
                         {activeView === 'REPORTES' && <FigmaReports stats={stats} />}
@@ -128,6 +132,10 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                     </div>
                 </div>
             </main>
+
+            {gestorBodegas !== false && (
+                <FigmaBodegaManager bodegas={stats?.bodegas || []} inicial={gestorBodegas} onClose={() => setGestorBodegas(false)} />
+            )}
 
             <MobileNav activeView={activeView} onNavigate={(v) => setActiveView(v as ViewMode)} user={user} />
         </div>

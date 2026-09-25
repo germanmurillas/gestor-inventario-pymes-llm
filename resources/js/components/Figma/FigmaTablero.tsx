@@ -6,7 +6,7 @@ import FigmaQuickActions from './FigmaQuickActions';
 import FigmaActivityItem from './FigmaActivityItem';
 import FigmaFefoTimer from './FigmaFefoTimer';
 
-const FigmaTablero = ({ stats, user, onViewChange }: { stats: any; user: any; onViewChange: (view: any) => void }) => {
+const FigmaTablero = ({ stats, user, onViewChange, onOpenBodega, onManageBodegas }: { stats: any; user: any; onViewChange: (view: any) => void; onOpenBodega?: (code: string) => void; onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
     const summary = stats?.summary || { totalMaterials: 0, totalLotes: 0, lotesCriticos: 0, totalInventoryValue: 0, totalInventoryVolume: 0 };
     const efficiency = stats?.efficiency || { accuracy: 0, turnoverRatio: 0, occupancyTotal: 0 };
     const activity = stats?.recentActivity || [];
@@ -124,20 +124,20 @@ const FigmaTablero = ({ stats, user, onViewChange }: { stats: any; user: any; on
                 <div className="space-y-6">
                     {/* Bodegas */}
                     <div>
-                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display mb-4">
-                            Ocupación por Bodega
-                        </h3>
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] font-display">Bodegas</h3>
+                            {user?.role === 'admin' && onManageBodegas && (
+                                <button onClick={() => onManageBodegas(null)} className="text-[11px] font-bold text-indigo-300 hover:text-indigo-200">Gestionar</button>
+                            )}
+                        </div>
                         <div className="space-y-3">
                             {bodegas.length > 0 ? (
                                 bodegas.map((b: any) => (
                                     <FigmaBodegaBar
                                         key={b.code}
-                                        name={b.name}
-                                        code={b.code}
-                                        percentage={b.percentage}
-                                        capacity={b.capacity}
-                                        occupied={b.occupied}
-                                        status={b.status}
+                                        bodega={b}
+                                        onOpen={() => onOpenBodega?.(b.code)}
+                                        onEdit={user?.role === 'admin' && onManageBodegas ? () => onManageBodegas(b.id) : undefined}
                                     />
                                 ))
                             ) : (
