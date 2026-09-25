@@ -1,0 +1,143 @@
+% -------------------------------------------------
+% Capítulo: Pruebas
+% Orden del director (19-sep-2026): pruebas unitarias, de integración, con usuario y
+% algún reporte. Todas las cifras salen de ejecuciones del 25-sep-2026:
+%   php artisan test  -> 76 pruebas (75 aprobadas, 1 omitida), 181 aserciones
+%   npx playwright test -> 60 de 60 aprobadas
+% -------------------------------------------------
+
+Este capítulo presenta las pruebas con que se verificó Pymetory: pruebas unitarias y de integración sobre el backend, pruebas de extremo a extremo sobre la interfaz, verificaciones en producción y el protocolo de pruebas con usuario. Todas las cifras corresponden a ejecuciones del 25 de septiembre de 2026 sobre la versión desplegada.
+
+\section{Estrategia}
+\label{sec:pru_estrategia}
+
+Las pruebas se organizaron en cuatro niveles:
+
+\begin{enumerate}
+    \item \textbf{Unitarias y de integración (PHPUnit).} Verifican reglas de negocio, controladores y permisos ejecutando la aplicación contra una base de datos SQLite en memoria que se reconstruye en cada prueba.
+    \item \textbf{De extremo a extremo (Playwright \cite{playwright}).} Manejan un navegador real contra la aplicación y recorren los casos del plan de pruebas, en escritorio y en celular.
+    \item \textbf{Verificación en producción.} Después de cada despliegue se comprueba en \url{https://app.pymetory.com} el funcionamiento de los cambios.
+    \item \textbf{Pruebas con usuario.} Tareas reales ejecutadas por la administradora de la empresa del caso de estudio (Sección \ref{sec:pru_usuario}).
+\end{enumerate}
+
+Las pruebas PHPUnit se ejecutan automáticamente en cada cambio que llega a la rama principal, y un fallo detiene el despliegue (Capítulo \ref{chap:implementacion}).
+
+\section{Pruebas unitarias y de integración}
+\label{sec:pru_phpunit}
+
+La suite PHPUnit tiene \textbf{76 pruebas en 32 clases}: 75 aprobadas y 1 omitida, con \textbf{181 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
+
+En Laravel, la mayoría de estas pruebas son de integración: envían una petición HTTP y recorren rutas, \textit{middleware}, controladores y base de datos. Algunas prueban un componente aislado, como el modelo \texttt{Movimiento} (inmutabilidad), el umbral del modelo \texttt{Lote} o el clasificador del asistente, y cumplen el papel de pruebas unitarias. La Tabla \ref{tab:pru_phpunit} las agrupa por área.
+
+\begin{longtable}{|p{3.4cm}|c|p{10cm}|}
+\caption{Pruebas PHPUnit por área.}
+\label{tab:pru_phpunit}\\
+\hline
+\textbf{Área} & \textbf{Pruebas} & \textbf{Clases y qué verifican} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Área} & \textbf{Pruebas} & \textbf{Clases y qué verifican} \\
+\hline
+\endhead
+FEFO & 7 & \texttt{FefoTest}, \texttt{ConsumptionFefoTest}, \texttt{FefoUmbralTest}, \texttt{ExpiredLoteRegressionTest}, \texttt{DashboardCriticosConsistencyTest}: orden de despacho por vencimiento, consumo que atraviesa varios lotes, lotes vencidos y umbral configurable. \\ \hline
+Kardex & 7 & \texttt{KardexTest}, \texttt{KardexInmutableTest}: registro de movimientos, rechazo de edición y borrado, protección en la base de datos y entrada al recibir órdenes de compra. \\ \hline
+Seguridad y roles & 13 & \texttt{UserManagementTest}, \texttt{ApiKeyTest}, \texttt{Auth\textbackslash AuthenticationTest}, \texttt{SettingsTest}: acceso por rol, registro público sin privilegios y claves cifradas. \\ \hline
+Asistente & 8 & \texttt{ChatLLMTest}, \texttt{ChatRagContextTest}, \texttt{ChatLLMLiveTest} (omitida): clasificación con tildes, material inexistente y filtrado del contexto. \\ \hline
+Operación de inventario & 16 & \texttt{InventoryTest}, \texttt{InventoryStoreTest}, \texttt{TransferTest}, \texttt{PurchaseOrderTest}, \texttt{QRScanTest}, \texttt{LabelTest}, \texttt{TagTest}. \\ \hline
+Reportes & 9 & \texttt{ReportExportTest}: los tipos de reporte en PDF y CSV y sus filtros. \\ \hline
+Kanban & 6 & \texttt{KanbanTest}, \texttt{KanbanReorderTest}. \\ \hline
+Flujos completos & 5 & \texttt{Flujos\textbackslash *}: autenticación, inventario, exportación, escaneo QR y consulta al asistente de principio a fin. \\ \hline
+Esquema y servicios & 5 & \texttt{MigrationsSchemaSanityTest}, \texttt{AlertServiceTest} y pruebas base del framework. \\ \hline
+\textbf{Total} & \textbf{76} & 75 aprobadas, 1 omitida, 181 aserciones. \\ \hline
+\end{longtable}
+
+\section{Pruebas de extremo a extremo}
+\label{sec:pru_e2e}
+
+La suite Playwright tiene \textbf{60 pruebas} y las \textbf{60 aprobaron}. Se ejecutan en Chromium con una ventana de escritorio de 1366$\times$768 y, para las pruebas móviles, con una pantalla de 390$\times$844.
+
+\begin{table}[H]
+\centering
+\caption{Pruebas de extremo a extremo.}
+\label{tab:pru_e2e}
+\begin{tabular}{|p{4.3cm}|c|p{8.8cm}|}
+\hline
+\textbf{Conjunto} & \textbf{Pruebas} & \textbf{Qué cubren} \\
+\hline
+Plan de casos & 34 & 17 casos positivos (ingreso, tablero, inventario, búsqueda, asistente, reportes PDF y CSV, Kardex, etiquetas, escaneo QR, transferencias, órdenes de compra, kanban) y 17 negativos (credenciales inválidas, datos vacíos o duplicados, stock insuficiente, QR corrupto, operario sin permisos, entre otros). \\ \hline
+Humo (\textit{smoke}) & 5 & Ingreso, tablero, kanban, asistente y ajustes responden sin errores. \\ \hline
+Estados de la interfaz & 5 & Los módulos principales se renderizan. \\ \hline
+Móvil & 4 & Tablero e inventario sin desbordes en 390 px. \\ \hline
+Tablero, kanban y asistente & 10 & Indicadores, arrastrar y soltar tarjetas y respuestas del asistente. \\ \hline
+Recorrido de sustentación & 1 & Ingreso, inventario, reporte PDF, kanban y pregunta al asistente con respuesta en kilogramos. \\ \hline
+Dominio principal & 1 & El dominio pymetory.com redirige correctamente. \\ \hline
+\textbf{Total} & \textbf{60} & \textbf{60 aprobadas.} \\ \hline
+\end{tabular}
+\end{table}
+
+Además de la suite, el repositorio conserva diez \textit{scripts} de diagnóstico que se ejecutan contra producción. No se cuentan como pruebas porque dependen de los datos vivos del servidor y no son repetibles.
+
+\section{Defectos encontrados}
+\label{sec:pru_defectos}
+
+Las pruebas y la verificación en producción encontraron defectos que se corrigieron antes de cerrar este documento. Los más relevantes se describen con su causa y su commit en la Tabla \ref{tab:imp_problemas} del Capítulo \ref{chap:implementacion}. Entre ellos están el registro público que permitía crear administradores, el borrado en cascada del Kardex y el asistente que devolvía lotes de otros materiales. En la última ejecución de la suite de extremo a extremo aparecieron además dos defectos introducidos por el rediseño de la pantalla de ingreso (campos sin atributo \texttt{name}) y por datos del tablero (bodegas sin identificador), también corregidos.
+
+\section{Verificación en producción}
+\label{sec:pru_produccion}
+
+Sobre la versión desplegada se verificó que el operario recibe acceso denegado (HTTP 403) en la gestión de usuarios y de claves de API, que el administrador sí accede, y que la aplicación no muestra información interna ante un error. Con el modelo \texttt{gpt-oss:120b-cloud} se hicieron las consultas de la Tabla \ref{tab:pru_rag} sobre los datos de demostración.
+
+\begin{table}[H]
+\centering
+\caption{Consultas al asistente en producción (25 de septiembre de 2026).}
+\label{tab:pru_rag}
+\begin{tabular}{|p{4.1cm}|p{8.4cm}|c|}
+\hline
+\textbf{Pregunta} & \textbf{Respuesta (extracto)} & \textbf{Tiempo} \\
+\hline
+¿Cuánta harina de trigo hay? & Hay 5\,772 kg de harina de trigo. & 0,7 s \\ \hline
+¿Cuánto ajonjolí queda? & Ajonjolí descortezado: 249,5 kg. & 0,6 s \\ \hline
+¿Qué lotes vencen pronto? & Levadura fresca, lote LEV-2609-A, vence 2026-10-01; levadura fresca, lote LEV-2609-B, vence 2026-10-21; \ldots & 1,4 s \\ \hline
+¿Cuánta mantequilla hay? & El material mantequilla no está registrado en el inventario. Los materiales que sí aparecen son: \ldots & 1,1 s \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Pruebas con usuario}
+\label{sec:pru_usuario}
+
+La prueba con usuario se realizará con la administradora de la empresa del caso de estudio, sobre la versión de producción. El protocolo es el siguiente:
+
+\begin{enumerate}
+    \item \textbf{Tareas}, derivadas de los requerimientos del Capítulo \ref{chap:requerimientos}: registrar el ingreso de un lote con su fecha de vencimiento, consumir una cantidad y comprobar qué lote se descontó, consultar al asistente cuánto queda de un insumo, conciliar un conteo físico y generar el reporte de consumo.
+    \item \textbf{Observación}: por cada tarea se registra si se completó, el tiempo empleado y los errores o dudas.
+    \item \textbf{Cuestionario SUS} (\textit{System Usability Scale}) de diez preguntas al finalizar.
+    \item \textbf{Entrevista corta} sobre qué cambiaría del sistema.
+\end{enumerate}
+
+\textbf{Estado:} programada, pendiente de ejecución. Sus resultados se incorporarán en esta sección.
+
+\section{Cumplimiento del indicador del objetivo específico 4}
+\label{sec:pru_indicador}
+
+El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La Tabla \ref{tab:pru_oe4} muestra su estado a la fecha.
+
+\begin{longtable}{|p{5.4cm}|p{6.3cm}|p{3cm}|}
+\caption{Estado del indicador del objetivo específico 4.}
+\label{tab:pru_oe4}\\
+\hline
+\textbf{Componente del indicador} & \textbf{Evidencia} & \textbf{Estado} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Componente del indicador} & \textbf{Evidencia} & \textbf{Estado} \\
+\hline
+\endhead
+111 casos de prueba ejecutados & 136 pruebas automatizadas (76 PHPUnit y 60 de extremo a extremo). & Cumplido \\ \hline
+Tasa de éxito global $\geq$ 95\% & 135 de 135 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
+Casos de uso automatizados con Playwright & 34 casos del plan que recorren los casos de uso. & Cumplido \\ \hline
+7 escenarios de despacho FEFO & 7 pruebas sobre la regla FEFO (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
+50 consultas en español para medir la precisión del asistente & Consultas verificadas en producción (Tabla \ref{tab:pru_rag}); falta la batería completa de 50 con su medición. & Pendiente \\ \hline
+Evaluación heurística de Nielsen & --- & Pendiente \\ \hline
+Auditoría de accesibilidad WCAG AA & --- & Pendiente \\ \hline
+\end{longtable}
