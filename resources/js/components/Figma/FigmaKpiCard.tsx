@@ -70,7 +70,7 @@ export default function FigmaKpiCard({ icon, count, label, color = 'indigo', tre
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={style}
-            className={`bg-slate-800/50 backdrop-blur-xl border ${c.border} rounded-2xl p-5 flex flex-col gap-3 hover:border-[var(--champagne)]/30 transition-colors duration-300 group ${c.glow} relative overflow-hidden cursor-default`}
+            className={`bg-slate-800/50 backdrop-blur-xl border ${c.border} rounded-2xl p-4 sm:p-5 flex flex-col gap-2 sm:gap-3 hover:border-[var(--champagne)]/30 transition-colors duration-300 group ${c.glow} relative overflow-hidden cursor-default`}
         >
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-full pointer-events-none" />
 
@@ -87,7 +87,7 @@ export default function FigmaKpiCard({ icon, count, label, color = 'indigo', tre
             </div>
 
             <div className="relative z-10">
-                <div className="text-2xl font-black text-white tracking-tighter font-display">{count}</div>
+                <div className="text-xl sm:text-2xl font-black text-white tracking-tighter font-display truncate">{count}</div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{label}</div>
             </div>
         </div>

@@ -296,7 +296,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                             </div>
                                             <div className="flex items-center gap-2 mt-1.5">
                                                 <span className="text-[10px] font-black text-indigo-600 uppercase">
-                                                    {material.stock_total} KG
+                                                    {material.stock_total} {(material as any).unit || 'kg'}
                                                 </span>
                                             </div>
                                         </div>

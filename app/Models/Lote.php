@@ -96,7 +96,8 @@ class Lote extends Model {
     /** URL pública de la foto del lote */
     public function getPhotoUrlAttribute(): ?string {
         if (!$this->photo_path) return null;
-        return asset('storage/' . $this->photo_path);
+        // Imágenes del catálogo demo viven en public/images; las subidas por usuarios, en storage.
+        return str_starts_with($this->photo_path, 'images/') ? asset($this->photo_path) : asset('storage/' . $this->photo_path);
     }
 
     // ── Scopes ────────────────────────────────────────────────────────────────

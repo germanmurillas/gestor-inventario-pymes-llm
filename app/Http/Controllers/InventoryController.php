@@ -8,7 +8,11 @@ use Inertia\Inertia;
 class InventoryController extends Controller {
     public function index() {
         // Enlaza la DB filtrando FEFO directo a la Data Estructurada del Componente Dashboard
-        $lotesActivos = Lote::with(['material', 'bodega'])->fefoOrder()->get()->map(function(\App\Models\Lote $lote) {
+        // Stock activo por material en una sola consulta (antes: una consulta por lote).
+        $stockPorMaterial = Lote::where('status', 'active')->groupBy('material_id')
+            ->selectRaw('material_id, SUM(quantity) as total')->pluck('total', 'material_id');
+
+        $lotesActivos = Lote::with(['material', 'bodega'])->fefoOrder()->get()->map(function(\App\Models\Lote $lote) use ($stockPorMaterial) {
             return [
                 'id' => $lote->id,
                 'material_id' => $lote->material_id,
@@ -23,9 +27,10 @@ class InventoryController extends Controller {
                 'status' => $lote->is_critical ? 'CRITICO' : 'NORMAL',
                 'photo_url' => $lote->photo_url ?? $lote->material->photo_url,
                 'quantity' => $lote->quantity,
-                'stock_total' => Lote::where('material_id', $lote->material_id)
-                    ->where('status', 'active')
-                    ->sum('quantity'),
+                'stock_total' => (float) ($stockPorMaterial[$lote->material_id] ?? 0),
+                'stock_minimo' => (float) ($lote->material->stock_minimo ?? 0),
+                'categoria' => $lote->material->categoria,
+                'estado' => $lote->status,
             ];
         });
 
@@ -73,6 +78,7 @@ class InventoryController extends Controller {
                 'batch' => $mov->lote->batch_number,
                 'user' => $mov->user->name ?? 'Sistema',
                 'quantity' => $mov->quantity,
+                'unit' => $mov->lote->material->unit ?? 'kg',
                 'time' => $mov->created_at->diffForHumans(),
                 'type' => $mov->type,
                 'action' => $mov->type === 'entrada' ? 'Ingreso de Lote' : 'Consumo / Despacho'

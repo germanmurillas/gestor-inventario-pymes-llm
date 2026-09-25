@@ -13,7 +13,9 @@ test('demo sustentacion - flujo completo', async ({ page }) => {
 
     // 3. Inventario por lotes
     await page.locator('aside button').filter({ hasText: /^\s*Inventario\s*$/ }).first().click();
-    await expect(page.getByText(/LEV-2609-A/).first()).toBeVisible();
+    await page.getByRole('button', { name: /Levadura fresca prensada/ }).first().click();
+    await expect(page.getByText('PRIMERO').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Cerrar', exact: true }).first().click();
 
     // 4. Reporte PDF (solo administrador)
     const pdf = await page.request.get('/inventory/report');

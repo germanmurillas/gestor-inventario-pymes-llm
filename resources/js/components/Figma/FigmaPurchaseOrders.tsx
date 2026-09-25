@@ -134,7 +134,7 @@ export default function FigmaPurchaseOrders() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 className="text-lg font-black text-white uppercase tracking-tight">Órdenes de Compra</h2>
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Purchase Orders · Crear, aprobar y recibir</p>
@@ -153,8 +153,8 @@ export default function FigmaPurchaseOrders() {
             {/* ── PO List ── */}
             <div className="space-y-3">
                 {filteredOrders.map(po => (
-                    <div key={po.id} className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 hover:border-slate-600/30 transition-all">
-                        <div className="flex items-center justify-between mb-4">
+                    <div key={po.id} className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-4 sm:p-6 hover:border-slate-600/30 transition-all">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
                                     <Truck size={20} className="text-indigo-400" />

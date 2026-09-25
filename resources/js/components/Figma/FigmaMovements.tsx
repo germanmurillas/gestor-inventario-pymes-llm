@@ -145,11 +145,11 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <span className={`text-xs font-black ${mov.type === 'entrada' ? 'text-emerald-600' : 'text-amber-600'}`}>
-                                                        {mov.type === 'entrada' ? '+' : '-'}{mov.quantity} KG
+                                                        {mov.type === 'entrada' ? '+' : '-'}{mov.quantity} {lote?.unit || 'kg'}
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <div className="text-xs font-black text-white">{mov.quantity_new} KG</div>
+                                                    <div className="text-xs font-black text-white">{mov.quantity_new} {lote?.unit || 'kg'}</div>
                                                 </td>
                                             </tr>
                                         ))

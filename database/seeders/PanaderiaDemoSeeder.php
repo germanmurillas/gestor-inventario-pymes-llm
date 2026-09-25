@@ -6,117 +6,174 @@ use App\Models\Bodega;
 use App\Models\Lote;
 use App\Models\Material;
 use App\Models\Movimiento;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\User;
+use App\Models\Vendor;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Datos de demostración basados en el caso de estudio (panificadora del Valle del Cauca).
+ * Datos de demostración de una panificadora industrial (caso de estudio de la tesis).
  *
- * Los insumos, presentaciones y unidades salen de la entrevista con la administradora
- * (inventario en kilos, harina en bultos de 50 kg, levadura en cajas de 10 kg, dos
- * mejoradores casi idénticos de 20 y 25 kg, bolsas en bultos de miles de unidades).
- * Los COSTOS UNITARIOS son REFERENCIALES de demostración: no provienen de la empresa.
+ * Catálogo en database/seeders/data/panaderia.json: insumos, presentaciones y unidades
+ * coherentes con la entrevista (inventario en kilos, bultos de 50 kg, dos mejoradores
+ * casi idénticos de 20 y 25 kg). Los COSTOS son REFERENCIALES de demostración.
+ * Las imágenes del catálogo (public/images/catalogo) se generaron con IA.
  *
+ * Simula la operación de los últimos días: recepción por lotes, consumo diario de
+ * producción descontando por FEFO, producción y despacho de producto terminado.
  * Reinicia los datos de inventario (incluido el Kardex): usar solo para montar la demo.
  */
 class PanaderiaDemoSeeder extends Seeder
 {
+    private User $admin;
+    private User $operario;
+
     public function run(): void
     {
         $this->limpiarInventario();
+        $cat = json_decode(file_get_contents(database_path('seeders/data/panaderia.json')), true);
 
-        $admin = User::updateOrCreate(
-            ['email' => 'admin@pymetory.com'],
-            ['name' => 'Administrador Demo', 'password' => bcrypt('Pymetory2026'), 'role' => 'admin']
-        );
-        $operario = User::updateOrCreate(
-            ['email' => 'operario@pymetory.com'],
-            ['name' => 'Operario de Bodega', 'password' => bcrypt('Pymetory2026'), 'role' => 'operario']
-        );
+        $this->admin = User::updateOrCreate(['email' => 'admin@pymetory.com'],
+            ['name' => 'Administrador Demo', 'password' => bcrypt('Pymetory2026'), 'role' => 'admin']);
+        $this->operario = User::updateOrCreate(['email' => 'operario@pymetory.com'],
+            ['name' => 'Operario de Bodega', 'password' => bcrypt('Pymetory2026'), 'role' => 'operario']);
 
-        $materiaPrima = Bodega::create(['name' => 'Bodega de materia prima', 'code' => 'BOD-MP', 'description' => 'Harinas, azúcar, sal y semillas en estibas.', 'capacity' => 15000, 'status' => 'active']);
-        $pesaje       = Bodega::create(['name' => 'Cuarto de pesaje', 'code' => 'BOD-PES', 'description' => 'Insumos abiertos en uso diario por producción.', 'capacity' => 1500, 'status' => 'active']);
-        $refrigerado  = Bodega::create(['name' => 'Cuarto frío', 'code' => 'BOD-FRIO', 'description' => 'Levadura fresca y grasas.', 'capacity' => 1200, 'status' => 'active']);
-        $empaques     = Bodega::create(['name' => 'Bodega de empaques', 'code' => 'BOD-EMP', 'description' => 'Bolsas y material de empaque.', 'capacity' => 60000, 'status' => 'active']);
-
-        // [código, nombre, unidad, categoría, stock mínimo, descripción]
-        $catalogo = [
-            ['MP-HAR-01', 'Harina de trigo panificable', 'kg', 'Harinas', 2500, 'Bulto de 50 kg. Base de todas las masas.'],
-            ['MP-LEV-01', 'Levadura fresca', 'kg', 'Levaduras', 150, 'Caja de 10 kg. Refrigerada.'],
-            ['MP-MEJ-20', 'Mejorador panificación caja 20 kg', 'kg', 'Mejoradores', 60, 'Caja de 20 kg. Empaque casi idéntico al de 25 kg: verificar al recibir.'],
-            ['MP-MEJ-25', 'Mejorador panificación caja 25 kg', 'kg', 'Mejoradores', 75, 'Caja de 25 kg. Empaque casi idéntico al de 20 kg: verificar al recibir.'],
-            ['MP-GRA-01', 'Grasa vegetal panadera', 'kg', 'Grasas', 200, 'Caja de 15 kg.'],
-            ['MP-AJO-01', 'Ajonjolí descortezado', 'kg', 'Semillas', 250, 'Bulto de 25 kg. Proveedor de Bogotá, entrega en unos 8 días.'],
-            ['MP-SAL-01', 'Sal refinada', 'kg', 'Básicos', 150, 'Bulto de 50 kg.'],
-            ['MP-AZU-01', 'Azúcar blanca', 'kg', 'Básicos', 600, 'Bulto de 50 kg.'],
-            ['EMP-BOL-01', 'Bolsa para pan tajado', 'und', 'Empaques', 8000, 'Bulto de 2.500 o 3.000 unidades.'],
-        ];
-
-        // Costo unitario REFERENCIAL (COP por kg o por unidad) — solo demostración.
-        $costo = ['MP-HAR-01' => 3100, 'MP-LEV-01' => 12500, 'MP-MEJ-20' => 24000, 'MP-MEJ-25' => 23500, 'MP-GRA-01' => 9200,
-                  'MP-AJO-01' => 14800, 'MP-SAL-01' => 1400, 'MP-AZU-01' => 4100, 'EMP-BOL-01' => 65];
-
-        $materiales = [];
-        foreach ($catalogo as [$code, $name, $unit, $cat, $min, $desc]) {
-            $materiales[$code] = Material::create([
-                'code' => $code, 'name' => $name, 'unit' => $unit, 'unidad_medida' => $unit,
-                'categoria' => $cat, 'stock_minimo' => $min, 'description' => $desc,
-            ]);
+        $bodegas = [];
+        foreach ($cat['bodegas'] as $b) {
+            $bodegas[$b['code']] = Bodega::create($b + ['status' => 'active']);
         }
 
-        // [material, bodega, lote, recibido hace (días), cantidad recibida, vence en (días desde hoy), consumo diario]
-        $lotes = [
-            ['MP-HAR-01', $materiaPrima, 'HAR-2608-A', 40, 5000, 95, 95],
-            ['MP-HAR-01', $materiaPrima, 'HAR-2609-B', 12, 4000, 150, 0],
-            ['MP-LEV-01', $refrigerado, 'LEV-2609-A', 18, 300, 6, 12],
-            ['MP-LEV-01', $refrigerado, 'LEV-2609-B', 5, 200, 26, 0],
-            ['MP-MEJ-20', $pesaje, 'MEJ20-2608', 35, 120, 160, 1.5],
-            ['MP-MEJ-25', $pesaje, 'MEJ25-2608', 35, 150, 165, 1.8],
-            ['MP-GRA-01', $refrigerado, 'GRA-2609-A', 25, 450, 70, 9],
-            ['MP-AJO-01', $materiaPrima, 'AJO-2608-A', 38, 600, 120, 11],
-            ['MP-SAL-01', $materiaPrima, 'SAL-2608-A', 30, 400, 540, 9.5],
-            ['MP-AZU-01', $materiaPrima, 'AZU-2609-A', 20, 1500, 300, 38],
-            ['EMP-BOL-01', $empaques, 'BOL-2608-A', 33, 30000, 720, 650],
-        ];
-
-        foreach ($lotes as [$code, $bodega, $batch, $hace, $cantidad, $vence, $diario]) {
-            $recibido = Carbon::now()->subDays($hace)->setTime(7, 30);
-            $lote = Lote::create([
-                'material_id' => $materiales[$code]->id, 'bodega_id' => $bodega->id,
-                'batch_number' => $batch, 'quantity' => $cantidad, 'unit_cost' => $costo[$code],
-                'expiration_date' => Carbon::today()->addDays($vence), 'status' => 'active',
+        foreach ($cat['materiales'] as $m) {
+            $material = Material::create([
+                'code' => $m['code'], 'name' => $m['name'], 'unit' => $m['unit'], 'unidad_medida' => $m['unit'],
+                'categoria' => $m['cat'], 'stock_minimo' => $m['min'], 'description' => $m['cat'],
+                'photo_path' => is_file(public_path("images/catalogo/{$m['code']}.webp")) ? "images/catalogo/{$m['code']}.webp" : null,
             ]);
-            $this->kardex($lote, $admin, 'entrada', $cantidad, 'ingreso', "Recepción por factura del proveedor, lote {$batch}.", $recibido);
+            isset($m['produccion'])
+                ? $this->simularProductoTerminado($material, $m, $bodegas[$m['bodega']])
+                : $this->simularMateriaPrima($material, $m, $bodegas[$m['bodega']]);
+        }
 
-            // Consumo diario de producción (días hábiles), registrado por el operario.
-            $saldo = $cantidad;
-            for ($d = $hace - 1; $d >= 1 && $diario > 0; $d--) {
-                $dia = Carbon::now()->subDays($d);
-                if ($dia->isSunday()) continue;
-                $salida = round($diario * (0.85 + (crc32($batch . $d) % 30) / 100), 1);
-                if ($saldo - $salida <= 0) break;
-                $saldo -= $salida;
-                $this->kardex($lote, $operario, 'salida', $salida, 'produccion', 'Consumo reportado en el formato diario de producción.', $dia->setTime(15, 0));
+        $this->casosEspeciales($bodegas);
+    }
+
+    /** Recepción por lotes y consumo diario de producción descontado por FEFO. */
+    private function simularMateriaPrima(Material $material, array $m, Bodega $bodega): void
+    {
+        $dias = 40;
+        $recepciones = [];
+        foreach ($m['lotes'] as $i => $cantidad) {
+            // Primer lote llegó al inicio del periodo; los siguientes, más recientes.
+            $recepciones[] = ['hace' => $i === 0 ? min($dias, max(8, (int) ($m['vida'] * 0.6))) : max(3, 14 - 6 * ($i - 1)), 'cantidad' => $cantidad, 'n' => $i + 1];
+        }
+
+        for ($hace = $dias; $hace >= 1; $hace--) {
+            $dia = Carbon::today()->subDays($hace);
+            foreach ($recepciones as $r) {
+                if ($r['hace'] === $hace) {
+                    $this->nuevoLote($material, $bodega, $r['cantidad'], $dia->copy()->setTime(7, 30), $dia->copy()->addDays($m['vida']),
+                        sprintf('%s-%s-%d', substr($m['code'], 3), $dia->format('ymd'), $r['n']), 'Recepción por factura del proveedor.');
+                }
             }
+            if ($m['diario'] > 0 && !$dia->isSunday()) {
+                $cantidad = round($m['diario'] * (0.85 + (crc32($m['code'] . $hace) % 30) / 100), 3);
+                $this->consumirFefo($material, $cantidad, $dia->copy()->setTime(15, 0), 'produccion', 'Consumo reportado en el formato diario de producción.');
+            }
+            if ($m['code'] === 'CB-ACPM-01' && $dia->isSaturday()) {
+                $this->consumirFefo($material, 4, $dia->copy()->setTime(9, 0), 'produccion', 'Prueba semanal de la planta eléctrica.');
+            }
+        }
+    }
 
-            $lote->forceFill(['quantity' => round($saldo, 3)])->saveQuietly();
+    /** Producción diaria y despacho a clientes, ambos por lote y con FEFO. */
+    private function simularProductoTerminado(Material $material, array $m, Bodega $bodega): void
+    {
+        for ($hace = 10; $hace >= 0; $hace--) {
+            $dia = Carbon::today()->subDays($hace);
+            if ($dia->isSunday()) continue;
+            $producido = (int) round($m['produccion'] * (0.9 + (crc32($m['code'] . $hace) % 20) / 100));
+            $this->nuevoLote($material, $bodega, $producido, $dia->copy()->setTime(5, 30), $dia->copy()->addDays($m['vida']),
+                sprintf('%s-%s', substr($m['code'], 3), $dia->format('ymd')), 'Producción del día ingresada a bodega de despacho.');
+            if ($hace > 0) {
+                $despacho = (int) round($m['diario'] * (0.9 + (crc32('d' . $m['code'] . $hace) % 20) / 100));
+                $this->consumirFefo($material, $despacho, $dia->copy()->setTime(16, 0), 'venta', 'Despacho a clientes.');
+            }
+        }
+    }
+
+    private function nuevoLote(Material $material, Bodega $bodega, float $cantidad, Carbon $cuando, Carbon $vence, string $batch, string $desc, string $estado = 'active'): Lote
+    {
+        $costo = collect(json_decode(file_get_contents(database_path('seeders/data/panaderia.json')), true)['materiales'])
+            ->firstWhere('code', $material->code)['cost'];
+        $lote = new Lote([
+            'material_id' => $material->id, 'bodega_id' => $bodega->id, 'batch_number' => $batch,
+            'quantity' => $cantidad, 'unit_cost' => $costo, 'expiration_date' => $vence->toDateString(), 'status' => $estado,
+        ]);
+        $lote->created_at = $cuando;
+        $lote->updated_at = $cuando;
+        $lote->save();
+        $this->kardex($lote, $this->admin, 'entrada', $cantidad, 'ingreso', $desc, $cuando);
+        return $lote;
+    }
+
+    private function consumirFefo(Material $material, float $cantidad, Carbon $cuando, string $motivo, string $desc): void
+    {
+        $lotes = Lote::where('material_id', $material->id)->where('status', 'active')
+            ->where('created_at', '<=', $cuando)->orderBy('expiration_date')->get();
+        foreach ($lotes as $lote) {
+            if ($cantidad <= 0) break;
+            $toma = min((float) $lote->quantity, $cantidad);
+            if ($toma <= 0) continue;
+            $lote->quantity = round($lote->quantity - $toma, 3);
+            if ($lote->quantity <= 0) $lote->status = 'consumed';
+            $lote->saveQuietly();
+            $this->kardex($lote, $this->operario, 'salida', $toma, $motivo, $desc, $cuando);
+            $cantidad = round($cantidad - $toma, 3);
+        }
+    }
+
+    private function casosEspeciales(array $bodegas): void
+    {
+        // Recepción con novedad: bultos rotos en cuarentena (RF-14).
+        $harina = Material::where('code', 'MP-HAR-01')->first();
+        $this->nuevoLote($harina, $bodegas['BOD-CUA'], 150, Carbon::today()->subDays(2)->setTime(8, 0), Carbon::today()->addDays(170),
+            'HAR-NOV-01', 'Recepción con novedad: 3 bultos rotos, pendiente de cambio por el proveedor.', 'quarantined');
+
+        // Conciliación de fin de mes (RF-11).
+        $mej = Lote::whereHas('material', fn ($q) => $q->where('code', 'AD-MEJ-20'))->where('status', 'active')->first();
+        if ($mej) {
+            $antes = (float) $mej->quantity;
+            $mej->quantity = round($antes - 2.5, 3);
+            $mej->saveQuietly();
+            $this->kardex($mej, $this->admin, 'salida', 2.5, 'ajuste',
+                "Conciliación física: remanente en báscula menor al del sistema (Cant. anterior: {$antes})", Carbon::today()->subDays(3)->setTime(17, 0));
         }
 
-        // Un ajuste de conciliación de fin de mes, como el descrito en la entrevista.
-        $mej20 = Lote::where('batch_number', 'MEJ20-2608')->first();
-        $this->kardex($mej20, $admin, 'salida', 2.5, 'ajuste', 'Conciliación física de fin de mes: remanente en báscula menor al del sistema.', Carbon::now()->subDays(25)->setTime(17, 0));
-        $mej20->forceFill(['quantity' => $mej20->quantity - 2.5])->saveQuietly();
+        // Proveedores y órdenes de compra.
+        $molino = Vendor::create(['name' => 'Molino de trigo (proveedor de harinas)', 'contact_name' => 'Asesor comercial', 'notes' => 'Entrega en 3 días hábiles.']);
+        $aditivos = Vendor::create(['name' => 'Distribuidor de aditivos panaderos', 'contact_name' => 'Asesor técnico', 'notes' => 'Enzimas, mejoradores y conservantes.']);
+        $semillas = Vendor::create(['name' => 'Proveedor de semillas (Bogotá)', 'contact_name' => 'Ventas', 'notes' => 'Ajonjolí: llega unos 8 días después del pedido.']);
+
+        $oc = PurchaseOrder::create(['po_number' => 'OC-2026-031', 'status' => 'approved', 'vendor_id' => $semillas->id,
+            'created_by' => $this->admin->id, 'date_expected' => Carbon::today()->addDays(6), 'total_cost' => 600 * 14800,
+            'notes' => 'Reposición de ajonjolí por debajo del mínimo.']);
+        PurchaseOrderItem::create(['purchase_order_id' => $oc->id, 'material_id' => Material::where('code', 'MP-AJO-01')->value('id'),
+            'quantity' => 600, 'unit_cost' => 14800]);
+
+        $oc2 = PurchaseOrder::create(['po_number' => 'OC-2026-032', 'status' => 'draft', 'vendor_id' => $aditivos->id,
+            'created_by' => $this->admin->id, 'date_expected' => Carbon::today()->addDays(10), 'total_cost' => 8 * 180000 + 25 * 16800]);
+        PurchaseOrderItem::create(['purchase_order_id' => $oc2->id, 'material_id' => Material::where('code', 'AD-ENZ-01')->value('id'), 'quantity' => 8, 'unit_cost' => 180000]);
+        PurchaseOrderItem::create(['purchase_order_id' => $oc2->id, 'material_id' => Material::where('code', 'AD-CON-01')->value('id'), 'quantity' => 25, 'unit_cost' => 16800]);
     }
 
     private function kardex(Lote $lote, User $user, string $type, float $qty, string $reason, string $desc, Carbon $when): void
     {
-        $mov = new Movimiento([
-            'lote_id' => $lote->id, 'user_id' => $user->id, 'type' => $type,
-            'quantity' => $qty, 'reason' => $reason, 'description' => $desc,
-        ]);
+        $mov = new Movimiento(['lote_id' => $lote->id, 'user_id' => $user->id, 'type' => $type,
+            'quantity' => $qty, 'reason' => $reason, 'description' => $desc]);
         $mov->created_at = $when;
         $mov->updated_at = $when;
         $mov->save();
@@ -126,7 +183,7 @@ class PanaderiaDemoSeeder extends Seeder
     private function limpiarInventario(): void
     {
         Schema::disableForeignKeyConstraints();
-        foreach (['movimientos', 'transferencias', 'purchase_order_items', 'purchase_orders', 'material_tag',
+        foreach (['movimientos', 'transferencias', 'purchase_order_items', 'purchase_orders', 'vendors', 'material_tag',
                   'lotes', 'materials', 'bodegas', 'notifications', 'chat_histories'] as $tabla) {
             if (Schema::hasTable($tabla)) DB::table($tabla)->delete();
         }

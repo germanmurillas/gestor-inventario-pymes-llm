@@ -1,15 +1,23 @@
+import { usePage } from '@inertiajs/react';
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, User, Bot, Search, Plus, Filter, Loader2, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 
 
 
+// Negritas **así** del modelo se muestran como negrita en lugar de asteriscos.
+const conFormato = (texto: string) => texto.split(/(\*\*[^*]+\*\*)/g).map((parte, i) =>
+    parte.startsWith('**') && parte.endsWith('**') ? <strong key={i}>{parte.slice(2, -2)}</strong> : <React.Fragment key={i}>{parte}</React.Fragment>);
+
 const FigmaLLM = () => {
+    const usuario = (usePage().props as any)?.auth?.user;
+    const nombre = (usuario?.name || '').split(' ')[0];
+    const saludo = `Hola${nombre ? `, ${nombre}` : ''}. Soy el asistente de inventario de Pymetory. Pregúntame por existencias, lotes, vencimientos o movimientos.`;
     const [sessions, setSessions] = useState<any[]>([]);
     const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
     const [activeSessionTitle, setActiveSessionTitle] = useState<string | null>(null);
     const [messages, setMessages] = useState<any[]>([
-        { id: 1, role: 'bot', content: 'Bienvenido Germán. Soy el motor RAG de Pymetory. ¿Qué quieres auditar hoy del inventario?' },
+        { id: 1, role: 'bot', content: saludo },
     ]);
     const [input, setInput] = useState('');
     const [isThinking, setIsThinking] = useState(false);
@@ -113,7 +121,7 @@ const FigmaLLM = () => {
                     });
                 });
                 setMessages(loaded.length > 0 ? loaded : [
-                    { id: 1, role: 'bot', content: 'Bienvenido Germán. Soy el motor RAG de Pymetory. ¿Qué quieres auditar hoy del inventario?' },
+                    { id: 1, role: 'bot', content: saludo },
                 ]);
             }
         } catch (err) {
@@ -127,7 +135,7 @@ const FigmaLLM = () => {
         setActiveSessionId(null);
         setActiveSessionTitle(null);
         setMessages([
-            { id: 1, role: 'bot', content: 'Bienvenido Germán. Soy el motor RAG de Pymetory. ¿Qué quieres auditar hoy del inventario?' },
+            { id: 1, role: 'bot', content: saludo },
         ]);
         setInput('');
     };
@@ -190,9 +198,9 @@ const FigmaLLM = () => {
     );
 
     return (
-        <div className="flex h-full gap-8 animate-in fade-in duration-500">
+        <div className="flex h-[calc(100dvh-11rem)] lg:h-full gap-8 animate-in fade-in duration-500">
             {/* Chat List Sidebar (Mockup 10 Left) */}
-            <aside className="pm-chatlist w-80 border-r border-slate-700/30 pr-8 space-y-6 flex flex-col h-full">
+            <aside className="pm-chatlist hidden lg:flex w-80 border-r border-slate-700/30 pr-8 space-y-6 flex-col h-full">
                  <div className="flex items-center justify-between">
                      <h2 className="text-xl font-bold uppercase tracking-tight">Chat Pymetory</h2>
                      <button onClick={handleNewChat} className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm" title="Nuevo Chat">
@@ -307,8 +315,8 @@ const FigmaLLM = () => {
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[80%] p-4 rounded-xl text-sm ${msg.role === 'user' ? 'pm-bubble-user pm-panel2-plain pm-accent-fg shadow-md' : 'pm-bubble-ai pm-panel pm-text pm-border border shadow-sm'}`}>
-                                <div className="font-bold text-[10px] mb-1 uppercase tracking-widest pm-text-muted">{msg.role === 'user' ? 'Germán' : 'Pymetory LLM'}</div>
-                                <div className="leading-relaxed whitespace-pre-wrap font-mono text-sm">{msg.content}</div>
+                                <div className="font-bold text-[10px] mb-1 uppercase tracking-widest pm-text-muted">{msg.role === 'user' ? (nombre || 'Tú') : 'Asistente'}</div>
+                                <div className="leading-relaxed whitespace-pre-wrap text-sm">{conFormato(String(msg.content ?? ''))}</div>
                             </div>
                         </div>
                     ))}

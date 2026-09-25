@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { LayoutGrid, Box, Plus, Folder, Bell, Settings, ArrowRightLeft, ChevronRight, X, Warehouse, Ruler, ScanLine, Sparkles, Clock } from 'lucide-react';
+import { Box, Plus, ChevronRight, X, Warehouse, ScanLine, Sparkles, Search } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import FigmaMovements from './FigmaMovements';
 import FigmaForms from './FigmaForms';
@@ -16,6 +16,8 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
     const [selectedBodega, setSelectedBodega] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTag, setSelectedTag] = useState<string>('');
+    const [categoria, setCategoria] = useState('');
+    const [materialAbierto, setMaterialAbierto] = useState<string | null>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -72,9 +74,27 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
         });
     }, [lotes, selectedBodega, searchQuery, selectedTag]);
 
+    const categorias = useMemo(() => Array.from(new Set(lotes.map((l: any) => l.categoria).filter(Boolean))).sort() as string[], [lotes]);
+
+    // Insumos agrupados (los lotes ya vienen en orden FEFO desde el servidor)
+    const materiales = useMemo(() => {
+        const map = new Map<string, any>();
+        filteredLotes.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
+            if (!map.has(l.codigo)) map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg',
+                foto: l.photo_url, minimo: Number(l.stock_minimo || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
+            const m = map.get(l.codigo);
+            m.lotes.push(l);
+            if (l.estado === 'quarantined') m.cuarentena++; else m.stock += Number(l.cantidad) || 0;
+            if (l.status === 'CRITICO' && l.estado !== 'quarantined') m.criticos++;
+            if (!m.proximo && l.estado === 'active') m.proximo = l.vencimiento;
+        });
+        return Array.from(map.values()).sort((a, b) => (b.criticos - a.criticos) || a.nombre.localeCompare(b.nombre));
+    }, [filteredLotes, categoria]);
+    const materialSel = materiales.find((m) => m.codigo === materialAbierto) ?? null;
+
     // Derivar lista de materiales únicos para el wizard (con stock total)
     const materialsList = useMemo(() => {
-        const map = new Map<number, { id: number; name: string; code: string; photo_url: string | null; stock_total: number }>();
+        const map = new Map<number, { id: number; name: string; code: string; photo_url: string | null; unit: string; stock_total: number }>();
         lotes.forEach((l: any) => {
             if (!l.material_name) return;
             const key = l.codigo;
@@ -84,6 +104,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                     name: l.material_name,
                     code: l.codigo,
                     photo_url: l.photo_url,
+                    unit: l.unit || 'kg',
                     stock_total: 0,
                 });
             }
@@ -109,94 +130,10 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
         return <FigmaConsumeWizard onBack={() => setViewMode('GRID')} initialMaterials={materialsList} />;
     }
 
-    return (
-        <div className="flex gap-8 h-full animate-in fade-in duration-500 relative">
-            {/* Modal de Producto (Mockup 6) */}
-            {showModal && selectedLote && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
-                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-700/30 w-full w-full overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-800/50">
-                            <h3 className="font-bold uppercase tracking-tight">Vista Previa: {selectedLote.codigo}</h3>
-                            <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-200 rounded-full transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="p-4 sm:p-10 flex gap-4 sm:gap-8">
-                            <div className="w-48 h-48 bg-slate-800/50 rounded-lg border border-gray-100 flex items-center justify-center relative overflow-hidden">
-                                {selectedLote.photo_url ? (
-                                    <img src={selectedLote.photo_url} alt={selectedLote.codigo} className="w-full h-full object-cover" />
-                                ) : (
-                                    <Box size={64} className="opacity-10" />
-                                )}
-                                {selectedLote.status === 'CRITICO' && (
-                                    <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-tighter">
-                                        Crítico
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex-1 space-y-6">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Vencimiento</div>
-                                        {selectedLote.days_until_expiration !== undefined && (
-                                            <FigmaFefoBadge daysUntilExpiration={selectedLote.days_until_expiration} size="sm" />
-                                        )}
-                                    </div>
-                                    <div className={`text-2xl font-bold mt-1 tracking-tighter ${selectedLote.status === 'CRITICO' ? 'text-red-600' : 'text-slate-200'}`}>
-                                        {selectedLote.vencimiento}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase">Cantidad</label>
-                                        <div className="text-sm font-bold border border-slate-700/30 rounded px-3 py-1 bg-slate-900/80 backdrop-blur-xl">{selectedLote.cantidad} KG</div>
-                                     </div>
-                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase">Lote</label>
-                                        <div className="text-sm font-bold border border-slate-700/30 rounded px-3 py-1 bg-slate-900/80 backdrop-blur-xl">#{selectedLote.lote}</div>
-                                     </div>
-                                </div>
-                                <p className="text-xs text-slate-400 leading-relaxed italic">"Producto auditado por el sistema Pymetory. Prioridad de despacho: {selectedLote.status === 'CRITICO' ? 'Inmediata (FEFO)' : 'Normal'}."</p>
-                                <div className="flex gap-4">
-                                    <button 
-                                        onClick={() => {
-                                            setShowModal(false);
-                                            setViewMode('CONSUME');
-                                        }}
-                                        className="flex-1 bg-obsidiana text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all active:scale-95 shadow-lg shadow-gray-200"
-                                    >
-                                        Gestionar Movimiento
-                                    </button>
-                                    <button 
-                                        onClick={() => {
-                                            setShowModal(false);
-                                            setViewMode('WIZARD');
-                                        }}
-                                        className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all active:scale-95 shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
-                                    >
-                                        <Sparkles size={14} />
-                                        <span>Consumo Asistido</span>
-                                    </button>
-                                    
-                                    {user?.role === 'admin' && (
-                                        <button 
-                                            onClick={() => {
-                                                setShowModal(false);
-                                                setShowAdjustModal(true);
-                                            }}
-                                            className="px-6 bg-slate-900/80 backdrop-blur-xl border-2 border-slate-200 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800/50 transition-colors"
-                                            title="Conciliación de Stock"
-                                        >
-                                            Conciliar
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+    const fmt = (n: number) => Number(n || 0).toLocaleString('es-CO', { maximumFractionDigits: 2 });
 
+    return (
+        <div className="relative mx-auto max-w-7xl space-y-5">
             {/* Modal de Conciliación (Ajuste Manual) */}
             {showAdjustModal && selectedLote && (
                 <AdjustModal 
@@ -266,175 +203,154 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate }: { lotes
                 </div>
             )}
 
-            {/* Folder Sidebar (Mockup 5 Left) */}
-            <aside className="w-64 space-y-6">
-                <div className="space-y-4">
-                    <div 
-                        onClick={() => setSelectedBodega(null)}
-                        className={`flex items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all font-display group ${!selectedBodega ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-200 hover:bg-slate-800/50'}`}
-                    >
-                        <Box size={20} className={!selectedBodega ? 'text-white' : 'text-indigo-600 group-hover:scale-110 transition-transform'} />
-                        <span className="text-xs font-black uppercase tracking-widest">Todo el inventario</span>
-                    </div>
-                    
-                    <div className="pl-2 space-y-4 font-black uppercase tracking-tight">
-                        <div className="flex items-center justify-between group px-2">
-                            <div className="flex items-center gap-2 text-slate-500">
-                                <Folder size={18} />
-                                <span className="text-[10px] tracking-widest">Disponible</span>
-                            </div>
-                            <button 
-                                onClick={() => setShowBodegaModal(true)}
-                                className="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all"
-                                title="Nueva Carpeta / Bodega"
-                            >
-                                <Plus size={14} />
-                            </button>
-                        </div>
 
-                        <div className="pl-4 space-y-2 border-l-2 border-slate-100 ml-2">
-                            {bodegas.length > 0 ? bodegas.map((bodega: any) => (
-                                <div 
-                                    key={bodega.code} 
-                                    onClick={() => setSelectedBodega(bodega)}
-                                    className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all group ${selectedBodega?.code === bodega.code ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-800/50'}`}
-                                >
-                                    <div className={`w-2 h-2 rounded-full ${selectedBodega?.code === bodega.code ? 'bg-indigo-400 animate-pulse' : 'bg-slate-200 group-hover:bg-indigo-500'} transition-colors`}></div>
-                                    <span className="text-[10px] font-black tracking-widest uppercase truncate">{bodega.name}</span>
-                                </div>
-                            )) : (
-                                <div className="text-[9px] text-slate-300 italic px-2">No hay bodegas realistas.</div>
-                            )}
-                            
-                            {/* Visual Hint for quarantine mentioned by user */}
-                            {!bodegas.find((b: any) => b.name.toLowerCase().includes('cuarentena')) && (
-                                <div className="flex items-center gap-3 p-2 text-slate-300 hover:text-red-400 cursor-pointer transition-all border-t border-slate-50 pt-2 opacity-60">
-                                    <Bell size={12} />
-                                    <span className="text-[10px] font-bold tracking-widest uppercase">Cuarentena</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            {/* Main Area (Mockup 5 Right) */}
-            <div className="flex-1 space-y-8">
-                {/* Top Actions */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest font-sans">
-                        <Box size={14} />
-                        <span>Inventario</span>
-                        <ChevronRight size={12} />
-                        <span className="text-indigo-600 italic">{selectedBodega ? selectedBodega.name : 'Vuelo Global'}</span>
-                    </div>
-
-                    <div className="flex gap-4">
-                        <button 
-                            onClick={() => setViewMode('WIZARD')}
-                            className="flex items-center gap-2 bg-obsidiana text-white px-5 py-2.5 rounded-xl shadow-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
-                        >
-                            <Sparkles size={14} />
-                            <span>Consumo FEFO</span>
-                        </button>
-                        <button 
-                            onClick={() => setViewMode('FORM')}
-                            className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg glow-indigo text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
-                        >
-                            <Plus size={14} />
-                            <span>Nuevo Ingreso {selectedBodega ? `en ${selectedBodega.code}` : ''}</span>
-                        </button>
-                        <button 
-                            onClick={() => onNavigate?.('ESCANER')}
-                            className="flex items-center gap-2 bg-obsidiana text-white px-5 py-2.5 rounded-xl shadow-lg text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all active:scale-95"
-                        >
-                            <ScanLine size={14} />
-                            <span>Escanear QR</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Grid (Mockup 5 Center) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {filteredLotes.length > 0 ? filteredLotes.map((lote: any) => (
-                        <div key={lote.id} className={`glass-morphism rounded-2xl sm:rounded-[2.5rem] overflow-hidden group relative transition-all duration-500 hover:-translate-y-2 ${lote.status === 'CRITICO' ? 'border-red-100/50 bg-red-50/5' : 'hover:border-indigo-100'}`}>
-                            {lote.status === 'CRITICO' && (
-                                <div className="absolute top-4 right-4 bg-red-600 text-white text-[8px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest animate-pulse z-10">
-                                    Crítico
-                                </div>
-                            )}
-                            {lote.days_until_expiration !== undefined && lote.days_until_expiration <= 30 && lote.status !== 'CRITICO' && (
-                                <div className="absolute top-4 right-4 z-10">
-                                    <FigmaFefoBadge daysUntilExpiration={lote.days_until_expiration} size="sm" />
-                                </div>
-                            )}
-                            <div 
-                                onClick={() => openPreview(lote)}
-                                className="aspect-[4/3] bg-slate-800/50 flex items-center justify-center border-b border-slate-100 cursor-pointer overflow-hidden relative"
-                            >
-                                {lote.photo_url ? (
-                                    <img
-                                        src={lote.photo_url}
-                                        alt={lote.codigo}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700"
-                                    />
-                                ) : (
-                                    <Warehouse size={64} className={`opacity-5 group-hover:scale-110 transition-all duration-700 ${lote.status === 'CRITICO' ? 'text-red-500' : 'text-indigo-600'}`} />
-                                )}
-                                <div className="absolute inset-0 bg-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div className="bg-slate-900/80 backdrop-blur-md backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-white/50 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Auditar Detalle</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="p-4 sm:p-8 space-y-3 sm:space-y-5">
-                                <div className="cursor-pointer" onClick={() => openPreview(lote)}>
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none font-display">{lote.codigo}</div>
-                                    <div className="text-lg font-black mt-2 text-white tracking-tight font-display">Batch #{lote.lote}</div>
-                                    
-                                    <div className="flex items-center gap-2 mt-4">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500"></div>
-                                        <div className={`text-[10px] font-black uppercase tracking-widest ${lote.status === 'CRITICO' ? 'text-red-500' : 'text-slate-600'}`}>
-                                            {lote.cantidad} KG DISPONIBLES
-                                        </div>
-                                    </div>
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1 italic">Exp: {lote.vencimiento} · {lote.bodega}</div>
-                                </div>
-                                <div className="flex items-center justify-between border-t border-slate-100 pt-6">
-                                    <div className="flex gap-4">
-                                        <Bell size={18} className={`${lote.status === 'CRITICO' ? 'text-red-400 animate-pulse' : 'text-slate-400'} hover:text-indigo-600 cursor-pointer transition-colors`} />
-                                        <button 
-                                            onClick={() => openAudit(lote)}
-                                            className="text-slate-400 hover:text-indigo-600 transition-colors"
-                                            title="Auditar Kardex"
-                                        >
-                                            <Clock size={18} />
-                                        </button>
-                                        <ArrowRightLeft size={18} onClick={() => openPreview(lote)} className="text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors" />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Settings size={18} className="text-slate-400 hover:text-indigo-600 cursor-pointer transition-colors" />
-                                        <button 
-                                            onClick={() => openPreview(lote)}
-                                            className="w-8 h-8 bg-slate-800/50 border border-slate-200 text-slate-400 flex items-center justify-center rounded-xl hover:bg-slate-900/80 backdrop-blur-xl hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95 shadow-sm"
-                                        >
-                                            <ChevronRight size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )) : (
-                        <div className="col-span-full py-32 flex flex-col items-center justify-center text-slate-300 glass-morphism rounded-[3rem] border-2 border-dashed border-slate-200">
-                            <Box size={56} className="mb-6 opacity-20 text-indigo-600" />
-                            <p className="text-xs font-black uppercase tracking-[0.3em] pm-text-muted text-center"><span className="pm-text font-black">Sin existencias en {selectedBodega?.name || 'inventario'}</span><br/><span className="text-[10px] pm-text-muted font-bold">Ubicación vacía o filtrada</span></p>
-                        </div>
-                    )}
+            {/* Buscador y acciones */}
+            <div className="space-y-3 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:space-y-0">
+                <label className="relative block flex-1 lg:max-w-md">
+                    <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Buscar insumo, código o lote"
+                        className="w-full rounded-2xl border border-slate-700/40 bg-slate-800/50 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none" />
+                </label>
+                <div className="grid grid-cols-3 gap-2 lg:flex">
+                    <button onClick={() => setViewMode('FORM')} className="flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-900/30 active:scale-95">
+                        <Plus size={16} /> Ingreso
+                    </button>
+                    <button onClick={() => setViewMode('WIZARD')} className="flex items-center justify-center gap-2 rounded-2xl border border-slate-700/40 bg-slate-800/60 px-4 py-3 text-xs font-bold text-white active:scale-95">
+                        <Sparkles size={16} /> Consumo FEFO
+                    </button>
+                    <button onClick={() => onNavigate?.('ESCANER')} className="flex items-center justify-center gap-2 rounded-2xl border border-slate-700/40 bg-slate-800/60 px-4 py-3 text-xs font-bold text-white active:scale-95">
+                        <ScanLine size={16} /> Escanear
+                    </button>
                 </div>
             </div>
+
+            {/* Filtros por bodega y categoría */}
+            <div className="-mx-4 space-y-2 px-4 sm:mx-0 sm:px-0">
+                <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+                    <Chip activo={!selectedBodega} onClick={() => setSelectedBodega(null)}>Todas las bodegas <b>{lotes.length}</b></Chip>
+                    {bodegas.map((b: any) => (
+                        <Chip key={b.code} activo={selectedBodega?.code === b.code} onClick={() => setSelectedBodega(b)}>
+                            {b.name} <b>{lotes.filter((l: any) => l.bodega === b.name).length}</b>
+                        </Chip>
+                    ))}
+                    {user?.role === 'admin' && (
+                        <button onClick={() => setShowBodegaModal(true)} className="shrink-0 rounded-full border border-dashed border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-400">+ Bodega</button>
+                    )}
+                </div>
+                {categorias.length > 1 && (
+                    <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+                        <Chip sutil activo={!categoria} onClick={() => setCategoria('')}>Todas las categorías</Chip>
+                        {categorias.map((c) => <Chip sutil key={c} activo={categoria === c} onClick={() => setCategoria(c)}>{c}</Chip>)}
+                    </div>
+                )}
+            </div>
+
+            {/* Insumos */}
+            {materiales.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {materiales.map((m) => {
+                        const bajo = m.minimo > 0 && m.stock < m.minimo;
+                        return (
+                            <button key={m.codigo} onClick={() => setMaterialAbierto(m.codigo)}
+                                className="group flex items-center gap-4 rounded-3xl border border-slate-700/30 bg-slate-800/40 p-3 text-left transition hover:border-indigo-400/40 active:scale-[0.99]">
+                                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-900">
+                                    {m.foto ? <img src={m.foto} alt="" loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                                        : <Warehouse size={28} className="absolute inset-0 m-auto text-slate-600" />}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{m.codigo}{m.categoria ? ` · ${m.categoria}` : ''}</p>
+                                    <p className="truncate text-[15px] font-bold leading-snug text-white">{m.nombre}</p>
+                                    <p className="mt-0.5 text-sm text-slate-300"><span className="font-bold text-white">{fmt(m.stock)}</span> {m.unidad} · {m.lotes.length} {m.lotes.length === 1 ? 'lote' : 'lotes'}</p>
+                                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                        {m.criticos > 0 && <Badge tono="rojo">{m.criticos} por vencer</Badge>}
+                                        {bajo && <Badge tono="ambar">Bajo mínimo</Badge>}
+                                        {m.cuarentena > 0 && <Badge tono="gris">Cuarentena</Badge>}
+                                        {!m.criticos && !bajo && m.proximo && <Badge tono="gris">Vence {m.proximo}</Badge>}
+                                    </div>
+                                </div>
+                                <ChevronRight size={18} className="shrink-0 text-slate-500" />
+                            </button>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-700/50 py-20 text-center text-slate-400">
+                    <Box size={40} className="mb-3 opacity-40" />
+                    <p className="text-sm font-semibold">Sin existencias para este filtro</p>
+                </div>
+            )}
+
+            {/* Panel del insumo con sus lotes en orden FEFO */}
+            {materialSel && (
+                <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label={materialSel.nombre}>
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMaterialAbierto(null)} />
+                    <div className="pm-chrome relative max-h-[88vh] w-full overflow-y-auto rounded-t-3xl border border-white/10 bg-obsidiana p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-300 sm:max-w-2xl sm:rounded-3xl">
+                        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-slate-600 sm:hidden" />
+                        <div className="flex items-start gap-4">
+                            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-900">
+                                {materialSel.foto && <img src={materialSel.foto} alt="" className="h-full w-full object-cover" />}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{materialSel.codigo}</p>
+                                <h3 className="text-xl font-bold leading-tight text-white">{materialSel.nombre}</h3>
+                                <p className="mt-1 text-sm text-slate-300">Stock total <b className="text-white">{fmt(materialSel.stock)} {materialSel.unidad}</b>{materialSel.minimo > 0 && <> · mínimo {fmt(materialSel.minimo)}</>}</p>
+                            </div>
+                            <button onClick={() => setMaterialAbierto(null)} aria-label="Cerrar" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-800 text-slate-300"><X size={18} /></button>
+                        </div>
+
+                        <button onClick={() => { setMaterialAbierto(null); setViewMode('WIZARD'); }}
+                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white active:scale-[0.99]">
+                            <Sparkles size={16} /> Consumir por FEFO
+                        </button>
+
+                        <h4 className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-slate-500">Lotes · sale primero el de arriba</h4>
+                        <ol className="space-y-2">
+                            {materialSel.lotes.map((l: any, i: number) => (
+                                <li key={l.id} className={`rounded-2xl border p-3 ${l.status === 'CRITICO' ? 'border-rose-500/30 bg-rose-500/5' : 'border-slate-700/40 bg-slate-800/40'}`}>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-bold text-white">{i === 0 && l.estado === 'active' && <span className="mr-1.5 rounded-md bg-indigo-500/20 px-1.5 py-0.5 text-[10px] text-indigo-200">PRIMERO</span>}{l.lote}</p>
+                                            <p className="text-xs text-slate-400">{l.bodega} · vence {l.vencimiento}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-bold text-white">{fmt(l.cantidad)} {l.unit}</p>
+                                            {l.estado === 'quarantined' ? <Badge tono="gris">Cuarentena</Badge>
+                                                : l.days_until_expiration !== undefined && <FigmaFefoBadge daysUntilExpiration={l.days_until_expiration} size="sm" />}
+                                        </div>
+                                    </div>
+                                    <div className="mt-3 grid grid-cols-3 gap-2">
+                                        <MiniAccion onClick={() => { setSelectedLote(l); setMaterialAbierto(null); setViewMode('CONSUME'); }}>Consumir</MiniAccion>
+                                        <MiniAccion onClick={() => { setSelectedLote(l); setMaterialAbierto(null); setViewMode('DETAIL'); }}>Kardex</MiniAccion>
+                                        {user?.role === 'admin'
+                                            ? <MiniAccion onClick={() => { setSelectedLote(l); setMaterialAbierto(null); setShowAdjustModal(true); }}>Conciliar</MiniAccion>
+                                            : <MiniAccion onClick={() => { setMaterialAbierto(null); onNavigate?.('TRANSFERENCIAS'); }}>Transferir</MiniAccion>}
+                                    </div>
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
+
+const Chip = ({ activo, sutil, onClick, children }: { activo: boolean; sutil?: boolean; onClick: () => void; children: React.ReactNode }) => (
+    <button onClick={onClick}
+        className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition [&_b]:ml-1 [&_b]:opacity-60 ${activo
+            ? (sutil ? 'border-amber-400/40 bg-amber-400/15 text-amber-200' : 'border-indigo-400/50 bg-indigo-500/20 text-indigo-100')
+            : 'border-slate-700/50 bg-slate-800/40 text-slate-300'}`}>
+        {children}
+    </button>
+);
+
+const Badge = ({ tono, children }: { tono: 'rojo' | 'ambar' | 'gris'; children: React.ReactNode }) => (
+    <span className={`inline-block rounded-md px-1.5 py-0.5 text-[10px] font-bold ${tono === 'rojo' ? 'bg-rose-500/15 text-rose-300' : tono === 'ambar' ? 'bg-amber-400/15 text-amber-300' : 'bg-slate-700/60 text-slate-300'}`}>{children}</span>
+);
+
+const MiniAccion = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
+    <button onClick={onClick} className="rounded-xl border border-slate-700/50 bg-slate-900/60 py-2 text-xs font-semibold text-slate-200 active:scale-95">{children}</button>
+);
 
 // Subcomponente para el modal de ajuste (Conciliación)
 const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {

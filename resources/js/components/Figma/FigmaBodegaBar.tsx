@@ -26,7 +26,16 @@ export default function FigmaBodegaBar({ name, code, percentage, capacity, occup
     const clamped = Math.min(Math.max(percentage, 0), 100);
 
     return (
-        <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/40 rounded-xl p-4 space-y-3 hover:border-slate-600/50 transition-all duration-300 group">
+        <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/40 rounded-xl overflow-hidden hover:border-slate-600/50 transition-all duration-300 group">
+            {code && (
+                <div className="relative h-20 overflow-hidden bg-slate-900">
+                    <img src={`/images/bodegas/${code}.webp`} alt="" loading="lazy"
+                        onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
+                        className="h-full w-full object-cover opacity-80 transition duration-700 group-hover:scale-105 group-hover:opacity-100" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent" />
+                </div>
+            )}
+            <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 bg-slate-700/50 rounded-lg flex items-center justify-center text-slate-400 group-hover:text-white transition-colors">
@@ -50,12 +59,13 @@ export default function FigmaBodegaBar({ name, code, percentage, capacity, occup
             </div>
 
             <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                <span>{occupied} / {capacity} kg</span>
+                <span>{Number(occupied).toLocaleString('es-CO', { maximumFractionDigits: 1 })} / {Number(capacity).toLocaleString('es-CO')} de capacidad</span>
                 {status && (
                     <span className={status === 'active' ? 'text-emerald-500' : 'text-slate-600'}>
                         {status === 'active' ? '· Activa' : '· Inactiva'}
                     </span>
                 )}
+            </div>
             </div>
         </div>
     );

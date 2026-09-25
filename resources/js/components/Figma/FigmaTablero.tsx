@@ -21,7 +21,7 @@ const FigmaTablero = ({ stats, user, onViewChange }: { stats: any; user: any; on
         : '—';
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+        <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-4 sm:pb-12">
             {/* ── Encabezado + Quick Actions ── */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
@@ -36,7 +36,7 @@ const FigmaTablero = ({ stats, user, onViewChange }: { stats: any; user: any; on
             </div>
 
             {/* ── KPI Cards ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <FigmaKpiCard
                     icon={<Package size={20} />}
                     count={summary.totalMaterials}

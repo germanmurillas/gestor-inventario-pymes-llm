@@ -309,7 +309,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                         </div>
                         <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                             <span className="text-[10px] font-bold text-white/40 uppercase">Base: {summary.totalLotes || 0} Lotes</span>
-                            <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">+4.2% Eficiencia</span>
+                            <span className="text-[10px] font-bold text-white/40 uppercase">Costo × cantidad por lote</span>
                         </div>
                     </div>
                 </div>

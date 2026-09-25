@@ -113,7 +113,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                             <div className="pt-6 border-t border-white/10 space-y-4">
                                 <div className="flex justify-between items-end">
                                     <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Proyección de Salida</div>
-                                    <div className="text-xs font-bold text-indigo-400">-{data.quantity} KG</div>
+                                    <div className="text-xs font-bold text-indigo-400">-{data.quantity} {lote.unit || "kg"}</div>
                                 </div>
                                 <div className="h-2 bg-slate-900/80 backdrop-blur-xl/10 rounded-full overflow-hidden">
                                     <div 
@@ -122,7 +122,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                     ></div>
                                 </div>
                                 <div className="text-[9px] text-white/30 italic">
-                                    Stock remanente: {(lote.cantidad - data.quantity).toFixed(2)} KG
+                                    Stock remanente: {(lote.cantidad - data.quantity).toFixed(2)} {lote.unit || "kg"}
                                 </div>
                             </div>
                         </div>
@@ -159,7 +159,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                 </p>
                                 {lote.stock_total !== undefined && lote.stock_total > lote.cantidad && (
                                     <p className="text-[9px] text-indigo-600 font-bold uppercase">
-                                        Stock total del material: {lote.stock_total} KG en múltiples lotes
+                                        Stock total del material: {lote.stock_total} {lote.unit || "kg"} en múltiples lotes
                                     </p>
                                 )}
                             </div>
@@ -192,7 +192,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                         />
                                         <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
                                             <span className="text-[10px] font-black text-slate-400 uppercase">Máximo</span>
-                                            <span className="text-[10px] font-black text-indigo-600">{lote.cantidad} KG</span>
+                                            <span className="text-[10px] font-black text-indigo-600">{lote.cantidad} {lote.unit || "kg"}</span>
                                         </div>
                                     </div>
                                     {errors.quantity && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.quantity}</p>}

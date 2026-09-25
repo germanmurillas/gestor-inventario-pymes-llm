@@ -57,8 +57,8 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
             className="space-y-8 animate-in slide-in-from-right-4 duration-500 max-w-7xl mx-auto pb-20"
         >
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3 sm:gap-6">
                     <button
                         type="button"
                         onClick={onBack}
@@ -67,7 +67,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                         <ArrowLeft size={18} />
                     </button>
                     <div>
-                        <h2 className="text-xl font-bold uppercase tracking-tight">
+                        <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight">
                             Transferencia entre Bodegas
                         </h2>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">

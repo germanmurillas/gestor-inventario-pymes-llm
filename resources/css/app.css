@@ -1176,3 +1176,7 @@ html[data-theme] .page-landing .bg-white { background-color: #FFFFFF !important;
 html[data-theme] .page-landing .bg-gray-100 { background-color: #F3F4F6 !important; }
 html[data-theme] .page-landing .border-gray-200 { border-color: #E5E7EB !important; }
 html[data-theme] .page-landing .bg-\[\#111111\] { background-color: #111111 !important; color: #FFFFFF !important; }
+
+/* Filas deslizables sin barra visible (fichas de filtro en móvil) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

@@ -3,6 +3,8 @@ import { Head } from '@inertiajs/react';
 import { HelpCircle, Menu } from 'lucide-react';
 import gsap from 'gsap';
 import Sidebar from '../Components/Sidebar';
+import MobileNav, { VIEW_LABELS } from '../Components/MobileNav';
+import { Boxes } from 'lucide-react';
 
 // Figma Components
 import FigmaTablero from '../components/Figma/FigmaTablero';
@@ -34,7 +36,11 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
         setStats(dashboardStats || null);
     }, [dashboardStats]);
 
-    const [activeView, setActiveView] = useState<ViewMode>('TABLERO');
+    // ?v=VISTA permite volver a una vista concreta desde otras páginas (Kanban, Ajustes).
+    const [activeView, setActiveView] = useState<ViewMode>(() => {
+        const v = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('v') : null;
+        return (v && v in VIEW_LABELS ? v : 'TABLERO') as ViewMode;
+    });
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileOpen, setMobileOpen] = useState(false);
     const viewRef = useRef<HTMLDivElement>(null);
@@ -51,9 +57,9 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
     // GSAP View Transition
     useEffect(() => {
         if (viewRef.current) {
-            gsap.fromTo(viewRef.current, 
-                { opacity: 0, y: 15, filter: 'blur(8px)' }, 
-                { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'power3.out' }
+            gsap.fromTo(viewRef.current,
+                { opacity: 0, y: 12 },
+                { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', clearProps: 'transform' }
             );
         }
     }, [activeView]);
@@ -66,7 +72,7 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                 <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.1)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '4s' }} />
                 <div className="absolute top-[40%] left-[30%] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.06)_0%,transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
             </div>
-            <Head title={`${activeView} | Pymetory Premium`} />
+            <Head title={`${VIEW_LABELS[activeView] ?? activeView} | Pymetory`} />
 
             <Sidebar
                 sidebarOpen={sidebarOpen}
@@ -80,20 +86,21 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col overflow-hidden relative z-10">
-                <header className="h-16 border-b flex items-center justify-between px-8 z-40 bg-obsidiana/60 backdrop-blur-xl border-slate-700/30 text-white">
-                    <div className="flex items-center gap-6">
-                        <button onClick={toggleSidebar} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="p-2 rounded-xl transition-all hover:scale-110 active:scale-95 hover:bg-slate-800 text-slate-400">
+                <header className="h-14 lg:h-16 border-b flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40 bg-obsidiana/60 backdrop-blur-xl border-slate-700/30 text-white">
+                    <div className="flex items-center gap-3 lg:gap-6">
+                        <button onClick={toggleSidebar} aria-label={sidebarOpen ? 'Cerrar menú' : 'Abrir menú'} className="hidden lg:inline-flex p-2 rounded-xl transition-all hover:scale-110 active:scale-95 hover:bg-slate-800 text-slate-400">
                             <Menu size={20} aria-hidden="true" />
                         </button>
+                        <span className="lg:hidden grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white"><Boxes size={16} /></span>
                         <nav className="flex items-center gap-2" aria-label="Breadcrumb">
-                             <span className="text-xs font-bold uppercase tracking-widest italic text-slate-500">Pymetory /</span>
-                             <h1 className="text-xs font-black uppercase tracking-widest text-white">{activeView}</h1>
+                             <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest italic text-slate-500">Pymetory /</span>
+                             <h1 className="text-sm lg:text-xs font-black lg:uppercase tracking-tight lg:tracking-widest text-white">{VIEW_LABELS[activeView] ?? activeView}</h1>
                         </nav>
                     </div>
                 </header>
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
-                    <div ref={viewRef} className="p-8 h-full">
+                    <div ref={viewRef} className="px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:p-8 min-h-full">
                         {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} onViewChange={setActiveView} />}
                         {activeView === 'INVENTARIO' && <FigmaInventario lotes={lotes} bodegas={stats?.bodegas || []} user={user} onNavigate={setActiveView} />}
                         {activeView === 'BUSCAR' && <FigmaSearch lotes={lotes} />}
@@ -121,6 +128,8 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                     </div>
                 </div>
             </main>
+
+            <MobileNav activeView={activeView} onNavigate={(v) => setActiveView(v as ViewMode)} user={user} />
         </div>
     );
 }
