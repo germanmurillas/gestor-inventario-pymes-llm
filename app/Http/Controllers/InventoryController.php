@@ -56,7 +56,11 @@ class InventoryController extends Controller {
 
         $efficiency = [
             'accuracy'       => $accuracy,
-            'turnoverRatio'  => 4.2,  // Calculable con: consumos / stock promedio del período
+            // Rotación de los últimos 30 días: salidas del Kardex / existencias actuales.
+            'turnoverRatio'  => $totalOcupado > 0
+                ? round(\App\Models\Movimiento::where('type', 'salida')
+                    ->where('created_at', '>=', now()->subDays(30))->sum('quantity') / $totalOcupado, 2)
+                : 0,
             'occupancyTotal' => $occupancy,
         ];
 
@@ -136,12 +140,18 @@ class InventoryController extends Controller {
                 ];
             });
 
-        // Tendencias: cambios porcentuales mock (MVP) — se reemplazarán con datos reales del período
+        // Tendencias reales frente a hace 30 días; null = sin base de comparación (no se muestra).
+        $hace30 = now()->subDays(30);
+        $variacion = function (int $antes, int $ahora): ?string {
+            if ($antes === 0 || $antes === $ahora) return null;
+            $pct = round((($ahora - $antes) / $antes) * 100);
+            return ($pct > 0 ? '+' : '') . $pct . '%';
+        };
         $trends = [
-            'materiales' => '+12%',
-            'lotes' => '+5%',
-            'criticos' => ($stats['lotesCriticos'] > 0 ? '+2' : '-3'),
-            'valor' => '+8%',
+            'materiales' => $variacion(\App\Models\Material::where('created_at', '<', $hace30)->count(), $stats['totalMaterials']),
+            'lotes'      => $variacion(Lote::where('created_at', '<', $hace30)->count(), Lote::count()),
+            'criticos'   => null,
+            'valor'      => null,
         ];
 
         return Inertia::render('Dashboard', [

@@ -21,5 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Fechas relativas del Kardex en el idioma de la app ("hace 3 meses").
+        \Carbon\Carbon::setLocale(config('app.locale'));
     }
 }

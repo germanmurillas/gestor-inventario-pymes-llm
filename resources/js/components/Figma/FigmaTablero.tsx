@@ -8,7 +8,7 @@ import FigmaFefoTimer from './FigmaFefoTimer';
 
 const FigmaTablero = ({ stats, user, onViewChange }: { stats: any; user: any; onViewChange: (view: any) => void }) => {
     const summary = stats?.summary || { totalMaterials: 0, totalLotes: 0, lotesCriticos: 0, totalInventoryValue: 0, totalInventoryVolume: 0 };
-    const efficiency = stats?.efficiency || { accuracy: 99, turnoverRatio: 4.2, occupancyTotal: 0 };
+    const efficiency = stats?.efficiency || { accuracy: 0, turnoverRatio: 0, occupancyTotal: 0 };
     const activity = stats?.recentActivity || [];
     const bodegas = stats?.bodegas || [];
     const fefoAlerts = stats?.fefoAlerts || [];
