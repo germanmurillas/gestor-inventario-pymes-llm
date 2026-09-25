@@ -195,6 +195,8 @@ class ChatLLMController extends Controller {
         return response()->json([
             'local'            => $local,
             'opencode'         => $opencode,
+            'opencode-go'      => \App\Models\ApiKey::where('tipo','opencode-go')->where('activo', true)
+                                 ->pluck('model_name')->filter()->unique()->values()->toArray(),
             'active_source'    => $activeSource,
             'active_model'     => $activeModel,
             'effective_model'  => $effectiveModel,
@@ -340,12 +342,20 @@ class ChatLLMController extends Controller {
 
         // ── Unified LLM inference (local, opencode, external) ──────────────────
         $endpoints = [
-            'local'    => ['url' => config('services.ollama.url') . '/api/chat', 'key' => '', 'native' => true],
-            'opencode' => ['url' => $apiBaseUrl ?: 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $apiKey],
-            'external' => ['url' => $apiBaseUrl ?: 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
+            'local'       => ['url' => config('services.ollama.url') . '/api/chat', 'key' => '', 'native' => true],
+            'opencode'    => ['url' => $apiBaseUrl ?: 'https://opencode.ai/zen/v1/chat/completions', 'key' => $apiKey],
+            'opencode-go' => ['url' => $apiBaseUrl ?: 'https://opencode.ai/zen/go/v1/chat/completions', 'key' => $apiKey, 'go' => true],
+            'external'    => ['url' => $apiBaseUrl ?: 'https://api.openai.com/v1/chat/completions', 'key' => $apiKey],
         ];
 
-        $cfg = $endpoints[$llmSource] ?? $endpoints['external'];
+        $sourceCfg = $endpoints[$llmSource] ?? [];
+        $cfg = $sourceCfg ?: $endpoints['external'];
+
+        // OpenCode Go exige header de sesión estable + UA de agente (docs Go 2026)
+        $withHeaders = !empty($sourceCfg['go'])
+            ? ['x-opencode-session' => 'sess-pymetory-' . substr(md5((string) ($sessionId ?? $query)), 0, 16),
+               'User-Agent' => 'pymetory/1.0 (codig agent; tesis UNA)']
+            : [];
 
         // FIX-UI: api_keys.model_name pisaba SIEMPRE la selección del usuario,
         // por eso el dropdown "no servía": elegir glm-5.1 seguía inferenciando
@@ -418,6 +428,7 @@ class ChatLLMController extends Controller {
             }
             $response = Http::timeout($isNativeLocal ? 90 : 60)
                 ->withToken($cfg['key'] ?: null)
+                ->withHeaders($withHeaders)
                 ->post($cfg['url'], $payload);
 
             if ($response->successful()) {
