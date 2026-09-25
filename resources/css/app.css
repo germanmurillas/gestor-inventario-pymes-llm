@@ -148,6 +148,20 @@
 [data-theme] .bg-indigo-50, [data-theme] .bg-amber-50, [data-theme] .bg-red-50, [data-theme] .bg-red-100 { background-color: var(--pm-panel); }
 [data-theme] .bg-white\/5, [data-theme] .bg-white\/10 { background-color: var(--pm-panel-2); }
 [data-theme] .bg-white { background-color: var(--pm-panel); }
+/* FIX login/osK inputs: los .bg-white remapeados a panel oscuro dejan el texto
+   del input con el color por defecto del UAs (casi negro) — invisible. El input
+   que vive en un panel oscuro gana texto claro explícito. */
+[data-theme] input.bg-white { background-color: var(--pm-panel-2); color: var(--pm-text); border-color: var(--pm-border); }
+[data-theme] input.bg-white::placeholder { color: var(--pm-text-muted); opacity: 1; }
+[data-theme] input.bg-white:-webkit-autofill,
+[data-theme] input.bg-white:-webkit-autofill:hover,
+[data-theme] input.bg-white:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--pm-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--pm-panel-2) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+[data-theme] label.text-gray-700 { color: var(--pm-text-muted); }
+[data-theme] .bg-\[\#111111\] { background-color: var(--pm-accent); color: var(--pm-accent-fg); }
 [data-theme] .border-slate-800, [data-theme] .border-slate-700, [data-theme] .border-slate-600,
 [data-theme] .border-slate-500, [data-theme] .border-slate-200, [data-theme] .border-slate-100, [data-theme] .border-slate-50 { border-color: var(--pm-border); }
 [data-theme] .text-white { color: var(--pm-text); }
