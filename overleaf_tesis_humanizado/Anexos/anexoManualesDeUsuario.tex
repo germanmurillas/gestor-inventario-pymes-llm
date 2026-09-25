@@ -1,11 +1,11 @@
-% Manual de usuario de Pymetory. Capturas tomadas de app.pymetory.com con los datos de demostración (25-sep-2026).
+% Manual de usuario de Pymetory. Capturas tomadas de app.pymetory.com con los datos de demostración y la interfaz rediseñada (25-sep-2026).
 \section*{Manual de usuario} \label{sec:ManualesdeUsuario}
 \addcontentsline{toc}{section}{Manual de usuario}
 
 Este manual describe el uso de Pymetory en \url{https://app.pymetory.com}. Las capturas muestran los datos de demostración del caso de estudio (panadería). Las funciones marcadas como \textit{solo administrador} no están disponibles para el rol operario.
 
 \newcommand{\capturaManual}[2]{%
-\begin{figure}[H]\centering\includegraphics[width=0.92\textwidth]{Anexos/Imagenes/manual/#1}\caption{#2}\end{figure}}
+\begin{figure}[H]\centering\includegraphics[width=0.8\textwidth]{Anexos/Imagenes/manual/#1}\caption{#2}\end{figure}}
 
 \subsection*{Ingreso al sistema}
 Ingrese el correo electrónico y la contraseña asignados por el administrador y pulse \textbf{Entrar}. No existe registro abierto de administradores: las cuentas con ese rol las crea otro administrador.
@@ -16,12 +16,15 @@ Resume el estado del inventario: número de insumos, lotes en bodega, lotes crí
 \capturaManual{02-tablero.png}{Tablero de control.}
 
 \subsection*{Inventario}
-Muestra los lotes activos agrupados por bodega, con su cantidad, fecha de vencimiento y estado. Los lotes dentro del umbral FEFO se marcan como críticos. Desde aquí se registran ingresos (\textbf{Nuevo ingreso}) y consumos; al consumir, el sistema descuenta primero del lote que vence primero.
-\capturaManual{03-inventario.png}{Inventario por lotes.}
+Tiene dos pestañas. En \textbf{Insumos} cada tarjeta es un insumo con su existencia total en su unidad (kg, L, gal, und), el número de lotes y avisos de lotes por vencer o de existencia bajo el mínimo; se puede filtrar por bodega y por categoría, y al tocar un insumo se ven sus lotes en orden FEFO. Desde aquí se registran ingresos (\textbf{Ingreso}) y consumos (\textbf{Consumo FEFO}); al consumir, el sistema descuenta primero del lote que vence primero.
+\capturaManual{03-inventario.png}{Inventario por insumo.}
+
+En \textbf{Bodegas} cada tarjeta resume lo que hay en esa bodega según la base de datos: lotes, insumos, lotes por vencer, valor y ocupación. Al tocarla se abre el inventario filtrado por esa bodega. El administrador puede crear una bodega o editarla (nombre, capacidad, descripción, estado e imagen de fondo, que puede ser un archivo subido o un enlace \texttt{https}).
+\capturaManual{03b-bodegas.png}{Bodegas conectadas al inventario.}
 
 \subsection*{Búsqueda}
-Permite encontrar materiales y lotes por nombre, código o etiqueta.
-\capturaManual{04-buscar.png}{Búsqueda de materiales y lotes.}
+Busca entre los lotes con existencias por nombre del insumo, código, número de lote, categoría o bodega. Los resultados pueden filtrarse por lotes por vencer, vigentes o en cuarentena, y por bodega.
+\capturaManual{04-buscar.png}{Búsqueda de lotes de harina.}
 
 \subsection*{Asistente de inventario}
 Escriba una pregunta en español, por ejemplo ``¿Qué lotes vencen pronto?'' o ``¿Cuánta harina de trigo hay?''. El asistente consulta la base de datos antes de responder; si el material no está registrado, lo indica. Las conversaciones quedan en el historial de la izquierda.
@@ -49,9 +52,13 @@ Registra órdenes a proveedores. Al recibir una orden, el sistema crea el lote r
 \capturaManual{11-ordenes.png}{Órdenes de compra.}
 
 \subsection*{Alertas}
-Reúne las alertas de stock bajo y de lotes próximos a vencer, que el sistema revisa cada hora.
+Reúne las alertas de stock bajo y de lotes próximos a vencer. Las genera una tarea programada que revisa el inventario cada hora; un aviso que sigue sin leer no se repite en las siguientes 24 horas. Al tocar una alerta se marca como leída y se abre el inventario.
 \capturaManual{12-alertas.png}{Centro de alertas.}
 
 \subsection*{Ajustes (solo administrador)}
-Configura el umbral FEFO, las notificaciones, el proveedor y modelo de lenguaje del asistente, las claves de API y los usuarios con sus roles.
+Configura el umbral FEFO, las notificaciones, el proveedor y modelo de lenguaje del asistente, las claves de API y los usuarios con sus roles. En \textbf{Tema visual} se elige una de seis paletas; el cambio se aplica a toda la interfaz.
 \capturaManual{13-ajustes.png}{Ajustes del sistema.}
+
+\subsection*{Uso en el celular}
+En pantallas pequeñas el menú lateral se reemplaza por una barra inferior con Tablero, Inventario, Escanear y Asistente; el botón \textbf{Más} abre el resto de módulos agrupados.
+\begin{figure}[H]\centering\includegraphics[width=0.8\textwidth]{Anexos/Imagenes/manual/14-movil.png}\caption{Tablero, inventario y escáner en el celular.}\end{figure}

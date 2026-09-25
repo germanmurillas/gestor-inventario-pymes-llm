@@ -120,7 +120,7 @@ El esquema se define mediante migraciones de Laravel, de modo que cada cambio en
 \textbf{Grupo} & \textbf{Tablas y propósito} \\
 \hline
 \endhead
-Inventario & \texttt{materials} (catálogo: código, nombre, unidad, categoría, stock mínimo), \texttt{lotes} (número de lote, cantidad, costo unitario, fecha de vencimiento, estado \textit{active}/\textit{quarantined}/\textit{consumed}, material y bodega), \texttt{bodegas} (ubicaciones y capacidad), \texttt{transferencias} (traslados entre bodegas). \\ \hline
+Inventario & \texttt{materials} (catálogo: código, nombre, unidad, categoría, stock mínimo), \texttt{lotes} (número de lote, cantidad, costo unitario, fecha de vencimiento, estado \textit{active}/\textit{quarantined}/\textit{consumed}, material y bodega), \texttt{bodegas} (ubicaciones, capacidad, estado y ruta o enlace de su imagen de fondo), \texttt{transferencias} (traslados entre bodegas). \\ \hline
 Kardex & \texttt{movimientos}: lote, usuario, tipo (entrada o salida), cantidad, motivo, descripción y fecha. \\ \hline
 Clasificación & \texttt{tags} y \texttt{material\_tag} (etiquetas de materiales), \texttt{custom\_field\_definitions} (campos personalizados). \\ \hline
 Compras & \texttt{vendors} (proveedores), \texttt{purchase\_orders} y \texttt{purchase\_order\_items} (órdenes de compra y cantidades recibidas). \\ \hline
@@ -142,7 +142,7 @@ El asistente sigue la arquitectura de generación aumentada por recuperación (R
 
 \begin{enumerate}
     \item \textbf{Clasificación de la intención} (\texttt{classifyQuery}). Mediante expresiones regulares se asigna la pregunta a una de nueve intenciones o, si ninguna coincide, a una intención general (Tabla \ref{tab:dis_intenciones}). Además, las palabras de la pregunta se comparan con los nombres y descripciones de los materiales para filtrar el contexto al material consultado.
-    \item \textbf{Construcción del contexto} (\texttt{buildRagContext}). Según la intención, se consulta la base de datos (lotes, movimientos, bodegas, valorización) y se arma un texto con los registros encontrados y el estado de las bodegas.
+    \item \textbf{Construcción del contexto} (\texttt{buildRagContext}). Según la intención, se consulta la base de datos (lotes, movimientos, bodegas, valorización) y se arma un texto con los registros encontrados y el estado de las bodegas. Solo se consideran lotes activos con existencias, el texto empieza con la fecha del día y cada lote indica cuántos días le faltan para vencer, de modo que el modelo pueda responder preguntas como ``¿qué vence esta semana?'' sin calcular fechas por su cuenta.
     \item \textbf{Generación de la respuesta}. El contexto, la instrucción de sistema (editable desde la configuración) y la pregunta se envían al proveedor de modelo de lenguaje configurado; la respuesta se muestra al usuario y se guarda en \texttt{chat\_histories}.
 \end{enumerate}
 
@@ -179,8 +179,8 @@ La interfaz se prototipó en Figma. El commit del 14 de abril de 2026 (\texttt{5
 Los principios que guiaron el diseño de la interfaz fueron:
 
 \begin{itemize}
-    \item \textbf{Navegación por tareas.} La barra lateral agrupa los módulos en tres secciones ---Principal (Tablero, Inventario, Buscar), Análisis (Asistente RAG, Reportes, Log Maestro, Etiquetas, Escáner QR) y Gestión (Historial QR, Transferencias, Órdenes de compra, Impresión de etiquetas, Alertas)--- y el tablero ofrece accesos rápidos a las acciones más frecuentes (nuevo insumo, escanear, reporte, consumo rápido).
+    \item \textbf{Navegación por tareas.} La barra lateral agrupa los módulos en tres secciones ---Principal (Tablero, Inventario, Buscar), Análisis (Asistente, Reportes, Kardex, Etiquetas, Escáner QR) y Gestión (Historial QR, Transferencias, Órdenes de compra, Imprimir etiquetas, Alertas)--- y el tablero ofrece accesos rápidos a las acciones más frecuentes (nuevo insumo, escanear, reporte, consumo rápido).
     \item \textbf{Lo urgente primero.} El tablero muestra en la parte superior los indicadores que requieren acción (lotes críticos por vencimiento, existencias, valorización) y, debajo, la actividad reciente del Kardex y la ocupación de las bodegas.
-    \item \textbf{Uso en bodega desde el celular.} El diseño es adaptable a pantallas pequeñas y el escáner usa la cámara del dispositivo, para que el personal pueda registrar movimientos sin ir a un computador.
-    \item \textbf{Temas visuales.} Los colores se definen como variables de CSS, lo que permitió ofrecer seis temas seleccionables (\textit{midnight-luxe}, \textit{carbon-amber}, \textit{nordic-steel}, \textit{obsidian-teal}, \textit{royal-plum} y \textit{paper-light}), incluido uno claro.
+    \item \textbf{Uso en bodega desde el celular.} El diseño es adaptable a pantallas pequeñas: el menú lateral se reemplaza por una barra inferior con las cuatro acciones más usadas (tablero, inventario, escanear y asistente) y un panel con el resto de módulos, y el escáner usa la cámara del dispositivo, para que el personal pueda registrar movimientos sin ir a un computador.
+    \item \textbf{Temas visuales.} Los colores se definen como variables de CSS, lo que permitió ofrecer seis temas seleccionables (\textit{midnight-luxe}, \textit{carbon-amber}, \textit{nordic-steel}, \textit{obsidian-teal}, \textit{royal-plum} y \textit{paper-light}), incluido uno claro. Cada tema define un pequeño conjunto de colores base (fondo, panel, borde, texto y acento) y a partir de ellos redefine la paleta completa que usan los componentes; así un tema no puede alterar a otro. Las imágenes, como las de las bodegas, provienen de la base de datos (archivo subido o enlace), no de rutas fijas en el código.
 \end{itemize}
