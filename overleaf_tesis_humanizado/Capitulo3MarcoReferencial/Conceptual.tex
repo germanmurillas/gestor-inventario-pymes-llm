@@ -13,16 +13,16 @@
 
 \subsection{Glosario}
 
-Esta sección reúne los términos que aparecen a lo largo del documento. Si encuentras un acrónimo o concepto técnico que no queda claro, aquí está su definición, contextualizada en el caso real de la panificadora de Cali. Los términos están agrupados en dos áreas: logística y negocios, y computación e ingeniería de software.
+Esta sección reúne los términos que aparecen a lo largo del documento. Si encuentras un acrónimo o concepto técnico que no queda claro, aquí está su definición, contextualizada, cuando aplica, en el caso de estudio de una panificadora del Valle del Cauca. Los términos están agrupados en dos áreas: logística y negocios, y computación e ingeniería de software.
 
 \subsection*{Área de Empresas y Logística}
 
 \begin{itemize}
     \item \textbf{Kardex:} Registro detallado y cronológico de todos los movimientos (entradas y salidas) de un producto específico \cite{ballou2004logistica}. Piensa en el Kardex como un libro contable digital que nadie puede alterar: cada línea documenta el tipo de operación, las cantidades antes y después del movimiento, el usuario responsable, la fecha exacta y la razón. En Pymetory, el Kardex es una tabla inmutable en la base de datos. Durante las entrevistas con la panificadora, descubrimos que la empresa no llevaba ningún tipo de Kardex, lo que hacía imposible reconstruir qué pasó con los insumos.
     
-    \item \textbf{Stock:} Cantidad de un producto disponible en el inventario \cite{ballou2004logistica}. En la panificadora, verificar el stock tomaba entre 20 y 40 minutos: el encargado recorría la bodega contando bulto por bulto. Pymetory calcula el stock en tiempo real sumando las cantidades de todos los lotes activos de cada material.
+    \item \textbf{Stock:} Cantidad de un producto disponible en el inventario \cite{ballou2004logistica}. En la empresa del caso de estudio, la existencia real solo se conoce recorriendo la bodega; Pymetory calcula el stock en tiempo real sumando las cantidades de todos los lotes activos de cada material.
     
-    \item \textbf{Trazabilidad:} Capacidad de seguir el rastro de un producto desde su entrada hasta su salida \cite{ballou2004logistica}. La falta de trazabilidad fue uno de los hallazgos más críticos en la panificadora: no existía registro de quién despachó qué material, cuándo, por qué razón ni de qué lote provenía. Pymetory garantiza trazabilidad completa vinculando cada movimiento del Kardex con el lote, el material, la bodega y el usuario responsable.
+    \item \textbf{Trazabilidad:} Capacidad de seguir el rastro de un producto desde su entrada hasta su salida \cite{ballou2004logistica}. En el caso de estudio, la trazabilidad por lote y vencimiento es una exigencia sanitaria que el sistema contable de la empresa no cubre. Pymetory garantiza trazabilidad completa vinculando cada movimiento del Kardex con el lote, el material, la bodega y el usuario responsable.
     
     \item \textbf{ERP (Enterprise Resource Planning):} Sistemas de planificación de recursos empresariales ---paquetes de software que integran y automatizan todos los procesos de una empresa \cite{ballou2004logistica}. Soluciones como Odoo o SAP Business One ofrecen funcionalidades de inventario, pero su costo y complejidad las hacen inaccesibles para la mayoría de las PYMEs colombianas. La panificadora había evaluado Odoo y lo descartó por el costo mensual y porque ``parecía hecho para ingenieros''.
     
@@ -30,7 +30,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{Desabastecimiento:} Situación en la que la demanda supera el inventario disponible, lo que puede detener la producción y generar pérdidas \cite{ballou2004logistica}. La panificadora experimentó desabastecimiento en temporadas altas (diciembre y Semana Santa) por no tener un sistema que proyectara necesidades de compra basadas en el consumo histórico.
     
-    \item \textbf{Mermas:} Reducciones en el inventario por deterioro, vencimiento, daño, robo o errores de registro \cite{ballou2004logistica}. La panificadora reportó al menos tres incidentes de merma por vencimiento de harina y levadura en un solo año, todos atribuibles a no saber qué lote debía usarse primero ---problema que FEFO resuelve.
+    \item \textbf{Mermas:} Reducciones en el inventario por deterioro, vencimiento, daño, robo o errores de registro \cite{ballou2004logistica}. En la empresa del caso de estudio la rotación es rápida y no se reportan mermas por caducidad; aun así, las mermas por errores de registro se manifiestan como diferencias entre el sistema contable y la bodega.
     
     \item \textbf{PYME (Pequeña y Mediana Empresa):} Empresas que por su facturación, empleados y activos se sitúan entre las microempresas y las grandes corporaciones \cite{ballou2004logistica}. En Colombia, según el DANE, las PYMEs representan más del 90\% del tejido empresarial y generan cerca del 65\% del empleo. La panificadora caso de estudio es una empresa mediana con aproximadamente 25 empleados y una producción diaria de 3.000 a 5.000 unidades de pan.
     
@@ -68,7 +68,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{UML (Unified Modeling Language):} Lenguaje estándar para modelar sistemas de software mediante diagramas \cite{omg_uml}. Incluye diagramas de casos de uso, clases, secuencia y otros.
     
-    \item \textbf{Historias de Usuario:} Descripciones breves de una funcionalidad desde la perspectiva del usuario final \cite{schwaber2020scrumguide}. Las 9 historias de usuario de Pymetory surgieron directamente de las entrevistas con el personal de la panificadora.
+    \item \textbf{Historias de Usuario:} Descripciones breves de una funcionalidad desde la perspectiva del usuario final \cite{schwaber2020scrumguide}. Las necesidades que dieron origen a las historias de usuario de Pymetory provienen de la entrevista descrita en el Capítulo \ref{chap:requerimientos}.
     
     \item \textbf{Sprint:} Período fijo de tiempo (1 a 4 semanas) en el que un equipo SCRUM completa un incremento de producto \cite{schwaber2020scrumguide}. Pymetory se desarrolló en 6 sprints de dos semanas.
     
@@ -99,42 +99,9 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     \item \textbf{Single Page Application (SPA):} Aplicación web que carga una sola página HTML y actualiza el contenido dinámicamente sin recargar la página completa. Gracias a Inertia.js, Pymetory funciona como una SPA.
 \end{itemize}
 
-\subsection{Contexto del Caso de Estudio: Panificadora en Cali}
+\subsection{Contexto del caso de estudio}
 \label{sec:contexto_panificadora}
 
-Para anclar el desarrollo a necesidades reales ---no a suposiciones de laboratorio--- seleccionamos como caso de estudio una panificadora mediana en Santiago de Cali, dedicada a producir y distribuir productos de panadería y repostería. Con aproximadamente 25 empleados y una producción diaria de 3.000 a 5.000 unidades, maneja un inventario de materia prima que incluye harina de trigo, azúcar, levadura, grasas vegetales, huevos, esencias, colorantes y empaques ---varios de ellos perecederos, con vencimientos entre 15 y 90 días.
+Para anclar el desarrollo a necesidades reales, se tomó como caso de estudio una panificadora de tamaño pequeño a mediano del municipio de La Victoria (Valle del Cauca), que elabora productos de panadería a escala industrial. Su inventario de materia prima incluye harinas, mejoradores, levaduras, grasas, semillas, sal, azúcar y material de empaque, y se lleva en kilogramos en un sistema contable que se alimenta desde las facturas de compra y desde el reporte diario de producción.
 
-El levantamiento de requisitos se hizo en ocho sesiones de trabajo, combinando entrevistas con el administrador y el encargado de bodega con sesiones de revisión dirigidas por el profesor director. La técnica fue la elicitación: conversaciones guiadas diseñadas para extraer necesidades que los propios entrevistados no habrían articulado espontáneamente, evitando preguntas de sí o no.
-
-Los hallazgos se tradujeron en 9 casos de uso (UC1--UC9), 10 reglas de negocio, 4 reglas inmutables y 18 prototipos en Figma. La Tabla \ref{tab:casos_uso} resume los casos de uso.
-
-\begin{table}[H]
-\centering
-\caption{Casos de uso identificados en la panificadora caso de estudio.}
-\label{tab:casos_uso}
-\begin{tabular}{|l|l|p{4cm}|}
-\hline
-\textbf{ID} & \textbf{Caso de Uso} & \textbf{Necesidad Identificada} \\
-\hline
-UC1 & Registrar entrada de materia prima & ``Cada vez que llega un proveedor, anotamos en el cuaderno, pero a veces se nos olvida anotar el lote'' \\
-\hline
-UC2 & Registrar salida/despacho & ``Cuando el panadero necesita harina, va a la bodega y coge. Nadie anota cuánto cogió'' \\
-\hline
-UC3 & Consultar stock disponible & ``Me toca ir a la bodega y contar bulto por bulto para saber cuánto hay'' \\
-\hline
-UC4 & Gestionar lotes por vencimiento (FEFO) & ``Muchas veces lo que está atrás nunca se usa y se vence'' \\
-\hline
-UC5 & Conciliar inventario físico vs. lógico & ``A fin de mes, lo que dice el cuaderno nunca coincide con lo que hay'' \\
-\hline
-UC6 & Generar reportes & ``El contador me pide el valor del inventario y me demoro dos días sacándolo'' \\
-\hline
-UC7 & Consultar con lenguaje natural (LLM) & ``Yo quisiera preguntarle al sistema como si fuera una persona: ¿qué me hace falta?'' \\
-\hline
-UC8 & Imprimir etiquetas QR & ``Sería bueno pegarle un código a cada estantería para saber qué hay sin abrir el sistema'' \\
-\hline
-UC9 & Gestionar usuarios y roles & ``No quiero que cualquiera pueda modificar el inventario'' \\
-\hline
-\end{tabular}
-\end{table}
-
-El caso de estudio no solo proporcionó los requisitos del sistema, sino también los datos semilla con los que se pobló la base de datos durante las pruebas: nombres reales de materiales, cantidades típicas, precios de mercado en Cali y fechas de vencimiento representativas del sector.
+Los requisitos se levantaron mediante una entrevista semiestructurada con la administradora de la empresa. Las preguntas, las respuestas, el problema identificado y los requerimientos derivados se presentan en el Capítulo \ref{chap:requerimientos}.

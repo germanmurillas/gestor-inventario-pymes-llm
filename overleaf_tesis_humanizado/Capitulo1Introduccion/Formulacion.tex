@@ -31,27 +31,22 @@ Esta forma de trabajar produce tres problemas que golpean directamente el bolsil
 
 Aunque existen sistemas de gestión de inventarios en el mercado —como Odoo, Zoho Inventory o Stockpile— la mayoría resultan inalcanzables para una PYME colombiana. Sus precios de suscripción, la complejidad de sus interfaces y la necesidad de personal técnico para operarlos los convierten en herramientas diseñadas para grandes empresas, no para panaderías, ferreterías o talleres.\cite{bbva2024mipymes}
 
-\subsection{Caso de Estudio: Panificadora en Santiago de Cali}
+\subsection{Caso de estudio: una panificadora del Valle del Cauca}
 
-Para entender el problema desde la realidad y no desde la teoría, el equipo realizó un proceso de levantamiento de requisitos con una panificadora mediana de Santiago de Cali, seleccionada como caso de estudio representativo del sector de alimentos. Esta empresa produce y distribuye productos de panadería y repostería a nivel local, manejando insumos como harinas, azúcares, levaduras, grasas vegetales, esencias y empaques —materiales que, en su mayoría, tienen fecha de vencimiento.
+Para entender el problema desde la operación real y no solo desde la literatura, se realizó un levantamiento de requisitos con una panificadora de tamaño pequeño a mediano del municipio de La Victoria (Valle del Cauca), que elabora productos de panadería a escala industrial y compra de forma continua harinas, mejoradores, levaduras, grasas, semillas, sal, azúcar y material de empaque. Por respeto a la empresa y a las personas involucradas, en este documento no se registran sus nombres.
 
-El levantamiento de requisitos consistió en ocho sesiones de trabajo con el personal de la panificadora y la dirección del trabajo de grado. La técnica utilizada fue la \textbf{elicitación} —un proceso de conversación guiada para extraer información y necesidades reales, no opiniones superficiales. Se partió de 20 preguntas iniciales que luego se refinaron hasta 10 preguntas definitivas, diseñadas para entender cómo funciona realmente la bodega en el día a día.
+El levantamiento consistió en una entrevista semiestructurada de aproximadamente 41 minutos con la persona a cargo de la administración de la empresa, organizada en diez preguntas en lenguaje cotidiano y un grupo de preguntas técnicas depuradas. El detalle completo de la entrevista y de los requerimientos que se derivaron de ella se presenta en el Capítulo \ref{chap:requerimientos}.
 
-Los hallazgos confirmaron y profundizaron lo que muestran las estadísticas nacionales. El encargado de bodega reportó cinco problemas concretos:
+La entrevista mostró que el problema de esta empresa no es la pérdida de materia prima por vencimiento ---la rotación es rápida y, según la administradora, no se presentan mermas por caducidad--- sino la calidad de la información con la que se gestiona la bodega:
 
 \begin{enumerate}
-    \item \textbf{Ausencia total de un sistema digital}: La panificadora registraba sus entradas y salidas en un cuaderno de contabilidad. Cuando alguien necesitaba saber cuánta harina quedaba, el encargado debía recorrer físicamente la bodega contando bulto por bulto. Cada consulta tomaba entre 20 y 40 minutos.
-
-    \item \textbf{Pérdidas por vencimiento no detectado}: En un solo año, la panificadora tuvo que desechar lotes completos de harina y levadura que se vencieron sin usarse. La causa no era la falta del producto, sino la imposibilidad de saber cuál de todos los lotes guardados era el más antiguo. En palabras del encargado: ``muchas veces el lote que está más atrás en la estantería nunca se usa porque siempre se despacha el que está más al frente, y cuando nos acordamos del de atrás ya está vencido''.
-
-    \item \textbf{Desabastecimiento en temporada alta}: En diciembre y Semana Santa, la producción se detuvo por falta de materia prima. Nadie sabía con anticipación que los insumos se iban a acabar porque no existían datos históricos de consumo para proyectar necesidades.
-
-    \item \textbf{Imposibilidad de conciliar el inventario}: Al cierre de cada mes, calcular ``qué hay en la bodega y cuánto vale'' tomaba entre dos y tres días de trabajo conjunto entre el administrador, el bodeguero y el contador. Siempre aparecían diferencias entre lo anotado en el cuaderno y lo que había físicamente en los estantes.
-
-    \item \textbf{Cero trazabilidad}: No existía ningún registro de quién había despachado un material, en qué fecha, por qué motivo ni de qué lote provenía. Esto hacía imposible cualquier auditoría y diluía la responsabilidad sobre el manejo de los insumos.
+    \item \textbf{El inventario digital no coincide con la bodega}: El sistema contable se alimenta a partir de las facturas y del formato diario de producción, sin verificación física. La confusión entre referencias casi idénticas al digitar las facturas y los consumos que no se desglosan generan diferencias que solo aparecen en el cierre de mes.
+    \item \textbf{La conciliación es manual}: Una vez al mes, la administradora compara en una hoja de cálculo el conteo físico con el saldo del sistema contable y corrige las diferencias con movimientos manuales que no dejan constancia de quién los hizo ni por qué.
+    \item \textbf{El reabastecimiento depende de la experiencia de una persona}: No hay stock mínimo ni punto de reorden; los pedidos se deciden recorriendo la bodega. La empresa ya ha tenido faltantes de insumos que obligaron a comprarlos en el mercado local a un precio mayor.
+    \item \textbf{La trazabilidad por lote es una exigencia sanitaria}: Aunque no haya mermas, ante una inspección del INVIMA la empresa debe demostrar qué lotes de materia prima usó y cuándo vencían.
 \end{enumerate}
 
-Estos cinco problemas no son exclusivos de esta panadería. Representan un patrón que se repite en miles de PYMEs colombianas del sector de alimentos, construcción, textiles y manufactura ligera. El caso de estudio confirmó que existe una necesidad real, concreta y urgente de herramientas de gestión de inventario diseñadas para este segmento empresarial.
+Estos problemas no son exclusivos de esta empresa: coinciden con las dificultades de digitalización que las fuentes citadas describen para las PYMEs colombianas, y confirman la pertinencia de una herramienta de gestión de inventario orientada a este segmento.
 
 \subsection{La brecha entre las PYMEs y el software disponible}
 
@@ -61,19 +56,19 @@ La Tabla \ref{tab:barreras_pymes} resume las barreras que separan a las PYMEs co
 \centering
 \caption{Barreras para la adopción de software de inventario en PYMEs colombianas.}
 \label{tab:barreras_pymes}
-\begin{tabular}{|l|p{5cm}|p{4cm}|}
+\begin{tabular}{|l|p{9cm}|}
 \hline
-\textbf{Barrera} & \textbf{Descripción} & \textbf{Evidencia en el caso de estudio} \\
+\textbf{Barrera} & \textbf{Descripción} \\
 \hline
-Costo de licenciamiento & Suscripciones mensuales desde \$200.000 COP hasta \$2.000.000 COP por usuario & La panificadora no podía justificar ese gasto recurrente para un software \\
+Costo de licenciamiento & Suscripciones mensuales desde \$200.000 COP hasta \$2.000.000 COP por usuario \\
 \hline
-Complejidad técnica & Interfaces diseñadas para grandes empresas con procesos estandarizados & El encargado de bodega expresó que ``esos sistemas parecen hechos para ingenieros, no para nosotros'' \\
+Complejidad técnica & Interfaces diseñadas para grandes empresas con procesos estandarizados \\
 \hline
-Falta de contexto local & Software diseñado en otros países sin adaptación al español colombiano ni a las regulaciones locales & Términos como \textit{SKU} o \textit{stock keeping unit} resultaban confusos para el personal \\
+Falta de contexto local & Software diseñado en otros países sin adaptación al español colombiano ni a las regulaciones locales \\
 \hline
-Curva de aprendizaje & Tiempo y costo de capacitar al personal en el uso de la herramienta & La panificadora no contaba con personal dedicado a TI que pudiera liderar la adopción \\
+Curva de aprendizaje & Tiempo y costo de capacitar al personal en el uso de la herramienta \\
 \hline
-Dependencia de infraestructura & Requisitos de hardware, servidores o conectividad permanente & La conexión a internet en la zona industrial era intermitente \\
+Dependencia de infraestructura & Requisitos de hardware, servidores o conectividad permanente \\
 \hline
 \end{tabular}
 \end{table}
@@ -85,11 +80,11 @@ A estas barreras se suma una ausencia llamativa: ninguna de las soluciones dispo
 Frente al panorama descrito, Pymetory se diseñó para cerrar cinco brechas concretas:
 
 \begin{itemize}
-    \item \textbf{Kardex digital automático}: Reemplaza el cuaderno de registros por un sistema que documenta cada movimiento automáticamente, guardando quién lo hizo, cuándo, qué cantidad había antes, qué cantidad quedó después y por qué se realizó.
-    \item \textbf{Despacho inteligente (FEFO)}: El sistema indica siempre qué lote debe salir primero según su fecha de vencimiento, resolviendo el problema de ``despachar siempre el que está más al frente''.
+    \item \textbf{Kardex digital automático}: Reemplaza los registros manuales por un sistema que documenta cada movimiento automáticamente, guardando quién lo hizo, cuándo, de qué tipo fue, qué cantidad movió y por qué se realizó.
+    \item \textbf{Despacho inteligente (FEFO)}: El sistema toma siempre primero el lote con la fecha de vencimiento más próxima, formalizando la práctica de ``gastar primero lo que ya estaba en bodega'' que hoy depende de la memoria del personal.
     \item \textbf{Consultas en español colombiano}: El usuario puede preguntar ``¿cuánta harina me queda?'', ``¿qué está por vencer?'' o ``¿quién hizo el último despacho?'' y recibir una respuesta basada en los datos reales de \textit{su} inventario.
     \item \textbf{Alertas automáticas}: El sistema avisa cuando un lote está próximo a vencer o cuando el stock de un material cae por debajo del nivel mínimo, sin depender de que alguien se acuerde de revisar.
-    \item \textbf{Reportes en un clic}: Informes de valorización, ocupación de bodegas y movimientos históricos en formatos PDF y CSV, reduciendo el cierre contable de tres días a pocos minutos.
+    \item \textbf{Reportes en un clic}: Informes de inventario, movimientos, FEFO, consumo y valorización en formatos PDF y CSV, que apoyan el cierre y la conciliación del inventario.
 \end{itemize}
 
 \newpage

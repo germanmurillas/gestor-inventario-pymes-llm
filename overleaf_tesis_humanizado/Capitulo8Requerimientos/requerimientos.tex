@@ -1,0 +1,216 @@
+% -------------------------------------------------
+% Capítulo: Levantamiento de requerimientos
+% Fuente única de hechos: entrevista a la administradora (audio de 41 min,
+% tesis/recursos/audios/Reunión Entrevistas/) y su transcripción automática.
+% Estado de cada RF verificado contra el código del repositorio (25-sep-2026).
+% -------------------------------------------------
+
+Este capítulo documenta cómo se obtuvieron los requerimientos de Pymetory: a quién se entrevistó, qué se preguntó, qué se respondió, qué problema quedó en evidencia y qué requerimientos funcionales y no funcionales se derivaron de ello. Al final de cada requerimiento se indica su estado en la versión entregada del sistema, de manera que el lector pueda distinguir lo que se construyó de lo que quedó planteado para trabajos futuros.
+
+\section{Caso de estudio y participante}
+\label{sec:req_caso}
+
+El caso de estudio es una panificadora de tamaño pequeño a mediano ubicada en el municipio de La Victoria (Valle del Cauca), en adelante \textit{la empresa}. La empresa elabora productos de panadería a escala industrial y compra de forma continua materias primas como harinas, mejoradores, levaduras, grasas, semillas, sal, azúcar y material de empaque.
+
+La participante fue la persona que ocupa el cargo de administración de la empresa, en adelante \textit{la administradora}. Entre sus responsabilidades están recibir las materias primas, solicitar los pedidos a los proveedores, ingresar al sistema contable el consumo diario reportado por producción y realizar el cierre de inventario al final de cada mes.
+
+\textbf{Criterio de anonimización.} Para no comprometer a personas ni entidades, en este documento no se registran el nombre de la empresa, el de la administradora ni el de las demás personas mencionadas durante la entrevista; se usan únicamente sus cargos (la administradora, la líder de producción, la persona encargada de digitar las facturas). Las marcas comerciales de los insumos se reemplazan por descripciones genéricas.
+
+\section{Diseño y ejecución de la entrevista}
+\label{sec:req_entrevista}
+
+Se realizó una entrevista semiestructurada \cite{pressman2014software, denzin_creswell}, en una sola sesión con una duración aproximada de 41 minutos, que fue grabada en audio. El entrevistador planteó las preguntas ``como si no supiera nada'' del proceso, para que la participante describiera la operación real y no una versión idealizada.
+
+La entrevista se organizó en dos bloques:
+
+\begin{enumerate}
+    \item \textbf{Preguntas en bruto.} Diez preguntas formuladas en lenguaje cotidiano, orientadas a que la participante contara cómo funciona la bodega en el día a día (Tabla \ref{tab:req_preguntas_bruto}).
+    \item \textbf{Preguntas técnicas depuradas.} Reformulaciones técnicas de algunas preguntas en bruto, con las que se contrastaron las primeras respuestas y se exploró qué esperaría la participante de un sistema de software (Tabla \ref{tab:req_preguntas_depuradas}).
+\end{enumerate}
+
+La grabación se transcribió de forma automática. Las cifras mencionadas por la participante se presentan como aproximadas, porque corresponden a ejemplos dados de memoria durante la conversación y no a registros contables verificados.
+
+\begin{longtable}{|c|p{12cm}|}
+\caption{Preguntas en bruto de la entrevista.}
+\label{tab:req_preguntas_bruto}\\
+\hline
+\textbf{N.º} & \textbf{Pregunta} \\
+\hline
+\endfirsthead
+\hline
+\textbf{N.º} & \textbf{Pregunta} \\
+\hline
+\endhead
+P1 & ¿Cómo anotan lo que llega de los proveedores y qué datos guardan de eso? \\ \hline
+P2 & ¿Qué hacen cuando ven que un producto se va a acabar para que la producción no se detenga? \\ \hline
+P3 & ¿Quién se encarga de decir cuánto material se gastó al final del turno? \\ \hline
+P4 & ¿Cómo revisan si lo que dice el computador es lo mismo que hay guardado en la bodega? \\ \hline
+P5 & ¿Qué pasa cuando un producto está muy cerca de vencerse? ¿Cómo lo identifican? \\ \hline
+P6 & ¿Cómo encuentran un producto rápido cuando hay mucha mercancía amontonada? \\ \hline
+P7 & ¿Qué cosas le gustaría preguntarle al sistema si pudiera darle respuestas inteligentes? \\ \hline
+P8 & ¿Quiénes son las personas que pueden entrar a la bodega y sacar materiales? \\ \hline
+P9 & ¿Cuál es el problema más común que tienen cuando cuentan la mercancía al final de mes? \\ \hline
+P10 & ¿Cómo registran si un producto llegó dañado o si no era lo que habían pedido? \\ \hline
+\end{longtable}
+
+\begin{longtable}{|c|p{12cm}|}
+\caption{Preguntas técnicas depuradas.}
+\label{tab:req_preguntas_depuradas}\\
+\hline
+\textbf{Deriva de} & \textbf{Pregunta técnica} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Deriva de} & \textbf{Pregunta técnica} \\
+\hline
+\endhead
+P1 & ¿Qué metadatos son críticos para garantizar la trazabilidad de la materia prima en el ingreso? \\ \hline
+P2 & ¿Cómo se definen los parámetros del stock mínimo y los disparadores de alertas de reabastecimiento? \\ \hline
+P4 & ¿Mediante qué mecanismos de auditoría se pueden conciliar las existencias físicas con las del inventario del programa contable? \\ \hline
+P5 & ¿Cómo se gestiona la rotación de inventario para minimizar mermas por caducidad? \\ \hline
+P7 & ¿Qué consultas de trazabilidad y reportes analíticos se deben resolver mediante lenguaje natural? \\ \hline
+P9 & ¿Qué factores causan la degradación de la integridad de los datos en el sistema actual? \\ \hline
+\end{longtable}
+
+\section{Respuestas obtenidas}
+\label{sec:req_respuestas}
+
+A continuación se resume lo que respondió la administradora, agrupado por tema. Entre comillas se incluyen fragmentos textuales de la transcripción cuando aportan precisión.
+
+\subsection{Ingreso de materia prima y unidad de medida (P1)}
+
+Las materias primas se reciben con factura del proveedor. Llegan en distintas presentaciones: las harinas, los mejoradores y las semillas en bultos (las harinas, de 50~kg netos), y productos como la grasa y la levadura en cajas. Sin importar la presentación, \textbf{todo el inventario se lleva en kilos}: si llegan 100 cajas de levadura de 10~kg cada una, lo que se ingresa al sistema contable son 1.000~kg. Los gramos solo aparecen en el pesaje de producción y en el conteo de remanentes de báscula durante el cierre mensual; el peso de la caja y del plástico no se cuenta.
+
+Para la parte administrativa, los datos que importan en el ingreso son la cantidad, el número de factura (electrónica) y el proveedor. Al presentarle la pregunta depurada, la administradora añadió que, en un sistema de software, sería conveniente registrar también la fecha de vencimiento, el lote y la ficha de calidad del producto, no tanto por el consumo sino porque es un requisito reglamentario: ``el día de mañana se presenta algún problema, alguna intoxicación, y nos viene a revisar el INVIMA o algún ente regulador, y es lo primero que nos va a pedir: el manejo de los lotes, el manejo de las fechas de vencimiento de nuestras materias primas''.
+
+\subsection{Reabastecimiento (P2)}
+
+No existe un stock mínimo formal. La administradora revisa físicamente la bodega y, con base en su experiencia, decide cuándo pedir. Reconoció que ``en esa parte sí tenemos falencias'': en ocasiones se han quedado sin un insumo (mencionó la sal) y han tenido que comprarlo en el mercado local, a un precio mayor que el del proveedor. En sus palabras, el proceso es ``demasiado humano, demasiado artesanal''.
+
+Como ejemplo de cómo razona hoy el punto de pedido, explicó que un tipo de semilla que llega desde Bogotá tarda aproximadamente 8 días después del pedido, mientras que otro insumo que llega por Cartagena tarda entre 20 y 25 días; por eso, cuando le quedan unos 15 bultos, ya debería estar pidiendo. Señaló que un pedido de 48 bultos le dura aproximadamente dos meses. Expresó el deseo de que el software ``me diga: tienes tantos bultos que te van a alcanzar para tantos días'', calculado a partir de la estadística de consumo.
+
+\subsection{Reporte de consumo (P3)}
+
+La líder de producción diligencia diariamente un formato en papel con las mezclas del día y la materia prima utilizada; con ese formato, la administradora ingresa el consumo al sistema contable. Debido a diferencias que detectó entre el sistema y la bodega, la administradora pidió que al pie del formato se especificara, día a día, cuánto se consumió de cada producto, incluyendo cuánto se destinó a la esponja (prefermento), cuánto al espolvoreo y cuánto a la producción propiamente dicha.
+
+\subsection{Conciliación entre sistema y bodega (P4)}
+
+La conciliación es manual. Al cierre de cada mes, la administradora registra en una hoja de Excel el conteo físico y lo compara con lo que reporta el sistema contable. Explicó que desde que se incorporó el proceso de esponja (hace aproximadamente tres años) aparecen diferencias: por ejemplo, cuando el programa de producción indica unos 45 bultos de harina, en la realidad puede haber una diferencia de 2 a 3 bultos, lo que a su vez descuadra los demás insumos asociados.
+
+\subsection{Vencimiento y rotación (P5)}
+
+La administradora afirmó que \textbf{no tienen pérdidas por vencimiento}: se compra lo que se va a consumir en menos de un mes, la materia prima llega de forma constante y, en general, lo comprado se consume en 15 a 20 días. Aun así, instruye al personal para que se consuma primero lo que ya estaba en bodega, práctica que corresponde de manera informal a la estrategia FEFO (\textit{First Expired, First Out}), y considera importante revisar lotes y fechas por razones sanitarias.
+
+\subsection{Ubicación de productos (P6)}
+
+La bodega mantiene un volumen de materia prima fácil de identificar y de consumo rápido, por lo que ubicar un producto no es un problema. La administradora recorre la bodega y el cuarto de pesaje dos o tres veces por semana para verificar existencias y evitar pedir en exceso.
+
+\subsection{Consultas deseadas al sistema (P7)}
+
+Lo primero que pidió fueron \textbf{estadísticas de consumo diarias, semanales y mensuales}. Ilustró la idea con un ejemplo: que el sistema pueda responder cuántas bolsas de un tipo de empaque quedan hoy respecto a las que había en el último cierre de inventario, y qué porcentaje se consumió en ese periodo. En la pregunta depurada añadió consultas del tipo ``cuántos bultos me quedan'' y ``cuántos bultos necesito para la producción de cada producto'', según el histórico semanal, quincenal o mensual. También planteó como idea deseable que, a partir de lo que producción reporta como consumido de harina en el día, el sistema estime cuánto se consumió de las demás materias primas y cuánto debería quedar.
+
+\subsection{Acceso a la bodega (P8)}
+
+Solo pueden sacar materiales la jefe, la líder de producción y las personas que ellas designan; por ejemplo, la persona de pesaje retira las cantidades que la líder le indica, incluyendo de qué marca o de qué referencia tomar el insumo.
+
+\subsection{Problemas en el conteo de fin de mes (P9)}
+
+La administradora identificó dos fuentes principales de error:
+
+\begin{itemize}
+    \item \textbf{Estibado no estandarizado.} Una misma referencia se apila con distinto número de cajas por nivel (por ejemplo, 14 o 18 cajas de levadura), lo que obliga a mover las estibas para contar. Lo mismo ocurre con los bultos de bolsas, que pueden venir por 2.500 o por 3.000 unidades. Propuso como solución un protocolo de bodegaje que fije la forma de estibar cada referencia.
+    \item \textbf{Cruce entre productos similares.} Dos mejoradores de la misma marca, con empaques casi idénticos y presentaciones de aproximadamente 20 y 25~kg, se confunden al ingresar las facturas. La persona que digita las facturas lo hace ``de factura a factura'', sin verificar físicamente en bodega. En el ejemplo que mostró durante la entrevista, el conteo físico de uno de los mejoradores era de unos 100~kg mientras el sistema mostraba un saldo negativo (alrededor de $-76$~kg), y el otro tenía unos 75~kg físicos frente a 123~kg en el sistema. La diferencia se corrige manualmente con movimientos de entrada y salida en el sistema contable.
+\end{itemize}
+
+Durante esta parte de la conversación se discutió la posibilidad de identificar cada producto con un código leído desde un teléfono celular. La administradora consideró inviable pegar una etiqueta a cada bulto (por el volumen recibido, que puede ser del orden de 400 bultos de harina, y porque la harina hace que las etiquetas se desprendan), y se concluyó que lo viable sería aprovechar los códigos de barras que ya traen los productos.
+
+\subsection{Recepción con novedades (P10)}
+
+La mercancía se revisa visualmente al recibirla. Si un bulto llega abierto o dañado, o llega menos cantidad de la facturada, se anota en la factura, se firma la novedad con el transportador y se notifica al proveedor; lo usual es devolver el producto para que lo cambien. La administradora indicó que no han recibido productos distintos a los pedidos.
+
+\section{Problema evidenciado}
+\label{sec:req_problema}
+
+La entrevista permitió precisar el problema real de la empresa, que no coincide con el supuesto más frecuente para el sector. La empresa \textbf{no pierde materia prima por vencimiento}, gracias a una rotación rápida; su problema es de \textbf{información}:
+
+\begin{enumerate}
+    \item \textbf{El inventario digital no refleja la bodega.} El sistema contable se alimenta desde las facturas y desde el formato de producción, sin verificación física. Los cruces entre referencias similares y los consumos no desglosados (esponja, espolvoreo) generan diferencias que solo se descubren en el cierre mensual.
+    \item \textbf{La conciliación es manual y tardía.} Se hace una vez al mes en Excel, se corrige con movimientos manuales y no deja registro de quién hizo la corrección ni por qué.
+    \item \textbf{El reabastecimiento depende de la memoria de una persona.} No hay stock mínimo, ni punto de reorden, ni estadística de consumo; ya se han presentado faltantes que obligan a compras de emergencia más costosas.
+    \item \textbf{La trazabilidad por lote y vencimiento es una exigencia regulatoria no resuelta.} Aunque no hay mermas, la empresa debe poder responder ante una inspección sanitaria qué lote de qué insumo se usó y cuándo vencía.
+\end{enumerate}
+
+\section{Requerimientos funcionales}
+\label{sec:req_rf}
+
+La Tabla \ref{tab:req_rf} lista los requerimientos funcionales definidos para Pymetory. La columna \textit{Origen} indica la pregunta de la entrevista o la regla de negocio de la dirección del trabajo de grado de la que proviene cada requerimiento; los requerimientos marcados como \textit{Sistema} surgieron de las necesidades propias de operar la aplicación. La columna \textit{Estado} refleja lo verificado en el código fuente de la versión entregada: \textit{Implementado}, \textit{Parcial} o \textit{No implementado}.
+
+\begin{longtable}{|c|p{6.3cm}|p{1.9cm}|p{4.2cm}|}
+\caption{Requerimientos funcionales de Pymetory.}
+\label{tab:req_rf}\\
+\hline
+\textbf{ID} & \textbf{Requerimiento} & \textbf{Origen} & \textbf{Estado} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Requerimiento} & \textbf{Origen} & \textbf{Estado} \\
+\hline
+\endhead
+RF-01 & Registrar materiales en un catálogo con código único, nombre, unidad de medida y stock mínimo. & P1, P2 & Implementado. La unidad por defecto es el kilogramo. \\ \hline
+RF-02 & Registrar el ingreso de lotes con número de lote, cantidad, costo unitario, bodega de destino y fecha de vencimiento obligatoria. & P1 (depurada) & Implementado. \\ \hline
+RF-03 & Asociar a cada ingreso el proveedor, el número de factura y la ficha de calidad del insumo. & P1 (depurada) & Parcial. Los proveedores se gestionan en las órdenes de compra; factura y ficha de calidad no tienen un campo dedicado. \\ \hline
+RF-04 & Despachar materia prima aplicando FEFO: el sistema toma primero el lote activo con fecha de vencimiento más próxima. & P5, regla de la dirección & Implementado. \\ \hline
+RF-05 & Registrar en un Kardex inmutable cada movimiento de inventario con usuario, fecha y hora, tipo, cantidad y motivo. & P4, P9, regla de la dirección & Implementado. \\ \hline
+RF-06 & Restringir las operaciones según el rol del usuario (administrador u operario). & P8, regla de la dirección & Implementado. \\ \hline
+RF-07 & Generar alertas cuando la existencia de un material cae por debajo de su stock mínimo. & P2 & Implementado (revisión programada cada hora). \\ \hline
+RF-08 & Generar alertas de lotes próximos a vencer según un umbral configurable. & P5 & Implementado (umbral por defecto: 15 días). \\ \hline
+RF-09 & Calcular un punto de reorden a partir del consumo promedio y del tiempo de entrega de cada proveedor, e indicar para cuántos días alcanza la existencia actual. & P2 (depurada) & No implementado. Queda como trabajo futuro. \\ \hline
+RF-10 & Consultar estadísticas de consumo por periodo (diario, semanal, mensual). & P7 & Parcial. Existe un reporte de consumo filtrable por rango de fechas (PDF y CSV); no hay agregación automática por periodo ni consulta de consumo desde el asistente. \\ \hline
+RF-11 & Conciliar el inventario físico con el del sistema mediante un ajuste justificado que queda registrado en el Kardex. & P4 (depurada) & Implementado (ajuste restringido al administrador). \\ \hline
+RF-12 & Consultar el inventario en lenguaje natural con respuestas construidas a partir de los datos reales de la base de datos (RAG). & P7, regla de la dirección & Implementado. Tiene un defecto conocido documentado en el capítulo de pruebas. \\ \hline
+RF-13 & Identificar materiales y lotes mediante códigos (QR y código de barras) impresos en etiquetas y leídos con la cámara de un dispositivo. & P9 & Implementado con etiquetas generadas por el sistema; no se leen los códigos de fábrica de los productos. \\ \hline
+RF-14 & Registrar novedades de recepción (producto dañado o cantidad incompleta). & P10 & Parcial. El lote admite el estado ``en cuarentena'' y la recepción de órdenes de compra registra la cantidad recibida; no existe un formulario específico de no conformidad. \\ \hline
+RF-15 & Desglosar el consumo diario por destino de producción (esponja, espolvoreo, línea de producto). & P3, P4 & No implementado. El consumo se registra con un motivo general (producción, venta, desperdicio o ajuste). \\ \hline
+RF-16 & Gestionar bodegas con su capacidad y transferir existencias entre bodegas, dejando registro en el Kardex. & Sistema & Implementado. \\ \hline
+RF-17 & Generar reportes de inventario, movimientos, FEFO, consumo y valorización en PDF y CSV. & Sistema, P7 & Implementado. \\ \hline
+RF-18 & Administrar usuarios y sus roles. & Sistema, P8 & Implementado. \\ \hline
+\end{longtable}
+
+\section{Requerimientos no funcionales}
+\label{sec:req_rnf}
+
+\begin{longtable}{|c|p{7.3cm}|p{1.6cm}|p{3.5cm}|}
+\caption{Requerimientos no funcionales derivados de la entrevista.}
+\label{tab:req_rnf}\\
+\hline
+\textbf{ID} & \textbf{Requerimiento} & \textbf{Origen} & \textbf{Estado} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Requerimiento} & \textbf{Origen} & \textbf{Estado} \\
+\hline
+\endhead
+RNF-01 & El inventario se expresa en una unidad base (kilogramos), independiente de la presentación comercial (bulto o caja). & P1 & Parcial. Cada material tiene una unidad; la conversión de presentación a kilos la hace el usuario. \\ \hline
+RNF-02 & La trazabilidad por lote y fecha de vencimiento debe poder consultarse en cualquier momento, como soporte ante una inspección sanitaria. & P1 (depurada), P5 & Implementado mediante el Kardex y los reportes. \\ \hline
+RNF-03 & La identificación de productos no debe exigir etiquetar cada bulto individualmente. & P9 & Implementado. Las etiquetas se generan por lote. \\ \hline
+RNF-04 & La interfaz y el asistente deben operar en español y ser utilizables por personal sin formación técnica. & Toda la entrevista & Implementado. Su evaluación se presenta en el capítulo de pruebas. \\ \hline
+\end{longtable}
+
+\section{Fuera del alcance}
+\label{sec:req_alcance}
+
+Durante la entrevista surgieron ideas que se dejaron explícitamente fuera del alcance de este trabajo:
+
+\begin{itemize}
+    \item Un mapa de la bodega en tiempo real en el que cada bulto aparezca como un punto que desaparece al ser retirado, al estilo del rastreo de contenedores con etiquetas RFID o NFC. Se descartó por el costo de etiquetar cada unidad y por las condiciones físicas de la bodega.
+    \item El protocolo de estibado propuesto por la administradora. Es una medida organizativa de la empresa y no un requerimiento de software, aunque reduciría el error de conteo descrito en la P9.
+\end{itemize}
+
+\section{Limitaciones del levantamiento}
+\label{sec:req_limitaciones}
+
+\begin{itemize}
+    \item Se entrevistó a una sola persona, en una sola sesión. La información sobre el trabajo de la líder de producción y de la persona que digita las facturas se obtuvo de forma indirecta, a través de la administradora.
+    \item La transcripción es automática; las cifras se reportan como aproximadas.
+    \item No se analizaron documentos de la empresa (facturas, formato de producción, hoja de conciliación), solo se describieron durante la entrevista.
+\end{itemize}
