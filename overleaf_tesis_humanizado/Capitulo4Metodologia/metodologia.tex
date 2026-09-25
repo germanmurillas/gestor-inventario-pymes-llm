@@ -93,7 +93,7 @@ Sprint 4 & Sem 11--12 & Desarrollar módulo RAG de consulta inteligente & ChatLL
 \hline
 Sprint 5 & Sem 13--14 & Implementar diseño visual, animaciones y settings & 18 componentes React fieles a mockups Figma, tema Midnight Luxe con Tailwind CSS v4, animaciones GSAP, panel de configuración (4 pestañas), gestión de usuarios & UC9 \\
 \hline
-Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & 111 casos de prueba Playwright (13 suites), despliegue en GCP + OCI, documentación técnica final, correcciones de bugs & Validación de UC1--UC9 \\
+Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & Pruebas automatizadas (PHPUnit y Playwright), despliegue en OCI con dominio propio, documentación técnica, corrección de defectos & Validación de UC1--UC9 \\
 \hline
 \end{tabular}
 \end{table}
@@ -182,13 +182,13 @@ El quinto sprint materializó los mockups de Figma en componentes React funciona
 El sprint final se enfocó en garantizar la calidad del producto y preparar los entregables académicos:
 
 \begin{itemize}
-    \item \textbf{Día 1--5}: Implementación y ejecución de 111 casos de prueba automatizados con Playwright 1.59, organizados en 13 suites: Autenticación y RBAC (5), Inventario y Lotes (6), Despacho FEFO (7), Conciliación (4), Etiquetas QR (3), Reportes PDF (4), Configuración (4), Regresión Visual (5), RAG --- Clasificación (50), RAG --- Fallback (4), Usabilidad (10 heurísticas), Accesibilidad (5 criterios WCAG AA), Rendimiento (4 métricas).
-    \item \textbf{Día 6--9}: Corrección de bugs identificados durante las pruebas. Despliegue del sistema en Google Cloud Platform (instancia e2-micro, Ubuntu 22.04, Nginx, PHP-FPM 8.3, MySQL 8.0). Configuración del servidor OCI (VM.Standard.A1.Flex, 4 OCPUs, 24 GB RAM) con sondeo automatizado para obtención de instancia.
+    \item \textbf{Día 1--5}: Implementación de las pruebas automatizadas: pruebas unitarias y de integración con PHPUnit y pruebas de extremo a extremo con Playwright 1.59. Sus resultados se reportan en el Capítulo \ref{chap:pruebas}.
+    \item \textbf{Día 6--9}: Corrección de los defectos encontrados. Despliegue del sistema en Oracle Cloud Infrastructure (instancia VM.Standard.A1.Flex, 4 OCPU, 24 GB de RAM, obtenida con un sondeo automatizado de regiones), con MySQL 8.0 y publicación en \url{https://app.pymetory.com} mediante un túnel de Cloudflare.
     \item \textbf{Día 10--12}: Redacción de la documentación técnica: manual de instalación, manual de usuario, documento de arquitectura, API reference (endpoints y controladores). Elaboración de los anexos del documento de tesis.
     \item \textbf{Día 13--14}: Sprint Review final con el director. Validación del sistema completo. Cierre del proyecto y preparación para la sustentación.
 \end{itemize}
 
-\textbf{Entregables}: 111 casos de prueba (99.1\% de éxito), sistema desplegado en GCP, documentación completa, repositorio GitHub público con +50 commits.
+\textbf{Entregables}: pruebas automatizadas (resultados en el Capítulo \ref{chap:pruebas}), sistema desplegado en OCI con dominio propio, documentación técnica y repositorio en GitHub.
 
 \section{Herramientas de Desarrollo y Colaboración}
 \label{sec:herramientas}

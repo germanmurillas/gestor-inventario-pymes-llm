@@ -257,10 +257,9 @@ Revisamos trabajos de grado en repositorios universitarios colombianos y encontr
 \subsection{Tecnologías de Despliegue en la Nube}
 \label{sec:cloud}
 
-El sistema se desplegó en dos plataformas de nube, ambas con nivel gratuito:
+El sistema se desplegó en la capa gratuita de una plataforma de nube:
 
 \begin{itemize}
-    \item \textbf{Google Cloud Platform (GCP):} Una instancia Compute Engine e2-micro con Ubuntu 22.04, Nginx y PHP-FPM 8.3. Este entorno, con apenas 1 vCPU y 1 GB de RAM, sirvió para validar que el sistema funciona en una máquina modesta ---el tipo de servidor que una PYME podría costear.
-    
     \item \textbf{Oracle Cloud Infrastructure (OCI):} Una instancia VM.Standard.A1.Flex con arquitectura ARM Ampere (4 OCPUs, 24 GB de RAM). Esta máquina, obtenida mediante un script automatizado que sondea múltiples regiones, está pensada para producción: sus 24 GB de RAM permiten ejecutar modelos de lenguaje locales (Ollama) directamente en el servidor, eliminando la dependencia de APIs externas de pago.
+    \item \textbf{Publicación con dominio propio:} La aplicación se publica en \url{https://app.pymetory.com} a través de un túnel de Cloudflare, que entrega HTTPS sin abrir puertos de entrada en el servidor (Capítulo \ref{chap:implementacion}).
 \end{itemize}
