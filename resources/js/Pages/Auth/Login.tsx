@@ -86,6 +86,7 @@ export default function Login() {
                                 <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-slate-300">Correo electrónico</label>
                                 <input
                                     id="email"
+                                    name="email"
                                     type="email"
                                     autoComplete="username"
                                     value={data.email}
@@ -103,6 +104,7 @@ export default function Login() {
                                 <div className="relative">
                                     <input
                                         id="password"
+                                        name="password"
                                         type={verClave ? 'text' : 'password'}
                                         autoComplete="current-password"
                                         value={data.password}

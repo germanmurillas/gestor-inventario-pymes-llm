@@ -1,34 +1,34 @@
-import { test, expect } from '@playwright/test';
+const { test, expect } = require('@playwright/test');
 
+// Recorrido de la sustentación sobre los datos de demostración (PanaderiaDemoSeeder).
 test('demo sustentacion - flujo completo', async ({ page }) => {
-  // 1. Login
-  await page.goto('/login');
-  await page.fill('input[name="email"]', 'admin@pymetory.com');
-  await page.fill('input[name="password"]', 'Pymetory2026');
-  await page.click('button[type="submit"]');
+    // 1. Ingreso
+    await page.goto('/login');
+    await page.fill('input[name="email"]', 'admin@pymetory.com');
+    await page.fill('input[name="password"]', 'Pymetory2026');
+    await Promise.all([page.waitForURL(/dashboard/), page.click('button[type="submit"]')]);
 
-  // 2. Dashboard KPIs
-  await expect(page).toHaveURL(/dashboard/);
-  await page.waitForTimeout(2500);
+    // 2. Tablero con indicadores
+    await expect(page.getByText(/Críticos FEFO/i).first()).toBeVisible();
 
-  // 3. Inventario FEFO
-  await page.goto('/inventario');
-  await page.waitForTimeout(2500);
+    // 3. Inventario por lotes
+    await page.locator('aside button').filter({ hasText: /^\s*Inventario\s*$/ }).first().click();
+    await expect(page.getByText(/LEV-2609-A/).first()).toBeVisible();
 
-  // 4. Reporte PDF (descarga)
-  const [download] = await Promise.all([
-    page.waitForEvent('download'),
-    page.click('text=/Exportar PDF|Descargar|Reporte/i'),
-  ]);
-  await download.saveAs(`./demo-evidence/${download.suggestedFilename()}`);
+    // 4. Reporte PDF (solo administrador)
+    const pdf = await page.request.get('/inventory/report');
+    expect(pdf.status()).toBe(200);
+    expect(pdf.headers()['content-type']).toContain('pdf');
 
-  // 5. Kanban
-  await page.goto('/kanban');
-  await page.waitForTimeout(2500);
+    // 5. Kanban
+    await page.goto('/kanban');
+    await expect(page).toHaveURL(/kanban/);
 
-  // 6. Chat RAG
-  await page.goto('/chat');
-  await page.fill('textarea, input[type="text"]', '¿Cuánta harina tenemos y cuándo vence?');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(6000);
+    // 6. Asistente: la respuesta debe traer datos reales (kg)
+    await page.goto('/dashboard');
+    await page.locator('aside button').filter({ hasText: /Asistente RAG/ }).first().click();
+    const entrada = page.locator('textarea, input[type="text"]').last();
+    await entrada.fill('¿Cuánta harina de trigo hay?');
+    await entrada.press('Enter');
+    await expect(page.getByText(/\d[\d.,\s]*kg/i).last()).toBeVisible({ timeout: 45000 });
 });

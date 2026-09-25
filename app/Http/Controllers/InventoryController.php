@@ -111,6 +111,7 @@ class InventoryController extends Controller {
         $bodegaStats = \App\Models\Bodega::all()->map(function($bodega) {
             return [
                 'name' => $bodega->name,
+                'id' => $bodega->id,
                 'code' => $bodega->code,
                 'capacity' => $bodega->capacity,
                 'occupied' => $bodega->occupied_capacity,

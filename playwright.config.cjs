@@ -7,6 +7,8 @@ const BASE_URL = `http://localhost:${PORT}`;
 module.exports = defineConfig({
     testDir: './tests/usabilidad',
     testMatch: '**/*.spec.cjs',
+    // Diagnósticos contra producción: no son pruebas repetibles (ver su README).
+    testIgnore: '**/diagnostico-produccion/**',
     timeout: 60_000,
     expect: { timeout: 10_000 },
     fullyParallel: false,
