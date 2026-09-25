@@ -811,6 +811,14 @@ nav[aria-label="Breadcrumb"] h1{ color: var(--pm-text); }
   }
 
   /* ── Tarjeta ── */
+  /* FIX: '.pm-card' NO tenía definición en el CSS (clase huérfana) → cards
+     transparentes y dominadas por el color del tema (fusión card/fondo).
+     Superficie explícita con panel-2 elevado + borde real + sombra sutil. */
+  .pm-card {
+    background: color-mix(in oklab, var(--pm-panel-2) 88%, var(--pm-kb-ink) 2%);
+    border: 1px solid var(--pm-kb-line);
+    overflow: hidden;
+  }
   .pm-kb-card {
     position: relative; display: flex; flex-direction: column; gap: 0.4rem;
     padding: 0.7rem 0.75rem; border-radius: 0.85rem;
