@@ -98,6 +98,7 @@ const FigmaTablero = ({ stats, user, onViewChange }: { stats: any; user: any; on
                                     batch={act.batch}
                                     user={act.user}
                                     quantity={act.quantity}
+                                    unit={act.unit}
                                     time={act.time}
                                     action={act.action}
                                     type={act.type}

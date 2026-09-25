@@ -34,7 +34,7 @@ export default function FigmaActivityItem({ material, code, batch, user, quantit
                 </div>
             </div>
             <div className="shrink-0 text-right">
-                <div className={`text-sm font-black tracking-tight font-display ${isEntrada ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <div className={`text-sm font-black tracking-tight font-display normal-case ${isEntrada ? 'text-emerald-400' : 'text-amber-400'}`}>
                     {isEntrada ? '+' : '−'}{cantidad} {unit}
                 </div>
                 <div className="text-[10px] text-slate-500">{time}</div>
