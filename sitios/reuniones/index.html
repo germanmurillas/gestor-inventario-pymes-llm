@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reuniones con el director · Pymetory</title>
+<meta name="description" content="Seguimiento del trabajo de grado Pymetory: pedidos del director y sus entregas, y el registro de cada reunión.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237C6CF5'/%3E%3Cpath d='M16 7l8 4.5v9L16 25l-8-4.5v-9z' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#070B14;--panel:#0F1524;--panel-2:#161E31;--line:#232C44;
+  --text:#E9ECF6;--muted:#9AA3BD;--faint:#6B7494;
+  --accent:#7C6CF5;--accent-2:#F2B45C;--ok:#34D399;--warn:#FBBF24;--pend:#F87171;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:400 16px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;letter-spacing:-.02em;line-height:1.15}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+@media(max-width:480px){.wrap{padding:0 16px}}
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font:700 17px Outfit,sans-serif;text-decoration:none}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#5B4BD8);display:grid;place-items:center}
+.nav{display:flex;gap:6px}
+.nav a{font-size:14px;color:var(--muted);text-decoration:none;padding:7px 11px;border-radius:10px}
+.nav a:hover{color:var(--text);background:var(--panel)}
+
+.hero{position:relative;overflow:hidden;padding:64px 0 40px}
+.hero::before{content:"";position:absolute;inset:-50% auto auto -20%;width:680px;height:680px;background:radial-gradient(closest-side,color-mix(in oklab,var(--accent) 26%,transparent),transparent);pointer-events:none}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2)}
+.hero h1{font-size:clamp(32px,5.4vw,52px);margin:12px 0 14px}
+.lead{color:var(--muted);max-width:60ch}
+
+.progress{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:640px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.kpi b{display:block;font:800 28px Outfit,sans-serif}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.kpi.ok b{color:var(--ok)}.kpi.parcial b{color:var(--warn)}.kpi.pend b{color:var(--pend)}
+@media(max-width:520px){.progress{grid-template-columns:1fr 1fr 1fr}.kpi{padding:12px}.kpi b{font-size:22px}}
+
+section{padding:48px 0;border-top:1px solid var(--line)}
+.sec-h{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.sec-h h2{font-size:clamp(24px,3.2vw,32px)}
+.sec-h p{color:var(--muted);max-width:52ch;font-size:15px}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filters button{font:600 13px Inter,sans-serif;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}
+.filters button[aria-pressed="true"]{color:var(--text);border-color:color-mix(in oklab,var(--accent) 60%,var(--line));background:color-mix(in oklab,var(--accent) 16%,var(--panel))}
+
+.req{display:grid;gap:10px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.item .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:14px;font-weight:800}
+.item.ok .ic{background:color-mix(in oklab,var(--ok) 16%,transparent);color:var(--ok)}
+.item.parcial .ic{background:color-mix(in oklab,var(--warn) 16%,transparent);color:var(--warn)}
+.item.pend .ic{background:color-mix(in oklab,var(--pend) 16%,transparent);color:var(--pend)}
+.item h3{font-size:16.5px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:0}
+.item p{font-size:14px;color:var(--muted);margin-top:4px}
+.item .where{font-size:12.5px;color:var(--faint);margin-top:6px}
+.tag{font-size:12px;font-weight:700;white-space:nowrap;padding:4px 10px;border-radius:999px}
+.item.ok .tag{color:var(--ok);background:color-mix(in oklab,var(--ok) 12%,transparent)}
+.item.parcial .tag{color:var(--warn);background:color-mix(in oklab,var(--warn) 12%,transparent)}
+.item.pend .tag{color:var(--pend);background:color-mix(in oklab,var(--pend) 12%,transparent)}
+@media(max-width:560px){.item{grid-template-columns:auto 1fr}.item .tag{grid-column:2;justify-self:start}}
+
+.timeline{position:relative;display:grid;gap:10px;padding-left:22px}
+.timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.meet{position:relative;display:flex;justify-content:space-between;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 16px;text-decoration:none;transition:border-color .2s,transform .2s}
+.meet::before{content:"";position:absolute;left:-21px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--bg);border:2px solid var(--accent)}
+.meet:hover{border-color:color-mix(in oklab,var(--accent) 55%,var(--line));transform:translateX(3px)}
+.meet .n{font:700 13px Outfit,sans-serif;color:var(--accent);min-width:74px}
+.meet .t{flex:1;font-weight:600;font-size:15px}
+.meet .d{font-size:13px;color:var(--faint);white-space:nowrap}
+.meet.latest{border-color:color-mix(in oklab,var(--accent-2) 55%,var(--line))}
+.meet.latest::before{border-color:var(--accent-2);background:var(--accent-2)}
+@media(max-width:560px){.meet{flex-wrap:wrap}.meet .n{min-width:auto}.meet .d{width:100%}}
+
+footer{border-top:1px solid var(--line);padding:28px 0 44px;color:var(--faint);font-size:14px}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="/"><span class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg></span>Pymetory · Reuniones</a>
+    <nav class="nav"><a href="https://tesis.pymetory.com">Tesis</a><a href="https://app.pymetory.com">App</a></nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Trabajo de grado · seguimiento con el director</p>
+      <h1>Reuniones con el director</h1>
+      <p class="lead">Qué pidió el profesor Héctor Fabio Ocampo en la última reunión, qué se entregó y dónde está en el documento; y el registro de las reuniones anteriores.</p>
+      <div class="progress" id="kpis"></div>
+    </div>
+  </div>
+
+  <section id="pedidos">
+    <div class="wrap">
+      <div class="sec-h">
+        <h2>Pedidos del director</h2>
+        <p>Acuerdos de la reunión del 19 de septiembre de 2026 y su estado al 25 de septiembre. Documento: <a href="https://tesis.pymetory.com/pymetory-tesis.pdf">PDF actual</a>.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrar por estado">
+        <button type="button" data-f="todos" aria-pressed="true">Todos</button>
+        <button type="button" data-f="ok" aria-pressed="false">Hecho</button>
+        <button type="button" data-f="parcial" aria-pressed="false">Parcial</button>
+        <button type="button" data-f="pend" aria-pressed="false">Pendiente</button>
+      </div>
+      <div class="req" id="req"></div>
+    </div>
+  </section>
+
+  <section id="historial">
+    <div class="wrap">
+      <div class="sec-h">
+        <h2>Historial de reuniones</h2>
+        <p>Cada enlace abre el registro de esa reunión.</p>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">Pymetory · Germán David Murillas Mondragón · Universidad del Valle, sede Tuluá</div></footer>
+
+<script>
+// Una sola fuente de datos para la lista y los contadores.
+const PEDIDOS = [
+  { e: 'ok', t: 'Tomar el anteproyecto como base y crear después los capítulos nuevos en el orden indicado',
+    d: 'Capítulos 1–7 del anteproyecto; luego 8 Requerimientos, 9 Diseño, 10 Implementación, 11 Pruebas, 12 Metodología de gestión, 13 Trabajos futuros y 14 Conclusiones. Formato de la tesis de referencia y citación IEEE.', w: 'Todo el documento' },
+  { e: 'ok', t: 'Capítulo de levantamiento de requerimientos',
+    d: 'Entrevista con la administradora (anonimizada): preguntas en bruto y depuradas, respuestas, lo que se evidenció, el problema real y los requerimientos funcionales y no funcionales con su estado verificado en el código.', w: 'Capítulo 8, p. 41' },
+  { e: 'ok', t: 'Capítulo de diseño: arquitectura, herramientas y por qué, interfaz',
+    d: 'Trazabilidad de requerimientos a componentes, arquitectura, tabla de herramientas con alternativas descartadas, modelo de datos, diseño del asistente y de la interfaz (de Figma a React).', w: 'Capítulo 9, p. 49' },
+  { e: 'ok', t: 'Capítulo de implementación: patrones, problemas, infraestructura y despliegue',
+    d: 'Patrones con la alternativa descartada y su evidencia en el código; problemas reales con su causa y su commit; infraestructura en la capa gratuita de Oracle Cloud y despliegue con GitHub Actions.', w: 'Capítulo 10, p. 55' },
+  { e: 'parcial', t: 'Capítulo de pruebas: unitarias, de integración, con usuario y un reporte',
+    d: '84 pruebas PHPUnit (83 aprobadas, 1 omitida) y 60/60 de extremo a extremo con Playwright; consultas al asistente verificadas en producción. La prueba con usuario tiene protocolo (tareas y SUS) pero falta hacerla.', w: 'Capítulo 11, p. 61' },
+  { e: 'ok', t: 'Metodología: tickets, pantallazo del GitHub Project, criterios de aceptación, DoR y DoD',
+    d: 'Tablero real de GitHub Projects, flujo de una tarea, criterios dado/cuando/entonces ligados a pruebas, Definition of Ready y Definition of Done (pruebas + desplegado y funcionando).', w: 'Capítulo 12, p. 66' },
+  { e: 'ok', t: 'Trabajos futuros y conclusiones',
+    d: 'Conclusiones objetivo por objetivo contra el indicador del anteproyecto, sin afirmar lo que no está medido.', w: 'Capítulos 13 y 14, pp. 70 y 75' },
+  { e: 'ok', t: 'Corregir el chat que “manda la lista completa”',
+    d: 'Las expresiones no reconocían tildes y un material inexistente devolvía lotes de otros. Corregido con pruebas y verificado en producción. En la revisión del 25-sep apareció y se corrigió otro caso: “¿qué vence esta semana?”.', w: 'Capítulo 10 (tabla de problemas) y 11' },
+  { e: 'pend', t: 'Prueba con usuario con la administradora',
+    d: 'Sesión con las tareas del protocolo y el cuestionario SUS.', w: 'Capítulo 11, sección de pruebas con usuario' },
+  { e: 'pend', t: 'Indicador del objetivo 4: asistente, heurísticas y accesibilidad',
+    d: 'Medir el asistente con 50 consultas, evaluación heurística de Nielsen y auditoría WCAG 2.1 AA.', w: 'Capítulo 11 y conclusiones' },
+];
+
+const REUNIONES = [
+  { n: 'Reunión 1', t: 'Inicio del anteproyecto', d: '12 feb 2026', u: './reunion1/' },
+  { n: 'Reunión 2', t: 'Definición del problema', d: '2 mar 2026', u: './reunion2/' },
+  { n: 'Reunión 3', t: 'Marco referencial y requisitos', d: '8 mar 2026', u: './reunion3/' },
+  { n: 'Reunión 4', t: 'Arquitectura del sistema', d: '16 mar 2026', u: './reunion4/' },
+  { n: 'Reunión 5', t: 'Diseño UML y Figma', d: '26 mar 2026', u: './reunion5/' },
+  { n: 'Reunión 6', t: 'Implementación', d: '8 abr 2026', u: './reunion6/' },
+  { n: 'Reunión 7', t: 'RAG y modelos de lenguaje', d: '23 abr 2026', u: './reunion7/' },
+  { n: 'Reunión 8', t: 'Pruebas y despliegue', d: '30 abr 2026', u: './reunion8/' },
+  { n: 'Reunión 9', t: 'Git Flow, CI/CD e inventario', d: '15 may 2026', u: './reunion9/' },
+  { n: 'Reunión 10', t: 'Saber Pro y documento final', d: '21 may 2026', u: './reunion10/' },
+  { n: 'Reunión 11', t: 'Pruebas unitarias y pipeline con pruebas', d: '28 may 2026', u: './reunion11/' },
+  { n: 'Plan', t: 'Plan de desarrollo y evidencias (reuniones 11–13)', d: 'jun 2026', u: './desarrolloreunion11-13/' },
+  { n: 'Reunión 13', t: 'Revisión de objetivos y preguntas de defensa', d: '11 jun 2026', u: './reunion13/' },
+  { n: 'Reunión 14', t: 'Patrones, guion de defensa y documento final', d: '14 jun 2026', u: './reunion14/' },
+  { n: '19 sep', t: 'Reunión virtual: estructura del documento final', d: '19 sep 2026', u: './informe-19-septiembre-2026/', latest: true },
+];
+
+const ETQ = { ok: 'Hecho', parcial: 'Parcial', pend: 'Pendiente' };
+const ICO = { ok: '✓', parcial: '◐', pend: '!' };
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+document.getElementById('kpis').innerHTML = ['ok', 'parcial', 'pend'].map((e) =>
+  `<div class="kpi ${e}"><b>${PEDIDOS.filter((p) => p.e === e).length}</b><span>${ETQ[e].toLowerCase()}${e === 'ok' ? 's' : e === 'pend' ? 's' : 'es'}</span></div>`).join('');
+
+const pintar = (f) => {
+  document.getElementById('req').innerHTML = PEDIDOS.filter((p) => f === 'todos' || p.e === f).map((p) =>
+    `<article class="item ${p.e}"><span class="ic" aria-hidden="true">${ICO[p.e]}</span>
+      <div><h3>${esc(p.t)}</h3><p>${esc(p.d)}</p><p class="where">${esc(p.w)}</p></div>
+      <span class="tag">${ETQ[p.e]}</span></article>`).join('');
+};
+pintar('todos');
+document.querySelectorAll('.filters button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.filters button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  pintar(b.dataset.f);
+}));
+
+document.getElementById('timeline').innerHTML = REUNIONES.slice().reverse().map((r) =>
+  `<a class="meet${r.latest ? ' latest' : ''}" href="${r.u}"><span class="n">${esc(r.n)}</span><span class="t">${esc(r.t)}</span><span class="d">${esc(r.d)}</span></a>`).join('');
+</script>
+</body>
+</html>

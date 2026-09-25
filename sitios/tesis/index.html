@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pymetory · Trabajo de grado</title>
+<meta name="description" content="Pymetory: gestión de inventario de materia prima para PYMEs con despacho FEFO, Kardex inmutable y un asistente que responde con los datos reales. Trabajo de grado, Universidad del Valle, sede Tuluá.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237C6CF5'/%3E%3Cpath d='M16 7l8 4.5v9L16 25l-8-4.5v-9z' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#070B14;--panel:#0F1524;--panel-2:#161E31;--line:#232C44;
+  --text:#E9ECF6;--muted:#9AA3BD;--faint:#6B7494;
+  --accent:#7C6CF5;--accent-2:#F2B45C;--ok:#34D399;--warn:#FBBF24;--pend:#F87171;
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font:400 16px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img{max-width:100%;display:block}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;letter-spacing:-.02em;line-height:1.15}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+@media(max-width:480px){.wrap{padding:0 16px}}
+
+/* barra */
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font:700 17px Outfit,sans-serif;text-decoration:none}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#5B4BD8);display:grid;place-items:center}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav a{font-size:14px;color:var(--muted);text-decoration:none;padding:7px 11px;border-radius:10px}
+.nav a:hover{color:var(--text);background:var(--panel)}
+@media(max-width:720px){.nav .opt{display:none}}
+
+/* hero */
+.hero{position:relative;overflow:hidden;padding:84px 0 56px}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto auto;width:720px;height:720px;background:radial-gradient(closest-side,color-mix(in oklab,var(--accent) 30%,transparent),transparent);pointer-events:none}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2)}
+.hero h1{font-size:clamp(34px,6vw,62px);margin:14px 0 18px;max-width:14ch}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#A99CFF,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:22px;font-size:14px;color:var(--faint)}
+.meta b{color:var(--text);font-weight:600}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--line);background:var(--panel);transition:border-color .2s,transform .2s}
+.btn:hover{border-color:color-mix(in oklab,var(--accent) 55%,var(--line));transform:translateY(-1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+
+section{padding:56px 0;border-top:1px solid var(--line)}
+.sec-h{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+.sec-h h2{font-size:clamp(26px,3.4vw,36px)}
+.sec-h p{color:var(--muted);max-width:56ch}
+
+/* reglas */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.grid4{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.card h3{font-size:18px;margin:10px 0 6px}
+.card p{font-size:14px;color:var(--muted)}
+.chip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:color-mix(in oklab,var(--accent) 14%,transparent);padding:4px 9px;border-radius:999px}
+
+/* galería */
+.shots{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+.shots figure{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.shots figure img{width:100%;aspect-ratio:1400/840;object-fit:cover;object-position:top left}
+.shots figcaption{font-size:13px;color:var(--muted);padding:10px 14px}
+.shots .big{grid-row:span 2}
+.shots .big img{aspect-ratio:auto;height:calc(100% - 42px)}
+@media(max-width:820px){.shots{grid-template-columns:1fr}.shots .big{grid-row:auto}.shots .big img{height:auto;aspect-ratio:1400/840}}
+
+/* capítulos */
+.toc{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.toc{grid-template-columns:1fr}}
+.toc li{list-style:none;display:flex;gap:14px;align-items:baseline;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 16px}
+.toc .n{font:700 14px Outfit,sans-serif;color:var(--accent);min-width:24px}
+.toc .t{flex:1}
+.toc .t small{display:block;color:var(--faint);font-size:12.5px}
+.toc .p{font-size:12px;color:var(--faint);white-space:nowrap}
+
+/* estado */
+.status{width:100%;border-collapse:separate;border-spacing:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+.status th,.status td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.status th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:700;background:var(--panel-2)}
+.status tr:last-child td{border-bottom:0}
+.status td:first-child{font-weight:600;width:30%}
+.status td:nth-child(2){color:var(--muted)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.st.ok{color:var(--ok)}.st.parcial{color:var(--warn)}.st.pend{color:var(--pend)}
+@media(max-width:640px){.status,.status tbody,.status tr,.status td{display:block;width:100%}.status thead{display:none}.status tr{border-bottom:1px solid var(--line);padding:6px 0}.status td{border:0;padding:6px 16px}.status td:first-child{width:100%}}
+
+footer{border-top:1px solid var(--line);padding:32px 0 48px;color:var(--faint);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal.on{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="#"><span class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg></span>Pymetory</a>
+    <nav class="nav">
+      <a class="opt" href="#sistema">Sistema</a>
+      <a class="opt" href="#documento">Documento</a>
+      <a href="#estado">Estado</a>
+      <a href="https://reuniones.pymetory.com">Reuniones</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Trabajo de grado · Ingeniería de Sistemas</p>
+      <h1>Inventario de materia prima, <em>por lote y con fecha</em></h1>
+      <p class="lead">Pymetory es un sistema web para que una PYME sepa qué tiene en bodega, despache primero lo que vence primero y pueda preguntar por su inventario en español. El caso de estudio es una panificadora del Valle del Cauca.</p>
+      <div class="meta">
+        <span>Autor <b>Germán David Murillas Mondragón</b></span>
+        <span>Director <b>Héctor Fabio Ocampo</b></span>
+        <span>Universidad del Valle · sede Tuluá</span>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="pymetory-tesis.pdf" download>Descargar el documento (PDF)</a>
+        <a class="btn" href="https://app.pymetory.com">Abrir la aplicación</a>
+      </div>
+    </div>
+  </div>
+
+  <section id="sistema">
+    <div class="wrap">
+      <div class="sec-h reveal">
+        <h2>Cuatro reglas de negocio</h2>
+        <p>Las fijó la dirección del trabajo de grado y el sistema las hace cumplir en el código y en la base de datos, no solo en la interfaz.</p>
+      </div>
+      <div class="grid4">
+        <article class="card reveal"><span class="chip">FEFO</span><h3>Sale primero lo que vence primero</h3><p>Cada consumo descuenta del lote con la fecha de vencimiento más cercana, aunque atraviese varios lotes.</p></article>
+        <article class="card reveal"><span class="chip">Kardex</span><h3>Historial que no se borra</h3><p>Cada movimiento guarda usuario, fecha y motivo. Editarlo o eliminarlo se rechaza en el modelo y en las llaves de la base de datos.</p></article>
+        <article class="card reveal"><span class="chip">RBAC</span><h3>Permisos por rol</h3><p>Administrador y operario. Usuarios, claves de API, reportes y ajustes son solo del administrador.</p></article>
+        <article class="card reveal"><span class="chip">RAG</span><h3>Respuestas con datos reales</h3><p>Antes de llamar al modelo de lenguaje se consultan los lotes, movimientos y bodegas que pide la pregunta.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-h reveal">
+        <h2>La aplicación</h2>
+        <p>Capturas de <a href="https://app.pymetory.com">app.pymetory.com</a> con los datos de demostración de la panadería (25 de septiembre de 2026).</p>
+      </div>
+      <div class="shots">
+        <figure class="big reveal"><img src="img/tablero.webp" alt="Tablero con insumos, lotes, lotes críticos, valorización, Kardex reciente y bodegas" loading="lazy"><figcaption>Tablero: indicadores, movimientos recientes del Kardex y bodegas.</figcaption></figure>
+        <figure class="reveal"><img src="img/asistente.webp" alt="El asistente lista los lotes que vencen esta semana" loading="lazy"><figcaption>Asistente: “¿Qué lotes vencen esta semana?”</figcaption></figure>
+        <figure class="reveal"><img src="img/bodegas.webp" alt="Tarjetas de bodegas con lotes, insumos, por vencer y valor" loading="lazy"><figcaption>Bodegas conectadas al inventario.</figcaption></figure>
+        <figure class="reveal"><img src="img/inventario.webp" alt="Inventario por insumo con foto, existencia y lotes" loading="lazy"><figcaption>Inventario por insumo, en su unidad real.</figcaption></figure>
+        <figure class="reveal"><img src="img/movil.webp" alt="Tres pantallas del celular: tablero, inventario y escáner" loading="lazy"><figcaption>En el celular: barra inferior y escáner QR.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="documento">
+    <div class="wrap">
+      <div class="sec-h reveal">
+        <h2>El documento</h2>
+        <p>Los capítulos 1 a 7 vienen del anteproyecto; del 8 en adelante documentan lo construido. Formato de la tesis de referencia y citación IEEE.</p>
+      </div>
+      <ol class="toc reveal">
+        <li><span class="n">1</span><span class="t">Introducción</span><span class="p">p. 2</span></li>
+        <li><span class="n">2</span><span class="t">Justificación y alcance</span><span class="p">p. 10</span></li>
+        <li><span class="n">3</span><span class="t">Marco referencial</span><span class="p">p. 13</span></li>
+        <li><span class="n">4</span><span class="t">Metodología</span><span class="p">p. 26</span></li>
+        <li><span class="n">5–7</span><span class="t">Cronograma, presupuesto e impacto ambiental</span><span class="p">p. 36</span></li>
+        <li><span class="n">8</span><span class="t">Levantamiento de requerimientos<small>Entrevista con la administradora, 18 RF y 4 RNF con su estado</small></span><span class="p">p. 41</span></li>
+        <li><span class="n">9</span><span class="t">Diseño<small>Arquitectura, herramientas y por qué, modelo de datos, interfaz</small></span><span class="p">p. 49</span></li>
+        <li><span class="n">10</span><span class="t">Implementación<small>Patrones, problemas reales con su commit, infraestructura</small></span><span class="p">p. 55</span></li>
+        <li><span class="n">11</span><span class="t">Pruebas<small>84 PHPUnit, 60 de extremo a extremo, verificación en producción</small></span><span class="p">p. 61</span></li>
+        <li><span class="n">12</span><span class="t">Metodología de gestión<small>Tablero de GitHub Projects, DoR y DoD</small></span><span class="p">p. 66</span></li>
+        <li><span class="n">13</span><span class="t">Trabajos futuros</span><span class="p">p. 70</span></li>
+        <li><span class="n">14</span><span class="t">Conclusiones</span><span class="p">p. 75</span></li>
+        <li><span class="n">A</span><span class="t">Anexos<small>Casos de uso, modelo entidad-relación, diagramas de flujo y manual de usuario</small></span><span class="p">p. 80</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="estado">
+    <div class="wrap">
+      <div class="sec-h reveal">
+        <h2>Estado frente a los objetivos</h2>
+        <p>Lo que está hecho y lo que falta, con el mismo criterio del capítulo de conclusiones.</p>
+      </div>
+      <table class="status reveal">
+        <thead><tr><th>Objetivo</th><th>Evidencia</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td>1. Entender las necesidades de una PYME</td><td>Entrevista de levantamiento con la administradora; problema real: el inventario contable no coincide con la bodega.</td><td><span class="st ok">Cumplido</span></td></tr>
+          <tr><td>2. Diseñar el sistema</td><td>Arquitectura, herramientas justificadas, modelo de datos y prototipo en Figma.</td><td><span class="st ok">Cumplido</span></td></tr>
+          <tr><td>3. Implementar y desplegar</td><td>Aplicación en producción con FEFO, Kardex inmutable, roles, asistente, reportes, etiquetas QR y bodegas.</td><td><span class="st ok">Cumplido</span></td></tr>
+          <tr><td>4. Verificar el sistema</td><td>84 pruebas PHPUnit y 60 de extremo a extremo aprobadas. Falta: prueba con usuario, 50 consultas al asistente, evaluación heurística y WCAG AA.</td><td><span class="st parcial">Parcial</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Pymetory · Trabajo de grado 2026 · Universidad del Valle, sede Tuluá</span>
+    <span><a href="https://app.pymetory.com">app.pymetory.com</a> · <a href="https://reuniones.pymetory.com">reuniones.pymetory.com</a></span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const els = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('on')); return; }
+  const io = new IntersectionObserver((xs) => xs.forEach(x => { if (x.isIntersecting) { x.target.classList.add('on'); io.unobserve(x.target); } }), { rootMargin: '0px 0px -8% 0px' });
+  els.forEach(e => io.observe(e));
+})();
+</script>
+</body>
+</html>
