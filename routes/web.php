@@ -133,7 +133,7 @@ Route::get('/api/llm-models', [ChatLLMController::class, 'models'])
 Route::get('/api/llm-providers', [ChatLLMController::class, 'providers'])
     ->middleware(['auth', 'verified']);
 
-Route::middleware(['auth', 'verified'])->prefix('api/llm-providers')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('api/llm-providers')->group(function () {
     Route::post('/', [ChatLLMController::class, 'storeProvider']);
     Route::put('/{key}', [ChatLLMController::class, 'updateProvider'])->where('key', '[a-zA-Z0-9_-]+');
     Route::delete('/{key}', [ChatLLMController::class, 'destroyProvider'])->where('key', '[a-zA-Z0-9_-]+');
@@ -241,7 +241,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // ── API Keys CRUD ────────────────────────────────────────────────────────
-Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('api')->group(function () {
     Route::get('/api-keys',         [\App\Http\Controllers\ApiKeyController::class, 'index']);
     Route::post('/api-keys',        [\App\Http\Controllers\ApiKeyController::class, 'store']);
     Route::put('/api-keys/{apiKey}',[\App\Http\Controllers\ApiKeyController::class, 'update']);

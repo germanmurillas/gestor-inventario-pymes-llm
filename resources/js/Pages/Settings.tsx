@@ -174,7 +174,7 @@ export default function Settings() {
     const resetPass = async (u: UserRow) => { const pw = prompt(`Nueva contraseña para ${u.name} (min 8):`); if (!pw || pw.length < 8) return notify('Minimo 8 caracteres.'); await axios.post(`/api/users/${u.id}/reset-password`, { password: pw }); notify('Reset OK.'); };
     const deleteUser = async (u: UserRow) => { if (!confirm(`¿Eliminar a ${u.name}?`)) return; try { await axios.delete(`/api/users/${u.id}`); await loadUsers(); notify('Eliminado.'); } catch (e: any) { notify(e?.response?.data?.message ?? 'Error.'); } };
 
-    useEffect(() => { loadSettings(); loadOllama(); loadKeys(); loadUsers(); loadProviders(); }, [loadSettings, loadOllama, loadKeys, loadUsers, loadProviders]);
+    useEffect(() => { loadSettings(); loadOllama(); loadProviders(); if (user.role === 'admin') { loadKeys(); loadUsers(); } }, [loadSettings, loadOllama, loadKeys, loadUsers, loadProviders, user.role]);
 
     useEffect(() => { setCurrentSource(settings.llm_source || 'local'); }, [settings.llm_source]);
 
