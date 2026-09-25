@@ -27,4 +27,17 @@ class ApiKeyTest extends TestCase
 
         $this->assertEquals('sk-demo-123456789', ApiKey::first()->key);
     }
+
+    public function test_listado_tolera_clave_cifrada_con_otra_app_key(): void
+    {
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $id = \Illuminate\Support\Facades\DB::table('api_keys')->insertGetId([
+            'nombre' => 'Vieja', 'key' => 'eyJpdiI6ImJhc3VyYSJ9', 'tipo' => 'opencode', 'activo' => false,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->actingAs($admin)->getJson('/api/api-keys')
+            ->assertOk()
+            ->assertJsonFragment(['id' => $id, 'key_masked' => 'Ilegible: vuelve a ingresarla']);
+    }
 }

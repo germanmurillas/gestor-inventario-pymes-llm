@@ -14,7 +14,7 @@ class ApiKeyController extends Controller
         $keys = ApiKey::orderBy('nombre')->get()->map(fn (ApiKey $k) => [
             'id'         => $k->id,
             'nombre'     => $k->nombre,
-            'key_masked' => $this->mask($k->key),
+            'key_masked' => $this->maskSafe($k),
             'base_url'   => $k->base_url,
             'model_name' => $k->model_name,
             'tipo'       => $k->tipo,
@@ -23,6 +23,16 @@ class ApiKeyController extends Controller
         ]);
 
         return response()->json(['api_keys' => $keys]);
+    }
+
+    /** Una clave cifrada con otra APP_KEY no debe tumbar todo el listado. */
+    private function maskSafe(ApiKey $k): string
+    {
+        try {
+            return $this->mask($k->key);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+            return 'Ilegible: vuelve a ingresarla';
+        }
     }
 
     public function store(Request $request)
