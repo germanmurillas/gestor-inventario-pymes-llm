@@ -1,0 +1,580 @@
+{
+ "generado": "2026-09-25",
+ "fuentes": "Issues del GitHub Project #3 e historial de git del repositorio",
+ "tarjetas": [
+  {
+   "columna": "done",
+   "titulo": "Finalización de la Elicitación de Requisitos",
+   "fecha": "2026-02-18",
+   "descripcion": "Issue #2 · abierto 2026-02-18 · cerrado 2026-02-18",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/2"
+  },
+  {
+   "columna": "done",
+   "titulo": "Crear Requerimientos Funcionales",
+   "fecha": "2026-03-05",
+   "descripcion": "Issue #3 · abierto 2026-02-26 · cerrado 2026-03-05",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/3"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Doc] Definir estándar de especificación de requisitos (IEEE 830)",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #5 · abierto 2026-03-05 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/5"
+  },
+  {
+   "columna": "done",
+   "titulo": "Crear diagramas UML",
+   "fecha": "2026-03-19",
+   "descripcion": "Issue #12 · abierto 2026-03-12 · cerrado 2026-03-19",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/12"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Doc] Diseño de prototipos de alta fidelidad en Figma (UI/UX)",
+   "fecha": "2026-03-18",
+   "descripcion": "Issue #13 · abierto 2026-03-18 · cerrado 2026-03-18",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/13"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Doc] Diseño del modelo de datos y diagrama UML (MER)",
+   "fecha": "2026-03-19",
+   "descripcion": "Issue #14 · abierto 2026-03-19 · cerrado 2026-03-19",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/14"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Doc] Definir arquitectura del sistema y estrategia de despliegue",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #15 · abierto 2026-03-19 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/15"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Doc] Consolidación del documento maestro de tesis (Elicitación + Requisitos + Anexos)",
+   "fecha": "2026-03-19",
+   "descripcion": "Issue #16 · abierto 2026-03-19 · cerrado 2026-03-19",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/16"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Doc] Modelado de Casos de Uso del sistema de inventario",
+   "fecha": "2026-03-19",
+   "descripcion": "Issue #17 · abierto 2026-03-19 · cerrado 2026-03-19",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/17"
+  },
+  {
+   "columna": "done",
+   "titulo": "Desarrollar el prototipo completamente",
+   "fecha": "2026-03-26",
+   "descripcion": "Issue #18 · abierto 2026-03-26 · cerrado 2026-03-26",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/18"
+  },
+  {
+   "columna": "done",
+   "titulo": "Configurar el ambiente de desarrollo",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #19 · abierto 2026-03-26 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/19"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RF-01] Implementar módulo de registro de entradas con trazabilidad de materia prima",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #4 · abierto 2026-03-05 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/4"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RF-02] Gestión de inventario mediante metodología FEFO",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #6 · abierto 2026-03-05 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/6"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RF-03] Alertas de reabastecimiento basadas en el Punto de Reorden (ROP)",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #7 · abierto 2026-03-05 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/7"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RF-04] Configurar agente LLM para consultas de inventario en lenguaje natural.",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #8 · abierto 2026-03-05 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/8"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RNF-01] Ajustar tipos de datos en la base de datos para precisión de 3 decimales (kg)",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #9 · abierto 2026-03-05 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/9"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Task] Realizar conciliación de inventario lógico vs. físico inicial",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #10 · abierto 2026-03-05 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/10"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RF-05] Generación de Reportes de Inventario en PDF",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #20 · abierto 2026-04-16 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/20"
+  },
+  {
+   "columna": "done",
+   "titulo": "[Doc] Implementar Sistema de Roles y Permisos (RBAC)",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #21 · abierto 2026-04-16 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/21"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RF-07] Gestión de Salidas y Trazabilidad Automática FEFO (Kardex)",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #22 · abierto 2026-04-16 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/22"
+  },
+  {
+   "columna": "done",
+   "titulo": "[RF-04] Refinamiento del Asistente IA: Modo Consultor Senior Proactivo",
+   "fecha": "2026-04-16",
+   "descripcion": "Issue #23 · abierto 2026-04-16 · cerrado 2026-04-16",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/23"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-02.9: Panel de Configuración (settings)",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #26 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/26"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-02.10: Módulo de Conciliación",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #27 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/27"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-03.5: Historial de conversaciones persistente",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #28 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/28"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-03.6: RAG responde desde Kanban (Preguntar al RAG)",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #29 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/29"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-05.5: Notificaciones proactivas (FEFO, Titan)",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #32 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/32"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-06.7: Modo oscuro/claro toggle",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #35 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/35"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-07.7: Monitoreo de uptime",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #36 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/36"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-07.8: Backups automáticos de BD",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #37 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/37"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-07.9: CI/CD con GitHub Actions",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #38 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/38"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-08.3: Documentación de arquitectura",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #39 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/39"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-08.4: Diagramas de infraestructura",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #40 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/40"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-08.5: Overleaf/LaTeX para tesis",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #41 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/41"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-08.6: Plan Maestro sincronizado con GitHub",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #42 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/42"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-09.8: Extraer Sidebar a componente reutilizable",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #43 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/43"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-09.9: Eliminar archivos JSX/TSX duplicados",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #44 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/44"
+  },
+  {
+   "columna": "done",
+   "titulo": "CU-09.11: Mobile responsive (menú hamburguesa)",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #45 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/45"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: /inventory/report — Error 500 (Server Error)",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #50 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/50"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: Arquitectura híbrida inconsistente (Inertia + Blade)",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #51 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/51"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: Sin SEO/OG tags en ninguna página",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #53 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/53"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: Diseño inconsistente en /rag-models y /models",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #54 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/54"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: Sin manejo de errores en /rag-models",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #56 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/56"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: Sin manejo de errores en /rag-models (catch{} vacío)",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #57 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/57"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: Exposición de IP interna en /rag-models",
+   "fecha": "2026-05-07",
+   "descripcion": "Issue #58 · abierto 2026-05-07 · cerrado 2026-05-07",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/58"
+  },
+  {
+   "columna": "done",
+   "titulo": "QA: Dark mode inconsistente entre páginas de Pymetory",
+   "fecha": "2026-09-25",
+   "descripcion": "Issue #61 (abierto en GitHub). Los temas se reescribieron: cada tema redefine la paleta completa. Commit 1dd9537.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/61"
+  },
+  {
+   "columna": "done",
+   "titulo": "[SEC-002] Add verified middleware to kanban routes",
+   "fecha": "2026-09-25",
+   "descripcion": "Issue #66 (abierto en GitHub). Las rutas del Kanban están en el grupo con middleware auth + verified (routes/web.php).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/66"
+  },
+  {
+   "columna": "done",
+   "titulo": "[SEC-004] Remove wheels/ from git tracking",
+   "fecha": "2026-09-25",
+   "descripcion": "Issue #68 (abierto en GitHub). La carpeta wheels/ ya no está en el repositorio.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/68"
+  },
+  {
+   "columna": "done",
+   "titulo": "[SEC-006] Create explicit cors.php config",
+   "fecha": "2026-09-25",
+   "descripcion": "Issue #70 (abierto en GitHub). Existe config/cors.php.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/70"
+  },
+  {
+   "columna": "done",
+   "titulo": "[SORTLY-001] Custom Fields para materiales",
+   "fecha": "2026-09-25",
+   "descripcion": "Issue #71 (abierto en GitHub). Campos personalizados implementados (custom_field_definitions, /api/custom-fields). Commit acaea50.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/71"
+  },
+  {
+   "columna": "done",
+   "titulo": "Estructura de la tesis, órdenes de compra, etiquetas y campos personalizados",
+   "fecha": "2026-05-21",
+   "descripcion": "Commit acaea50 (2026-05-21).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/acaea50"
+  },
+  {
+   "columna": "done",
+   "titulo": "Auditoría y corrección de enlaces rotos",
+   "fecha": "2026-05-22",
+   "descripcion": "Commit f7bc7a0 (2026-05-22).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/f7bc7a0"
+  },
+  {
+   "columna": "done",
+   "titulo": "Kanban v2: arrastrar y soltar con teclado y táctil, filtros y atajos",
+   "fecha": "2026-05-23",
+   "descripcion": "Commit 3ad9fd5 (2026-05-23).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/3ad9fd5"
+  },
+  {
+   "columna": "done",
+   "titulo": "Integración de OpenCode (capa gratuita) como proveedor del asistente",
+   "fecha": "2026-05-24",
+   "descripcion": "Commit 6a618a7 (2026-05-24).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/6a618a7"
+  },
+  {
+   "columna": "done",
+   "titulo": "Selector de modelo del asistente (Ollama local y OpenCode)",
+   "fecha": "2026-06-10",
+   "descripcion": "Commit eb5cc99 (2026-06-10).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/eb5cc99"
+  },
+  {
+   "columna": "done",
+   "titulo": "Motor RAG unificado en Ajustes: proveedor, clave, modelo, parámetros y prueba en vivo",
+   "fecha": "2026-06-11",
+   "descripcion": "Commit 0284e96 (2026-06-11).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/0284e96"
+  },
+  {
+   "columna": "done",
+   "titulo": "Gestión de proveedores de modelos de lenguaje desde la interfaz",
+   "fecha": "2026-06-11",
+   "descripcion": "Commit 418f208 (2026-06-11).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/418f208"
+  },
+  {
+   "columna": "done",
+   "titulo": "Reunión 13: revisión de objetivos y objeciones preparadas para la defensa",
+   "fecha": "2026-06-12",
+   "descripcion": "Commit b9c9856 (2026-06-12).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/b9c9856"
+  },
+  {
+   "columna": "done",
+   "titulo": "CI/CD: el despliegue en el servidor autentica con token efímero",
+   "fecha": "2026-09-24",
+   "descripcion": "Commit 5d7c5af (2026-09-24).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/5d7c5af"
+  },
+  {
+   "columna": "done",
+   "titulo": "Rediseño del tablero Kanban",
+   "fecha": "2026-09-24",
+   "descripcion": "Commit 85a49b3 (2026-09-24).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/85a49b3"
+  },
+  {
+   "columna": "done",
+   "titulo": "Seguridad: el registro público ya no crea administradores; rutas sensibles solo para admin",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit d5b4b16 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/d5b4b16"
+  },
+  {
+   "columna": "done",
+   "titulo": "Kardex inmutable también en la base de datos",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit be72cd3 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/be72cd3"
+  },
+  {
+   "columna": "done",
+   "titulo": "Asistente: corregido el error de “la lista completa” (tildes y material inexistente)",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 89cd440 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/89cd440"
+  },
+  {
+   "columna": "done",
+   "titulo": "Producción: inicio de sesión detrás del túnel de Cloudflare",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit e18afb2 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/e18afb2"
+  },
+  {
+   "columna": "done",
+   "titulo": "Tablero sin cifras fijas: tendencias y rotación calculadas desde la base de datos",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 3c83fa9 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/3c83fa9"
+  },
+  {
+   "columna": "done",
+   "titulo": "El umbral FEFO configurado se respeta en tablero e inventario",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 154dce6 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/154dce6"
+  },
+  {
+   "columna": "done",
+   "titulo": "Página de inicio nueva",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 5155041 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/5155041"
+  },
+  {
+   "columna": "done",
+   "titulo": "Documento: capítulos 8 a 14 con cifras verificadas",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit ea27881 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/ea27881"
+  },
+  {
+   "columna": "done",
+   "titulo": "Datos de demostración del caso de estudio y rediseño móvil",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit bc52fd7 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/bc52fd7"
+  },
+  {
+   "columna": "done",
+   "titulo": "Gestión de bodegas con imagen, conectadas al inventario real",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit b8dea4d (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/b8dea4d"
+  },
+  {
+   "columna": "done",
+   "titulo": "Sistema de temas reescrito y alertas leídas de la base de datos",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 1dd9537 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/1dd9537"
+  },
+  {
+   "columna": "done",
+   "titulo": "Asistente: vencimientos de la semana solo con lotes con existencias",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 08d8312 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/08d8312"
+  },
+  {
+   "columna": "done",
+   "titulo": "Sitios tesis.pymetory.com y reuniones.pymetory.com",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 359fc46 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/359fc46"
+  },
+  {
+   "columna": "review",
+   "titulo": "Documento final entregado al director para revisión",
+   "fecha": "2026-09-25",
+   "descripcion": "Versión de 113 páginas con los capítulos 8 a 14, anexos y manual de usuario con capturas de producción (25-sep-2026).",
+   "fuente": "https://tesis.pymetory.com/"
+  },
+  {
+   "columna": "in_progress",
+   "titulo": "Correcciones del director al documento final",
+   "fecha": "2026-09-25",
+   "descripcion": "Según los comentarios de la próxima reunión.",
+   "fuente": "https://reuniones.pymetory.com/"
+  },
+  {
+   "columna": "todo",
+   "titulo": "Prueba con usuario con la administradora (tareas + SUS)",
+   "fecha": "2026-09-25",
+   "descripcion": "Pendiente del objetivo 4. Protocolo en el Capítulo 11.",
+   "fuente": null
+  },
+  {
+   "columna": "todo",
+   "titulo": "Medir el asistente con 50 consultas",
+   "fecha": "2026-09-25",
+   "descripcion": "Pendiente del indicador del objetivo 4.",
+   "fuente": null
+  },
+  {
+   "columna": "todo",
+   "titulo": "Evaluación heurística de Nielsen",
+   "fecha": "2026-09-25",
+   "descripcion": "Pendiente del indicador del objetivo 4.",
+   "fuente": null
+  },
+  {
+   "columna": "todo",
+   "titulo": "Auditoría de accesibilidad WCAG 2.1 AA",
+   "fecha": "2026-09-25",
+   "descripcion": "Pendiente del indicador del objetivo 4.",
+   "fuente": null
+  },
+  {
+   "columna": "todo",
+   "titulo": "RF-10: agregación automática del consumo por periodo",
+   "fecha": "2026-09-25",
+   "descripcion": "Parcial: hoy existe el reporte por rango de fechas (Capítulo 8).",
+   "fuente": null
+  },
+  {
+   "columna": "todo",
+   "titulo": "RF-14: registro formal de novedades de recepción",
+   "fecha": "2026-09-25",
+   "descripcion": "Parcial: existe el estado de cuarentena del lote (Capítulo 8).",
+   "fuente": null
+  },
+  {
+   "columna": "todo",
+   "titulo": "RF-15: desglose del consumo por destino de producción",
+   "fecha": "2026-09-25",
+   "descripcion": "No implementado (Capítulo 8).",
+   "fuente": null
+  },
+  {
+   "columna": "todo",
+   "titulo": "Actualizar axios (vulnerabilidades altas de npm audit)",
+   "fecha": "2026-09-25",
+   "descripcion": "Issue #65, sigue abierto: npm audit reporta axios 1.0.0–1.17.0 con severidad alta.",
+   "fuente": null
+  }
+ ]
+}
