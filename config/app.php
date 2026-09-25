@@ -123,4 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    | Contraseña de las cuentas de demostración (PanaderiaDemoSeeder).
+    */
+    'demo_password' => env('DEMO_PASSWORD'),
+
 ];

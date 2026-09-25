@@ -37,10 +37,18 @@ class PanaderiaDemoSeeder extends Seeder
         $this->limpiarInventario();
         $cat = json_decode(file_get_contents(database_path('seeders/data/panaderia.json')), true);
 
+        // Contraseña de las cuentas de demostración: DEMO_PASSWORD en .env (en producción es distinta a la de desarrollo).
+        $clave = config('app.demo_password');
+        if (!$clave) {
+            if (app()->isProduction()) {
+                throw new \RuntimeException('Defina DEMO_PASSWORD en .env antes de cargar la demostración en producción.');
+            }
+            $clave = 'Pymetory2026';
+        }
         $this->admin = User::updateOrCreate(['email' => 'admin@pymetory.com'],
-            ['name' => 'Administrador Demo', 'password' => bcrypt('Pymetory2026'), 'role' => 'admin']);
+            ['name' => 'Administrador Demo', 'password' => bcrypt($clave), 'role' => 'admin']);
         $this->operario = User::updateOrCreate(['email' => 'operario@pymetory.com'],
-            ['name' => 'Operario de Bodega', 'password' => bcrypt('Pymetory2026'), 'role' => 'operario']);
+            ['name' => 'Operario de Bodega', 'password' => bcrypt($clave), 'role' => 'operario']);
 
         $bodegas = [];
         foreach ($cat['bodegas'] as $b) {

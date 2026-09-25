@@ -1,349 +1,349 @@
 {
  "generado": "2026-09-25",
- "fuentes": "Issues del GitHub Project #3 e historial de git del repositorio",
+ "fuentes": "Issues del GitHub Project #3 (tablero privado del autor) e historial de git del repositorio",
  "tarjetas": [
   {
    "columna": "done",
    "titulo": "Finalización de la Elicitación de Requisitos",
    "fecha": "2026-02-18",
    "descripcion": "Issue #2 · abierto 2026-02-18 · cerrado 2026-02-18",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/2"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "Crear Requerimientos Funcionales",
    "fecha": "2026-03-05",
    "descripcion": "Issue #3 · abierto 2026-02-26 · cerrado 2026-03-05",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/3"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Doc] Definir estándar de especificación de requisitos (IEEE 830)",
    "fecha": "2026-04-16",
    "descripcion": "Issue #5 · abierto 2026-03-05 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/5"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "Crear diagramas UML",
    "fecha": "2026-03-19",
    "descripcion": "Issue #12 · abierto 2026-03-12 · cerrado 2026-03-19",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/12"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Doc] Diseño de prototipos de alta fidelidad en Figma (UI/UX)",
    "fecha": "2026-03-18",
    "descripcion": "Issue #13 · abierto 2026-03-18 · cerrado 2026-03-18",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/13"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Doc] Diseño del modelo de datos y diagrama UML (MER)",
    "fecha": "2026-03-19",
    "descripcion": "Issue #14 · abierto 2026-03-19 · cerrado 2026-03-19",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/14"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Doc] Definir arquitectura del sistema y estrategia de despliegue",
    "fecha": "2026-04-16",
    "descripcion": "Issue #15 · abierto 2026-03-19 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/15"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Doc] Consolidación del documento maestro de tesis (Elicitación + Requisitos + Anexos)",
    "fecha": "2026-03-19",
    "descripcion": "Issue #16 · abierto 2026-03-19 · cerrado 2026-03-19",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/16"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Doc] Modelado de Casos de Uso del sistema de inventario",
    "fecha": "2026-03-19",
    "descripcion": "Issue #17 · abierto 2026-03-19 · cerrado 2026-03-19",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/17"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "Desarrollar el prototipo completamente",
    "fecha": "2026-03-26",
    "descripcion": "Issue #18 · abierto 2026-03-26 · cerrado 2026-03-26",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/18"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "Configurar el ambiente de desarrollo",
    "fecha": "2026-04-16",
    "descripcion": "Issue #19 · abierto 2026-03-26 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/19"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RF-01] Implementar módulo de registro de entradas con trazabilidad de materia prima",
    "fecha": "2026-04-16",
    "descripcion": "Issue #4 · abierto 2026-03-05 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/4"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RF-02] Gestión de inventario mediante metodología FEFO",
    "fecha": "2026-04-16",
    "descripcion": "Issue #6 · abierto 2026-03-05 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/6"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RF-03] Alertas de reabastecimiento basadas en el Punto de Reorden (ROP)",
    "fecha": "2026-04-16",
    "descripcion": "Issue #7 · abierto 2026-03-05 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/7"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RF-04] Configurar agente LLM para consultas de inventario en lenguaje natural.",
    "fecha": "2026-04-16",
    "descripcion": "Issue #8 · abierto 2026-03-05 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/8"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RNF-01] Ajustar tipos de datos en la base de datos para precisión de 3 decimales (kg)",
    "fecha": "2026-04-16",
    "descripcion": "Issue #9 · abierto 2026-03-05 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/9"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Task] Realizar conciliación de inventario lógico vs. físico inicial",
    "fecha": "2026-04-16",
    "descripcion": "Issue #10 · abierto 2026-03-05 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/10"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RF-05] Generación de Reportes de Inventario en PDF",
    "fecha": "2026-04-16",
    "descripcion": "Issue #20 · abierto 2026-04-16 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/20"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[Doc] Implementar Sistema de Roles y Permisos (RBAC)",
    "fecha": "2026-04-16",
    "descripcion": "Issue #21 · abierto 2026-04-16 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/21"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RF-07] Gestión de Salidas y Trazabilidad Automática FEFO (Kardex)",
    "fecha": "2026-04-16",
    "descripcion": "Issue #22 · abierto 2026-04-16 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/22"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[RF-04] Refinamiento del Asistente IA: Modo Consultor Senior Proactivo",
    "fecha": "2026-04-16",
    "descripcion": "Issue #23 · abierto 2026-04-16 · cerrado 2026-04-16",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/23"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-02.9: Panel de Configuración (settings)",
    "fecha": "2026-05-07",
    "descripcion": "Issue #26 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/26"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-02.10: Módulo de Conciliación",
    "fecha": "2026-05-07",
    "descripcion": "Issue #27 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/27"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-03.5: Historial de conversaciones persistente",
    "fecha": "2026-05-07",
    "descripcion": "Issue #28 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/28"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-03.6: RAG responde desde Kanban (Preguntar al RAG)",
    "fecha": "2026-05-07",
    "descripcion": "Issue #29 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/29"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-05.5: Notificaciones proactivas (FEFO, Titan)",
    "fecha": "2026-05-07",
    "descripcion": "Issue #32 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/32"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-06.7: Modo oscuro/claro toggle",
    "fecha": "2026-05-07",
    "descripcion": "Issue #35 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/35"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-07.7: Monitoreo de uptime",
    "fecha": "2026-05-07",
    "descripcion": "Issue #36 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/36"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-07.8: Backups automáticos de BD",
    "fecha": "2026-05-07",
    "descripcion": "Issue #37 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/37"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-07.9: CI/CD con GitHub Actions",
    "fecha": "2026-05-07",
    "descripcion": "Issue #38 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/38"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-08.3: Documentación de arquitectura",
    "fecha": "2026-05-07",
    "descripcion": "Issue #39 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/39"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-08.4: Diagramas de infraestructura",
    "fecha": "2026-05-07",
    "descripcion": "Issue #40 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/40"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-08.5: Overleaf/LaTeX para tesis",
    "fecha": "2026-05-07",
    "descripcion": "Issue #41 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/41"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-08.6: Plan Maestro sincronizado con GitHub",
    "fecha": "2026-05-07",
    "descripcion": "Issue #42 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/42"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-09.8: Extraer Sidebar a componente reutilizable",
    "fecha": "2026-05-07",
    "descripcion": "Issue #43 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/43"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-09.9: Eliminar archivos JSX/TSX duplicados",
    "fecha": "2026-05-07",
    "descripcion": "Issue #44 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/44"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "CU-09.11: Mobile responsive (menú hamburguesa)",
    "fecha": "2026-05-07",
    "descripcion": "Issue #45 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/45"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: /inventory/report — Error 500 (Server Error)",
    "fecha": "2026-05-07",
    "descripcion": "Issue #50 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/50"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: Arquitectura híbrida inconsistente (Inertia + Blade)",
    "fecha": "2026-05-07",
    "descripcion": "Issue #51 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/51"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: Sin SEO/OG tags en ninguna página",
    "fecha": "2026-05-07",
    "descripcion": "Issue #53 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/53"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: Diseño inconsistente en /rag-models y /models",
    "fecha": "2026-05-07",
    "descripcion": "Issue #54 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/54"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: Sin manejo de errores en /rag-models",
    "fecha": "2026-05-07",
    "descripcion": "Issue #56 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/56"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: Sin manejo de errores en /rag-models (catch{} vacío)",
    "fecha": "2026-05-07",
    "descripcion": "Issue #57 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/57"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: Exposición de IP interna en /rag-models",
    "fecha": "2026-05-07",
    "descripcion": "Issue #58 · abierto 2026-05-07 · cerrado 2026-05-07",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/58"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "QA: Dark mode inconsistente entre páginas de Pymetory",
    "fecha": "2026-09-25",
    "descripcion": "Issue #61 (abierto en GitHub). Los temas se reescribieron: cada tema redefine la paleta completa. Commit 1dd9537.",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/61"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[SEC-002] Add verified middleware to kanban routes",
    "fecha": "2026-09-25",
    "descripcion": "Issue #66 (abierto en GitHub). Las rutas del Kanban están en el grupo con middleware auth + verified (routes/web.php).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/66"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[SEC-004] Remove wheels/ from git tracking",
    "fecha": "2026-09-25",
    "descripcion": "Issue #68 (abierto en GitHub). La carpeta wheels/ ya no está en el repositorio.",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/68"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[SEC-006] Create explicit cors.php config",
    "fecha": "2026-09-25",
    "descripcion": "Issue #70 (abierto en GitHub). Existe config/cors.php.",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/70"
+   "fuente": null
   },
   {
    "columna": "done",
    "titulo": "[SORTLY-001] Custom Fields para materiales",
    "fecha": "2026-09-25",
    "descripcion": "Issue #71 (abierto en GitHub). Campos personalizados implementados (custom_field_definitions, /api/custom-fields). Commit acaea50.",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/issues/71"
+   "fuente": null
   },
   {
    "columna": "done",

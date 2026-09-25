@@ -52,7 +52,7 @@ jobs:
           APP_ENV: testing
         run: php artisan test --stop-on-failure
 
-  # ── 3. Deploy to DesktopTitan (Oracle Cloud) ──
+  # ── 3. Despliegue en el servidor (Oracle Cloud) ──
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main'
@@ -63,16 +63,14 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.DESKTOPTITAN_HOST }}
-          port: ${{ secrets.DESKTOPTITAN_PORT }}
-          username: ${{ secrets.DESKTOPTITAN_USER }}
-          key: ${{ secrets.DESKTOPTITAN_KEY }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /var/www/portafolio/SolucionesWeb/pymetoryTesis
-            # FIX-CI: el repo clonado en Titan usa https sin credenciales => git pull fallaba
-            # "could not read Username". Se autentica con token efimero de este run
-            # (repo privado; token nunca se escribe a disco).
-            git remote set-url origin https://x-access-token:${{ secrets.DEPLOY_GH_TOKEN }}@github.com/germanmurillas/gestor-inventario-pymes-llm.git
+            # Repositorio público: el servidor actualiza sin credenciales.
+            sudo git remote set-url origin https://github.com/germanmurillas/gestor-inventario-pymes-llm.git
             sudo git pull origin main
             sudo composer install --no-dev --optimize-autoloader --no-interaction
             sudo php artisan migrate --force
