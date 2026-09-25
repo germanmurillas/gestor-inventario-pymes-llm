@@ -160,9 +160,10 @@ class PurchaseOrderController extends Controller
 
                 if ($poi->received_qty < $poi->quantity) $allReceived = false;
 
-                // Registrar movimiento en inventario
-                $material = Material::find($poi->material_id);
-                Lote::create([
+                if ($item['received'] <= 0) continue;
+
+                // Registrar el lote recibido y su entrada en el Kardex
+                $lote = Lote::create([
                     'material_id'    => $poi->material_id,
                     'batch_number'   => 'PO-' . $order->po_number . '-' . now()->format('Ymd'),
                     'quantity'       => $item['received'],
@@ -170,6 +171,15 @@ class PurchaseOrderController extends Controller
                     'expiration_date'=> now()->addYear(),
                     'status'         => 'active',
                     'notes'          => 'Recibido de orden ' . $order->po_number,
+                ]);
+
+                \App\Models\Movimiento::create([
+                    'lote_id'     => $lote->id,
+                    'user_id'     => $request->user()->id,
+                    'type'        => 'entrada',
+                    'quantity'    => $item['received'],
+                    'reason'      => 'ingreso',
+                    'description' => 'Recepción de la orden de compra ' . $order->po_number,
                 ]);
             }
 

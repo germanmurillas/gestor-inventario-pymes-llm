@@ -65,6 +65,11 @@ class UserController extends Controller
             return response()->json(['message' => 'No puedes eliminar tu propia cuenta.'], 422);
         }
 
+        // El Kardex conserva quién hizo cada movimiento: un usuario con historial no se borra.
+        if (\App\Models\Movimiento::where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'El usuario tiene movimientos en el Kardex y no se puede eliminar.'], 422);
+        }
+
         $this->audit('eliminar', $user->id);
         $user->delete();
 
