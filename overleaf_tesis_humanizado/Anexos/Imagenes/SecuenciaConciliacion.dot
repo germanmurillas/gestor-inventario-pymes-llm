@@ -1,0 +1,18 @@
+digraph SEQ_CONCILIACION {
+  rankdir=TB; bgcolor=white; fontname="Helvetica"; fontsize=9;
+  node [shape=box, fontname="Helvetica", fillcolor="#F3F3F3", style=filled];
+  edge [arrowsize=.7];
+
+  U [label="Administrador", style="rounded,filled", fillcolor="#F5E7C1"];
+  V [label="Vista Conciliación"];
+  M [label="middleware\nrole:admin"];
+  C [label="InventoryController::adjust"];
+  DB [label="MySQL", shape=cylinder, fillcolor="#DDE7F5"];
+
+  U -> V [label="1. registra conteo físico\n+ justificación"];
+  V -> M [label="2. PATCH /inventory/adjust/{id}"];
+  M -> C [label="3. rol verificado"];
+  C -> DB [label="4. lee cantidad actual\ndel lote"];
+  C -> DB [label="5. transacción: actualiza lote\n+ INSERT movimiento 'ajuste'\n(cantidad anterior, usuario, motivo)"];
+  C -> U [label="6. confirmación"];
+}

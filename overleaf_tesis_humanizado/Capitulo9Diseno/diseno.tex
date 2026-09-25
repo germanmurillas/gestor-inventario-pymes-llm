@@ -133,11 +133,7 @@ Operación & \texttt{notifications} (alertas), \texttt{kanban\_items} (tablero d
 
 La entidad central del diseño es el lote, no el material: la existencia de un material es la suma de las cantidades de sus lotes activos, y cada lote conoce su fecha de vencimiento. Esto es lo que permite aplicar FEFO. Las operaciones que cambian la cantidad de un lote desde el inventario ---ingreso, consumo, despacho por escaneo, transferencia y ajuste de conciliación--- registran un movimiento en la tabla \texttt{movimientos} con el usuario autenticado, el tipo, la cantidad, el motivo y la marca de tiempo. Las operaciones que tocan más de un lote (por ejemplo, un despacho FEFO que agota un lote y continúa con el siguiente, o una transferencia) se ejecutan dentro de una transacción de base de datos, para que el Kardex nunca quede con movimientos a medias.
 
-% PENDIENTE (hallazgo 25-sep-2026): la inmutabilidad no está forzada en código.
-% Además, PurchaseOrderController::receive crea lotes sin registrar Movimiento.
-% movimientos usa cascadeOnDelete hacia users y lotes, y el modelo no bloquea
-% update/delete. Redactar el mecanismo definitivo cuando se aplique la corrección.
-Por regla de la dirección, el Kardex es de solo inserción: la aplicación no ofrece ninguna operación para editar o eliminar movimientos, y las correcciones se hacen registrando un nuevo movimiento de ajuste con su justificación.
+Por regla de la dirección, el Kardex es de solo inserción, y esa regla se garantiza en dos niveles. En la aplicación, el modelo \texttt{Movimiento} rechaza cualquier intento de modificar o eliminar un registro existente. En la base de datos, las llaves foráneas de \texttt{movimientos} hacia \texttt{lotes} y \texttt{users} impiden borrar un lote o un usuario que tenga historial. Las correcciones se hacen registrando un nuevo movimiento de ajuste con su justificación.
 
 \section{Diseño del módulo de consulta en lenguaje natural}
 \label{sec:dis_rag}
@@ -178,7 +174,7 @@ El controlador define un mapa de proveedores intercambiables ---Ollama en el pro
 \section{Diseño de la interfaz de usuario}
 \label{sec:dis_ui}
 
-La interfaz se prototipó en Figma y el primer commit del repositorio (14 de abril de 2026) corresponde a la reconstrucción en React de 18 vistas de alta fidelidad a partir de ese prototipo; por eso varios componentes conservan el prefijo \texttt{Figma} en su nombre (\texttt{FigmaTablero}, \texttt{FigmaLabelPrint}, \texttt{FigmaQRScanner}, entre otros).
+La interfaz se prototipó en Figma. El commit del 14 de abril de 2026 (\texttt{5049333}, ``Reconstrucción Figma de Alta Fidelidad (18 vistas)'') trasladó a React las 18 vistas de alta fidelidad de ese prototipo; por eso varios componentes conservan el prefijo \texttt{Figma} en su nombre (\texttt{FigmaTablero}, \texttt{FigmaLabelPrint}, \texttt{FigmaQRScanner}, entre otros).
 
 Los principios que guiaron el diseño de la interfaz fueron:
 

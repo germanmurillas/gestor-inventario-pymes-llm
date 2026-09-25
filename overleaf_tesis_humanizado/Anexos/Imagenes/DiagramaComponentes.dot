@@ -8,7 +8,7 @@ digraph COMP {
     COMP [label="Componentes Figma*\n(impresión QR, kardex)"];
   }
   subgraph cluster_back {
-    label="Backend (Laravel 11 / PHP 8.3)"; fillcolor="#EFF7EF";
+    label="Backend (Laravel 13 / PHP 8.3)"; fillcolor="#EFF7EF";
     CTL [label="Controladores\n(Lote, Bodega, Reportes)"];
     RAG [label="ChatLLMController\n(RAG)"];
     FALL [label="Fallback Chain"];
@@ -18,7 +18,7 @@ digraph COMP {
     label="Datos + IA"; fillcolor="#F7F0F7";
     MYSQL [label="MySQL 8.0", shape=cylinder];
     OLLAMA [label="Ollama local\n(gemma3, qwen3)"];
-    OPENAI [label="OpenAI API", shape=box3d];
+    OPENAI [label="Proveedores LLM\n(Ollama Cloud, OpenCode,\nAPI compatible OpenAI)", shape=box3d];
   }
 
   PAGES -> CTL [label="Inertia HTTP"];

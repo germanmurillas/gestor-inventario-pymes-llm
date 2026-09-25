@@ -4,8 +4,8 @@ digraph SEQ_FEFO {
   edge [arrowsize=.7];
 
   U [label="Operario", style="rounded,filled", fillcolor="#F5E7C1"];
-  V [label="Vista Despacho"];
-  C [label="DespachoController"];
+  V [label="Vista Consumo"];
+  C [label="ConsumptionController"];
   L [label="fefoOrder() scope"];
   DB [label="MySQL", shape=cylinder, fillcolor="#DDE7F5"];
 

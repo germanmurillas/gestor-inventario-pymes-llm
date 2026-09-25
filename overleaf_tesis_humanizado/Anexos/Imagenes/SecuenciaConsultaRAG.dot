@@ -7,7 +7,7 @@ digraph SEQ_RAG {
   CHAT [label="ChatLLMController"];
   CTX [label="buildRagContext()"];
   DB [label="MySQL", shape=cylinder, fillcolor="#DDE7F5"];
-  LLM [label="LLM (Ollama / OpenAI)"];
+  LLM [label="Modelo de lenguaje\n(Ollama local / Ollama Cloud / API compatible)"];
 
   U -> CHAT [label="1. pregunta en\nlenguaje natural"];
   CHAT -> CHAT [label="2. classifyQuery()"];

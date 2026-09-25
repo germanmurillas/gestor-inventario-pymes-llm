@@ -1,31 +1,31 @@
-digraph DESPLIEGUE {
-  rankdir=TB; bgcolor=white; nodesep=.5; fontname="Helvetica"; fontsize=10;
-  node [shape=box, fontname="Helvetica", style=filled];
+// Despliegue real de Pymetory (verificado en el servidor el 25-sep-2026)
+digraph Despliegue {
+  graph [rankdir=LR, fontname="Helvetica", fontsize=11, nodesep=0.5, ranksep=0.8];
+  node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
 
-  subgraph cluster_user {
-    label="Cliente"; fillcolor="#FDF6E3"; style=filled;
-    BROWSER [label="Navegador\n(de bodega / remoto)"];
-    TG [label="Telegram bot"];
-  }
-  subgraph cluster_titan {
-    label="Titán (Oracle ARM Ashburn — 4 OCPU / 24GB)"; fillcolor="#EFF7EF";
-    TUNNEL [label="cloudflared\n(Cloudflare Tunnel)"];
-    NGINX [label="nginx:80"];
-    APP [label="Laravel 11\n(puerto 8081)"];
-    OLLAMA [label="Ollama :11434\n(gemma3 / qwen3)"];
+  subgraph cluster_cliente { label="Cliente"; style=filled; fillcolor="#FDF6E3";
+    BROWSER [label="Navegador\n(computador o celular)"]; }
+
+  subgraph cluster_cf { label="Cloudflare"; style=filled; fillcolor="#F7F0F7";
+    DNS [label="DNS + TLS\napp.pymetory.com"]; }
+
+  subgraph cluster_titan { label="Titán — Oracle Cloud Always Free (ARM, 4 OCPU / 24 GB)"; style=filled; fillcolor="#EFF7EF";
+    TUNNEL [label="cloudflared\n(túnel saliente)"];
+    APP [label="Laravel 13 + React 19\n(PHP 8.3, puerto 8081)"];
     MYSQL [label="MySQL 8.0", shape=cylinder];
-    CRON [label="cron (miloto-sync,\nauditorías)"];
-  }
-  subgraph cluster_cf {
-    label="Cloudflare"; fillcolor="#F7F0F7";
-    DNS [label="DNS + Tunnel\npymetory.com"];
-  }
-  OPENAI [label="OpenAI API\n(remoto)"];
+    OLLAMA [label="Ollama :11434\nrespaldo local gemma3:4b\n(límite 14 GB, 1 modelo)"];
+    CRON [label="cron\nschedule:run cada minuto\n(alertas FEFO y stock bajo)"]; }
+
+  OCLOUD [label="Ollama Cloud (plan gratuito)\ngpt-oss:120b-cloud", fillcolor="#EEF0FF"];
+  GH [label="GitHub Actions\n(pruebas + despliegue)", fillcolor="#F2F2F2"];
 
   BROWSER -> DNS [label="HTTPS"];
-  DNS -> TUNNEL [label="tunnel"];
-  TG -> APP [label="API (bot)"];
-  TUNNEL -> NGINX -> APP;
-  APP -> MYSQL; APP -> OLLAMA; APP -> OPENAI [style=dashed, label="fallback"];
+  DNS -> TUNNEL [label="túnel"];
+  TUNNEL -> APP [label="HTTP local"];
+  APP -> MYSQL [label="Eloquent"];
+  APP -> OLLAMA [label="API /api/chat"];
+  OLLAMA -> OCLOUD [label="modelos :cloud", style=dashed];
   CRON -> APP [style=dotted];
+  GH -> APP [label="SSH: pull + migrate", style=dashed];
 }

@@ -1,233 +1,57 @@
-% -------------------------------------------------
-% VERSION TRACKER — No modificar este bloque
-% Versión:    Tesis Humanizada
-% Archivo:    Anexos/anexoManualesDeUsuario.tex
-% Última mod:  2026-05-08T08:45:26
-% Git commit:  cc9c766f @ main
-% Audiencia:   general
-% Verificar antes de editar: bash check_tesis_version.sh overleaf_tesis_humanizado/Anexos/anexoManualesDeUsuario.tex
-% -------------------------------------------------
+% Manual de usuario de Pymetory. Capturas tomadas de app.pymetory.com con los datos de demostración (25-sep-2026).
+\section*{Manual de usuario} \label{sec:ManualesdeUsuario}
+\addcontentsline{toc}{section}{Manual de usuario}
 
+Este manual describe el uso de Pymetory en \url{https://app.pymetory.com}. Las capturas muestran los datos de demostración del caso de estudio (panadería). Las funciones marcadas como \textit{solo administrador} no están disponibles para el rol operario.
 
-\section*{Manuales de usuario} \label{sec:ManualesdeUsuario}
-\addcontentsline{toc}{section}{Manuales de usuario}
+\newcommand{\capturaManual}[2]{%
+\begin{figure}[H]\centering\includegraphics[width=0.92\textwidth]{Anexos/Imagenes/manual/#1}\caption{#2}\end{figure}}
 
-\begin{multicols}{2} 
-\subsection*{Consultas a base de datos}
+\subsection*{Ingreso al sistema}
+Ingrese el correo electrónico y la contraseña asignados por el administrador y pulse \textbf{Entrar}. No existe registro abierto de administradores: las cuentas con ese rol las crea otro administrador.
+\capturaManual{01-login.png}{Pantalla de inicio de sesión.}
 
-Existen dos tipos de consultas básicas: consultas por zona determinada o por rango de frecuencia. Usted puede elegir consultar a nivel nacional, en una entidad territorial, departamento o municipio. Las consultas requieren un poco de tiempo en desplegarse debido a que presentan información considerable, considere usar una conexión de al menos 516 kbps.
+\subsection*{Tablero}
+Resume el estado del inventario: número de insumos, lotes en bodega, lotes críticos por vencimiento y valorización. Debajo aparecen los últimos movimientos del Kardex y la ocupación de cada bodega. Los accesos rápidos permiten registrar un insumo, escanear un código, generar un reporte o hacer un consumo rápido.
+\capturaManual{02-tablero.png}{Tablero de control.}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=8.5cm]{Anexos/Imagenes/ManualUsuario/ConsultasGeografica.png}
-	\caption{Filtro en la consulta por zona geográfica.}
-\end{figure}
+\subsection*{Inventario}
+Muestra los lotes activos agrupados por bodega, con su cantidad, fecha de vencimiento y estado. Los lotes dentro del umbral FEFO se marcan como críticos. Desde aquí se registran ingresos (\textbf{Nuevo ingreso}) y consumos; al consumir, el sistema descuenta primero del lote que vence primero.
+\capturaManual{03-inventario.png}{Inventario por lotes.}
 
-Usted puede elegir la zona geográfica que desea consultar.
-	
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6.5cm]{Anexos/Imagenes/ManualUsuario/FiltroPorOperador.png}
-	\caption{Filtro en la consulta por operador.}
-\end{figure}
+\subsection*{Búsqueda}
+Permite encontrar materiales y lotes por nombre, código o etiqueta.
+\capturaManual{04-buscar.png}{Búsqueda de materiales y lotes.}
 
-En esta pantalla usted puede elegir el operador al cual se va consultar su asignación.
+\subsection*{Asistente de inventario}
+Escriba una pregunta en español, por ejemplo ``¿Qué lotes vencen pronto?'' o ``¿Cuánta harina de trigo hay?''. El asistente consulta la base de datos antes de responder; si el material no está registrado, lo indica. Las conversaciones quedan en el historial de la izquierda.
+\capturaManual{05-asistente.png}{Asistente con una consulta de vencimientos.}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6.5cm]{Anexos/Imagenes/ManualUsuario/FiltroPorBanda.png}
-	\caption{Filtro en la consulta por banda.}
-\end{figure}
+\subsection*{Reportes (solo administrador)}
+Genera reportes de inventario, movimientos, FEFO, consumo y valorización, filtrables por bodega, material y rango de fechas, en PDF o CSV.
+\capturaManual{06-reportes.png}{Módulo de reportes.}
 
-En esta consulta se puede elegir la banda que se desea consultar.
+\subsection*{Log maestro (Kardex)}
+Lista todos los movimientos con tipo, material, lote, responsable, cantidad y fecha. Los movimientos no se pueden editar ni eliminar; una corrección se registra como un ajuste nuevo con su justificación.
+\capturaManual{07-kardex.png}{Log maestro de movimientos.}
 
-\subsection*{Gestión Operadores}
+\subsection*{Etiquetas y escáner}
+El módulo de etiquetas genera códigos QR y de barras por lote para imprimir. El escáner lee esas etiquetas con la cámara del dispositivo (o con ingreso manual del código) y registra la entrada o salida correspondiente en el Kardex.
+\capturaManual{08-etiquetas.png}{Generación de etiquetas.}
+\capturaManual{09-escaner.png}{Escáner de códigos QR.}
 
-Estas operaciones sólo las puede realizar un usuario con rol administrador de espectro.
+\subsection*{Transferencias}
+Traslada cantidad de un lote entre bodegas. La operación registra la salida en la bodega de origen y la entrada en la de destino.
+\capturaManual{10-transferencias.png}{Transferencias entre bodegas.}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6.5cm]{Anexos/Imagenes/ManualUsuario/Operador.png}
-	\caption{Registrar operador}
-\end{figure}
+\subsection*{Órdenes de compra}
+Registra órdenes a proveedores. Al recibir una orden, el sistema crea el lote recibido y su entrada en el Kardex.
+\capturaManual{11-ordenes.png}{Órdenes de compra.}
 
-Para registrar un operador, usted debe definir sus parámetros y hacer clic en guardar.
-	
+\subsection*{Alertas}
+Reúne las alertas de stock bajo y de lotes próximos a vencer, que el sistema revisa cada hora.
+\capturaManual{12-alertas.png}{Centro de alertas.}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6cm]{Anexos/Imagenes/ManualUsuario/OperadorEditar.png}
-	\caption{Editar operador.}
-\end{figure}
-
-Para editar un operador, puede editar cualquier de los cambios y servicios asociados a el.
-	
-\subsection*{Gestión Servicios.}
-
-Estas operaciones sólo las puede realizar un usuario con rol administrador de espectro.
-
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=5cm]{Anexos/Imagenes/ManualUsuario/Servicios.png}
-	\caption{Agregar servicio.}
-\end{figure}
-
-Para agregar un servicio, se debe definir un nombre y su descripción, finalmente hacer clic en guardar.	
-	
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6.5cm]{Anexos/Imagenes/ManualUsuario/EditarServicios.png}
-	\caption{Editar servicio.}
-\end{figure}
-
-Aquí usted podrá editar los parámetros asociados de un servicio.
-	
-\subsection*{Gestión Rangos de Frecuencia}
-
-Estas operaciones sólo las puede realizar un usuario con rol administrador de espectro.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6cm]{Anexos/Imagenes/ManualUsuario/SeleccionBanda.png}
-	\caption{ Selección banda de frecuencia.}
-\end{figure}
-
-En esta pantalla usted podrá seleccionar la banda de frecuencia para realizar acciones sobre los rangos de frecuencia asociados a ella.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=7cm]{Anexos/Imagenes/ManualUsuario/AgregarRangoFrecuencia.png}
-	\caption{ Agregar banda de frecuencia.}
-\end{figure}
-
-En este campo usted podrá crear un nuevo rango de frecuencia, especificando cada uno de los datos del rango y las formulas que se aplican para el cálculo de las frecuencias de transmisión y recepción de cada uno de los canales del nuevo rango de frecuencia.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6.5cm]{Anexos/Imagenes/ManualUsuario/FrecuenciasRegistradas.png}
-	\caption{ Lista de rangos de frecuencia registrados en una banda.}
-\end{figure}
-
-En esta pantalla, usted podrá elegir que rango de frecuencia desea editar.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=5cm]{Anexos/Imagenes/ManualUsuario/EditarRangoFrecuencia.png}
-	\caption{ Editar rango de frecuencia.}
-\end{figure}
-
-La operación editar rango de frecuencia permite editar los parámetros asociados a un rango de frecuencia.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=8cm]{Anexos/Imagenes/ManualUsuario/Canales.png}
-	\caption{ Lista de canales asociados a un rango de frecuencia.}
-\end{figure}
-
-Es la lista de canales asociados a un rango de frecuencia, si usted desea editar alguno de ellos debe hacer clic en \textit{Editar}.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=5cm]{Anexos/Imagenes/ManualUsuario/EditarCanal.png}
-	\caption{ Editar canal.}
-\end{figure}
-
-Al hacer clic en editar, usted puede editar los parámetros asociados a un canal de un rango de frecuencia.
-
-\subsection*{Gestión Entradas XML}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=7.5cm]{Anexos/Imagenes/ManualUsuario/Entradas.png}
-	\caption{ Lista de entradas XML almacenadas en el sistema.}
-\end{figure}
-
-La gestión de entradas XML permite visualizar, descargar y borrar las entradas XML propias de un usuario.
-
-\subsection*{Gestión Salidas XML}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=7.5cm]{Anexos/Imagenes/ManualUsuario/Salidas.png}
-	\caption{ Lista de salidas XML almacenadas en el sistema.}
-\end{figure}
-
-La gestión de salidas XML permite visualizar, descargar y borrar las salidas XML propias de un usuario.
-
-\subsection*{Generador de entradas}
-
-En el generador de entradas, usted debe seleccionar la zona geográfica y la banda de frecuencia en donde desea realizar un requerimiento, una vez hecho éste proceso puede proceder a crear los requerimientos de la entrada.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=5cm]{Anexos/Imagenes/ManualUsuario/Requerimientos.png}
-	\caption{ Especificación de requerimientos.}
-\end{figure}
-
-Una vez haga la creación de requerimientos podrá generar la entrada XML y almacenarla en el sistema.
-
-\subsection*{Actualizar Base de datos}
-
-Estas operaciones sólo las puede realizar un usuario con rol administrador de espectro.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6.5cm]{Anexos/Imagenes/ManualUsuario/Entrada.png}
-	\caption{ Selección salida XML para actualizar base de datos.}
-\end{figure}
-
-Usted debe seleccionar un archivo de salida o ingresar uno, para registrar su información a la base de datos.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6.5cm]{Anexos/Imagenes/ManualUsuario/ElegirSolucion.png}
-	\caption{ Selección entrada XML para actualizar base de datos.}
-\end{figure}
-
-Es importante aclarar que una asignación con datos incorrectos, puede comprometer la integridad de los datos de la base de datos.
-
-\subsection*{Aplicativos} \label{manual:aplicativo}
-
-Existen dos aplicativos en el proyecto, por programación por restricciones y por algoritmo genético. 
-
-\begin{figure}[H]
-	\centering
-	\label{fig:appCPP}
-	\includegraphics[width=7.5cm]{Anexos/Imagenes/ManualUsuario/Aplicacion.jpeg}
-	\caption{ Aplicativo por programación por restricciones.}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=6cm]{Anexos/Imagenes/ManualUsuario/Flexibilidad.png}
-	\caption{ Flexibilidad y debilidad de restricciones.}
-\end{figure}
-
-En la flexibilidad se pueden dfinir que restricciones no se toman en cuenta y decidir cuantas iteraciones se van a realizar.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=7.5cm]{Anexos/Imagenes/ManualUsuario/genetico.png}
-	\caption{ Aplicativo por algortimo genético.}
-\end{figure}
-
-Los resultados se despliegan mostrando la información general de la ejecución, un listado de soluciones encontradas y el detalle de que cada solución.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=7.5cm]{Anexos/Imagenes/ManualUsuario/Resultados.png}
-	\caption{ Información general acerca de una salida XML.}
-\end{figure}
-
-\end{multicols} 
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=15cm]{Anexos/Imagenes/ManualUsuario/ResultadosCostos.png}
-	\caption{ Información de costos y reporte de una solución obtenida de una salida XML.}
-\end{figure}
-
-
-
-
+\subsection*{Ajustes (solo administrador)}
+Configura el umbral FEFO, las notificaciones, el proveedor y modelo de lenguaje del asistente, las claves de API y los usuarios con sus roles.
+\capturaManual{13-ajustes.png}{Ajustes del sistema.}
