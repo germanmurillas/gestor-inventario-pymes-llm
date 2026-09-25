@@ -259,6 +259,7 @@ class InventoryController extends Controller {
             'capacity' => 'required|numeric|min:1',
             'description' => 'nullable|string|max:500',
             'image' => 'nullable|image|max:6144',
+            'image_link' => 'nullable|url:http,https|max:1000',
         ]);
 
         \App\Models\Bodega::create([
@@ -267,7 +268,8 @@ class InventoryController extends Controller {
             'capacity' => $validated['capacity'],
             'description' => $validated['description'] ?? null,
             'status' => 'active',
-            'image_path' => $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public') : null,
+            // Archivo subido al servidor o enlace externo; la URL final siempre sale de este campo.
+            'image_path' => $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public') : ($validated['image_link'] ?? null),
         ]);
 
         return back()->with('success', 'Nueva bodega creada exitosamente.');
@@ -281,12 +283,16 @@ class InventoryController extends Controller {
             'description' => 'nullable|string|max:500',
             'status' => 'required|in:active,full,maintenance',
             'image' => 'nullable|image|max:6144',
+            'image_link' => 'nullable|url:http,https|max:1000',
             'remove_image' => 'nullable|boolean',
         ]);
 
-        if ($request->hasFile('image') || $request->boolean('remove_image')) {
-            if ($bodega->image_path) \Illuminate\Support\Facades\Storage::disk('public')->delete($bodega->image_path);
-            $bodega->image_path = $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public') : null;
+        if ($request->hasFile('image') || $request->filled('image_link') || $request->boolean('remove_image')) {
+            // Solo se borran del disco los archivos subidos (no enlaces externos ni recursos públicos).
+            $anterior = $bodega->image_path;
+            if ($anterior && !preg_match('#^(https?://|images/)#i', $anterior)) \Illuminate\Support\Facades\Storage::disk('public')->delete($anterior);
+            $bodega->image_path = $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public')
+                : ($request->filled('image_link') ? $validated['image_link'] : null);
         }
         $bodega->fill(collect($validated)->only(['name', 'capacity', 'description', 'status'])->all())->save();
 

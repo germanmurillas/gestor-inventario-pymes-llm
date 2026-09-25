@@ -59,4 +59,17 @@ class BodegaGestionTest extends TestCase
 
         $this->actingAs($operario)->post("/bodegas/{$bodega->id}", ['name' => 'X', 'capacity' => 1, 'status' => 'active'])->assertStatus(403);
     }
+
+    public function test_admin_puede_usar_un_enlace_de_imagen(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->post('/bodegas', [
+            'name' => 'Bodega externa', 'code' => 'BOD-EXT', 'capacity' => 100,
+            'image_link' => 'https://example.com/bodega.jpg',
+        ])->assertRedirect();
+
+        $this->assertSame('https://example.com/bodega.jpg', Bodega::where('code', 'BOD-EXT')->value('image_path'));
+        $this->assertSame('https://example.com/bodega.jpg', Bodega::where('code', 'BOD-EXT')->first()->image_url);
+    }
 }

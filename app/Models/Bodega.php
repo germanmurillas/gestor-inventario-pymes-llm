@@ -20,13 +20,10 @@ class Bodega extends Model
 
     protected $appends = ['image_url'];
 
-    /** Imagen subida por el administrador; si no hay, la foto por defecto de su código (catálogo demo). */
+    /** URL de la imagen según lo registrado en la base de datos: enlace externo, recurso público o archivo subido. */
     public function getImageUrlAttribute(): ?string
     {
-        if ($this->image_path) {
-            return asset('storage/' . $this->image_path);
-        }
-        return is_file(public_path("images/bodegas/{$this->code}.webp")) ? asset("images/bodegas/{$this->code}.webp") : null;
+        return \App\Support\Imagen::url($this->image_path);
     }
 
     public function lotes(): HasMany

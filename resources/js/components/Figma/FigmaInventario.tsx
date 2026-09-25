@@ -6,6 +6,7 @@ import FigmaForms from './FigmaForms';
 import FigmaConsumeForm from './FigmaConsumeForm';
 import FigmaConsumeWizard from './FigmaConsumeWizard';
 import FigmaFefoBadge from './FigmaFefoBadge';
+import FigmaBodegaBar from './FigmaBodegaBar';
 
 const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBodegaCode, onManageBodegas }: { lotes?: any[], bodegas?: any[], user?: any, onNavigate?: (view: string) => void, initialBodegaCode?: string | null, onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
     const [viewMode, setViewMode] = useState<'GRID' | 'DETAIL' | 'FORM' | 'CONSUME' | 'WIZARD'>('GRID');
@@ -17,6 +18,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTag, setSelectedTag] = useState<string>('');
     const [categoria, setCategoria] = useState('');
+    const [pestana, setPestana] = useState<'insumos' | 'bodegas'>('insumos');
     const [materialAbierto, setMaterialAbierto] = useState<string | null>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -204,6 +206,32 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
             )}
 
 
+            {/* Pestañas del módulo: insumos y bodegas */}
+            <div className="flex items-center justify-between gap-3">
+                <div role="tablist" className="inline-flex rounded-2xl border border-slate-700/40 bg-slate-800/40 p-1">
+                    {(['insumos', 'bodegas'] as const).map((t) => (
+                        <button key={t} role="tab" aria-selected={pestana === t} onClick={() => setPestana(t)}
+                            className={`whitespace-nowrap rounded-xl px-3 sm:px-4 py-2 text-sm font-bold capitalize transition ${pestana === t ? 'bg-indigo-600 text-white shadow' : 'text-slate-300'}`}>
+                            {t} <span className="ml-1 text-xs opacity-70">{t === 'insumos' ? new Set(lotes.map((l: any) => l.codigo)).size : bodegas.length}</span>
+                        </button>
+                    ))}
+                </div>
+                {pestana === 'bodegas' && user?.role === 'admin' && onManageBodegas && (
+                    <button onClick={() => onManageBodegas('nueva')} className="flex items-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white active:scale-95">
+                        <Plus size={16} /> <span className="whitespace-nowrap">Nueva bodega</span>
+                    </button>
+                )}
+            </div>
+
+            {pestana === 'bodegas' ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {bodegas.map((b: any) => (
+                        <FigmaBodegaBar key={b.code} bodega={b}
+                            onOpen={() => { setSelectedBodega(b); setPestana('insumos'); }}
+                            onEdit={user?.role === 'admin' && onManageBodegas ? () => onManageBodegas(b.id) : undefined} />
+                    ))}
+                </div>
+            ) : (<>
             {/* Buscador y acciones */}
             <div className="space-y-3 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:space-y-0">
                 <label className="relative block flex-1 lg:max-w-md">
@@ -303,6 +331,8 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                     <p className="text-sm font-semibold">Sin existencias para este filtro</p>
                 </div>
             )}
+
+            </>)}
 
             {/* Panel del insumo con sus lotes en orden FEFO */}
             {materialSel && (

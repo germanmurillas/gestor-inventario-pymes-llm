@@ -44,7 +44,9 @@ class PanaderiaDemoSeeder extends Seeder
 
         $bodegas = [];
         foreach ($cat['bodegas'] as $b) {
-            $bodegas[$b['code']] = Bodega::create($b + ['status' => 'active']);
+            // La imagen queda registrada en la base de datos (recurso publicado en public/images/bodegas).
+            $imagen = is_file(public_path("images/bodegas/{$b['code']}.webp")) ? "images/bodegas/{$b['code']}.webp" : null;
+            $bodegas[$b['code']] = Bodega::create($b + ['status' => 'active', 'image_path' => $imagen]);
         }
 
         foreach ($cat['materiales'] as $m) {

@@ -20,13 +20,14 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
     const [imagen, setImagen] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [quitarImagen, setQuitarImagen] = useState(false);
+    const [enlace, setEnlace] = useState('');
     const [errores, setErrores] = useState<Record<string, string>>({});
     const [guardando, setGuardando] = useState(false);
 
     const actual = typeof editando === 'number' ? bodegas.find((b) => b.id === editando) : undefined;
 
     useEffect(() => {
-        setErrores({}); setImagen(null); setQuitarImagen(false);
+        setErrores({}); setImagen(null); setQuitarImagen(false); setEnlace('');
         if (actual) {
             setForm({ name: actual.name, code: actual.code, capacity: actual.capacity, description: actual.description ?? '', status: (actual.status as any) || 'active' });
             setPreview(actual.image_url ?? null);
@@ -45,6 +46,7 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
         setGuardando(true);
         const datos: Record<string, any> = { name: form.name, capacity: form.capacity, description: form.description };
         if (imagen) datos.image = imagen;
+        else if (enlace.trim()) datos.image_link = enlace.trim();
         const url = actual ? `/bodegas/${actual.id}` : '/bodegas';
         if (actual) { datos.status = form.status; if (quitarImagen) datos.remove_image = 1; } else { datos.code = form.code; }
         router.post(url, datos, {
@@ -99,7 +101,12 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                                 <Trash2 size={13} /> {quitarImagen ? 'Conservar la imagen actual' : 'Quitar imagen'}
                             </button>
                         )}
-                        {errores.image && <p className="text-xs text-rose-300">{errores.image}</p>}
+                        <div>
+                            <label className="mb-1 block text-xs font-semibold text-slate-400">…o pega el enlace de una imagen (https)</label>
+                            <input type="url" className={campo} value={enlace} placeholder="https://…" disabled={!!imagen}
+                                onChange={(e) => { setEnlace(e.target.value); setQuitarImagen(false); setPreview(e.target.value || actual?.image_url || null); }} />
+                        </div>
+                        {(errores.image || errores.image_link) && <p className="text-xs text-rose-300">{errores.image || errores.image_link}</p>}
 
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div className="sm:col-span-2">
