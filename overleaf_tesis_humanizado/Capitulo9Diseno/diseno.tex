@@ -1,0 +1,190 @@
+% -------------------------------------------------
+% Capítulo: Diseño
+% Orden del director (19-sep-2026): diseño arquitectónico; qué herramientas se
+% decidieron y por qué estas y no otras; diseño de la interfaz de usuario.
+% Los patrones de diseño del código van en el capítulo de Implementación.
+% Versiones y nombres verificados contra composer.json, package.json,
+% migraciones y controladores (25-sep-2026).
+% -------------------------------------------------
+
+Este capítulo explica cómo se diseñó Pymetory a partir de los requerimientos del Capítulo \ref{chap:requerimientos}: la arquitectura general del sistema, las herramientas elegidas y las razones de cada elección, el modelo de datos, el diseño del módulo de consulta en lenguaje natural y el diseño de la interfaz de usuario.
+
+\section{De los requerimientos a los componentes}
+\label{sec:dis_trazabilidad}
+
+Cada requerimiento funcional implementado se asignó a uno o varios componentes del sistema. La Tabla \ref{tab:dis_trazabilidad} muestra esa correspondencia; los nombres de clases y comandos son los del código fuente.
+
+\begin{longtable}{|c|p{5.2cm}|p{7cm}|}
+\caption{Correspondencia entre requerimientos funcionales y componentes.}
+\label{tab:dis_trazabilidad}\\
+\hline
+\textbf{RF} & \textbf{Requerimiento (resumen)} & \textbf{Componentes} \\
+\hline
+\endfirsthead
+\hline
+\textbf{RF} & \textbf{Requerimiento (resumen)} & \textbf{Componentes} \\
+\hline
+\endhead
+RF-01, RF-02 & Catálogo de materiales e ingreso de lotes & \texttt{InventoryController}, modelos \texttt{Material} y \texttt{Lote} \\ \hline
+RF-04 & Despacho FEFO & \texttt{ConsumptionController}, \textit{scope} \texttt{Lote::fefoOrder} \\ \hline
+RF-05 & Kardex & Modelo \texttt{Movimiento}, tabla \texttt{movimientos} \\ \hline
+RF-06, RF-18 & Roles y usuarios & \textit{Middleware} \texttt{CheckRole}, \texttt{UserController}, \texttt{AuthController} \\ \hline
+RF-07, RF-08 & Alertas de stock bajo y de vencimiento & Comandos \texttt{alerts:low-stock} y \texttt{alerts:fefo}, programados cada hora \\ \hline
+RF-10, RF-17 & Reportes & \texttt{ReportController}, \texttt{InventoryController} (exportación PDF y CSV) \\ \hline
+RF-11 & Conciliación & \texttt{InventoryController::adjust} \\ \hline
+RF-12 & Consulta en lenguaje natural & \texttt{ChatLLMController} \\ \hline
+RF-13 & Etiquetas y escaneo & \texttt{LabelController}, \texttt{QRScanController} \\ \hline
+RF-14 & Recepción de órdenes de compra & \texttt{PurchaseOrderController} \\ \hline
+RF-16 & Bodegas y transferencias & \texttt{InventoryController}, \texttt{TransferController} \\ \hline
+\end{longtable}
+
+\section{Arquitectura del sistema}
+\label{sec:dis_arquitectura}
+
+Pymetory es una aplicación web monolítica organizada según el patrón Modelo-Vista-Controlador (MVC) que propone el framework Laravel \cite{laraveldocs}. La capa de presentación se construye con React y se conecta con los controladores de Laravel mediante Inertia.js \cite{inertiajs}: el controlador responde con el nombre de una página y los datos que necesita, e Inertia se encarga de renderizar el componente React correspondiente en el navegador. De esta forma la aplicación se comporta como una aplicación de una sola página (SPA) sin que sea necesario diseñar y mantener una API REST separada para las vistas principales. Algunas funciones puntuales (usuarios, etiquetas, órdenes de compra, proveedores de modelos de lenguaje) sí exponen rutas JSON bajo el prefijo \texttt{/api}, que consumen los componentes React con Axios.
+
+La Figura \ref{fig:dis_arquitectura} resume las capas y el recorrido de una solicitud.
+
+\begin{figure}[H]
+\centering
+\footnotesize
+\begin{verbatim}
+ Navegador (React 19 + Inertia.js)
+        |  solicitud HTTP (sesión)
+        v
+ Laravel 13 - middleware: auth, verified, role:admin (CheckRole)
+        |
+        +--> Controladores de inventario --> Modelos Eloquent --> MySQL 8
+        |      (Inventory, Consumption,        (Material, Lote,
+        |       Transfer, Report, Label...)     Movimiento, Bodega...)
+        |
+        +--> ChatLLMController (RAG)
+               1. classifyQuery()    intención de la pregunta
+               2. buildRagContext()  lectura de MySQL
+               3. llamada al proveedor de modelo de lenguaje
+                  (Ollama local | OpenCode | API compatible OpenAI)
+               4. respuesta + registro en chat_histories
+\end{verbatim}
+\caption{Arquitectura en capas de Pymetory y flujo de una solicitud.}
+\label{fig:dis_arquitectura}
+\end{figure}
+
+Dos decisiones de diseño se derivan directamente de las reglas de la dirección del trabajo de grado:
+
+\begin{itemize}
+    \item \textbf{El módulo de lenguaje natural es de solo lectura sobre el inventario.} El \texttt{ChatLLMController} consulta las tablas del inventario para construir el contexto, pero no crea, modifica ni elimina lotes o movimientos; solo escribe en su propio historial de conversación. Así, un error del modelo de lenguaje puede producir una respuesta equivocada, pero no puede alterar las existencias.
+    \item \textbf{El control de acceso se decide en el servidor.} Las rutas administrativas se protegen con el \textit{middleware} \texttt{role:admin}; la interfaz oculta opciones según el rol, pero la autorización real ocurre en Laravel, antes de llegar al controlador.
+\end{itemize}
+
+\section{Selección de herramientas}
+\label{sec:dis_herramientas}
+
+La selección de herramientas respondió a cuatro criterios propios del proyecto: (1) costo de licencia nulo, porque el sistema está pensado para PYMEs que no pueden pagar suscripciones; (2) un solo desarrollador, lo que favorece herramientas que resuelven de fábrica autenticación, migraciones y pruebas; (3) experiencia previa del autor con Laravel, GitHub y Figma; y (4) que los datos del inventario puedan permanecer en infraestructura controlada por la empresa, incluido el modelo de lenguaje. La Tabla \ref{tab:dis_herramientas} presenta cada herramienta, las alternativas comparables y la razón de la elección.
+
+\begin{longtable}{|p{2.4cm}|p{2.9cm}|p{8.3cm}|}
+\caption{Herramientas elegidas, alternativas y justificación.}
+\label{tab:dis_herramientas}\\
+\hline
+\textbf{Herramienta} & \textbf{Alternativas} & \textbf{Por qué se eligió} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Herramienta} & \textbf{Alternativas} & \textbf{Por qué se eligió} \\
+\hline
+\endhead
+Laravel 13.4 (PHP 8.3) & Django, Node.js/Express, Spring Boot & Incluye ORM, migraciones versionadas, \textit{middleware}, validación, tareas programadas y soporte de pruebas en un solo marco; el autor ya lo conocía. PHP se ejecuta en casi cualquier alojamiento de bajo costo. \\ \hline
+React 19 + Inertia.js 2 & Blade, Livewire, React con API REST aparte & React permite construir una interfaz interactiva (arrastrar y soltar, escáner, chat) con un ecosistema amplio de componentes; Inertia evita duplicar la capa de API para las vistas y conserva el enrutamiento y la autenticación de Laravel. \\ \hline
+TypeScript 5 & JavaScript & Detecta en compilación errores en los datos que llegan del servidor a los componentes. \\ \hline
+Tailwind CSS 4 & Bootstrap, CSS propio & Estilos por utilidades que permiten traducir el prototipo de Figma a componentes sin mantener hojas de estilo separadas por vista, y definir temas mediante variables. \\ \hline
+MySQL 8.0 & PostgreSQL, SQLite & Base de datos relacional con transacciones ACID e integridad referencial, necesarias para que un despacho FEFO que toca varios lotes quede completo o no quede. Disponible en el servidor de producción sin costo. En pruebas automatizadas se usa SQLite en memoria. \\ \hline
+Ollama y proveedores compatibles con la API de OpenAI & Un único proveedor comercial & Ollama permite ejecutar modelos abiertos en el propio servidor, sin costo por consulta y sin enviar los datos a terceros. El diseño admite además proveedores externos configurables desde la aplicación, para elegir según disponibilidad y calidad. \\ \hline
+GitHub y GitHub Projects & GitLab, Jira, Trello & Repositorio, historial de cambios, automatización de despliegue y tablero de tareas en una sola plataforma gratuita, que el autor ya usaba. \\ \hline
+Figma & Adobe XD, Penpot & Prototipado de alta fidelidad en el navegador, con plan gratuito; el autor ya lo usaba. \\ \hline
+Playwright 1.59 y PHPUnit & Cypress, Selenium, Pest & PHPUnit viene integrado con Laravel; Playwright automatiza el navegador real para pruebas de extremo a extremo. \\ \hline
+Oracle Cloud (capa Always Free) & AWS, Google Cloud, Azure & Instancia ARM con 4 OCPU y 24 GB de RAM sin costo recurrente \cite{oci_always_free}, suficiente para la aplicación, la base de datos y modelos de lenguaje pequeños. \\ \hline
+\end{longtable}
+
+\section{Modelo de datos}
+\label{sec:dis_datos}
+
+El esquema se define mediante migraciones de Laravel, de modo que cada cambio en la base de datos queda versionado junto con el código. La Tabla \ref{tab:dis_tablas} agrupa las tablas del dominio de Pymetory.
+
+\begin{longtable}{|p{3.2cm}|p{10.8cm}|}
+\caption{Tablas del dominio de Pymetory.}
+\label{tab:dis_tablas}\\
+\hline
+\textbf{Grupo} & \textbf{Tablas y propósito} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Grupo} & \textbf{Tablas y propósito} \\
+\hline
+\endhead
+Inventario & \texttt{materials} (catálogo: código, nombre, unidad, categoría, stock mínimo), \texttt{lotes} (número de lote, cantidad, costo unitario, fecha de vencimiento, estado \textit{active}/\textit{quarantined}/\textit{consumed}, material y bodega), \texttt{bodegas} (ubicaciones y capacidad), \texttt{transferencias} (traslados entre bodegas). \\ \hline
+Kardex & \texttt{movimientos}: lote, usuario, tipo (entrada o salida), cantidad, motivo, descripción y fecha. \\ \hline
+Clasificación & \texttt{tags} y \texttt{material\_tag} (etiquetas de materiales), \texttt{custom\_field\_definitions} (campos personalizados). \\ \hline
+Compras & \texttt{vendors} (proveedores), \texttt{purchase\_orders} y \texttt{purchase\_order\_items} (órdenes de compra y cantidades recibidas). \\ \hline
+Seguridad y auditoría & \texttt{users} (con rol \textit{admin} u \textit{operario}), \texttt{audit\_log} (cambios administrativos), \texttt{api\_keys} (claves de proveedores cifradas). \\ \hline
+Asistente & \texttt{chat\_histories} (conversaciones por sesión), \texttt{llm\_providers} (proveedores de modelos configurados), \texttt{settings} (parámetros clave-valor, como el umbral FEFO de 15 días). \\ \hline
+Operación & \texttt{notifications} (alertas), \texttt{kanban\_items} (tablero de actividades). \\ \hline
+\end{longtable}
+
+\subsection{Diseño del Kardex}
+
+La entidad central del diseño es el lote, no el material: la existencia de un material es la suma de las cantidades de sus lotes activos, y cada lote conoce su fecha de vencimiento. Esto es lo que permite aplicar FEFO. Las operaciones que cambian la cantidad de un lote desde el inventario ---ingreso, consumo, despacho por escaneo, transferencia y ajuste de conciliación--- registran un movimiento en la tabla \texttt{movimientos} con el usuario autenticado, el tipo, la cantidad, el motivo y la marca de tiempo. Las operaciones que tocan más de un lote (por ejemplo, un despacho FEFO que agota un lote y continúa con el siguiente, o una transferencia) se ejecutan dentro de una transacción de base de datos, para que el Kardex nunca quede con movimientos a medias.
+
+% PENDIENTE (hallazgo 25-sep-2026): la inmutabilidad no está forzada en código.
+% Además, PurchaseOrderController::receive crea lotes sin registrar Movimiento.
+% movimientos usa cascadeOnDelete hacia users y lotes, y el modelo no bloquea
+% update/delete. Redactar el mecanismo definitivo cuando se aplique la corrección.
+Por regla de la dirección, el Kardex es de solo inserción: la aplicación no ofrece ninguna operación para editar o eliminar movimientos, y las correcciones se hacen registrando un nuevo movimiento de ajuste con su justificación.
+
+\section{Diseño del módulo de consulta en lenguaje natural}
+\label{sec:dis_rag}
+
+El asistente sigue la arquitectura de generación aumentada por recuperación (RAG) \cite{rag_lewis2020}: antes de llamar al modelo de lenguaje, el sistema recupera de la base de datos la información pertinente y la entrega al modelo como contexto, para que la respuesta se base en el inventario real y no en conocimiento general del modelo. El diseño tiene tres etapas:
+
+\begin{enumerate}
+    \item \textbf{Clasificación de la intención} (\texttt{classifyQuery}). Mediante expresiones regulares se asigna la pregunta a una de nueve intenciones o, si ninguna coincide, a una intención general (Tabla \ref{tab:dis_intenciones}). Además, las palabras de la pregunta se comparan con los nombres y descripciones de los materiales para filtrar el contexto al material consultado.
+    \item \textbf{Construcción del contexto} (\texttt{buildRagContext}). Según la intención, se consulta la base de datos (lotes, movimientos, bodegas, valorización) y se arma un texto con los registros encontrados y el estado de las bodegas.
+    \item \textbf{Generación de la respuesta}. El contexto, la instrucción de sistema (editable desde la configuración) y la pregunta se envían al proveedor de modelo de lenguaje configurado; la respuesta se muestra al usuario y se guarda en \texttt{chat\_histories}.
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{Intenciones reconocidas por el clasificador del asistente.}
+\label{tab:dis_intenciones}
+\begin{tabular}{|l|p{5.3cm}|p{5.5cm}|}
+\hline
+\textbf{Intención} & \textbf{Ejemplos de palabras que la activan} & \textbf{Contexto que se recupera} \\
+\hline
+\texttt{stock\_check} & cuántos hay, stock, cantidad, existencias & Lotes del material, por cantidad \\ \hline
+\texttt{critical\_alerts} & crítico, por vencer, alerta, urgente & Lotes dentro del umbral FEFO \\ \hline
+\texttt{expiration} & vence, fecha de vencimiento, expira & Lotes por fecha de vencimiento \\ \hline
+\texttt{location} & dónde, ubicación, bodega, almacén & Materiales por bodega \\ \hline
+\texttt{valuation} & valor, precio, costo & Cantidad por costo unitario \\ \hline
+\texttt{movements} & entró, salió, movimiento, historial, kardex & Movimientos con usuario y motivo \\ \hline
+\texttt{batch\_info} & lote LT-\ldots & Detalle de un lote \\ \hline
+\texttt{summary} & resumen, todo, general, panorama & Resumen del inventario \\ \hline
+\texttt{conciliation} & conciliar, ajuste, diferencia, descuadre & Datos para conciliación \\ \hline
+\texttt{general} & (ninguna de las anteriores) & Lotes en orden FEFO \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Proveedores de modelo de lenguaje}
+
+El controlador define un mapa de proveedores intercambiables ---Ollama en el propio servidor, OpenCode y cualquier API compatible con la de OpenAI--- y el administrador elige el proveedor, el modelo y los parámetros desde la pantalla de configuración, con claves de API almacenadas cifradas. Este diseño evita depender de un único proveedor: si el servicio externo no está disponible se puede cambiar a un modelo local, si el proveedor elegido falla se intenta un modelo local de respaldo, y si ningún modelo responde el sistema devuelve en texto plano un listado de lotes en orden FEFO en lugar de un error. La justificación de esta estructura desde el punto de vista de los patrones de diseño se presenta en el capítulo de Implementación.
+
+\section{Diseño de la interfaz de usuario}
+\label{sec:dis_ui}
+
+La interfaz se prototipó en Figma y el primer commit del repositorio (14 de abril de 2026) corresponde a la reconstrucción en React de 18 vistas de alta fidelidad a partir de ese prototipo; por eso varios componentes conservan el prefijo \texttt{Figma} en su nombre (\texttt{FigmaTablero}, \texttt{FigmaLabelPrint}, \texttt{FigmaQRScanner}, entre otros).
+
+Los principios que guiaron el diseño de la interfaz fueron:
+
+\begin{itemize}
+    \item \textbf{Navegación por tareas.} La barra lateral agrupa los módulos en tres secciones ---Principal (Tablero, Inventario, Buscar), Análisis (Asistente RAG, Reportes, Log Maestro, Etiquetas, Escáner QR) y Gestión (Historial QR, Transferencias, Órdenes de compra, Impresión de etiquetas, Alertas)--- y el tablero ofrece accesos rápidos a las acciones más frecuentes (nuevo insumo, escanear, reporte, consumo rápido).
+    \item \textbf{Lo urgente primero.} El tablero muestra en la parte superior los indicadores que requieren acción (lotes críticos por vencimiento, existencias, valorización) y, debajo, la actividad reciente del Kardex y la ocupación de las bodegas.
+    \item \textbf{Uso en bodega desde el celular.} El diseño es adaptable a pantallas pequeñas y el escáner usa la cámara del dispositivo, para que el personal pueda registrar movimientos sin ir a un computador.
+    \item \textbf{Temas visuales.} Los colores se definen como variables de CSS, lo que permitió ofrecer seis temas seleccionables (\textit{midnight-luxe}, \textit{carbon-amber}, \textit{nordic-steel}, \textit{obsidian-teal}, \textit{royal-plum} y \textit{paper-light}), incluido uno claro.
+\end{itemize}

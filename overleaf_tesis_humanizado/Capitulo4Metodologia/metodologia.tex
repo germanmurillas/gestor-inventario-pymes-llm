@@ -83,7 +83,7 @@ El desarrollo del sistema se ejecutó a lo largo de 6 sprints de dos semanas cad
 \hline
 Fase 0: Requisitos y Diseño & Sem 1--4 & Identificar necesidades, definir alcance, diseñar arquitectura & Documento IEEE 830, MER (10 tablas), 18 mockups Figma, product backlog priorizado & UC1--UC9 (definición) \\
 \hline
-Sprint 1 & Sem 5--6 & Configurar entorno de desarrollo e implementar autenticación & Proyecto Laravel 11 base, migraciones iniciales, middleware RBAC, seeders con datos de panificadora, login/logout funcional & Base para todos los UC \\
+Sprint 1 & Sem 5--6 & Configurar entorno de desarrollo e implementar autenticación & Proyecto Laravel 13 base, migraciones iniciales, middleware RBAC, seeders con datos de panificadora, login/logout funcional & Base para todos los UC \\
 \hline
 Sprint 2 & Sem 7--8 & Implementar módulo de inventario y gestión de lotes & CRUD de materiales, CRUD de lotes, lógica de bodegas con \% de ocupación, búsqueda con debounce, dashboard con KPIs & UC1, UC2, UC3 \\
 \hline
@@ -117,7 +117,7 @@ Durante las primeras cuatro semanas, anteriores al inicio formal de los sprints 
 El primer sprint se enfocó en establecer la base técnica sobre la cual se construiría todo el sistema:
 
 \begin{itemize}
-    \item \textbf{Día 1--3}: Instalación y configuración del entorno de desarrollo: Laravel 11, PHP 8.3, MySQL 8.0, Node.js para Vite. Creación del repositorio en GitHub (\texttt{germanmurillas/gestor-inventario-pymes-llm}).
+    \item \textbf{Día 1--3}: Instalación y configuración del entorno de desarrollo: Laravel 13, PHP 8.3, MySQL 8.0, Node.js para Vite. Creación del repositorio en GitHub (\texttt{germanmurillas/gestor-inventario-pymes-llm}).
     \item \textbf{Día 4--7}: Ejecución de migraciones para las 10 tablas del modelo entidad-relación. Definición de modelos Eloquent con relaciones. Creación de seeders con datos realistas de la panificadora (materiales, lotes, bodegas).
     \item \textbf{Día 8--12}: Implementación del sistema de autenticación con Laravel Breeze. Definición de roles (Admin/Operario) en la tabla users. Implementación del middleware CheckRole para control de acceso basado en roles (RBAC). Pruebas manuales de inicio de sesión con ambos roles.
     \item \textbf{Día 13--14}: Sprint Review con el director. Verificación de que los middlewares de autenticación y RBAC funcionaran correctamente. Sprint Retrospective: se identificó la necesidad de mejorar la comunicación entre los dos desarrolladores que trabajaban en horarios complementarios.
