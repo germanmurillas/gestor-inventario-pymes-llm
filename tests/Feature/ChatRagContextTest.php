@@ -68,4 +68,25 @@ class ChatRagContextTest extends TestCase
         $this->assertStringNotContainsString('MATERIAL NO ENCONTRADO', $ctx);
         $this->assertStringContainsString('LT-LEV-9', $ctx);
     }
+
+    /** Regresión: el asistente respondía que nada vencía esta semana porque leía lotes ya consumidos. */
+    public function test_vencimientos_de_la_semana_solo_lotes_con_stock(): void
+    {
+        $pan = Material::factory()->create(['name' => 'Pan tajado']);
+        Lote::factory()->create(['material_id' => $pan->id, 'batch_number' => 'LT-CONSUMIDO', 'status' => 'consumed',
+            'quantity' => 0, 'expiration_date' => now()->subDays(5)]);
+        Lote::factory()->create(['material_id' => $pan->id, 'batch_number' => 'LT-ESTA-SEMANA', 'status' => 'active',
+            'quantity' => 90, 'expiration_date' => now()->addDays(3)]);
+        Lote::factory()->create(['material_id' => $pan->id, 'batch_number' => 'LT-MES', 'status' => 'active',
+            'quantity' => 40, 'expiration_date' => now()->addDays(20)]);
+
+        $pregunta = '¿Qué lotes vencen esta semana?';
+        $ctx = $this->invokePrivate('buildRagContext', $pregunta, $this->invokePrivate('classifyQuery', $pregunta));
+
+        $this->assertStringContainsString('FECHA DE HOY', $ctx);
+        $this->assertStringContainsString('LT-ESTA-SEMANA', $ctx);
+        $this->assertStringContainsString('(en 3 días)', $ctx);
+        $this->assertStringNotContainsString('LT-CONSUMIDO', $ctx);
+        $this->assertStringNotContainsString('LT-MES', $ctx);
+    }
 }

@@ -28,7 +28,7 @@ test('demo sustentacion - flujo completo', async ({ page }) => {
 
     // 6. Asistente: la respuesta debe traer datos reales (kg)
     await page.goto('/dashboard');
-    await page.locator('aside button').filter({ hasText: /Asistente RAG/ }).first().click();
+    await page.locator('aside button').filter({ hasText: /Asistente/ }).first().click();
     const entrada = page.locator('textarea, input[type="text"]').last();
     await entrada.fill('¿Cuánta harina de trigo hay?');
     await entrada.press('Enter');

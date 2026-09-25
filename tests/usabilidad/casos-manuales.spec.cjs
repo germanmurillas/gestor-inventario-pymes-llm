@@ -360,7 +360,7 @@ test.describe('Casos Manuales - Plan de Pruebas @casos @visual', () => {
 
     test('caso-09-log-maestro-kardex @caso-09 @positivo', async ({ page }) => {
         await loginAsAdmin(page);
-        await goToDashboardView(page, 'Ir a Log Maestro');
+        await goToDashboardView(page, 'Ir a Kardex');
         const body = (await page.locator('body').innerText()).toLowerCase();
         const hasKardexUI = body.includes('log')
             || body.includes('kardex')
@@ -509,7 +509,7 @@ test.describe('Casos Manuales - Plan de Pruebas @casos @visual', () => {
 
     test('caso-16-generar-labels @caso-16 @positivo', async ({ page }) => {
         await loginAsAdmin(page);
-        await goToDashboardView(page, 'Ir a Imprimir Labels');
+        await goToDashboardView(page, 'Ir a Imprimir etiquetas');
         const body = (await page.locator('body').innerText()).toLowerCase();
         const hasLabelsUI = body.includes('label')
             || body.includes('etiqueta')

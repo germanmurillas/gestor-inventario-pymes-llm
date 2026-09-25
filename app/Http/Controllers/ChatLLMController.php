@@ -101,8 +101,25 @@ class ChatLLMController extends Controller {
             ->toArray();
     }
 
+    /** Ventana en días que expresa la pregunta ("hoy", "esta semana", "este mes"); null si no la hay. */
+    private function ventanaDias(string $query): ?int
+    {
+        $q = mb_strtolower($query);
+        return match (true) {
+            (bool) preg_match('/\bhoy\b/u', $q) => 0,
+            (bool) preg_match('/ma[ñn]ana/u', $q) => 1,
+            (bool) preg_match('/semana/u', $q) => 7,
+            (bool) preg_match('/quincena/u', $q) => 15,
+            (bool) preg_match('/\bmes\b/u', $q) => 30,
+            default => null,
+        };
+    }
+
     private function buildRagContext($query, $intent) {
         $keywords = $this->materialKeywords($query);
+        // Solo lotes con existencias: los consumidos quedan en el Kardex, no en el inventario.
+        $conStock = fn () => Lote::with(['material', 'bodega'])->activos()->where('quantity', '>', 0);
+        $ventana = $this->ventanaDias($query);
 
         $materialIds = [];
         if (!empty($keywords)) {
@@ -126,28 +143,34 @@ class ChatLLMController extends Controller {
 
         switch ($intent) {
             case 'stock_check':
-                $lotes = Lote::with(['material', 'bodega'])
+                $lotes = $conStock()
                     ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
                     ->orderBy('quantity', 'desc')
                     ->take(6)->get();
                 $context = "CONSULTA DE STOCK - Datos actuales del inventario solicitado:\n";
                 break;
             case 'critical_alerts':
-                $lotes = Lote::with(['material', 'bodega'])->fefoOrder()
-                    ->whereHas('material', fn($q) => $q->whereIn('id', $materialIds ?: \App\Models\Material::pluck('id')))
-                    ->take(5)->get();
-                $context = "ALERTAS FEFO - Lotes que requieren atención por vencimiento próximo:\n";
+                $dias = $ventana ?? Lote::diasCriticos();
+                $lotes = $conStock()
+                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
+                    ->whereDate('expiration_date', '<=', now()->addDays($dias))
+                    ->orderBy('expiration_date')
+                    ->take(12)->get();
+                $context = "ALERTAS FEFO - Lotes con existencias que vencen en los próximos {$dias} días (o ya vencidos):\n";
                 break;
             case 'expiration':
-                $lotes = Lote::with(['material', 'bodega'])
+                $lotes = $conStock()
                     ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
                     ->whereNotNull('expiration_date')
+                    ->when($ventana !== null, fn($q) => $q->whereDate('expiration_date', '<=', now()->addDays($ventana)))
                     ->orderBy('expiration_date', 'asc')
-                    ->take(6)->get();
-                $context = "FECHAS DE VENCIMIENTO - Lotes ordenados por cercanía de vencimiento:\n";
+                    ->take(12)->get();
+                $context = $ventana !== null
+                    ? "FECHAS DE VENCIMIENTO - Lotes con existencias que vencen en los próximos {$ventana} días (o ya vencidos), del más próximo al más lejano:\n"
+                    : "FECHAS DE VENCIMIENTO - Lotes con existencias ordenados por cercanía de vencimiento:\n";
                 break;
             case 'location':
-                $lotes = Lote::with(['material', 'bodega'])
+                $lotes = $conStock()
                     ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
                     ->take(10)->get();
                 $context = "UBICACIÓN EN BODEGAS - Distribución física de los materiales:\n";
@@ -166,7 +189,7 @@ class ChatLLMController extends Controller {
                 })->join("\n");
                 break;
             default:
-                $lotes = Lote::with(['material', 'bodega'])->fefoOrder()
+                $lotes = $conStock()->orderBy('expiration_date')
                     ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
                     ->take(6)->get();
                 $context = "INVENTARIO ACTUAL:\n";
@@ -175,12 +198,15 @@ class ChatLLMController extends Controller {
         if ($intent !== 'movements') {
             $context .= (isset($lotes) && $lotes->isNotEmpty())
                 ? $lotes->map(function($l) {
-                    return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$l->quantity} {$l->material->unit} | Vence: " .
-                           ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') .
+                    $dias = $l->expiration_date ? (int) now()->startOfDay()->diffInDays($l->expiration_date->copy()->startOfDay(), false) : null;
+                    $cuando = $dias === null ? 'N/A'
+                        : $l->expiration_date->format('Y-m-d') . ($dias < 0 ? " (VENCIDO hace " . abs($dias) . " días)" : ($dias === 0 ? ' (vence HOY)' : " (en {$dias} días)"));
+                    return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$l->quantity} {$l->material->unit} | Vence: {$cuando}" .
                            " | Bodega: " . ($l->bodega?->name ?? 'Sin bodega');
                   })->join("\n")
-                : "- No se encontraron registros para esta consulta.";
+                : "- No hay lotes con existencias que cumplan esta consulta.";
         }
+        $context = "FECHA DE HOY: " . now()->locale('es')->isoFormat('dddd D [de] MMMM [de] YYYY') . ' (' . now()->toDateString() . ")\n\n" . $context;
 
         $bodegas = \App\Models\Bodega::all()->map(fn($b) => "{$b->name}: {$b->occupancy_percentage}% ocupación")->join(' | ');
         $context .= "\n\nESTADO DE BODEGAS: {$bodegas}";
