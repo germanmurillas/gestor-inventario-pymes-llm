@@ -444,8 +444,24 @@ class ChatLLMController extends Controller {
                     }
                 } else {
                     $text = trim((string) $response->json('choices.0.message.content'));
-                    $text = preg_replace('#</think>#is', '', $text);
+                    $text = $this->stripThinking($text);
                     $text = trim($text);
+                    // FIX-RAG(v2.2): modelos Go tipo space-bunny/MiMo pueden terminar el
+                    // budget en el reasoning y devolver content '' con finish_reason=length.
+                    // Reintento con más tokens; si aún así, usar reasoning limpio como texto.
+                    if ($text === '' && ($response->json('choices.0.finish_reason') === 'length'
+                                       || str_contains((string) $response->body(), 'reasoning'))) {
+                        $retry = $payload;
+                        $retry['max_tokens'] = max($maxTokens, 1500);
+                        $retryResp = Http::timeout(90)->withToken($cfg['key'] ?: null)
+                            ->withHeaders($withHeaders)->post($cfg['url'], $retry);
+                        if ($retryResp->successful()) {
+                            $text = trim((string) $retryResp->json('choices.0.message.content'));
+                            $text = $this->stripThinking($text);
+                            $text = trim($text);
+                        }
+                        \Log::info('RAG retry go-reasoning', ['url' => $cfg['url'], 'status' => $retryResp->status()]);
+                    }
                 }
 
                 if ($text === '' && $llmSource === 'opencode') {
@@ -491,5 +507,11 @@ class ChatLLMController extends Controller {
             'source' => 'fallback',
             'key_name' => '—',
         ], 200);
+    }
+
+    /** FIX-RAG(v2.2): quita bloques de razonamiento (&lt;think&gt;...&lt;/think&gt;) del texto */
+    private function stripThinking(string $t): string {
+        $t = preg_replace('/' . chr(60) . 'think' . chr(62) . '.*?' . chr(60) . '\/think' . chr(62) . '/is', '', $t);
+        return trim((string) $t);
     }
 }
