@@ -148,12 +148,12 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
             {showBodegaModal && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-obsidiana/40 backdrop-blur-xl p-4">
                     <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
-                        <div className="p-4 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-800/50">
+                        <div className="p-4 sm:p-8 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/50">
                             <div>
                                 <h3 className="text-lg font-black text-white tracking-tight font-display">Nueva Ubicación</h3>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Crear carpeta de inventario</p>
                             </div>
-                            <button onClick={() => setShowBodegaModal(false)} className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-200 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
+                            <button onClick={() => setShowBodegaModal(false)} className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
@@ -166,7 +166,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                                         value={data.name}
                                         onChange={e => setData('name', e.target.value)}
                                         placeholder="Ej: Bodega Norte, Cuarentena..."
-                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                                     />
                                     {errors.name && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.name}</div>}
                                 </div>
@@ -178,17 +178,17 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                                             value={data.code}
                                             onChange={e => setData('code', e.target.value.toUpperCase())}
                                             placeholder="B-001"
-                                            className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all uppercase"
+                                            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all uppercase"
                                         />
                                         {errors.code && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.code}</div>}
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Capacidad (KG)</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Capacidad</label>
                                         <input 
                                             type="number" 
                                             value={data.capacity}
                                             onChange={e => setData('capacity', parseInt(e.target.value))}
-                                            className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                                         />
                                     </div>
                                 </div>
@@ -275,7 +275,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
 
             {/* Bodega seleccionada: imagen y resumen real */}
             {selectedBodega && (
-                <div className="relative overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900">
+                <div className="pm-media relative overflow-hidden rounded-3xl border border-slate-700/40 bg-slate-900">
                     {selectedBodega.image_url && <img src={selectedBodega.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-50" />}
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-950/20" />
                     <div className="relative flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:justify-between">
@@ -307,7 +307,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                                 className="group flex items-center gap-4 rounded-3xl border border-slate-700/30 bg-slate-800/40 p-3 text-left transition hover:border-indigo-400/40 active:scale-[0.99]">
                                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-slate-900">
                                     {m.foto ? <img src={m.foto} alt="" loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
-                                        : <Warehouse size={28} className="absolute inset-0 m-auto text-slate-600" />}
+                                        : <Warehouse size={28} className="absolute inset-0 m-auto text-slate-300" />}
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{m.codigo}{m.categoria ? ` · ${m.categoria}` : ''}</p>
@@ -426,30 +426,30 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-obsidiana/40 backdrop-blur-xl p-4">
             <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
-                <div className="p-4 sm:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-800/50">
+                <div className="p-4 sm:p-8 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/50">
                     <div>
                         <h3 className="text-lg font-black text-white tracking-tight font-display">Conciliación Física</h3>
                         <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest">Ajuste de Stock: {lote.codigo}</p>
                     </div>
-                    <button onClick={onClose} className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-200 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
+                    <button onClick={onClose} className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
                         <X size={20} />
                     </button>
                 </div>
                 <form onSubmit={submitAdjust} className="p-4 sm:p-8 space-y-4 sm:space-y-6">
                     <div className="space-y-4">
-                        <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
+                        <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
                             <div className="text-[10px] font-black text-slate-400 uppercase">Stock actual en sistema</div>
-                            <div className="text-2xl font-black text-white">{lote.cantidad} KG</div>
+                            <div className="text-2xl font-black text-white">{lote.cantidad} {lote.unit}</div>
                         </div>
                         
                         <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Stock Físico Real (KG)</label>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Stock físico real ({lote.unit})</label>
                             <input 
                                 type="number" 
                                 step="0.01"
                                 value={data.new_quantity}
                                 onChange={e => setData('new_quantity', parseFloat(e.target.value))}
-                                className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-4 text-xl font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-4 py-4 text-xl font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                             />
                             {errors.new_quantity && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.new_quantity}</div>}
                         </div>
@@ -460,7 +460,7 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
                                 value={data.reason}
                                 onChange={e => setData('reason', e.target.value)}
                                 placeholder="Indica por qué cambió el stock (ej: pérdida por humedad, error de pesaje...)"
-                                className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
+                                className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
                                 required
                             />
                             {errors.reason && <div className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.reason}</div>}

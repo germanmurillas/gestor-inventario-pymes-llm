@@ -22,13 +22,13 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div className="flex items-center gap-4">
                     {onBack && (
-                        <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-xl border border-slate-200 transition-all">
-                            <ArrowLeft size={18} className="text-slate-600" />
+                        <button onClick={onBack} className="p-2 hover:bg-slate-700/60 rounded-xl border border-slate-700/50 transition-all">
+                            <ArrowLeft size={18} className="text-slate-300" />
                         </button>
                     )}
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <History size={20} className="text-indigo-600" />
+                            <History size={20} className="text-indigo-400" />
                             <h2 className="text-xl font-bold uppercase tracking-tight text-white font-display">Log Maestro de Movimientos</h2>
                         </div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Kardex Histórico Completo de la PYME</p>
@@ -43,26 +43,26 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                             placeholder="Buscar por material, lote o usuario..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
+                            className="w-full pl-12 pr-4 py-3 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm"
                         />
                     </div>
                     
-                    <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                    <div className="flex bg-slate-800/60 p-1 rounded-xl border border-slate-700/50">
                         <button 
                             onClick={() => setFilterType('all')}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900/80 backdrop-blur-xl text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900/80 backdrop-blur-xl text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                         >
                             Todos
                         </button>
                         <button 
                             onClick={() => setFilterType('entrada')}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'entrada' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-400 hover:text-emerald-600'}`}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'entrada' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-400 hover:text-emerald-400'}`}
                         >
                             Entradas
                         </button>
                         <button 
                             onClick={() => setFilterType('salida')}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'salida' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-400 hover:text-amber-600'}`}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'salida' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-400 hover:text-amber-400'}`}
                         >
                             Salidas
                         </button>
@@ -71,10 +71,10 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
             </div>
 
             {/* Main Table Container */}
-            <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col relative">
+            <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col relative">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left font-sans">
-                        <thead className="bg-slate-800/50/80 border-b border-slate-100">
+                        <thead className="bg-slate-800/50/80 border-b border-slate-700/50">
                             <tr>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Movimiento</th>
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Insumo / Lote</th>
@@ -83,12 +83,12 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Fecha & Hora</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50">
+                        <tbody className="divide-y divide-slate-700/40">
                             {filteredMovements.length > 0 ? filteredMovements.map((mov) => (
                                 <tr key={mov.id} className="hover:bg-slate-800/50 transition-all group">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${mov.type === 'entrada' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${mov.type === 'entrada' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
                                                 {mov.type === 'entrada' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
                                             </div>
                                             <div>
@@ -102,21 +102,21 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                                             <Package size={16} className="text-slate-300" />
                                             <div>
                                                 <div className="text-sm font-bold text-slate-300">{mov.material}</div>
-                                                <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Lote: {mov.batch}</div>
+                                                <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Lote: {mov.batch}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                                            <div className="w-6 h-6 bg-slate-800/60 rounded-full flex items-center justify-center text-slate-400">
                                                 <User size={12} />
                                             </div>
-                                            <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">{mov.user}</span>
+                                            <span className="text-xs font-bold text-slate-300 uppercase tracking-tight">{mov.user}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <div className={`text-sm font-black tracking-tighter ${mov.type === 'entrada' ? 'text-emerald-600' : 'text-amber-600'}`}>
-                                            {mov.type === 'entrada' ? '+' : '-'}{mov.quantity} KG
+                                        <div className={`text-sm font-black tracking-tighter ${mov.type === 'entrada' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                            {mov.type === 'entrada' ? '+' : '-'}{mov.quantity} {mov.unit ?? ''}
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-right">
@@ -139,7 +139,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                 </div>
                 
                 {/* Stats Footer for the Log */}
-                <div className="bg-slate-800/50 border-t border-slate-100 px-8 py-4 flex justify-between items-center">
+                <div className="bg-slate-800/50 border-t border-slate-700/50 px-8 py-4 flex justify-between items-center">
                     <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         Mostrando {filteredMovements.length} de {movements.length} transacciones
                     </div>

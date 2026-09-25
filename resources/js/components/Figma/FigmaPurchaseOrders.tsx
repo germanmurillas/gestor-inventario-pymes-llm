@@ -181,7 +181,7 @@ export default function FigmaPurchaseOrders() {
                                                 title={STATUS_LABELS[s]}
                                                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-black transition-all ${
                                                     s === po.status ? STATUS_COLORS[s] + ' text-white scale-125' :
-                                                    isPast ? 'bg-slate-600 text-slate-400' : 'bg-slate-700/30 text-slate-600'
+                                                    isPast ? 'bg-slate-600 text-slate-400' : 'bg-slate-700/30 text-slate-300'
                                                 } ${s !== po.status ? 'hover:scale-110 cursor-pointer' : 'cursor-default'}`}
                                             >
                                                 {isPast ? <CheckCircle size={10} /> : i + 1}
@@ -212,7 +212,7 @@ export default function FigmaPurchaseOrders() {
                     </div>
                 ))}
                 {filteredOrders.length === 0 && (
-                    <div className="p-12 text-center text-slate-600 text-xs font-bold uppercase tracking-wider">
+                    <div className="p-12 text-center text-slate-300 text-xs font-bold uppercase tracking-wider">
                         <Package size={32} className="mx-auto mb-3 opacity-50" /> No hay órdenes de compra
                     </div>
                 )}

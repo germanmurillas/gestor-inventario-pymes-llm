@@ -354,7 +354,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                 {pagedLotes.map((lote) => (
                                     <div
                                         key={lote.id}
-                                        className="label-card bg-white rounded-xl border-2 border-slate-200 p-4 flex flex-col items-center gap-3 shadow-md"
+                                        className="label-card pm-paper rounded-xl border-2 pm-paper-line p-4 flex flex-col items-center gap-3 shadow-md"
                                     >
                                         <div className="text-center w-full">
                                             <div className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">
@@ -365,7 +365,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                             </div>
                                         </div>
 
-                                        <div className="w-full p-2 bg-white rounded-lg border border-slate-100 flex items-center justify-center">
+                                        <div className="w-full p-2 pm-paper rounded-lg border pm-paper-line flex items-center justify-center">
                                             {labelType === 'CODE128' ? (
                                                 <svg
                                                     id={`barcode-${lote.id}`}

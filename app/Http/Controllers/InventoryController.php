@@ -18,6 +18,10 @@ class InventoryController extends Controller {
                 'material_id' => $lote->material_id,
                 'codigo' => $lote->material->code,
                 'material_name' => $lote->material->name,
+                'material' => $lote->material->name,
+                'bodega_id' => $lote->bodega_id,
+                'batch_number' => $lote->batch_number,
+                'expiration_date' => $lote->expiration_date->format('Y-m-d'),
                 'unit' => $lote->material->unit ?? 'kg',
                 'lote' => $lote->batch_number,
                 'cantidad' => $lote->quantity,
@@ -51,7 +55,7 @@ class InventoryController extends Controller {
         $totalAjustes      = \App\Models\Movimiento::where('reason', 'ajuste')->count();
         $accuracy          = $totalMovimientos > 0
             ? round((1 - ($totalAjustes / max($totalMovimientos, 1))) * 100, 1)
-            : 99.0;
+            : null; // sin movimientos no hay con qué medirla
 
         $totalCapacidad = \App\Models\Bodega::where('status', 'active')->sum('capacity');
         $totalOcupado   = Lote::activos()->sum('quantity');
@@ -95,6 +99,7 @@ class InventoryController extends Controller {
                 'user' => $mov->user->name ?? 'Sistema',
                 'type' => $mov->type,
                 'quantity' => $mov->quantity,
+                'unit' => $mov->lote->material->unit ?? '',
                 'reason' => $mov->reason,
                 'description' => $mov->description,
                 'date' => $mov->created_at->format('d M, Y H:i'),

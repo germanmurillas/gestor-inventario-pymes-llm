@@ -43,6 +43,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Sidebar from '../Components/Sidebar';
+import MobileNav from '../Components/MobileNav';
 
 /* ═══════════════════════════════════════════════════════════════════
    TIPOS Y CONSTANTES
@@ -1342,14 +1343,14 @@ export default function Kanban({
                                 else setMobileOpen((prev) => !prev);
                             }}
                             aria-label={sidebarOpen ? 'Cerrar menú lateral' : 'Abrir menú lateral'}
-                            className="pm-kb-iconbtn pm-kb-iconbtn--lg"
+                            className="pm-kb-iconbtn pm-kb-iconbtn--lg hidden lg:inline-flex"
                         >
                             <Menu size={18} aria-hidden="true" />
                         </button>
 
                         <nav aria-label="Ruta de navegación" className="flex items-center gap-2 min-w-0">
                             <span className="pm-kb-crumb">Pymetory /</span>
-                            <h1 className="pm-kb-title">Flow Board</h1>
+                            <h1 className="pm-kb-title">Kanban</h1>
                         </nav>
 
                         <div className="hidden xl:flex items-center gap-3 pl-4">
@@ -1479,6 +1480,7 @@ export default function Kanban({
                     </DndContext>
                 </div>
             </main>
+            <MobileNav activeView="KANBAN" user={user} />
 
             {/* ── INSPECTOR ── */}
             {inspectItem ? (

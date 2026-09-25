@@ -222,7 +222,7 @@ export default function Nicho() {
 
   if (!unlocked) {
     return (
-      <div className="min-h-screen bg-obsidiana flex items-center justify-center p-8">
+      <div className="pm-fixed-dark min-h-screen bg-obsidiana flex items-center justify-center p-8">
         <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/30 rounded-3xl p-12 max-w-md w-full text-center space-y-6 animate-in zoom-in-95 duration-300">
           <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center mx-auto">
             <Lock size={32} className="text-purple-400" />
@@ -244,7 +244,7 @@ export default function Nicho() {
   const longPlays = NICHES.filter(n => n.timeWeeks.min >= 4 && n.trend >= 4);
 
   return (
-    <div className="min-h-screen bg-obsidiana text-white pb-20 relative">
+    <div className="pm-fixed-dark min-h-screen bg-obsidiana text-white pb-20 relative">
       <Head title="Nicho | Oportunidades" />
       <PixelSnow color="#c084fc" flakeSize={0.008} minFlakeSize={1} pixelResolution={500} speed={0.4} depthFade={4} farPlane={30} brightness={2} gamma={0.08} density={0.2} variant="round" direction={250} style={{ position: 'fixed' }} />
 

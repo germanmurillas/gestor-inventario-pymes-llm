@@ -7,6 +7,7 @@ import {
     Bell, Pencil, Shield, QrCode, Printer,
 } from 'lucide-react';
 import Sidebar from '../Components/Sidebar';
+import MobileNav from '../Components/MobileNav';
 import { Palette as PaletteIcon } from 'lucide-react';
 import { THEMES, DEFAULT_THEME, applyTheme, currentTheme } from '../lib/theme';
 
@@ -18,23 +19,23 @@ interface UserRow { id: number; name: string; email: string; role: 'admin'|'oper
 interface ApiKey { id: number; nombre: string; key_masked: string; base_url: string|null; model_name: string|null; tipo: 'opencode'|'openai'|'ollama'; activo: boolean; updated_at: string|null; }
 type SettingsMap = Record<string, string>;
 
-const field = 'w-full px-3 py-2 rounded-lg border pm-border/20 bg-white font-mono text-sm pm-text focus:outline-none focus:border-[#7C6CF5]';
-const label = 'block font-mono text-[11px] uppercase tracking-wider pm-text-muted mb-1';
-const btn = 'inline-flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-sm font-bold transition-transform hover:-translate-y-0.5';
+const field = 'w-full px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-950/60 text-sm pm-text focus:outline-none focus:border-indigo-500';
+const label = 'block text-[11px] font-semibold uppercase tracking-wider pm-text-muted mb-1';
+const btn = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-transform hover:-translate-y-0.5';
 
 function Section({ icon: Icon, title, subtitle, open, onToggle, children }: {
     icon: React.ElementType; title: string; subtitle: string; open: boolean; onToggle: () => void; children: React.ReactNode;
 }) {
     return (
-        <div className="bg-white rounded-xl border pm-border/10 overflow-hidden">
-            <button onClick={onToggle} className="w-full flex items-center justify-between p-5 hover:pm-bg/40 transition-colors">
+        <div className="bg-slate-900/70 rounded-2xl border border-slate-700/60 overflow-hidden">
+            <button onClick={onToggle} className="w-full flex items-center justify-between p-5 hover:bg-slate-800/50 transition-colors">
                 <div className="flex items-center gap-4 text-left">
                     <div className="h-11 w-11 rounded-lg pm-panel2-plain pm-accent-fg flex items-center justify-center"><Icon size={18} /></div>
-                    <div><h2 className="font-sans font-bold text-lg pm-text">{title}</h2><p className="font-mono text-xs pm-text-muted">{subtitle}</p></div>
+                    <div><h2 className="font-display font-bold text-lg pm-text">{title}</h2><p className="text-xs pm-text-muted">{subtitle}</p></div>
                 </div>
                 {open ? <ChevronDown size={20} className="pm-text-muted" /> : <ChevronRight size={20} className="pm-text-muted" />}
             </button>
-            {open && <div className="p-5 border-t pm-border/10 bg-white/40">{children}</div>}
+            {open && <div className="p-5 border-t border-slate-700/60 bg-slate-950/30">{children}</div>}
         </div>
     );
 }
@@ -159,7 +160,7 @@ export default function Settings() {
         try {
             const { data } = await axios.post('/chat-rag', { prompt });
             const resp = data.response || JSON.stringify(data);
-            if (el) el.innerHTML = `<b style="color:#1B7F3B">✅ ${data.model || 'RAG'} · ${data.source || ''}</b><br>${resp}`;
+            if (el) el.innerHTML = `<b class="text-emerald-400">✅ ${data.model || 'RAG'} · ${data.source || ''}</b><br>${resp}`;
         } catch (e: any) {
             if (el) el.textContent = '❌ ' + (e?.response?.data?.message || e?.message || 'Error');
         }
@@ -187,38 +188,41 @@ export default function Settings() {
     }, [providers, nk.tipo]);
 
     return (
-        <div className="flex h-screen pm-panel pm-text overflow-hidden">
+        <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden">
             <Head title="Configuración" />
             <Sidebar sidebarOpen={sidebarOpen} mobileOpen={mobileOpen} user={user} activeView="CONFIGURACION" mode="kanban" onMobileClose={() => setMobileOpen(false)} />
             <main className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-16 border-b pm-border/10 flex items-center justify-between px-8 bg-white/50 backdrop-blur-md">
-                    <div><span className="pm-text-muted text-xs font-bold uppercase tracking-widest italic">Pymetory /</span><h1 className="font-display text-base font-black uppercase tracking-[0.18em] text-white">Configuración</h1></div>
-                    {flash && <div className="font-mono text-xs font-bold text-green-700 bg-green-100 px-3 py-1.5 rounded-lg border border-green-300">{flash}</div>}
+                <header className="h-14 lg:h-16 border-b flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40 bg-obsidiana/60 backdrop-blur-xl border-slate-700/30">
+                    <nav className="flex items-center gap-2" aria-label="Breadcrumb">
+                        <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest italic text-slate-500">Pymetory /</span>
+                        <h1 className="text-sm lg:text-xs font-black lg:uppercase tracking-tight lg:tracking-widest text-white">Ajustes</h1>
+                    </nav>
+                    {flash && <div role="status" className="text-xs font-bold text-emerald-300 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/30">{flash}</div>}
                 </header>
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-5 max-w-4xl w-full mx-auto">
+                <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pt-4 pb-28 sm:p-6 lg:p-8 space-y-4 max-w-4xl w-full mx-auto">
                     {/* ── 0. TEMAS ── */}
                     <Section icon={PaletteIcon} title="Tema Visual" subtitle="Presets de paleta para toda la interfaz — se aplican al instante" open={openSec === 'temas'} onToggle={() => toggle('temas')}>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {THEMES.map(t => (
                                 <button key={t.id} type="button" onClick={() => pickTheme(t.id)}
                                     aria-pressed={pmTheme === t.id} aria-label={`Tema ${t.name}`}
-                                    className={`relative rounded-lg border-2 p-4 text-left transition-all ${pmTheme === t.id ? 'border-[#7C6CF5] ring-1 ring-[#7C6CF5]/40' : 'pm-border/15 hover:pm-border/40'}`}>
+                                    className={`relative rounded-2xl border-2 p-4 text-left transition-all ${pmTheme === t.id ? 'border-indigo-500 ring-1 ring-indigo-500/40' : 'border-slate-700 hover:border-slate-500'}`}>
                                     {pmTheme === t.id && <span className="absolute top-2 right-2 w-4 h-4 rounded-full pm-accent-hover pm-accent-fg flex items-center justify-center text-[9px]">✓</span>}
                                     <div className="flex gap-1.5 mb-3">
                                         {[t.bg, t.panel, t.accent].map(c => (
-                                            <span key={c} style={{ background: c }} className="w-7 h-7 rounded-full border border-black/20" />
+                                            <span key={c} style={{ background: c }} className="w-7 h-7 rounded-full border border-slate-600" />
                                         ))}
                                     </div>
                                     <p className="font-sans font-bold text-sm pm-text">{t.name}</p>
-                                    <p className="font-mono text-[10px] pm-text-muted">{t.id}</p>
+                                    <p className="text-[10px] pm-text-muted">{t.id}</p>
                                 </button>
                             ))}
                         </div>
                         <div className="mt-4 flex gap-2">
                             <button onClick={saveTheme} className={`${btn} pm-panel2-plain pm-accent-fg`}><Save size={16} /> Guardar tema</button>
-                            <button onClick={() => pickTheme(DEFAULT_THEME)} className={`${btn} bg-white border pm-border/15 pm-text`}>Default</button>
+                            <button onClick={() => pickTheme(DEFAULT_THEME)} className={`${btn} bg-slate-900 border border-slate-700 pm-text`}>Default</button>
                         </div>
-                        <p className="font-mono text-[10px] pm-text-muted mt-2">El tema elegido se guarda en los settings del sistema (clave <code>ui.theme</code>) y también LocalStorage.</p>
+                        <p className="text-[10px] pm-text-muted mt-2">El tema elegido se guarda en los settings del sistema (clave <code>ui.theme</code>) y también LocalStorage.</p>
                     </Section>
 
                     {/* ── 1. GENERAL ── */}
@@ -237,10 +241,10 @@ export default function Settings() {
                     {/* ── 2. MOTOR RAG ── */}
                     <Section icon={Cpu} title="Motor RAG" subtitle="Configuracion centralizada del asistente IA: modelo, proveedor, parametros y test en vivo" open={openSec === 'llm'} onToggle={() => toggle('llm')}>
                         {/* ── Proveedor + Key activa ── */}
-                        <div className="p-4 rounded-lg pm-bg/30 border pm-border/10 mb-4">
+                        <div className="p-4 rounded-lg bg-slate-950/40 border border-slate-700/60 mb-4">
                             <div className="flex items-center gap-3 mb-3">
                                 <span className="font-sans font-black text-[11px] uppercase tracking-wider pm-text-muted">Proveedor y Key activa</span>
-                                <span className="font-mono text-[10px] pm-text-muted">
+                                <span className="text-[10px] pm-text-muted">
                                     {apiKeys.filter(k => k.activo && k.tipo === settings.llm_source).length > 0
                                         ? `Usando: ${apiKeys.find(k => k.activo && k.tipo === settings.llm_source)?.nombre || '—'}`
                                         : settings.llm_source === 'local' ? 'Ollama (sin key)' : '⚠ Sin key activa'}
@@ -281,7 +285,7 @@ export default function Settings() {
                                     {apiKeys.filter(k => k.activo && k.tipo === settings.llm_source && k.model_name).map(k => <option key={`k-${k.id}`} value={k.model_name!}>{k.model_name} [{k.nombre}]</option>)}
                                 </optgroup>}
                             </select>
-                            <p className="font-mono text-[10px] pm-text-muted mt-1">
+                            <p className="text-[10px] pm-text-muted mt-1">
                                 {ollamaModels.length > 0 && <span>{ollamaModels.length} locales · </span>}
                                 {apiKeys.filter(k => k.activo).length} keys activas · {(providers[settings.llm_source]?.models || []).length} modelos provider
                             </p>
@@ -293,7 +297,7 @@ export default function Settings() {
                                 <input type="checkbox" checked={!!settings.llm_privacy} onChange={e => setVal('llm_privacy', e.target.checked ? '1' : '0')} />
                                 <div>
                                     <span className="font-bold text-xs">🔒 Modo Privacidad</span>
-                                    <p className="text-[10px] text-[#888]">Ollama local anonimiza los datos en un grafo antes de enviarlos a la API externa. Los nombres reales nunca salen de Titan.</p>
+                                    <p className="text-[10px] text-slate-500">Ollama local anonimiza los datos en un grafo antes de enviarlos a la API externa. Los nombres reales nunca salen de Titan.</p>
                                 </div>
                             </label>
                         )}
@@ -315,13 +319,13 @@ export default function Settings() {
                         </div>
 
                         {/* ── Test RAG en vivo ── */}
-                        <div className="p-4 rounded-lg pm-bg/20 border pm-border/10 mb-4">
+                        <div className="p-4 rounded-lg bg-slate-950/40 border border-slate-700/60 mb-4">
                             <div className="flex items-center gap-3">
                                 <span className="font-sans font-black text-[11px] uppercase tracking-wider pm-text-muted">Probar RAG</span>
                                 <input id="ragTestInput" className={`${field} flex-1`} placeholder="Ej: ¿Cuál es el lote que vence primero?" onKeyDown={e => { if (e.key === 'Enter') { const i = (document.getElementById('ragTestInput') as HTMLInputElement); testRag(i.value); } }} />
                                 <button className={`${btn} pm-panel2-plain pm-accent-fg`} onClick={() => { const i = (document.getElementById('ragTestInput') as HTMLInputElement); testRag(i.value); }}><RefreshCw size={15} /> Probar</button>
                             </div>
-                            <div id="ragTestResult" className="font-mono text-xs pm-text-muted mt-2 max-h-32 overflow-y-auto"></div>
+                            <div id="ragTestResult" className="text-xs pm-text-muted mt-2 max-h-32 overflow-y-auto"></div>
                         </div>
 
                         <button className={`${btn} pm-panel2-plain pm-accent-fg`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes','llm_prompt','llm_privacy'])}><Save size={15} /> Guardar Motor RAG</button>
@@ -341,7 +345,7 @@ export default function Settings() {
 
                     {/* ── 4. API KEYS ── */}
                     <Section icon={KeyRound} title="API Keys" subtitle="Credenciales de proveedores LLM (cifradas en reposo)" open={openSec === 'keys'} onToggle={() => toggle('keys')}>
-                        {apiKeys.length === 0 && <p className="font-mono text-xs pm-text-muted mb-4">Sin API Keys registradas.</p>}
+                        {apiKeys.length === 0 && <p className="text-xs pm-text-muted mb-4">Sin API Keys registradas.</p>}
                         {(['opencode','openai','ollama','anthropic','google'] as const).filter(t => apiKeys.some(k => k.tipo === t)).map(tipo => {
                           const provider = providers[tipo];
                           const keys = apiKeys.filter(k => k.tipo === tipo);
@@ -349,23 +353,23 @@ export default function Settings() {
                             <div key={tipo} className="mb-5">
                               <div className="flex items-center gap-2 mb-2 px-1">
                                 <span className="font-sans font-black text-[11px] uppercase tracking-wider pm-text-muted">{provider?.label || tipo}</span>
-                                <span className="font-mono text-[10px] pm-text-muted">{keys.length} key(s)</span>
+                                <span className="text-[10px] pm-text-muted">{keys.length} key(s)</span>
                               </div>
                               <div className="space-y-2">
                                 {keys.map(k => (
-                                  <div key={k.id} className="flex items-center gap-3 p-3 rounded-lg border pm-border/10 bg-white">
+                                  <div key={k.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-700/60 bg-slate-900">
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2">
                                         <span className="font-sans font-bold text-sm truncate">{k.nombre}</span>
-                                        {k.activo && tipo === currentSource && <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-mono text-[9px] font-black uppercase">● EN USO</span>}
+                                        {k.activo && tipo === currentSource && <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-mono text-[9px] font-black uppercase">● EN USO</span>}
                                         <span className="px-1.5 py-0.5 rounded pm-bg font-mono text-[10px] uppercase">{k.tipo}</span>
-                                        {k.activo && tipo !== currentSource && <span className="font-mono text-[10px] text-green-600">activa</span>}
+                                        {k.activo && tipo !== currentSource && <span className="font-mono text-[10px] text-emerald-400">activa</span>}
                                       </div>
-                                      <p className="font-mono text-[11px] pm-text-muted truncate">{k.key_masked} · {k.model_name || 'sin modelo'} · {k.base_url || 'sin url'}</p>
+                                      <p className="text-[11px] pm-text-muted truncate">{k.key_masked} · {k.model_name || 'sin modelo'} · {k.base_url || 'sin url'}</p>
                                     </div>
-                                    <button onClick={() => toggleKey(k)} title={k.activo ? 'Desactivar' : 'Activar'} className={`p-2 rounded-lg ${k.activo ? 'text-green-600 bg-green-50' : 'pm-text/30 pm-bg'}`}><Power size={15} /></button>
+                                    <button onClick={() => toggleKey(k)} title={k.activo ? 'Desactivar' : 'Activar'} className={`p-2 rounded-lg ${k.activo ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-500 pm-bg'}`}><Power size={15} /></button>
                                     <button onClick={() => testKey(k.id)} className="p-2 rounded-lg pm-accent-text hover:opacity-70" title="Probar conexión"><RefreshCw size={15} /></button>
-                                    <button onClick={() => editKey(k)} className="p-2 rounded-lg pm-text-muted hover:pm-bg" title="Editar"><Pencil size={15} /></button>
+                                    <button onClick={() => editKey(k)} className="p-2 rounded-lg pm-text-muted hover:bg-slate-800" title="Editar"><Pencil size={15} /></button>
                                     <button onClick={() => deleteKey(k.id)} className="p-2 rounded-lg pm-accent-text hover:opacity-70" title="Eliminar"><Trash2 size={15} /></button>
                                   </div>
                                 ))}
@@ -373,7 +377,7 @@ export default function Settings() {
                             </div>
                           );
                         })}
-                        <div className="grid md:grid-cols-3 gap-3 p-4 rounded-lg pm-bg/40 border pm-border/10">
+                        <div className="grid md:grid-cols-3 gap-3 p-4 rounded-lg bg-slate-950/50 border border-slate-700/60">
                             <input className={field} placeholder="Nombre *" value={nk.nombre} onChange={e => setNk({...nk, nombre: e.target.value})} />
                             <select className={field} value={nk.tipo} onChange={e => {
                               const t = e.target.value;
@@ -390,7 +394,7 @@ export default function Settings() {
                                 {((providers[nk.tipo]?.models || []).length === 0 && nk.tipo !== 'ollama') && <option value="">Sin modelos</option>}
                             </select>
                             <input className={field} placeholder={editingId ? 'API Key (dejar vacio = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
-                            <input className={`${field} pm-bg/60 cursor-not-allowed`} placeholder="Base URL" value={nk.base_url} readOnly />
+                            <input className={`${field} bg-slate-950/60 cursor-not-allowed`} placeholder="Base URL" value={nk.base_url} readOnly />
                             <button className={`${btn} pm-accent text-white justify-center`} onClick={saveKey}>
                                 {editingId ? <><Save size={15} /> Actualizar Key</> : <><Plus size={15} /> Nueva Key</>}
                             </button>
@@ -398,30 +402,30 @@ export default function Settings() {
                         </div>
 
                         {/* ── Provider CRUD ── */}
-                        <div className="mt-5 pt-4 border-t pm-border/10">
+                        <div className="mt-5 pt-4 border-t border-slate-700/60">
                             <div className="flex items-center justify-between mb-3">
                                 <span className="font-sans font-black text-[11px] uppercase tracking-wider pm-text-muted">Proveedores</span>
-                                <span className="font-mono text-[10px] pm-text-muted">{Object.keys(providers).length} configurados</span>
+                                <span className="text-[10px] pm-text-muted">{Object.keys(providers).length} configurados</span>
                             </div>
                             <div className="space-y-2 mb-4">
                                 {Object.entries(providers).map(([key, p]: [string, any]) => (
-                                    <div key={key} className="flex items-center gap-2 p-2 rounded-lg border pm-border/10 bg-white">
+                                    <div key={key} className="flex items-center gap-2 p-2 rounded-lg border border-slate-700/60 bg-slate-900">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-mono font-bold text-xs">{key}</span>
                                                 <span className="font-sans text-xs pm-text-muted">{p.label}</span>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${p.enabled !== false ? 'bg-green-500' : 'pm-panel-2'}`}></span>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${p.enabled !== false ? 'bg-emerald-500/100' : 'pm-panel-2'}`}></span>
                                             </div>
-                                            <p className="font-mono text-[10px] pm-text-muted truncate">{p.base_url} · {(p.models || []).length} modelos</p>
+                                            <p className="text-[10px] pm-text-muted truncate">{p.base_url} · {(p.models || []).length} modelos</p>
                                         </div>
-                                        <button onClick={() => toggleProv(key)} title={p.enabled !== false ? 'Deshabilitar' : 'Habilitar'} className={`p-1.5 rounded ${p.enabled !== false ? 'text-green-600 bg-green-50' : 'pm-text/20 pm-bg'}`}><Power size={13} /></button>
-                                        <button onClick={() => editProv(key)} className="p-1.5 rounded pm-text-muted hover:pm-bg" title="Editar"><Pencil size={13} /></button>
+                                        <button onClick={() => toggleProv(key)} title={p.enabled !== false ? 'Deshabilitar' : 'Habilitar'} className={`p-1.5 rounded ${p.enabled !== false ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-300 pm-bg'}`}><Power size={13} /></button>
+                                        <button onClick={() => editProv(key)} className="p-1.5 rounded pm-text-muted hover:bg-slate-800" title="Editar"><Pencil size={13} /></button>
                                         {p.from_db && <button onClick={() => deleteProv(key)} className="p-1.5 rounded pm-accent-text hover:opacity-70" title="Eliminar"><Trash2 size={13} /></button>}
                                     </div>
                                 ))}
-                                {Object.keys(providers).length === 0 && <p className="font-mono text-xs pm-text-muted">Cargando...</p>}
+                                {Object.keys(providers).length === 0 && <p className="text-xs pm-text-muted">Cargando...</p>}
                             </div>
-                            <div className="grid md:grid-cols-2 gap-2 p-3 rounded-lg pm-bg/20 border pm-border/10">
+                            <div className="grid md:grid-cols-2 gap-2 p-3 rounded-lg bg-slate-950/40 border border-slate-700/60">
                                 <input className={field} placeholder="Key (ej: groq)" value={pk.key} onChange={e => setPk({...pk, key: e.target.value})} disabled={!!provEditKey} />
                                 <input className={field} placeholder="Label (ej: Groq Cloud)" value={pk.label} onChange={e => setPk({...pk, label: e.target.value})} />
                                 <input className={`${field} md:col-span-2`} placeholder="Base URL" value={pk.base_url} onChange={e => setPk({...pk, base_url: e.target.value})} />
@@ -438,19 +442,19 @@ export default function Settings() {
                     <Section icon={UsersIcon} title="Usuarios y Roles" subtitle="Altas, bajas, asignacion de roles y reseteo de contraseñas" open={openSec === 'users'} onToggle={() => toggle('users')}>
                         <div className="space-y-2 mb-5">
                             {users.map(u => (
-                                <div key={u.id} className="flex items-center gap-3 p-3 rounded-lg border pm-border/10 bg-white">
+                                <div key={u.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-700/60 bg-slate-900">
                                     <div className="h-9 w-9 rounded-lg pm-bg flex items-center justify-center font-serif italic font-bold">{u.name.charAt(0)}</div>
-                                    <div className="flex-1 min-w-0"><p className="font-sans font-bold text-sm truncate">{u.name}</p><p className="font-mono text-[11px] pm-text-muted truncate">{u.email}</p></div>
-                                    <select value={u.role} onChange={e => changeRole(u, e.target.value)} className="px-2 py-1.5 rounded-lg border pm-border/15 bg-white font-mono text-xs">
+                                    <div className="flex-1 min-w-0"><p className="font-sans font-bold text-sm truncate">{u.name}</p><p className="text-[11px] pm-text-muted truncate">{u.email}</p></div>
+                                    <select value={u.role} onChange={e => changeRole(u, e.target.value)} className="px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900 font-mono text-xs">
                                         <option value="admin">admin</option><option value="operario">operario</option>
                                     </select>
                                     {u.role === 'admin' ? <ShieldCheck size={16} className="pm-text" /> : <UserIcon size={16} className="pm-text-muted" />}
-                                    <button onClick={() => resetPass(u)} className="p-2 rounded-lg pm-text-muted hover:pm-bg"><KeyRound size={15} /></button>
+                                    <button onClick={() => resetPass(u)} className="p-2 rounded-lg pm-text-muted hover:bg-slate-800"><KeyRound size={15} /></button>
                                     <button onClick={() => deleteUser(u)} className="p-2 rounded-lg pm-accent-text hover:opacity-70"><Trash2 size={15} /></button>
                                 </div>
                             ))}
                         </div>
-                        <div className="grid md:grid-cols-2 gap-3 p-4 rounded-lg pm-bg/40 border pm-border/10">
+                        <div className="grid md:grid-cols-2 gap-3 p-4 rounded-lg bg-slate-950/50 border border-slate-700/60">
                             <input className={field} placeholder="Nombre *" value={nu.name} onChange={e => setNu({...nu, name: e.target.value})} />
                             <input className={field} type="email" placeholder="Email *" value={nu.email} onChange={e => setNu({...nu, email: e.target.value})} />
                             <input className={field} type="password" placeholder="Contraseña (min. 8) *" value={nu.password} onChange={e => setNu({...nu, password: e.target.value})} />
@@ -546,9 +550,9 @@ export default function Settings() {
                                 {/* ── Perfiles ── */}
                                 <div className="mb-6">
                                     <h3 className="font-bold text-sm mb-2">📋 Perfiles de Etiqueta</h3>
-                                    <div className="space-y-1 mb-3 max-h-[200px] overflow-y-auto border pm-border/10 rounded-lg">
+                                    <div className="space-y-1 mb-3 max-h-[200px] overflow-y-auto border border-slate-700/60 rounded-lg">
                                         {profiles.map((p, i) => (
-                                            <div key={i} className={`flex items-center gap-2 px-3 py-2 text-xs ${i === activeIdx ? 'pm-panel2-plain pm-accent-fg' : 'bg-white hover:pm-bg/40'}`}>
+                                            <div key={i} className={`flex items-center gap-2 px-3 py-2 text-xs ${i === activeIdx ? 'pm-panel2-plain pm-accent-fg' : 'bg-slate-900 hover:bg-slate-800/50'}`}>
                                                 <button onClick={() => setActiveIdx(i)} className="flex-1 text-left font-bold">{p.name}</button>
                                                 <button onClick={duplicateProfile} className="p-1 opacity-50 hover:opacity-100" title="Duplicar">📋</button>
                                                 <button onClick={() => deleteProfile(i)} className="p-1 opacity-50 hover:opacity-100" title="Eliminar">🗑️</button>
@@ -579,15 +583,15 @@ export default function Settings() {
                                 </div>
 
                                 {/* ── Preview ── */}
-                                <div className="border pm-border/10 rounded-lg p-4 pm-bg/20 overflow-auto">
+                                <div className="border border-slate-700/60 rounded-lg p-4 bg-slate-950/40 overflow-auto">
                                     <div className="flex items-center justify-between mb-2">
                                         <h3 className="font-bold text-xs uppercase tracking-wider pm-text-muted">📐 Preview — {active.name}</h3>
                                         <label className="flex items-center gap-2 text-[10px] cursor-pointer">
-                                            <span className={previewType === 'QR' ? 'font-bold pm-text-muted' : 'text-[#aaa]'}>QR</span>
+                                            <span className={previewType === 'QR' ? 'font-bold pm-text-muted' : 'text-slate-400'}>QR</span>
                                             <div className={`w-8 h-4 rounded-full relative transition-colors ${previewType === 'QR' ? 'bg-indigo-600' : 'bg-slate-600'}`} onClick={() => setPreviewType(prev => prev === 'QR' ? 'CODE128' : 'QR')}>
-                                                <div className={`w-3 h-3 rounded-full bg-white absolute top-0.5 transition-transform ${previewType === 'QR' ? 'left-0.5' : 'left-4'}`} />
+                                                <div className={`w-3 h-3 rounded-full bg-slate-900 absolute top-0.5 transition-transform ${previewType === 'QR' ? 'left-0.5' : 'left-4'}`} />
                                             </div>
-                                            <span className={previewType === 'CODE128' ? 'font-bold pm-text-muted' : 'text-[#aaa]'}>Barras</span>
+                                            <span className={previewType === 'CODE128' ? 'font-bold pm-text-muted' : 'text-slate-400'}>Barras</span>
                                         </label>
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cfg.cols}, ${cfg.labelW}px)`, gap: `${cfg.gapY}px ${cfg.gapX}px`, justifyContent: 'start' }}>
@@ -620,6 +624,7 @@ export default function Settings() {
                     </Section>
                 </div>
             </main>
+            <MobileNav activeView="AJUSTES" user={user} />
         </div>
     );
 }

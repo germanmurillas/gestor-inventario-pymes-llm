@@ -30,7 +30,7 @@ class QRScanController extends Controller
             return back()->withErrors(['qr_data' => 'Código QR inválido. Formato no reconocido.']);
         }
 
-        $lote = Lote::find($qr['id']);
+        $lote = Lote::with('material')->find($qr['id']);
 
         if (!$lote) {
             return back()->withErrors(['qr_data' => 'Lote no encontrado (ID: ' . $qr['id'] . '). El código QR puede estar desactualizado.']);
@@ -39,7 +39,7 @@ class QRScanController extends Controller
         // Validación de salida: stock insuficiente
         if ($validated['action'] === 'salida' && $lote->quantity < $validated['quantity']) {
             return back()->withErrors([
-                'quantity' => 'Stock insuficiente. Disponible: ' . round($lote->quantity, 3) . ' kg. Solicitado: ' . $validated['quantity'] . ' kg.'
+                'quantity' => 'Stock insuficiente. Disponible: ' . round($lote->quantity, 3) . " {$lote->material?->unit}. Solicitado: {$validated['quantity']} {$lote->material?->unit}."
             ]);
         }
 
@@ -73,7 +73,7 @@ class QRScanController extends Controller
 
         $actionLabel = $validated['action'] === 'entrada' ? 'Check-in (entrada)' : 'Check-out (salida)';
 
-        return back()->with('success', "{$actionLabel} registrado vía QR. Lote: {$lote->batch_number} | Cant: {$validated['quantity']} kg");
+        return back()->with('success', "{$actionLabel} registrado vía QR. Lote: {$lote->batch_number} | Cant: {$validated['quantity']} {$lote->material?->unit}");
     }
 
     /**
@@ -96,6 +96,7 @@ class QRScanController extends Controller
             'material'     => $lote->material->name ?? 'N/A',
             'lote'         => $lote->batch_number,
             'cantidad'     => $lote->quantity,
+            'unit'         => $lote->material->unit ?? '',
             'vencimiento'  => $lote->expiration_date?->format('Y-m-d'),
             'status'       => $lote->status,
             'is_critical'  => $lote->is_critical,
@@ -123,6 +124,7 @@ class QRScanController extends Controller
                     'user'        => $mov->user->name ?? 'Sistema',
                     'type'        => $mov->type,
                     'quantity'    => $mov->quantity,
+                    'unit'        => $mov->lote->material->unit ?? '',
                     'reason'      => $mov->reason,
                     'description' => $mov->description,
                     'date'        => $mov->created_at->format('d M, Y H:i'),

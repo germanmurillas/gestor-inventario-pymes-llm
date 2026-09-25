@@ -16,6 +16,8 @@ interface LoteOption {
     material: string;
     codigo: string;
     bodega_id: number;
+    unit?: string;
+    estado?: string;
 }
 
 interface FigmaTransferFormProps {
@@ -34,11 +36,12 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
     });
 
     const filteredLotes = lotes.filter(
-        (l) => data.from_bodega_id && l.bodega_id === Number(data.from_bodega_id) && l.quantity > 0
+        (l) => data.from_bodega_id && l.bodega_id === Number(data.from_bodega_id) && l.quantity > 0 && (l.estado ?? 'active') === 'active'
     );
 
     const selectedLote = lotes.find((l) => l.id === Number(data.lote_id));
     const maxTransfer = selectedLote ? selectedLote.quantity : 0;
+    const unidad = selectedLote?.unit ?? '';
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -146,7 +149,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                 </div>
                                 <div className="text-3xl font-black mt-1">
                                     {selectedLote ? selectedLote.quantity : '—'}{' '}
-                                    <span className="text-xs text-white/40">KG</span>
+                                    <span className="text-xs text-white/40">{unidad}</span>
                                 </div>
                             </div>
 
@@ -157,7 +160,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                             Proyección
                                         </div>
                                         <div className="text-xs font-bold text-indigo-400">
-                                            -{data.cantidad} KG
+                                            -{data.cantidad} {unidad}
                                         </div>
                                     </div>
                                     <div className="h-2 bg-slate-900/80 backdrop-blur-xl/10 rounded-full overflow-hidden">
@@ -173,7 +176,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                     </div>
                                     <div className="text-[9px] text-white/30 italic">
                                         Stock remanente:{' '}
-                                        {(maxTransfer - Number(data.cantidad)).toFixed(2)} KG
+                                        {(maxTransfer - Number(data.cantidad)).toFixed(2)} {unidad}
                                     </div>
                                 </div>
                             )}
@@ -181,13 +184,13 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                     </div>
 
                     {selectedLote && selectedLote.expiration_date && (
-                        <div className="bg-amber-50 border border-amber-100 p-6 rounded-3xl flex gap-4 items-start">
+                        <div className="bg-amber-500/10 border border-amber-500/25 p-6 rounded-3xl flex gap-4 items-start">
                             <AlertTriangle className="text-amber-500 shrink-0" size={20} />
                             <div>
-                                <div className="text-[10px] font-black text-amber-700 uppercase tracking-widest">
+                                <div className="text-[10px] font-black text-amber-300 uppercase tracking-widest">
                                     Vencimiento FEFO
                                 </div>
-                                <p className="text-[10px] text-amber-600 font-bold leading-tight mt-1 uppercase">
+                                <p className="text-[10px] text-amber-400 font-bold leading-tight mt-1 uppercase">
                                     Este lote vence el {selectedLote.expiration_date}. El sistema prioriza lotes
                                     con vencimiento más próximo.
                                 </p>
@@ -199,7 +202,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                 {/* Right: Form */}
                 <div className="md:col-span-2 space-y-8">
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-8">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/40 pb-2">
                             <Warehouse size={14} />
                             <span>Origen y Destino</span>
                         </div>
@@ -216,7 +219,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                         setData('from_bodega_id', e.target.value);
                                         setData('lote_id', '');
                                     }}
-                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                                 >
                                     <option value="">Seleccionar bodega...</option>
                                     {bodegas.map((b) => (
@@ -240,7 +243,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                     required
                                     value={data.to_bodega_id}
                                     onChange={(e) => setData('to_bodega_id', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                                 >
                                     <option value="">Seleccionar bodega...</option>
                                     {bodegas
@@ -259,7 +262,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/40 pb-2">
                             <Package size={14} />
                             <span>Lote y Cantidad</span>
                         </div>
@@ -274,7 +277,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                     value={data.lote_id}
                                     onChange={(e) => setData('lote_id', e.target.value)}
                                     disabled={!data.from_bodega_id}
-                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer disabled:opacity-40"
+                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer disabled:opacity-40"
                                 >
                                     <option value="">Seleccionar lote...</option>
                                     {filteredLotes
@@ -298,7 +301,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
 
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
-                                    Cantidad a Transferir (KG)
+                                    Cantidad a transferir{unidad ? ` (${unidad})` : ''}
                                 </label>
                                 <div className="relative">
                                     <input
@@ -311,13 +314,13 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                         max={maxTransfer}
                                         disabled={!data.lote_id}
                                         className={`w-full bg-slate-800/50 border ${
-                                            errors.cantidad ? 'border-red-500' : 'border-slate-200'
+                                            errors.cantidad ? 'border-red-500' : 'border-slate-700/50'
                                         } rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-40`}
                                     />
                                     <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
                                         <span className="text-[10px] font-black text-slate-400 uppercase">Máximo</span>
-                                        <span className="text-[10px] font-black text-indigo-600">
-                                            {maxTransfer} KG
+                                        <span className="text-[10px] font-black text-indigo-400">
+                                            {maxTransfer} {unidad}
                                         </span>
                                     </div>
                                 </div>
@@ -339,7 +342,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                 value={data.reason}
                                 onChange={(e) => setData('reason', e.target.value)}
                                 placeholder="Ej: Reorganización de bodega, optimización de espacio..."
-                                className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:italic"
+                                className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:italic"
                             />
                             {errors.reason && (
                                 <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">
@@ -348,9 +351,9 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                             )}
                         </div>
 
-                        <div className="bg-indigo-50/30 p-6 rounded-3xl border border-indigo-100/50 flex gap-4 items-center">
+                        <div className="bg-indigo-500/10 p-6 rounded-3xl border border-indigo-500/25 flex gap-4 items-center">
                             <Info size={18} className="text-indigo-400 shrink-0" />
-                            <p className="text-[10px] text-indigo-900/60 font-bold uppercase tracking-tight leading-relaxed">
+                            <p className="text-[10px] text-indigo-300/60 font-bold uppercase tracking-tight leading-relaxed">
                                 Esta acción genera 2 registros en el Kardex (salida + entrada) y es
                                 irreversible. El sistema aplica FEFO automáticamente al sugerir lotes.
                             </p>
@@ -361,7 +364,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
 
             <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 <div className="flex items-center gap-2">
-                    <Tag size={14} className="text-indigo-600" />
+                    <Tag size={14} className="text-indigo-400" />
                     <span>Transacción Protegida por Pymetory Core</span>
                 </div>
                 <button

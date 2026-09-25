@@ -80,7 +80,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
 
                             <div className="pt-6 border-t border-white/10">
                                 <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Stock Disponible</div>
-                                <div className="text-3xl font-black mt-1">{lote.cantidad} <span className="text-xs text-white/40">KG</span></div>
+                                <div className="text-3xl font-black mt-1">{lote.cantidad} <span className="text-xs text-white/40">{lote.unit}</span></div>
                             </div>
 
                             {lote.photo_url && (
@@ -131,8 +131,8 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                     {lote.days_until_expiration !== undefined && lote.days_until_expiration <= 30 && (
                         <div className={`p-6 rounded-3xl flex gap-4 items-start border ${
                             lote.days_until_expiration <= 15
-                                ? 'bg-red-50 border-red-100'
-                                : 'bg-amber-50 border-amber-100'
+                                ? 'bg-red-500/10 border-red-500/25'
+                                : 'bg-amber-500/10 border-amber-500/25'
                         }`}>
                             {lote.days_until_expiration <= 15 ? (
                                 <AlertTriangle className="text-red-500 shrink-0" size={20} />
@@ -142,7 +142,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
                                     <span className={`text-[10px] font-black uppercase tracking-widest ${
-                                        lote.days_until_expiration <= 15 ? 'text-red-600' : 'text-amber-600'
+                                        lote.days_until_expiration <= 15 ? 'text-red-400' : 'text-amber-400'
                                     }`}>
                                         {lote.days_until_expiration <= 15 ? 'Prioridad FEFO' : 'Sugerencia FEFO'}
                                     </span>
@@ -151,14 +151,14 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                         size="sm"
                                     />
                                 </div>
-                                <p className="text-[10px] font-bold leading-tight uppercase text-slate-600">
+                                <p className="text-[10px] font-bold leading-tight uppercase text-slate-300">
                                     {lote.days_until_expiration <= 15
                                         ? `Este lote vence en ${lote.days_until_expiration} días. Se recomienda despacharlo con prioridad máxima.`
                                         : `Este lote vence en ${lote.days_until_expiration} días. Considere consumirlo pronto para evitar desperdicio.`
                                     }
                                 </p>
                                 {lote.stock_total !== undefined && lote.stock_total > lote.cantidad && (
-                                    <p className="text-[9px] text-indigo-600 font-bold uppercase">
+                                    <p className="text-[9px] text-indigo-400 font-bold uppercase">
                                         Stock total del material: {lote.stock_total} {lote.unit || "kg"} en múltiples lotes
                                     </p>
                                 )}
@@ -170,7 +170,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                 {/* Right: Form Actions */}
                 <div className="md:col-span-2 space-y-8">
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-8">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/40 pb-2">
                             <MinusCircle size={14} />
                             <span>Detalles del Despacho</span>
                         </div>
@@ -178,7 +178,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Cantidad a Retirar (KG)</label>
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Cantidad a retirar ({lote.unit})</label>
                                     <div className="relative">
                                         <input 
                                             type="number" 
@@ -188,11 +188,11 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                             onChange={e => setData('quantity', parseFloat(e.target.value))}
                                             placeholder="0.00"
                                             max={lote.cantidad}
-                                            className={`w-full bg-slate-800/50 border ${errors.quantity ? 'border-red-500' : 'border-slate-200'} rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
+                                            className={`w-full bg-slate-800/50 border ${errors.quantity ? 'border-red-500' : 'border-slate-700/50'} rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
                                         />
                                         <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
                                             <span className="text-[10px] font-black text-slate-400 uppercase">Máximo</span>
-                                            <span className="text-[10px] font-black text-indigo-600">{lote.cantidad} {lote.unit || "kg"}</span>
+                                            <span className="text-[10px] font-black text-indigo-400">{lote.cantidad} {lote.unit || "kg"}</span>
                                         </div>
                                     </div>
                                     {errors.quantity && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.quantity}</p>}
@@ -203,7 +203,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                         required
                                         value={data.reason}
                                         onChange={e => setData('reason', e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                                     >
                                         <option value="produccion">⚙️ Consumo para Producción</option>
                                         <option value="venta">📦 Despacho por Venta</option>
@@ -221,16 +221,16 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                         value={data.description}
                                         onChange={e => setData('description', e.target.value)}
                                         placeholder="Indica el número de orden de producción o cualquier detalle relevante..."
-                                        className="flex-1 w-full bg-slate-800/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none transition-all placeholder:italic"
+                                        className="flex-1 w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none transition-all placeholder:italic"
                                     />
                                     {errors.description && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.description}</p>}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-indigo-50/30 p-6 rounded-3xl border border-indigo-100/50 flex gap-4 items-center">
+                        <div className="bg-indigo-500/10 p-6 rounded-3xl border border-indigo-500/25 flex gap-4 items-center">
                             <Info size={18} className="text-indigo-400 shrink-0" />
-                            <p className="text-[10px] text-indigo-900/60 font-bold uppercase tracking-tight leading-relaxed">
+                            <p className="text-[10px] text-indigo-300/60 font-bold uppercase tracking-tight leading-relaxed">
                                 Esta acción es irreversible. Al procesar el despacho, el sistema actualizará el stock físico y dejará un rastro en el historial para auditoría.
                             </p>
                         </div>
@@ -240,7 +240,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
 
             <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                 <div className="flex items-center gap-2">
-                    <Tag size={14} className="text-indigo-600" />
+                    <Tag size={14} className="text-indigo-400" />
                     <span>Transacción Protegida por Pymetory Core</span>
                 </div>
                 <button 

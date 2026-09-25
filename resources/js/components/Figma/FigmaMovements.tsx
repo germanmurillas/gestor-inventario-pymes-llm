@@ -23,14 +23,14 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
             <div className="flex items-center gap-6">
                 <button 
                     onClick={onBack}
-                    className="w-12 h-12 bg-slate-900/80 backdrop-blur-xl hover:bg-slate-800/50 border border-slate-200 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-95 group"
+                    className="w-12 h-12 bg-slate-900/80 backdrop-blur-xl hover:bg-slate-800/50 border border-slate-700/50 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-95 group"
                 >
-                    <ArrowLeft size={20} className="text-slate-600 group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft size={20} className="text-slate-300 group-hover:-translate-x-1 transition-transform" />
                 </button>
                 <div>
                     <h2 className="text-2xl font-black text-white tracking-tight font-display">Auditoría de Lote</h2>
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">
-                        <span className="text-indigo-600">Lote #{lote.lote || lote.id}</span>
+                        <span className="text-indigo-400">Lote #{lote.lote || lote.id}</span>
                         <span className="opacity-30">•</span>
                         <span>{lote.bodega}</span>
                         <span className="opacity-30">•</span>
@@ -42,10 +42,10 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Product Stats */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-8 shadow-sm space-y-8 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] -mr-16 -mt-16 opacity-50" />
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] p-8 shadow-sm space-y-8 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-bl-[5rem] -mr-16 -mt-16 opacity-50" />
                         
-                        <div className="aspect-square bg-slate-800/50 rounded-3xl border border-slate-100 flex items-center justify-center relative z-10 overflow-hidden">
+                        <div className="aspect-square bg-slate-800/50 rounded-3xl border border-slate-700/50 flex items-center justify-center relative z-10 overflow-hidden">
                             {lote.photo_url ? (
                                 <img src={lote.photo_url} alt={lote.material_name} className="w-full h-full object-cover" />
                             ) : (
@@ -60,22 +60,22 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                             </div>
                             
                             <div className="grid grid-cols-1 gap-6">
-                                <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
+                                <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Stock Actual</label>
                                     <div className="text-xl font-black text-white">{lote.cantidad} <span className="text-[10px] text-slate-400 uppercase">KG</span></div>
                                 </div>
-                                <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-100">
+                                <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Costo Unitario</label>
                                     <div className="text-xl font-black text-white">${new Intl.NumberFormat('es-CO').format(lote.unit_cost || 0)}</div>
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-slate-100">
+                            <div className="pt-6 border-t border-slate-700/50">
                                 <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
                                     <Calendar size={12} className="text-indigo-500" />
                                     Vencimiento
                                 </div>
-                                <div className="text-sm font-bold text-slate-700">{lote.vencimiento}</div>
+                                <div className="text-sm font-bold text-slate-300">{lote.vencimiento}</div>
                             </div>
                         </div>
                     </div>
@@ -87,16 +87,16 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
                             <Clock size={14} /> Historial del Kardex
                         </h3>
-                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+                        <span className="text-[10px] font-bold text-slate-400 bg-slate-800/60 px-3 py-1 rounded-full">
                             {movements.length} Registros
                         </span>
                     </div>
 
-                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+                    <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-800/50 border-b border-slate-100">
+                                    <tr className="bg-slate-800/50 border-b border-slate-700/50">
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Operación</th>
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Responsable</th>
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Fecha & Hora</th>
@@ -104,7 +104,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                         <th className="px-8 py-5 font-black text-slate-400 uppercase text-[9px] tracking-widest">Saldo</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-slate-700/40">
                                     {loading ? (
                                         <tr>
                                             <td colSpan={5} className="px-8 py-20 text-center">
@@ -120,8 +120,8 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                                                            mov.type === 'entrada' ? 'bg-emerald-50 text-emerald-600' : 
-                                                            mov.type === 'salida' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
+                                                            mov.type === 'entrada' ? 'bg-emerald-500/10 text-emerald-400' : 
+                                                            mov.type === 'salida' ? 'bg-amber-500/10 text-amber-400' : 'bg-blue-500/10 text-blue-400'
                                                         }`}>
                                                             {mov.type === 'entrada' ? <ArrowDownToLine size={14} /> : 
                                                              mov.type === 'salida' ? <ArrowUpFromLine size={14} /> : <AlertCircle size={14} />}
@@ -134,17 +134,17 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                        <div className="w-6 h-6 bg-slate-800/60 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
                                                             {mov.user?.name?.charAt(0) || 'U'}
                                                         </div>
-                                                        <span className="text-xs font-bold text-slate-600">{mov.user?.name || 'Sistema'}</span>
+                                                        <span className="text-xs font-bold text-slate-300">{mov.user?.name || 'Sistema'}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <div className="text-xs font-bold text-slate-600">{mov.fecha}</div>
+                                                    <div className="text-xs font-bold text-slate-300">{mov.fecha}</div>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <span className={`text-xs font-black ${mov.type === 'entrada' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                                    <span className={`text-xs font-black ${mov.type === 'entrada' ? 'text-emerald-400' : 'text-amber-400'}`}>
                                                         {mov.type === 'entrada' ? '+' : '-'}{mov.quantity} {lote?.unit || 'kg'}
                                                     </span>
                                                 </td>

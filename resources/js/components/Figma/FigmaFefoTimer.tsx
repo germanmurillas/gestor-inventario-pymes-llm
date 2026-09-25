@@ -80,15 +80,15 @@ export default function FigmaFefoTimer({ material, codigo, lote, diasRestantes, 
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                     {codigo && <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{codigo}</span>}
-                    <span className="text-[9px] text-slate-600">·</span>
+                    <span className="text-[9px] text-slate-300">·</span>
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Lote {lote}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">{vencimiento}</span>
+                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wider">{vencimiento}</span>
                     {bodega && (
                         <>
-                            <span className="text-[9px] text-slate-700">·</span>
-                            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">{bodega}</span>
+                            <span className="text-[9px] text-slate-300">·</span>
+                            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wider">{bodega}</span>
                         </>
                     )}
                 </div>

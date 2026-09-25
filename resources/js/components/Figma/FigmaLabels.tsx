@@ -478,7 +478,7 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
                                             <div className="flex items-center gap-3 mt-1.5 ml-6">
                                                 <span className="text-[10px] text-slate-500 font-bold uppercase">Lote {item.lote}</span>
                                                 <span className="text-[10px] text-slate-500">|</span>
-                                                <span className="text-[10px] text-slate-500">{item.cantidad} KG</span>
+                                                <span className="text-[10px] text-slate-500">{item.cantidad} {item.unit ?? ''}</span>
                                                 <span className="text-[10px] text-slate-500">|</span>
                                                 <span className="text-[10px] text-slate-500">{item.bodega}</span>
                                             </div>
@@ -493,7 +493,7 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
                                                     </span>
                                                 ))}
                                                 {itemTags.length === 0 && (
-                                                    <span className="text-[10px] text-slate-600 italic">Sin etiquetas</span>
+                                                    <span className="text-[10px] text-slate-300 italic">Sin etiquetas</span>
                                                 )}
                                             </div>
                                         </div>

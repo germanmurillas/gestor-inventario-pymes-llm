@@ -43,7 +43,7 @@ class CheckLowStockAlerts extends Command
                 tipo:  'warning',
                 titulo: $titulo,
                 mensaje: $mensaje,
-                accionUrl: '/inventory',
+                accionUrl: '/dashboard?v=INVENTARIO',
                 icono: 'Package',
             );
 

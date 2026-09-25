@@ -38,7 +38,7 @@ class CheckFefoAlerts extends Command
                 tipo:  $dias <= 7 ? 'critico' : 'warning',
                 titulo: $titulo,
                 mensaje: $mensaje,
-                accionUrl: '/inventory',
+                accionUrl: '/dashboard?v=INVENTARIO',
                 icono: 'AlertTriangle',
             );
 

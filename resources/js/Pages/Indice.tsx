@@ -194,7 +194,7 @@ export default function Indice() {
 
     if (!unlocked) {
         return (
-            <div className="min-h-screen bg-obsidiana flex items-center justify-center p-8">
+            <div className="pm-fixed-dark min-h-screen bg-obsidiana flex items-center justify-center p-8">
                 <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/30 rounded-3xl p-12 max-w-md w-full text-center space-y-6 animate-in zoom-in-95 duration-300">
                     <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mx-auto">
                         <Lock size={32} className="text-indigo-400" />
@@ -226,7 +226,7 @@ export default function Indice() {
     }
 
     return (
-        <div className="min-h-screen bg-obsidiana text-white pb-20 relative">
+        <div className="pm-fixed-dark min-h-screen bg-obsidiana text-white pb-20 relative">
             <Head title="Índice General | Pymetory" />
 
             <PixelSnow

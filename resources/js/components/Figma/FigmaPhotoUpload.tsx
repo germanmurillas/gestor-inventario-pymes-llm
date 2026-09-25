@@ -54,7 +54,7 @@ const FigmaPhotoUpload = ({ photoUrl, uploadUrl, deleteUrl, label = 'Foto del Í
             onClick={() => displayUrl && setShowLightbox(true)}
             className={`relative w-32 h-32 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${
               displayUrl
-                ? 'border-indigo-300 cursor-zoom-in hover:border-indigo-500'
+                ? 'border-indigo-500/40 cursor-zoom-in hover:border-indigo-500'
                 : 'border-slate-300 cursor-pointer hover:border-indigo-400 bg-slate-800/50'
             }`}
           >
@@ -88,7 +88,7 @@ const FigmaPhotoUpload = ({ photoUrl, uploadUrl, deleteUrl, label = 'Foto del Í
               type="button"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-200 disabled:opacity-50"
+              className="flex items-center gap-2 bg-indigo-500/10 text-indigo-300 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/15 transition-all border border-indigo-500/25 disabled:opacity-50"
             >
               <Camera size={14} />
               <span>{displayUrl ? 'Cambiar foto' : 'Subir foto'}</span>
@@ -97,7 +97,7 @@ const FigmaPhotoUpload = ({ photoUrl, uploadUrl, deleteUrl, label = 'Foto del Í
               <button
                 type="button"
                 onClick={handleDelete}
-                className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-all border border-red-200"
+                className="flex items-center gap-2 bg-red-500/10 text-red-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/15 transition-all border border-red-500/25"
               >
                 <Trash2 size={14} />
                 <span>Eliminar</span>

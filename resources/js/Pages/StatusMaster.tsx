@@ -63,7 +63,7 @@ export default function StatusMaster() {
   const events = data.events || [];
 
   return (
-    <div className="min-h-screen bg-obsidiana text-white font-sans relative overflow-hidden">
+    <div className="pm-fixed-dark min-h-screen bg-obsidiana text-white font-sans relative overflow-hidden">
       <Head title="Status Master | Pymetory" />
 
       {/* Aurora Background + Golden Particles + Floating Orbs */}

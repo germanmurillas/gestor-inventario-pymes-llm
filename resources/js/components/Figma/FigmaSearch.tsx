@@ -1,260 +1,138 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { Search, Package, Clock, MapPin, AlertTriangle, CheckCircle, Filter, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, Clock, MapPin, Package, Search, ShieldAlert, X } from 'lucide-react';
 
-// ── Debounce hook ─────────────────────────────────────────────────────────────
-function useDebounce<T>(value: T, delay = 300): T {
-    const [debounced, setDebounced] = React.useState(value);
-    React.useEffect(() => {
+function useDebounce<T>(value: T, delay = 250): T {
+    const [debounced, setDebounced] = useState(value);
+    useEffect(() => {
         const t = setTimeout(() => setDebounced(value), delay);
         return () => clearTimeout(t);
     }, [value, delay]);
     return debounced;
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-type FilterState = 'TODOS' | 'CRITICO' | 'NORMAL' | 'CONSUMED';
+type Filtro = 'TODOS' | 'CRITICO' | 'NORMAL' | 'CUARENTENA';
 
-// ── Component ─────────────────────────────────────────────────────────────────
-const FigmaSearch = ({ lotes = [], bodegas = [] }: { lotes: any[]; bodegas: any[] }) => {
-    const [query,         setQuery]         = useState('');
-    const [activeFilter,  setActiveFilter]  = useState<FilterState>('TODOS');
-    const [bodegaFilter,  setBodegaFilter]  = useState<string>('TODAS');
+interface LoteBusqueda {
+    id: number;
+    codigo: string;
+    material_name: string;
+    categoria?: string | null;
+    unit: string;
+    lote: string;
+    cantidad: number;
+    vencimiento: string;
+    days_until_expiration: number;
+    bodega: string;
+    status: 'CRITICO' | 'NORMAL';
+    estado?: string;
+    photo_url?: string | null;
+}
+
+const normalizar = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+/** Búsqueda sobre los lotes con existencias: insumo, código, lote, categoría o bodega. */
+const FigmaSearch = ({ lotes = [] }: { lotes: LoteBusqueda[] }) => {
+    const [query, setQuery] = useState('');
+    const [filtro, setFiltro] = useState<Filtro>('TODOS');
+    const [bodega, setBodega] = useState('TODAS');
     const inputRef = useRef<HTMLInputElement>(null);
+    const q = useDebounce(query);
 
-    const debouncedQuery = useDebounce(query, 280);
+    // Solo lotes con existencias; los consumidos quedan en el Kardex.
+    const disponibles = useMemo(() => lotes.filter((l) => Number(l.cantidad) > 0 && l.estado !== 'consumed'), [lotes]);
+    const bodegas = useMemo(() => Array.from(new Set(disponibles.map((l) => l.bodega))).sort(), [disponibles]);
 
-    // ── Filtered results ──────────────────────────────────────────────────────
-    const filteredResults = useMemo(() => {
-        let results = [...lotes];
+    const cumpleFiltro = (l: LoteBusqueda, f: Filtro) =>
+        f === 'TODOS' ? true : f === 'CUARENTENA' ? l.estado === 'quarantined' : l.status === f && l.estado !== 'quarantined';
 
-        // Text search
-        if (debouncedQuery.trim()) {
-            const s = debouncedQuery.toLowerCase();
-            results = results.filter(item =>
-                item.codigo?.toLowerCase().includes(s)        ||
-                item.lote?.toLowerCase().includes(s)          ||
-                item.bodega?.toLowerCase().includes(s)        ||
-                item.material?.name?.toLowerCase().includes(s)||
-                item.material?.code?.toLowerCase().includes(s)
-            );
-        }
+    const resultados = useMemo(() => {
+        const s = normalizar(q.trim());
+        return disponibles.filter((l) =>
+            (!s || [l.material_name, l.codigo, l.lote, l.bodega, l.categoria ?? ''].some((v) => normalizar(v).includes(s)))
+            && cumpleFiltro(l, filtro)
+            && (bodega === 'TODAS' || l.bodega === bodega));
+    }, [q, filtro, bodega, disponibles]);
 
-        // Status filter
-        if (activeFilter !== 'TODOS') {
-            results = results.filter(item => item.status === activeFilter);
-        }
+    const conteo = (f: Filtro) => disponibles.filter((l) => cumpleFiltro(l, f)).length;
 
-        // Bodega filter
-        if (bodegaFilter !== 'TODAS') {
-            results = results.filter(item => item.bodega === bodegaFilter);
-        }
-
-        return results;
-    }, [debouncedQuery, activeFilter, bodegaFilter, lotes]);
-
-    // ── Counts for filter badges ──────────────────────────────────────────────
-    const counts = useMemo(() => ({
-        total:    lotes.length,
-        criticos: lotes.filter(l => l.status === 'CRITICO').length,
-        normales: lotes.filter(l => l.status === 'NORMAL').length,
-    }), [lotes]);
-
-    const clearSearch = useCallback(() => {
-        setQuery('');
-        setActiveFilter('TODOS');
-        setBodegaFilter('TODAS');
+    const limpiar = useCallback(() => {
+        setQuery(''); setFiltro('TODOS'); setBodega('TODAS');
         inputRef.current?.focus();
     }, []);
 
-    // ── Status badge ──────────────────────────────────────────────────────────
-    const StatusBadge = ({ status }: { status: string }) => {
-        if (status === 'CRITICO') return (
-            <span className="flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 text-[8px] font-black rounded-full uppercase tracking-widest border border-red-200">
-                <AlertTriangle size={8} /> Crítico
-            </span>
-        );
-        if (status === 'CONSUMED') return (
-            <span className="px-3 py-1 bg-slate-100 text-slate-500 text-[8px] font-black rounded-full uppercase tracking-widest">Consumido</span>
-        );
-        return (
-            <span className="flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-[8px] font-black rounded-full uppercase tracking-widest border border-emerald-200">
-                <CheckCircle size={8} /> Normal
-            </span>
-        );
-    };
-
-    // ── Days badge ────────────────────────────────────────────────────────────
-    const DaysBadge = ({ vencimiento }: { vencimiento: string }) => {
-        const days = Math.ceil((new Date(vencimiento).getTime() - Date.now()) / 86400000);
-        const color = days <= 15 ? 'text-red-600 bg-red-50 border-red-200'
-                    : days <= 30 ? 'text-amber-600 bg-amber-50 border-amber-200'
-                    : 'text-slate-400 bg-slate-800/50 border-slate-200';
-        return (
-            <span className={`flex items-center gap-1 px-2 py-1 text-[8px] font-black rounded-full uppercase border ${color}`}>
-                <Clock size={8} />
-                {days > 0 ? `${days}d` : 'VENCIDO'}
-            </span>
-        );
-    };
+    const hayFiltros = !!query || filtro !== 'TODOS' || bodega !== 'TODAS';
 
     return (
-        <div className="space-y-10 animate-in fade-in duration-500 pb-20">
-
-            {/* Header */}
+        <div className="space-y-5 animate-in fade-in duration-500">
             <div>
-                <h2 className="text-xl font-bold uppercase tracking-tight">Buscador Inteligente</h2>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
-                    Explora materiales, lotes y ubicaciones en tiempo real
-                </p>
+                <h2 className="text-xl font-bold tracking-tight text-white">Buscar</h2>
+                <p className="mt-1 text-xs text-slate-400">Lotes con existencias, ordenados por vencimiento (FEFO).</p>
             </div>
 
-            {/* Search Bar */}
             <div className="relative">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 p-2 bg-indigo-50 text-indigo-600 rounded-xl">
-                    <Search size={22} strokeWidth={3} />
-                </div>
-                <input
-                    ref={inputRef}
-                    type="text"
-                    id="search-input"
-                    placeholder="Nombre del producto, SKU, No. de Lote, Bodega..."
-                    className="w-full bg-slate-900/80 backdrop-blur-xl border-2 border-slate-100 rounded-3xl pl-20 pr-14 py-6 text-xl shadow-2xl shadow-indigo-100/50 focus:outline-none focus:border-indigo-300 transition-all placeholder:text-slate-300 font-medium"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    autoComplete="off"
-                />
-                {(query || activeFilter !== 'TODOS' || bodegaFilter !== 'TODAS') && (
-                    <button
-                        onClick={clearSearch}
-                        className="absolute right-6 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-slate-600 transition-colors"
-                        title="Limpiar filtros"
-                    >
-                        <X size={20} />
+                <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input ref={inputRef} type="search" id="search-input" autoComplete="off" value={query} onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Insumo, código, lote, categoría o bodega…"
+                    className="w-full rounded-2xl border border-slate-700 bg-slate-900 py-4 pl-12 pr-12 text-base text-white placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none" />
+                {hayFiltros && (
+                    <button onClick={limpiar} aria-label="Limpiar búsqueda" className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <X size={18} />
                     </button>
                 )}
             </div>
 
-            {/* Filters Row */}
-            <div className="flex flex-wrap items-center gap-4">
-                {/* Status filters */}
-                <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-100 rounded-2xl p-1.5">
-                    {([
-                        { id: 'TODOS',    label: `Todos (${counts.total})` },
-                        { id: 'CRITICO',  label: `Críticos (${counts.criticos})` },
-                        { id: 'NORMAL',   label: `Normales (${counts.normales})` },
-                    ] as { id: FilterState; label: string }[]).map(f => (
-                        <button
-                            key={f.id}
-                            onClick={() => setActiveFilter(f.id)}
-                            className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
-                                activeFilter === f.id
-                                    ? 'bg-slate-900 text-white shadow-lg'
-                                    : 'text-slate-400 hover:text-slate-700'
-                            }`}
-                        >
-                            {f.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Bodega filter */}
-                {bodegas.length > 0 && (
-                    <div className="flex items-center gap-2">
-                        <MapPin size={14} className="text-slate-400" />
-                        <select
-                            value={bodegaFilter}
-                            onChange={(e) => setBodegaFilter(e.target.value)}
-                            className="bg-slate-900/80 backdrop-blur-xl border-2 border-slate-100 rounded-2xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 focus:outline-none focus:border-indigo-300 transition-all"
-                        >
-                            <option value="TODAS">Todas las bodegas</option>
-                            {bodegas.map((b: any) => (
-                                <option key={b.name} value={b.name}>{b.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
-                {/* Results count */}
-                <div className="ml-auto text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    {filteredResults.length} resultado{filteredResults.length !== 1 ? 's' : ''}
-                </div>
+            <div className="flex flex-wrap items-center gap-2">
+                {([['TODOS', 'Todos'], ['CRITICO', 'Por vencer'], ['NORMAL', 'Vigentes'], ['CUARENTENA', 'Cuarentena']] as [Filtro, string][]).map(([id, txt]) => (
+                    <button key={id} onClick={() => setFiltro(id)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${filtro === id ? 'border-indigo-400/50 bg-indigo-500/15 text-indigo-200' : 'border-slate-700 text-slate-400 hover:text-white'}`}>
+                        {txt} <span className="opacity-60">{conteo(id)}</span>
+                    </button>
+                ))}
+                <label className="ml-auto flex items-center gap-2 text-xs text-slate-400">
+                    <MapPin size={14} />
+                    <select value={bodega} onChange={(e) => setBodega(e.target.value)} aria-label="Filtrar por bodega"
+                        className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-200 focus:border-indigo-400 focus:outline-none">
+                        <option value="TODAS">Todas las bodegas</option>
+                        {bodegas.map((b) => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                </label>
             </div>
 
-            {/* Results Grid */}
-            {filteredResults.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredResults.map((item) => (
-                        <div
-                            key={item.id}
-                            className="bg-slate-900/80 backdrop-blur-xl border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group cursor-pointer relative overflow-hidden"
-                        >
-                            {/* Background icon */}
-                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <Package size={80} />
-                            </div>
+            <p className="text-xs text-slate-500">{resultados.length} lote{resultados.length !== 1 ? 's' : ''}</p>
 
-                            <div className="space-y-5 relative z-10">
-                                {/* Header */}
-                                <div className="flex items-start justify-between gap-2">
-                                    <span className="inline-flex px-3 py-1 bg-slate-900 text-white text-[8px] font-black rounded-full uppercase tracking-widest">
-                                        {item.codigo}
-                                    </span>
-                                    <StatusBadge status={item.status} />
+            {resultados.length > 0 ? (
+                <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {resultados.map((l) => {
+                        const dias = l.days_until_expiration;
+                        const cuarentena = l.estado === 'quarantined';
+                        const tono = cuarentena ? 'text-amber-300' : l.status === 'CRITICO' ? 'text-rose-300' : 'text-slate-400';
+                        return (
+                            <li key={l.id} className="flex gap-3 rounded-2xl border border-slate-700/50 bg-slate-900/70 p-3 transition hover:border-indigo-400/40">
+                                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-800">
+                                    {l.photo_url ? <img src={l.photo_url} alt="" loading="lazy" className="h-full w-full object-cover" /> : <Package size={22} className="m-auto mt-5 text-slate-300" />}
                                 </div>
-
-                                {/* Material name */}
-                                <div>
-                                    <h3 className="font-black text-white uppercase leading-tight text-sm line-clamp-2">
-                                        {item.material?.name || 'Producto'}
-                                    </h3>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">
-                                        Lote: {item.lote}
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-500">{l.codigo}{l.categoria ? ` · ${l.categoria}` : ''}</p>
+                                    <p className="truncate text-sm font-bold text-white">{l.material_name}</p>
+                                    <p className="mt-0.5 text-xs text-slate-400"><span className="font-semibold text-slate-200">{Number(l.cantidad).toLocaleString('es-CO')} {l.unit}</span> · lote {l.lote}</p>
+                                    <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                                        <span className={`inline-flex items-center gap-1 ${tono}`}>
+                                            {cuarentena ? <ShieldAlert size={12} /> : l.status === 'CRITICO' ? <AlertTriangle size={12} /> : <Clock size={12} />}
+                                            {cuarentena ? 'En cuarentena' : dias < 0 ? 'Vencido' : dias === 0 ? 'Vence hoy' : `Vence en ${dias} d`}
+                                        </span>
+                                        <span className="inline-flex min-w-0 items-center gap-1 text-slate-500"><MapPin size={12} /><span className="truncate">{l.bodega}</span></span>
                                     </p>
                                 </div>
-
-                                {/* Stats row */}
-                                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                                    <div className="text-center">
-                                        <div className="text-lg font-black text-white">{item.cantidad}</div>
-                                        <div className="text-[8px] text-slate-400 font-bold uppercase">Cantidad</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <DaysBadge vencimiento={item.vencimiento} />
-                                        <div className="text-[8px] text-slate-400 font-bold uppercase mt-1">Vence</div>
-                                    </div>
-                                </div>
-
-                                {/* Bodega */}
-                                <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-2xl">
-                                    <MapPin size={10} className="text-indigo-600 shrink-0" />
-                                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest truncate">
-                                        {item.bodega || 'Sin asignar'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
             ) : (
-                <div className="flex flex-col items-center justify-center py-24 space-y-6 text-slate-300">
-                    <Search size={56} strokeWidth={1} />
-                    <div className="text-center space-y-2">
-                        <p className="text-lg font-black uppercase tracking-tight">Sin resultados</p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest">
-                            {debouncedQuery
-                                ? `No hay lotes que coincidan con "${debouncedQuery}"`
-                                : 'No hay lotes disponibles con los filtros seleccionados'
-                            }
-                        </p>
-                    </div>
-                    {(debouncedQuery || activeFilter !== 'TODOS' || bodegaFilter !== 'TODAS') && (
-                        <button
-                            onClick={clearSearch}
-                            className="px-6 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-indigo-700 transition-colors active:scale-95"
-                        >
-                            Limpiar filtros
-                        </button>
-                    )}
+                <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-slate-700 px-6 py-16 text-center">
+                    <Search size={28} className="text-slate-500" />
+                    <p className="text-sm font-semibold text-slate-200">Sin resultados</p>
+                    <p className="text-xs text-slate-400">{q ? `Ningún lote coincide con “${q}”.` : 'No hay lotes con los filtros elegidos.'}</p>
+                    {hayFiltros && <button onClick={limpiar} className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white">Limpiar filtros</button>}
                 </div>
             )}
         </div>

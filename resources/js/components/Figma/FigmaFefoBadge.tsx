@@ -19,29 +19,29 @@ const FigmaFefoBadge = ({ daysUntilExpiration, size = 'md', showIcon = true, sho
 
     const config = {
         vencido: {
-            bg: 'bg-red-100 border-red-300',
-            text: 'text-red-700',
+            bg: 'bg-red-500/15 border-red-500/40',
+            text: 'text-red-300',
             dot: 'bg-red-500',
             icon: <Skull size={12} className="text-red-500" />,
             label: daysUntilExpiration < 0 ? `VENCIÓ HACE ${Math.abs(daysUntilExpiration)}d` : 'VENCIDO',
         },
         critico: {
-            bg: 'bg-red-50 border-red-200',
-            text: 'text-red-600',
+            bg: 'bg-red-500/10 border-red-500/25',
+            text: 'text-red-400',
             dot: 'bg-red-500 animate-pulse',
             icon: <AlertTriangle size={12} className="text-red-500" />,
             label: `${daysUntilExpiration}d`,
         },
         warning: {
-            bg: 'bg-amber-50 border-amber-200',
-            text: 'text-amber-700',
+            bg: 'bg-amber-500/10 border-amber-500/25',
+            text: 'text-amber-300',
             dot: 'bg-amber-500',
             icon: <Clock size={12} className="text-amber-500" />,
             label: `${daysUntilExpiration}d`,
         },
         ok: {
-            bg: 'bg-emerald-50 border-emerald-200',
-            text: 'text-emerald-700',
+            bg: 'bg-emerald-500/10 border-emerald-500/25',
+            text: 'text-emerald-300',
             dot: 'bg-emerald-500',
             icon: <ShieldCheck size={12} className="text-emerald-500" />,
             label: `${daysUntilExpiration}d`,

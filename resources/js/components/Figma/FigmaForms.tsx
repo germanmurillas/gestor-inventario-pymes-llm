@@ -78,7 +78,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
 
             <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-[2.5rem] p-10 shadow-sm space-y-10">
                 {errors.error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-pulse">
+                    <div className="bg-red-500/10 border border-red-500/25 text-red-400 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-pulse">
                         <Tag size={16} />
                         <span>{errors.error}</span>
                     </div>
@@ -88,7 +88,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                     
                     {/* General Info */}
                     <div className="space-y-6">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/40 pb-2">
                             <Info size={14} />
                             <span>Información General</span>
                         </div>
@@ -101,7 +101,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
                                     placeholder="Ej: Harina de Trigo Especial" 
-                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
                                 />
                                 {errors.name && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.name}</p>}
                             </div>
@@ -114,7 +114,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         value={data.code}
                                         onChange={e => setData('code', e.target.value.toUpperCase())}
                                         placeholder="MAT-00X" 
-                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all uppercase" 
+                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all uppercase" 
                                     />
                                     {errors.code && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.code}</p>}
                                 </div>
@@ -126,7 +126,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         value={data.batch_number}
                                         onChange={e => setData('batch_number', e.target.value)}
                                         placeholder="L-0000" 
-                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
                                     />
                                     {errors.batch_number && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.batch_number}</p>}
                                 </div>
@@ -137,7 +137,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                     required
                                     value={data.bodega_id}
                                     onChange={e => setData('bodega_id', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold"
+                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold"
                                 >
                                     <option value="">Seleccione una bodega...</option>
                                     {bodegas.map((b: any) => (
@@ -152,7 +152,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                     value={data.description}
                                     onChange={e => setData('description', e.target.value)}
                                     placeholder="Detalles sobre el proveedor o uso comercial..." 
-                                    className="w-full bg-slate-800/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none transition-all" 
+                                    className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none transition-all" 
                                 />
                             </div>
 
@@ -164,7 +164,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         onClick={() => !previewUrl && fileInputRef.current?.click()}
                                         className={`relative w-32 h-32 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all group ${
                                             previewUrl
-                                                ? 'border-indigo-300 cursor-pointer'
+                                                ? 'border-indigo-500/40 cursor-pointer'
                                                 : 'border-slate-300 cursor-pointer hover:border-indigo-400 bg-slate-800/50'
                                         }`}
                                     >
@@ -189,7 +189,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-200"
+                                            className="flex items-center gap-2 bg-indigo-500/10 text-indigo-300 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-500/15 transition-all border border-indigo-500/25"
                                         >
                                             <Camera size={14} />
                                             <span>{previewUrl ? 'Cambiar foto' : 'Seleccionar foto'}</span>
@@ -198,7 +198,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                             <button
                                                 type="button"
                                                 onClick={removePhoto}
-                                                className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-all border border-red-200"
+                                                className="flex items-center gap-2 bg-red-500/10 text-red-400 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500/15 transition-all border border-red-500/25"
                                             >
                                                 <span>✕ Quitar</span>
                                             </button>
@@ -220,7 +220,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
 
                     {/* Stock & Timeline */}
                     <div className="space-y-6">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/40 pb-2">
                             <Package size={14} />
                             <span>Existencias Iniciales</span>
                         </div>
@@ -236,7 +236,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         value={data.stock_initial}
                                         onChange={e => setData('stock_initial', parseFloat(e.target.value))}
                                         placeholder="0.00" 
-                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
+                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl pl-4 pr-12 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
                                     />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-tighter">KG</span>
                                 </div>
@@ -252,20 +252,20 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         required
                                         value={data.expiration_date}
                                         onChange={e => setData('expiration_date', e.target.value)}
-                                        className="w-full bg-slate-800/50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
+                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
                                     />
                                 </div>
                                 {errors.expiration_date && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.expiration_date}</p>}
                                 <p className="text-[9px] text-slate-400 italic">Crítico para el cálculo de salida prioritaria.</p>
                             </div>
 
-                            <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100/50 space-y-3">
-                                <div className="flex items-center gap-2 text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                            <div className="bg-indigo-500/10 p-6 rounded-2xl border border-indigo-500/25 space-y-3">
+                                <div className="flex items-center gap-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest">
                                     <Tag size={14} />
                                     <span>Previsualización de Lote</span>
                                 </div>
-                                <div className="text-[10px] text-indigo-900/60 leading-relaxed font-bold uppercase tracking-tight">
-                                    Al guardar, el sistema generará automáticamente un registro de entrada en el Kardex para el lote <span className="text-indigo-600">#{data.batch_number || '---'}</span> con <span className="text-indigo-600">{data.stock_initial || 0} KG</span>.
+                                <div className="text-[10px] text-indigo-300/60 leading-relaxed font-bold uppercase tracking-tight">
+                                    Al guardar, el sistema generará automáticamente un registro de entrada en el Kardex para el lote <span className="text-indigo-400">#{data.batch_number || '---'}</span> con <span className="text-indigo-400">{data.stock_initial || 0} KG</span>.
                                 </div>
                             </div>
                         </div>
@@ -273,8 +273,8 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
 
                 </div>
 
-                <div className="pt-10 border-t border-gray-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                <div className="pt-10 border-t border-slate-700/40 flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-xs text-slate-400">
                         <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center text-white">
                             <Info size={12} />
                         </div>
@@ -283,7 +283,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                     <button 
                         type="button"
                         onClick={onBack}
-                        className="text-[10px] font-black text-red-400 hover:text-red-600 transition-colors uppercase tracking-[0.2em]"
+                        className="text-[10px] font-black text-red-400 hover:text-red-400 transition-colors uppercase tracking-[0.2em]"
                     >
                         Cancelar Registro
                     </button>

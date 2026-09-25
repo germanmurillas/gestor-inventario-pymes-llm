@@ -105,7 +105,7 @@ const FigmaTablero = ({ stats, user, onViewChange, onOpenBodega, onManageBodegas
                                 />
                             ))
                         ) : (
-                            <div className="p-12 text-center text-slate-600 text-xs font-bold uppercase tracking-wider">
+                            <div className="p-12 text-center text-slate-300 text-xs font-bold uppercase tracking-wider">
                                 Sin movimientos registrados
                             </div>
                         )}
@@ -141,7 +141,7 @@ const FigmaTablero = ({ stats, user, onViewChange, onOpenBodega, onManageBodegas
                                     />
                                 ))
                             ) : (
-                                <div className="bg-slate-800/20 border border-dashed border-slate-700/30 rounded-xl p-6 text-center text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+                                <div className="bg-slate-800/20 border border-dashed border-slate-700/30 rounded-xl p-6 text-center text-slate-300 text-[10px] font-bold uppercase tracking-wider">
                                     Sin bodegas
                                 </div>
                             )}

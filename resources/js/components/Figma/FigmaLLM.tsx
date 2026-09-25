@@ -209,7 +209,7 @@ const FigmaLLM = () => {
                  </div>
 
                  <div className="relative">
-                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                      <input 
                         type="text" 
                         value={searchQuery}
@@ -226,18 +226,18 @@ const FigmaLLM = () => {
                             onClick={() => handleSelectSession(s.session_id, s.session_title)}
                             className={`p-4 rounded-lg border cursor-pointer transition-all ${
                                 activeSessionId === s.session_id 
-                                ? 'bg-indigo-50 border-indigo-200 shadow-sm' 
+                                ? 'bg-indigo-500/10 border-indigo-500/25 shadow-sm' 
                                 : 'bg-slate-900/80 backdrop-blur-xl border-slate-700/40 hover:border-slate-600'
                             }`}
                          >
                              <div className="text-sm font-bold truncate text-slate-300">{s.session_title || 'Nueva Consulta'}</div>
-                             <div className="text-[10px] text-gray-400 uppercase tracking-wider mt-1 truncate">
+                             <div className="text-[10px] text-slate-400 uppercase tracking-wider mt-1 truncate">
                                 {s.last_activity ? new Date(s.last_activity).toLocaleDateString() : 'Auditoría FEFO'}
                              </div>
                          </div>
                      ))}
                      {filteredSessions.length === 0 && (
-                         <div className="text-center p-4 text-xs font-bold text-gray-400 uppercase tracking-widest">No hay chats previos</div>
+                         <div className="text-center p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">No hay chats previos</div>
                      )}
                  </div>
             </aside>
@@ -246,19 +246,19 @@ const FigmaLLM = () => {
             <div className="flex-1 flex flex-col bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-xl overflow-hidden shadow-sm">
                 <header className="px-6 py-4 border-b border-slate-700/40 flex items-center justify-between bg-slate-800/40 relative z-20">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-black rounded flex items-center justify-center text-white">
+                        <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center text-white">
                             <Bot size={18} />
                         </div>
                         <div>
                             <div className="text-sm font-bold">Motor RAG Pymetory</div>
                             <div className="flex items-center gap-1.5">
                                 <span className={`w-1.5 h-1.5 rounded-full ${isThinking ? 'bg-amber-500 animate-pulse' : 'bg-green-500'}`}></span>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                     {isThinking ? 'Procesando RAG...' : 'En línea'}
                                 </span>
                                 {!isThinking && ragInfo.model !== '—' && (
-                                    <span className="text-[09px] font-mono text-gray-500 ml-2 truncate max-w-[280px]" title={`${ragInfo.model} · ${ragInfo.source} · ${ragInfo.key_name}`}>
-                                        {ragInfo.model} <span className="text-[#E63B2E]">·</span> {ragInfo.source} <span className="text-[#E63B2E]">·</span> {ragInfo.key_name}
+                                    <span className="text-[09px] font-mono text-slate-400 ml-2 truncate max-w-[280px]" title={`${ragInfo.model} · ${ragInfo.source} · ${ragInfo.key_name}`}>
+                                        {ragInfo.model} <span className="text-rose-400">·</span> {ragInfo.source} <span className="text-rose-400">·</span> {ragInfo.key_name}
                                     </span>
                                 )}
                             </div>
@@ -271,19 +271,19 @@ const FigmaLLM = () => {
                                 aria-expanded={dropdownOpen}
                                 aria-label={`Modelo activo: ${selectedSource} ${selectedModel}. Cambiar modelo`}
                                 title={modelDirty ? 'No se pudo guardar la selección — el motor sigue usando el modelo anterior' : `Modelo persistido en settings: ${selectedModel}`}
-                                className={`flex items-center gap-1.5 bg-slate-950 border rounded-md px-2.5 py-1 text-[10px] font-bold text-slate-200 transition-colors ${modelDirty ? 'border-[#E63B2E]' : 'border-slate-600 hover:border-slate-400'}`}
+                                className={`flex items-center gap-1.5 bg-slate-950 border rounded-md px-2.5 py-1 text-[10px] font-bold text-slate-200 transition-colors ${modelDirty ? 'border-rose-500' : 'border-slate-600 hover:border-slate-400'}`}
                             >
-                                <span className="text-[#E63B2E] uppercase tracking-wider">{selectedSource === 'opencode' ? 'OPENCODE' : 'LOCAL'}</span>
+                                <span className="text-rose-400 uppercase tracking-wider">{selectedSource === 'opencode' ? 'OPENCODE' : 'LOCAL'}</span>
                                 <span className="text-slate-500">·</span>
                                 <span className="truncate max-w-[120px]">{selectedModel}</span>
-                                {modelDirty && <span className="text-[#E63B2E] font-black" aria-hidden="true">!</span>}
+                                {modelDirty && <span className="text-rose-400 font-black" aria-hidden="true">!</span>}
                                 <ChevronDown size={12} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {dropdownOpen && (
                                 <div
                                     role="listbox"
                                     aria-label="Seleccionar modelo LLM"
-                                    className="absolute right-0 top-full mt-2 z-50 bg-[#0b0d13] border border-slate-600 rounded-lg shadow-2xl min-w-[240px] max-h-[min(60vh,420px)] overflow-y-auto custom-scrollbar"
+                                    className="absolute right-0 top-full mt-2 z-50 bg-slate-950 border border-slate-600 rounded-lg shadow-2xl min-w-[240px] max-h-[min(60vh,420px)] overflow-y-auto custom-scrollbar"
                                 >
                                     <div className="sticky top-0 z-10 bg-slate-800/95 backdrop-blur-sm text-[10px] leading-4 font-black uppercase tracking-widest text-slate-300 px-3 py-2 border-b border-slate-600">LOCAL · Ollama</div>
                                     {models.local.map(m => (
@@ -292,7 +292,7 @@ const FigmaLLM = () => {
                                             role="option"
                                             aria-selected={selectedSource === 'local' && selectedModel === m}
                                             onClick={() => changeModel('local', m)}
-                                            className={`w-full text-left px-3 py-2 text-[11px] text-slate-200 hover:bg-slate-700 transition-colors ${selectedSource === 'local' && selectedModel === m ? 'bg-slate-700 border-l-2 border-[#E63B2E] font-bold' : ''}`}
+                                            className={`w-full text-left px-3 py-2 text-[11px] text-slate-200 hover:bg-slate-700 transition-colors ${selectedSource === 'local' && selectedModel === m ? 'bg-slate-700 border-l-2 border-rose-500 font-bold' : ''}`}
                                         >{m}</button>
                                     ))}
                                     <div className="sticky z-10 bg-slate-800/95 backdrop-blur-sm text-[10px] leading-4 font-black uppercase tracking-widest text-slate-300 px-3 py-2 border-y border-slate-600">OPENCODE · Remoto · $0</div>
@@ -302,7 +302,7 @@ const FigmaLLM = () => {
                                             role="option"
                                             aria-selected={selectedSource === 'opencode' && selectedModel === m}
                                             onClick={() => changeModel('opencode', m)}
-                                            className={`w-full text-left px-3 py-2 text-[11px] text-slate-200 hover:bg-slate-700 transition-colors ${selectedSource === 'opencode' && selectedModel === m ? 'bg-slate-700 border-l-2 border-[#E63B2E] font-bold' : ''}`}
+                                            className={`w-full text-left px-3 py-2 text-[11px] text-slate-200 hover:bg-slate-700 transition-colors ${selectedSource === 'opencode' && selectedModel === m ? 'bg-slate-700 border-l-2 border-rose-500 font-bold' : ''}`}
                                         >{m}</button>
                                     ))}
                                 </div>
@@ -343,7 +343,7 @@ const FigmaLLM = () => {
                         <button 
                             disabled={isThinking}
                             onClick={handleSendMessage}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-black text-white p-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-20"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-20"
                         >
                             <Send size={16} />
                         </button>

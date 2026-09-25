@@ -18,7 +18,7 @@ export default function Login() {
     };
 
     return (
-        <div className="relative min-h-screen overflow-hidden bg-[#070B14] text-slate-100 font-sans">
+        <div className="pm-fixed-dark relative min-h-screen overflow-hidden bg-[#070B14] text-slate-100 font-sans">
             <Head title="Iniciar sesión | Pymetory" />
 
             {/* Fondo: bodega con flujo de datos */}

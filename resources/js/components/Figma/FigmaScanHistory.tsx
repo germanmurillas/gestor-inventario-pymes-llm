@@ -55,8 +55,8 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl">
-                    <ScanLine size={14} className="text-indigo-600" />
+                <div className="flex items-center gap-2 bg-slate-800/60 px-4 py-2 rounded-xl">
+                    <ScanLine size={14} className="text-indigo-400" />
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
                         {scans.length} escaneos
                     </span>
@@ -70,13 +70,13 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
             )}
 
             {error && (
-                <div className="bg-red-50 border border-red-100 p-8 rounded-[2rem] text-center">
-                    <p className="text-red-600 font-bold text-sm">{error}</p>
+                <div className="bg-red-500/10 border border-red-500/25 p-8 rounded-[2rem] text-center">
+                    <p className="text-red-400 font-bold text-sm">{error}</p>
                 </div>
             )}
 
             {!loading && !error && scans.length === 0 && (
-                <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-dashed border-slate-200 rounded-[3rem] py-32 flex flex-col items-center justify-center text-slate-300">
+                <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-dashed border-slate-700/50 rounded-[3rem] py-32 flex flex-col items-center justify-center text-slate-300">
                     <ScanLine size={56} className="mb-6 opacity-20" />
                     <p className="text-sm font-black uppercase tracking-[0.3em] opacity-40 text-white">
                         Sin escaneos QR registrados
@@ -92,7 +92,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-slate-800/50 border-b border-slate-100">
+                                <tr className="bg-slate-800/50 border-b border-slate-700/50">
                                     <th className="px-6 py-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Tipo</th>
                                     <th className="px-6 py-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Material</th>
                                     <th className="px-6 py-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Lote</th>
@@ -102,24 +102,24 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                                     <th className="px-6 py-4 font-black text-slate-400 uppercase text-[10px] tracking-widest">Nota</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-50">
+                            <tbody className="divide-y divide-slate-700/40">
                                 {scans.map((scan) => (
                                     <tr key={scan.id} className="hover:bg-slate-800/50 transition-colors group">
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2">
                                                 {scan.type === 'entrada' ? (
                                                     <>
-                                                        <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
-                                                            <ArrowDown size={14} className="text-green-600" />
+                                                        <div className="w-8 h-8 bg-green-500/15 rounded-xl flex items-center justify-center">
+                                                            <ArrowDown size={14} className="text-green-400" />
                                                         </div>
-                                                        <span className="text-[10px] font-black text-green-700 uppercase">Entrada</span>
+                                                        <span className="text-[10px] font-black text-green-300 uppercase">Entrada</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <div className="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center">
-                                                            <ArrowUp size={14} className="text-red-600" />
+                                                        <div className="w-8 h-8 bg-red-500/15 rounded-xl flex items-center justify-center">
+                                                            <ArrowUp size={14} className="text-red-400" />
                                                         </div>
-                                                        <span className="text-[10px] font-black text-red-700 uppercase">Salida</span>
+                                                        <span className="text-[10px] font-black text-red-300 uppercase">Salida</span>
                                                     </>
                                                 )}
                                             </div>
@@ -131,10 +131,10 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-sm font-bold text-slate-700 font-mono">{scan.batch}</span>
+                                            <span className="text-sm font-bold text-slate-300 font-mono">{scan.batch}</span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-sm font-black text-white">{scan.quantity} kg</span>
+                                            <span className="text-sm font-black text-white">{scan.quantity} {scan.unit ?? ''}</span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2">
@@ -170,13 +170,13 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                     </div>
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entradas (Check-in)</div>
-                        <div className="text-2xl font-black text-green-600 mt-2">
+                        <div className="text-2xl font-black text-green-400 mt-2">
                             {scans.filter(s => s.type === 'entrada').length}
                         </div>
                     </div>
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
                         <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Salidas (Check-out)</div>
-                        <div className="text-2xl font-black text-red-600 mt-2">
+                        <div className="text-2xl font-black text-red-400 mt-2">
                             {scans.filter(s => s.type === 'salida').length}
                         </div>
                     </div>

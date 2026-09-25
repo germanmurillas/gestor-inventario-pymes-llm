@@ -36,10 +36,10 @@ export default function FigmaBodegaBar({ bodega: b, onOpen, onEdit }: Props) {
     return (
         <div className={`group relative overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-800/40 transition hover:border-indigo-400/40 ${inactiva ? 'opacity-60' : ''}`}>
             <button type="button" onClick={onOpen} className="block w-full text-left" aria-label={`Ver inventario de ${b.name}`}>
-                <div className="relative h-24 overflow-hidden bg-slate-900">
+                <div className="pm-media relative h-24 overflow-hidden bg-slate-900">
                     {b.image_url
                         ? <img src={b.image_url} alt="" loading="lazy" className="h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105 group-hover:opacity-95" />
-                        : <Warehouse size={36} className="absolute inset-0 m-auto text-slate-700" />}
+                        : <Warehouse size={36} className="absolute inset-0 m-auto text-slate-300" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent" />
                     <div className="absolute inset-x-3 bottom-2 flex items-end justify-between gap-2">
                         <div className="min-w-0">
@@ -70,7 +70,7 @@ export default function FigmaBodegaBar({ bodega: b, onOpen, onEdit }: Props) {
 
             {onEdit && (
                 <button type="button" onClick={onEdit} aria-label={`Editar ${b.name}`}
-                    className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-lg bg-slate-950/60 text-slate-200 opacity-100 backdrop-blur transition hover:bg-slate-900 sm:opacity-0 sm:group-hover:opacity-100">
+                    className="pm-media absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-lg bg-slate-950/60 text-slate-200 opacity-100 backdrop-blur transition hover:bg-slate-900 sm:opacity-0 sm:group-hover:opacity-100">
                     <Pencil size={14} />
                 </button>
             )}

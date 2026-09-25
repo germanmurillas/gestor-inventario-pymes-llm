@@ -14,6 +14,11 @@ class AlertService
      */
     public function send(string $tipo, string $titulo, string $mensaje, ?string $accionUrl = null, ?string $icono = null): void
     {
+        // Los comandos corren cada hora: no se repite un aviso que sigue sin leer en las últimas 24 h.
+        if (self::yaNotificada($titulo)) {
+            return;
+        }
+
         $this->sendInApp($tipo, $titulo, $mensaje, $accionUrl, $icono);
 
         if (self::isActive('notif_telegram_activo')) {
@@ -23,6 +28,12 @@ class AlertService
         if (self::isActive('notif_email_activo')) {
             $this->sendEmail($tipo, $titulo, $mensaje);
         }
+    }
+
+    public static function yaNotificada(string $titulo): bool
+    {
+        return Notification::where('titulo', $titulo)->unread()
+            ->where('created_at', '>=', now()->subDay())->exists();
     }
 
     /**

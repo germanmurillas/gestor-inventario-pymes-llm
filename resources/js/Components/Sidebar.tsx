@@ -201,7 +201,7 @@ export default function Sidebar({
                 ))}
             </nav>
 
-            <div className="shrink-0 p-4 border-t border-white/5 bg-black/40">
+            <div className="shrink-0 p-4 border-t border-white/5 bg-slate-950/40">
                 <div className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 text-xs font-bold capitalize rounded-xl">
                     <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
                         <User size={16} />

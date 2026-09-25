@@ -77,7 +77,7 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                         {bodegas.map((b) => (
                             <button key={b.id} onClick={() => setEditando(b.id)} className="flex w-full items-center gap-3 rounded-2xl border border-slate-700/40 bg-slate-800/40 p-2 text-left">
                                 <div className="h-14 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-900">
-                                    {b.image_url ? <img src={b.image_url} alt="" className="h-full w-full object-cover" /> : <Warehouse size={20} className="m-auto mt-4 text-slate-600" />}
+                                    {b.image_url ? <img src={b.image_url} alt="" className="h-full w-full object-cover" /> : <Warehouse size={20} className="m-auto mt-4 text-slate-300" />}
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <p className="truncate text-sm font-bold text-white">{b.name}</p>
@@ -89,7 +89,7 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                     </div>
                 ) : (
                     <form onSubmit={guardar} className="space-y-4">
-                        <label className="relative block h-40 cursor-pointer overflow-hidden rounded-2xl border border-dashed border-slate-600 bg-slate-900">
+                        <label className="pm-media relative block h-40 cursor-pointer overflow-hidden rounded-2xl border border-dashed border-slate-600 bg-slate-900">
                             {preview && !quitarImagen
                                 ? <img src={preview} alt="" className="h-full w-full object-cover" />
                                 : <span className="flex h-full flex-col items-center justify-center gap-2 text-sm text-slate-400"><ImagePlus size={26} /> Imagen de fondo (opcional)</span>}

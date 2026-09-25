@@ -267,3 +267,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/monitor', [\App\Http\Controllers\MonitorController::class, 'index']);
 Route::get('/api/monitor/stats', [\App\Http\Controllers\MonitorController::class, 'stats']);
 Route::post('/api/monitor/pulse', [\App\Http\Controllers\MonitorController::class, 'pulse']);
+
+// Alertas del sistema (FEFO y stock bajo) por usuario
+Route::middleware(['auth', 'verified'])->prefix('api/notificaciones')->group(function () {
+    Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::post('/leidas', [\App\Http\Controllers\NotificationController::class, 'marcarTodas']);
+    Route::post('/{notification}/leida', [\App\Http\Controllers\NotificationController::class, 'marcarLeida']);
+});
