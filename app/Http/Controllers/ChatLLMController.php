@@ -67,27 +67,41 @@ class ChatLLMController extends Controller {
     }
 
     private function classifyQuery($query) {
-        $q = strtolower($query);
-        if (preg_match('/cu[aá]nt[oa]s?.+hay|stock|cantidad|existencias|disponible/i', $q)) return 'stock_check';
-        if (preg_match('/cr[ií]tic[oa]|por vencer|pr[oó]xim[oa].+venc|alerta|urgente/i', $q)) return 'critical_alerts';
-        if (preg_match('/vence|fecha.+vencimient|cu[aá]ndo.+vence|expira/i', $q)) return 'expiration';
-        if (preg_match('/d[oó]nde|ubicaci[oó]n|bodega|almac[eé]n|est[aá].+guardado/i', $q)) return 'location';
-        if (preg_match('/valor|cu[aá]nto.+vale|precio|costo|cu[aá]nto.+cuest/i', $q)) return 'valuation';
-        if (preg_match('/entr[oó]|sali[oó]|movimient|historial|kardex|qui[eé]n.+mov/i', $q) && !preg_match('/lote/i', $q)) return 'movements';
-        if (preg_match('/lote\s*LT-\d+|batch\s*\d+/i', $q)) return 'batch_info';
-        if (preg_match('/resumen|todo|general|panorama/i', $q)) return 'summary';
-        if (preg_match('/concili|ajust|diferencia|descuadr/i', $q)) return 'conciliation';
+        $q = mb_strtolower($query);
+        if (preg_match('/cu[aá]nt[oa]s?.+(hay|queda|tengo|tenemos)|stock|cantidad|existencias|disponible/iu', $q)) return 'stock_check';
+        if (preg_match('/cr[ií]tic[oa]|por vencer|pr[oó]xim[oa].+venc|alerta|urgente/iu', $q)) return 'critical_alerts';
+        if (preg_match('/vence|fecha.+vencimient|cu[aá]ndo.+vence|expira/iu', $q)) return 'expiration';
+        if (preg_match('/d[oó]nde|ubicaci[oó]n|bodega|almac[eé]n|est[aá].+guardado/iu', $q)) return 'location';
+        if (preg_match('/valor|cu[aá]nto.+vale|precio|costo|cu[aá]nto.+cuest/iu', $q)) return 'valuation';
+        if (preg_match('/entr[oó]|sali[oó]|movimient|historial|kardex|qui[eé]n.+mov/iu', $q) && !preg_match('/lote/iu', $q)) return 'movements';
+        if (preg_match('/lote\s*LT-\d+|batch\s*\d+/iu', $q)) return 'batch_info';
+        if (preg_match('/resumen|panorama|todo el inventario|estado general/iu', $q)) return 'summary';
+        if (preg_match('/concili|ajust|diferencia|descuadr/iu', $q)) return 'conciliation';
         return 'general';
     }
 
-    private function buildRagContext($query, $intent) {
-        $keywords = collect(explode(' ', strtolower($query)))
-            ->filter(fn($w) => strlen($w) > 2)
-            ->map(fn($w) => trim($w, "?. ,!¡¿;:"))
-            ->reject(fn($w) => in_array($w, ['que','los','las','del','por','con','una','para','como','tiene',
-                'hay','está','estan','haber','ser','fue','son','era','eran','donde','cuando','cual','cuales']))
+    /** Palabras de la pregunta que pueden nombrar un material (sin términos genéricos del dominio). */
+    private function materialKeywords(string $query): array
+    {
+        $generic = ['que','qué','los','las','del','por','con','una','uno','para','como','cómo','tiene','tengo','tenemos',
+            'hay','está','esta','este','estos','estas','estan','están','haber','ser','fue','son','era','eran','donde','dónde',
+            'cuando','cuándo','cual','cuál','cuales','cuáles','cuanto','cuánto','cuanta','cuánta','cuantos','cuántos','cuantas','cuántas',
+            'queda','quedan','me','mi','mis','dame','muestra','muéstrame','muestrame','dime','ver','todo','todos','todas',
+            'inventario','stock','cantidad','existencias','disponible','material','materiales','producto','productos','insumo','insumos',
+            'lote','lotes','bodega','bodegas','vence','vencen','vencer','vencimiento','vencimientos','fecha','fechas','semana','mes','hoy',
+            'días','dias','próximo','proximo','próximos','proximos','crítico','critico','críticos','criticos','alerta','alertas','urgente',
+            'valor','precio','costo','vale','movimiento','movimientos','entradas','salidas','historial','kardex','resumen','general',
+            'ubicación','ubicacion','almacén','almacen','kilos','kg','bultos','cajas','sobre','acerca'];
+
+        return collect(preg_split('/\s+/u', mb_strtolower($query)))
+            ->map(fn($w) => preg_replace('/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/u', '', $w))
+            ->filter(fn($w) => mb_strlen($w) > 2 && !in_array($w, $generic, true))
             ->values()
             ->toArray();
+    }
+
+    private function buildRagContext($query, $intent) {
+        $keywords = $this->materialKeywords($query);
 
         $materialIds = [];
         if (!empty($keywords)) {
@@ -97,6 +111,16 @@ class ChatLLMController extends Controller {
                       ->orWhere('description', 'like', "%{$word}%");
                 }
             })->pluck('id')->toArray();
+        }
+
+        // Si la pregunta nombra un material que no existe, se dice explícitamente
+        // en lugar de devolver lotes de otros materiales.
+        if (!empty($keywords) && empty($materialIds)
+            && in_array($intent, ['stock_check', 'expiration', 'location', 'valuation', 'general'], true)) {
+            $catalogo = \App\Models\Material::orderBy('name')->pluck('name')->join(', ');
+            return "MATERIAL NO ENCONTRADO: ningún material registrado coincide con \"" . implode(' ', $keywords) . "\".\n"
+                 . "MATERIALES REGISTRADOS: {$catalogo}\n\n"
+                 . "INSTRUCCIÓN: Indica al usuario que ese material no está registrado en el inventario y menciona los materiales registrados que podrían ser lo que busca. No inventes cantidades.";
         }
 
         switch ($intent) {
@@ -152,7 +176,7 @@ class ChatLLMController extends Controller {
                 ? $lotes->map(function($l) {
                     return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$l->quantity} | Vence: " .
                            ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') .
-                           " | Bodega: {$l->bodega->name}";
+                           " | Bodega: " . ($l->bodega?->name ?? 'Sin bodega');
                   })->join("\n")
                 : "- No se encontraron registros para esta consulta.";
         }
@@ -496,12 +520,10 @@ class ChatLLMController extends Controller {
             \Log::error("LLM connection error [{$llmSource}]: " . $e->getMessage());
         }
 
-        $fallbackLotes = Lote::with(['material', 'bodega'])->fefoOrder()->take(8)->get();
+        // Sin modelo disponible: se entregan los datos recuperados para la consulta, no un listado genérico.
+        $datos = trim(explode("\n\nINSTRUCCIÓN:", explode("\n\nESTADO DE BODEGAS:", $contextoRAG)[0])[0]);
         return response()->json([
-            'response' => "> MODO TEXTO (sin IA):\n" . $fallbackLotes->map(function($l) {
-                return "- {$l->material->name} [{$l->batch_number}]: {$l->quantity}u (Vence: " .
-                    ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') . ")";
-            })->join("\n"),
+            'response' => "> MODO TEXTO (sin IA): datos encontrados para tu consulta\n" . $datos,
             'intent' => $intent,
             'model'  => 'text-mode',
             'source' => 'fallback',
