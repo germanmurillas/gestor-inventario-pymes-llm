@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Console/Commands',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        // La app escucha solo en 127.0.0.1 detrás del túnel de Cloudflare/nginx:
+        // confiar en X-Forwarded-Proto para generar URLs y redirecciones https.
+        $middleware->trustProxies(at: '*');
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
