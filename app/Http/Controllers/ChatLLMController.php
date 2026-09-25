@@ -184,7 +184,7 @@ class ChatLLMController extends Controller {
 
         $bodegas = \App\Models\Bodega::all()->map(fn($b) => "{$b->name}: {$b->occupancy_percentage}% ocupación")->join(' | ');
         $context .= "\n\nESTADO DE BODEGAS: {$bodegas}";
-        $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó. Si pregunta por stock de cemento, solo habla de cemento. Si pregunta por vencimientos, solo muestra fechas. NO repitas todo el inventario a menos que te lo pidan explícitamente.";
+        $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó. Si pregunta por un material, habla solo de ese material e indica la unidad. Si pregunta por vencimientos, indica material, lote y fecha de vencimiento, del más próximo al más lejano. NO repitas todo el inventario a menos que te lo pidan explícitamente.";
 
         return $context;
     }
