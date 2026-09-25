@@ -263,15 +263,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/monitor', [\App\Http\Controllers\MonitorController::class, 'index']);
 Route::get('/api/monitor/stats', [\App\Http\Controllers\MonitorController::class, 'stats']);
 Route::post('/api/monitor/pulse', [\App\Http\Controllers\MonitorController::class, 'pulse']);
-
-// ── MILOTO ──
-Route::get('/api/miloto', [\App\Http\Controllers\MilotoController::class, 'index']);
-
-// MiLoto backtesting API (Fase 4) — rutas específicas ANTES del comodín /{id}
-Route::get('/api/miloto/historial',      [\App\Http\Controllers\MilotoBacktestController::class, 'historial']);
-Route::get('/api/miloto/ranking',        [\App\Http\Controllers\MilotoBacktestController::class, 'ranking']);
-Route::get('/api/miloto/sync-status',    [\App\Http\Controllers\MilotoBacktestController::class, 'syncStatus']);
-Route::get('/api/miloto/algoritmo/{id}', [\App\Http\Controllers\MilotoBacktestController::class, 'algoritmo'])
-    ->whereNumber('id');
-
-Route::get('/api/miloto/{id}', [\App\Http\Controllers\MilotoController::class, 'run']);
