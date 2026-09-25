@@ -57,4 +57,15 @@ class ChatRagContextTest extends TestCase
         $this->assertStringContainsString('LT-HAR-1', $ctx);
         $this->assertStringNotContainsString('LT-SAL-1', $ctx);
     }
+
+    public function test_pregunta_de_vencimiento_sin_material_lista_por_fecha(): void
+    {
+        $lev = Material::factory()->create(['name' => 'Levadura fresca']);
+        Lote::factory()->create(['material_id' => $lev->id, 'batch_number' => 'LT-LEV-9']);
+
+        $ctx = $this->invokePrivate('buildRagContext', '¿Qué lotes vencen pronto?', 'expiration');
+
+        $this->assertStringNotContainsString('MATERIAL NO ENCONTRADO', $ctx);
+        $this->assertStringContainsString('LT-LEV-9', $ctx);
+    }
 }

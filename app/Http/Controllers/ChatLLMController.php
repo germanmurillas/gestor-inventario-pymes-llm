@@ -91,7 +91,8 @@ class ChatLLMController extends Controller {
             'lote','lotes','bodega','bodegas','vence','vencen','vencer','vencimiento','vencimientos','fecha','fechas','semana','mes','hoy',
             'días','dias','próximo','proximo','próximos','proximos','crítico','critico','críticos','criticos','alerta','alertas','urgente',
             'valor','precio','costo','vale','movimiento','movimientos','entradas','salidas','historial','kardex','resumen','general',
-            'ubicación','ubicacion','almacén','almacen','kilos','kg','bultos','cajas','sobre','acerca'];
+            'ubicación','ubicacion','almacén','almacen','kilos','kg','bultos','cajas','sobre','acerca',
+            'pronto','ahora','actualmente','favor','porfa','necesito','quiero','saber','tiene','tienes','hoy','mañana'];
 
         return collect(preg_split('/\s+/u', mb_strtolower($query)))
             ->map(fn($w) => preg_replace('/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/u', '', $w))
@@ -116,7 +117,7 @@ class ChatLLMController extends Controller {
         // Si la pregunta nombra un material que no existe, se dice explícitamente
         // en lugar de devolver lotes de otros materiales.
         if (!empty($keywords) && empty($materialIds)
-            && in_array($intent, ['stock_check', 'expiration', 'location', 'valuation', 'general'], true)) {
+            && in_array($intent, ['stock_check', 'location', 'valuation'], true)) {
             $catalogo = \App\Models\Material::orderBy('name')->pluck('name')->join(', ');
             return "MATERIAL NO ENCONTRADO: ningún material registrado coincide con \"" . implode(' ', $keywords) . "\".\n"
                  . "MATERIALES REGISTRADOS: {$catalogo}\n\n"
@@ -174,7 +175,7 @@ class ChatLLMController extends Controller {
         if ($intent !== 'movements') {
             $context .= (isset($lotes) && $lotes->isNotEmpty())
                 ? $lotes->map(function($l) {
-                    return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$l->quantity} | Vence: " .
+                    return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$l->quantity} {$l->material->unit} | Vence: " .
                            ($l->expiration_date ? $l->expiration_date->format('Y-m-d') : 'N/A') .
                            " | Bodega: " . ($l->bodega?->name ?? 'Sin bodega');
                   })->join("\n")
