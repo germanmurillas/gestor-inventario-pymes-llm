@@ -1160,3 +1160,19 @@ nav[aria-label="Breadcrumb"] h1{ color: var(--pm-text); }
 }
 
 
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LANDING (Welcome.tsx) — página de marketing con paleta PROPIA.
+   La capa de temas remapea .text-gray-500/.bg-white/etc a tokens oscuros;
+   en una página clara eso pinta texto claro sobre fondo claro (invisible).
+   Excepción: la landing SIEMPRE mantiene su paleta fija clara.
+   ═══════════════════════════════════════════════════════════════════ */
+html[data-theme] .page-landing { background-color: #F3F4F6 !important; color: #111111 !important; }
+html[data-theme] .page-landing .text-gray-400 { color: #9CA3AF !important; }
+html[data-theme] .page-landing .text-gray-500 { color: #6B7280 !important; }
+html[data-theme] .page-landing .text-gray-600 { color: #4B5563 !important; }
+html[data-theme] .page-landing .bg-white { background-color: #FFFFFF !important; }
+html[data-theme] .page-landing .bg-gray-100 { background-color: #F3F4F6 !important; }
+html[data-theme] .page-landing .border-gray-200 { border-color: #E5E7EB !important; }
+html[data-theme] .page-landing .bg-\[\#111111\] { background-color: #111111 !important; color: #FFFFFF !important; }

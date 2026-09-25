@@ -20,7 +20,7 @@ const infra = [
 
 export default function Welcome() {
     return (
-        <div className="min-h-screen bg-[#F3F4F6] text-[#111111] font-sans">
+        <div className="page-landing min-h-screen bg-[#F3F4F6] text-[#111111] font-sans">
             <Head title="Pymetory | Inicio" />
 
             {/* Navbar */}
