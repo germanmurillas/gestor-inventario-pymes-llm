@@ -220,7 +220,7 @@ export default function Sidebar({
                     href="/logout"
                     method="post"
                     as="button"
-                    className="w-full mt-1 flex items-center gap-3 px-4 py-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all text-[10px] font-black uppercase tracking-widest rounded-lg"
+                    className="w-full mt-1 flex items-center gap-3 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/5 transition-all text-[10px] font-black uppercase tracking-widest rounded-lg"
                 >
                     <LogOut size={16} />
                     <span className={`${sidebarOpen ? 'block' : 'hidden lg:block'}`}>Cerrar Sesión</span>

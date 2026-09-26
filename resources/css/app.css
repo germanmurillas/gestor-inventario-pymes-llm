@@ -249,7 +249,7 @@
   :root {
     --pm-kb-accent: var(--pm-accent, oklch(0.80 0.115 86));
     --pm-kb-ink: var(--pm-on-card, oklch(0.24 0.02 265));
-    --pm-kb-muted: color-mix(in oklab, var(--pm-kb-ink) 52%, transparent);
+    --pm-kb-muted: color-mix(in oklab, var(--pm-kb-ink) 72%, transparent);
     --pm-kb-faint: color-mix(in oklab, var(--pm-kb-ink) 72%, transparent);
     --pm-kb-line: var(--pm-border-color, color-mix(in oklab, var(--pm-kb-ink) 12%, transparent));
     --pm-kb-surface: color-mix(in oklab, var(--pm-kb-ink) 3%, transparent);

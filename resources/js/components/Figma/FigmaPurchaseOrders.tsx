@@ -213,7 +213,7 @@ export default function FigmaPurchaseOrders() {
                                 </div>
                                 <button onClick={() => abrirRecepcion(po)}
                                     disabled={!['approved','ordered'].includes(po.status)}
-                                    className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 disabled:opacity-30 text-[9px] font-black uppercase rounded-lg transition-all">
+                                    className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 disabled:opacity-30 text-[9px] font-black uppercase rounded-lg transition-all">
                                     Recibir
                                 </button>
                                 <button aria-label={`Eliminar la orden ${po.po_number}`}

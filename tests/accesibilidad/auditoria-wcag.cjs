@@ -14,7 +14,8 @@ const VISTAS = ['TABLERO', 'INVENTARIO', 'BUSCAR', 'LLM', 'REPORTES', 'LOG_MAEST
     'TRANSFERENCIAS', 'PURCHASE_ORDERS', 'LABELS_PRINT', 'NOTIFICACIONES'];
 
 async function auditar(page, nombre, url, dispositivo) {
-    await page.goto(BASE + url, { waitUntil: 'networkidle' });
+    page.setDefaultTimeout(90000);
+    await page.goto(BASE + url, { waitUntil: 'networkidle', timeout: 90000 });
     if (TEMA) await page.evaluate((t) => { document.documentElement.dataset.theme = t; }, TEMA);
     await page.waitForTimeout(2000); // estado final, tras cargas y transiciones de entrada
     const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
