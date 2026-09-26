@@ -96,25 +96,6 @@ class InventoryController extends Controller {
             ];
         });
 
-        // Actividad Completa (Log Maestro / Kardex Histórico)
-        $fullActivity = \App\Models\Movimiento::with(['lote.material', 'user'])->latest()->get()->map(function(\App\Models\Movimiento $mov) {
-            return [
-                'id' => $mov->id,
-                'material' => $mov->lote->material->name,
-                'code' => $mov->lote->material->code,
-                'batch' => $mov->lote->batch_number,
-                'user' => $mov->user->name ?? 'Sistema',
-                'type' => $mov->type,
-                'quantity' => $mov->quantity,
-                'unit' => $mov->lote->material->unit ?? '',
-                'reason' => $mov->reason,
-                'description' => $mov->description,
-                'date' => $mov->created_at->format('d M, Y H:i'),
-                'time' => $mov->created_at->diffForHumans(),
-                'action' => $mov->type === 'entrada' ? 'Entrada' : 'Salida'
-            ];
-        });
-
         // Niveles de Inventario por Material (Top 3 para el dashboard)
         $inventoryLevels = \App\Models\Material::withSum(['lotes' => function($q) {
             $q->where('status', '!=', 'consumed');
@@ -197,12 +178,57 @@ class InventoryController extends Controller {
                 'summary' => $stats,
                 'efficiency' => $efficiency,
                 'recentActivity' => $recentActivity,
-                'fullActivity' => $fullActivity,
                 'inventoryLevels' => $inventoryLevels,
                 'bodegas' => $bodegaStats,
                 'fefoAlerts' => $fefoAlerts,
                 'trends' => $trends,
             ]
+        ]);
+    }
+
+    /**
+     * Kardex histórico paginado: el tablero ya no carga todos los movimientos en cada visita.
+     * Filtra en la base por insumo, lote o responsable (q) y por tipo (entrada/salida).
+     */
+    public function kardex(\Illuminate\Http\Request $request) {
+        $datos = $request->validate([
+            'q' => 'nullable|string|max:100',
+            'tipo' => 'nullable|in:entrada,salida',
+            'page' => 'nullable|integer|min:1',
+        ]);
+
+        $consulta = \App\Models\Movimiento::with(['lote.material', 'user'])
+            ->when($datos['tipo'] ?? null, fn ($q, $tipo) => $q->where('type', $tipo))
+            ->when(trim($datos['q'] ?? ''), function ($q, $texto) {
+                $patron = '%' . $texto . '%';
+                $q->where(fn ($w) => $w
+                    ->whereHas('lote', fn ($l) => $l->where('batch_number', 'like', $patron)
+                        ->orWhereHas('material', fn ($m) => $m->where('name', 'like', $patron)))
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $patron)));
+            })
+            ->orderByDesc('created_at')->orderByDesc('id');
+
+        $pagina = $consulta->paginate(50);
+
+        return response()->json([
+            'movimientos' => collect($pagina->items())->map(fn (\App\Models\Movimiento $mov) => [
+                'id' => $mov->id,
+                'material' => $mov->lote->material->name,
+                'batch' => $mov->lote->batch_number,
+                'user' => $mov->user->name ?? 'Sistema',
+                'type' => $mov->type,
+                'quantity' => $mov->quantity,
+                'unit' => $mov->lote->material->unit ?? '',
+                'reason' => $mov->reason,
+                'description' => $mov->description,
+                'date' => $mov->created_at->format('d M, Y H:i'),
+                'time' => $mov->created_at->diffForHumans(),
+                'action' => $mov->type === 'entrada' ? 'Entrada' : 'Salida',
+            ]),
+            'pagina' => $pagina->currentPage(),
+            'paginas' => $pagina->lastPage(),
+            'total' => $pagina->total(),
+            'total_general' => \App\Models\Movimiento::count(),
         ]);
     }
 

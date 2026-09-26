@@ -112,7 +112,7 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                         {activeView === 'REPORTES' && <FigmaReports stats={stats} />}
                         {activeView === 'LLM' && <FigmaLLM />}
                         {activeView === 'NOTIFICACIONES' && <FigmaNotifications />}
-                        {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro movements={stats?.fullActivity || []} onBack={() => setActiveView('TABLERO')} />}
+                        {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'ESCANER' && <FigmaQRScanner onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'SCAN_HISTORY' && <FigmaScanHistory onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'TRANSFERENCIAS' && <FigmaTransferForm bodegas={stats?.bodegas || []} lotes={lotes} onBack={() => setActiveView('TABLERO')} />}

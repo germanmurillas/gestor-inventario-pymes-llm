@@ -1,20 +1,37 @@
-import React, { useState } from 'react';
-import { History, Search, Filter, ArrowLeft, ArrowUpRight, ArrowDownLeft, User, Package, FileText } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { History, Search, ArrowLeft, ArrowUpRight, ArrowDownLeft, User, Package, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?: () => void }) => {
+type Pagina = { movimientos: any[]; pagina: number; paginas: number; total: number; total_general: number };
+
+// El Kardex se consulta por páginas de 50 movimientos, filtrado en el servidor.
+const FigmaLogMaestro = ({ onBack }: { onBack?: () => void }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [busqueda, setBusqueda] = useState('');
     const [filterType, setFilterType] = useState<'all' | 'entrada' | 'salida'>('all');
+    const [pagina, setPagina] = useState(1);
+    const [datos, setDatos] = useState<Pagina | null>(null);
+    const [cargando, setCargando] = useState(true);
+    const [error, setError] = useState(false);
 
-    const filteredMovements = movements.filter(m => {
-        const matchesSearch = 
-            m.material.toLowerCase().includes(searchTerm.toLowerCase()) || 
-            m.batch.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            m.user.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesFilter = filterType === 'all' || m.type === filterType;
-        
-        return matchesSearch && matchesFilter;
-    });
+    // Espera a que el usuario deje de escribir antes de consultar.
+    useEffect(() => {
+        const t = setTimeout(() => { setBusqueda(searchTerm.trim()); setPagina(1); }, 300);
+        return () => clearTimeout(t);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        let vigente = true;
+        setCargando(true);
+        axios.get('/inventory/kardex', { params: { q: busqueda || undefined, tipo: filterType === 'all' ? undefined : filterType, page: pagina } })
+            .then(({ data }) => { if (vigente) { setDatos(data); setError(false); } })
+            .catch(() => { if (vigente) setError(true); })
+            .finally(() => { if (vigente) setCargando(false); });
+        return () => { vigente = false; };
+    }, [busqueda, filterType, pagina]);
+
+    const filteredMovements = datos?.movimientos ?? [];
+    const cambiarTipo = (tipo: 'all' | 'entrada' | 'salida') => { setFilterType(tipo); setPagina(1); };
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -49,20 +66,20 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                     
                     <div className="flex bg-slate-800/60 p-1 rounded-xl border border-slate-700/50">
                         <button 
-                            onClick={() => setFilterType('all')}
+                            onClick={() => cambiarTipo('all')}
                             className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'all' ? 'bg-slate-900/80 backdrop-blur-xl text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
                         >
                             Todos
                         </button>
                         <button 
-                            onClick={() => setFilterType('entrada')}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'entrada' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-400 hover:text-emerald-400'}`}
+                            onClick={() => cambiarTipo('entrada')}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'entrada' ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-400 hover:text-emerald-400'}`}
                         >
                             Entradas
                         </button>
                         <button 
-                            onClick={() => setFilterType('salida')}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'salida' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-400 hover:text-amber-400'}`}
+                            onClick={() => cambiarTipo('salida')}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === 'salida' ? 'bg-amber-700 text-white shadow-sm' : 'text-slate-400 hover:text-amber-400'}`}
                         >
                             Salidas
                         </button>
@@ -129,7 +146,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                                     <td colSpan={5} className="px-8 py-32 text-center">
                                         <div className="flex flex-col items-center justify-center text-slate-300">
                                             <FileText size={48} className="mb-4 opacity-10" />
-                                            <p className="text-xs font-black uppercase tracking-[0.2em] opacity-30">No se encontraron movimientos registrados</p>
+                                            <p className="text-xs font-black uppercase tracking-[0.2em] opacity-30">{cargando ? 'Cargando movimientos…' : error ? 'No se pudo cargar el Kardex. Intenta de nuevo.' : 'No se encontraron movimientos registrados'}</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -139,9 +156,24 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
                 </div>
                 
                 {/* Stats Footer for the Log */}
-                <div className="bg-slate-800/50 border-t border-slate-700/50 px-8 py-4 flex justify-between items-center">
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        Mostrando {filteredMovements.length} de {movements.length} transacciones
+                <div className="bg-slate-800/50 border-t border-slate-700/50 px-8 py-4 flex flex-wrap gap-3 justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]" aria-live="polite">
+                            {datos ? `Mostrando ${filteredMovements.length} de ${datos.total} transacciones${datos.total !== datos.total_general ? ` (de ${datos.total_general} en total)` : ''}` : 'Cargando…'}
+                        </div>
+                        {datos && datos.paginas > 1 && (
+                            <div className="flex items-center gap-2">
+                                <button aria-label="Página anterior" disabled={pagina <= 1 || cargando} onClick={() => setPagina(pagina - 1)}
+                                    className="p-1.5 rounded-lg border border-slate-700/50 text-slate-300 hover:bg-slate-700/60 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    <ChevronLeft size={14} />
+                                </button>
+                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Página {datos.pagina} de {datos.paginas}</span>
+                                <button aria-label="Página siguiente" disabled={pagina >= datos.paginas || cargando} onClick={() => setPagina(pagina + 1)}
+                                    className="p-1.5 rounded-lg border border-slate-700/50 text-slate-300 hover:bg-slate-700/60 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    <ChevronRight size={14} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <div className="flex gap-6">
                          <div className="flex items-center gap-2">

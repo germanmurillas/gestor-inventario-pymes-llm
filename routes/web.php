@@ -48,6 +48,10 @@ Route::get('/status-master', function () {
 // Agent bus API (SSH proxy to DesktopTitan — may be slow, frontend handles gracefully)
 Route::get('/api/agent-bus', [\App\Http\Controllers\AgentBusController::class, 'events']);
 
+Route::get('/inventory/kardex', [InventoryController::class, 'kardex'])
+    ->middleware(['auth', 'verified'])
+    ->name('inventory.kardex');
+
 Route::get('/inventory/report', [InventoryController::class, 'exportPdf'])
     ->middleware(['auth', 'verified', 'role:admin'])
     ->name('inventory.report');
