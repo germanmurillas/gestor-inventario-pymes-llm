@@ -61,6 +61,9 @@ class PanaderiaDemoSeeder extends Seeder
             $material = Material::create([
                 'code' => $m['code'], 'name' => $m['name'], 'unit' => $m['unit'], 'unidad_medida' => $m['unit'],
                 'categoria' => $m['cat'], 'stock_minimo' => $m['min'], 'description' => $m['cat'],
+                // Umbral FEFO propio (parámetro de demostración): el pan dura 5–7 días, así que con el
+                // umbral general de 15 días todo lote saldría crítico; se marca crítico en sus 2 últimos días.
+                'dias_criticos' => $m['critico'] ?? null,
                 'photo_path' => is_file(public_path("images/catalogo/{$m['code']}.webp")) ? "images/catalogo/{$m['code']}.webp" : null,
             ]);
             isset($m['produccion'])
@@ -81,17 +84,30 @@ class PanaderiaDemoSeeder extends Seeder
             $recepciones[] = ['hace' => $i === 0 ? min($dias, max(8, (int) ($m['vida'] * 0.6))) : max(3, 14 - 6 * ($i - 1)), 'cantidad' => $cantidad, 'n' => $i + 1];
         }
 
+        // Operación en marcha: si el primer lote del catálogo llega después del inicio del periodo,
+        // antes hubo recepciones periódicas (cada ~60 % de la vida útil) con exactamente lo que la
+        // producción consumió en ese tramo; así ningún lote vence sin usarse ni queda stock inventado.
+        $primera = $recepciones[0]['hace'];
+        $paso = max(3, (int) floor($m['vida'] * 0.6));
+        for ($t = $dias, $k = 0; $t > $primera; $t -= $paso, $k++) {
+            $hasta = max($primera, $t - $paso);
+            $cantidad = 0;
+            for ($h = $t; $h > $hasta; $h--) $cantidad += $this->consumoDelDia($m, $h);
+            if ($cantidad > 0) {
+                $recepciones[] = ['hace' => $t, 'cantidad' => round($cantidad, 3), 'n' => 'P' . ($k + 1)];
+            }
+        }
+
         for ($hace = $dias; $hace >= 1; $hace--) {
             $dia = Carbon::today()->subDays($hace);
             foreach ($recepciones as $r) {
                 if ($r['hace'] === $hace) {
                     $this->nuevoLote($material, $bodega, $r['cantidad'], $dia->copy()->setTime(7, 30), $dia->copy()->addDays($m['vida']),
-                        sprintf('%s-%s-%d', substr($m['code'], 3), $dia->format('ymd'), $r['n']), 'Recepción por factura del proveedor.');
+                        sprintf('%s-%s-%s', substr($m['code'], 3), $dia->format('ymd'), $r['n']), 'Recepción por factura del proveedor.');
                 }
             }
             if ($m['diario'] > 0 && !$dia->isSunday()) {
-                $cantidad = round($m['diario'] * (0.85 + (crc32($m['code'] . $hace) % 30) / 100), 3);
-                $this->consumirFefo($material, $cantidad, $dia->copy()->setTime(15, 0), 'produccion', 'Consumo reportado en el formato diario de producción.');
+                $this->consumirFefo($material, $this->consumoProduccion($m, $hace), $dia->copy()->setTime(15, 0), 'produccion', 'Consumo reportado en el formato diario de producción.');
             }
             if ($m['code'] === 'CB-ACPM-01' && $dia->isSaturday()) {
                 $this->consumirFefo($material, 4, $dia->copy()->setTime(9, 0), 'produccion', 'Prueba semanal de la planta eléctrica.');
@@ -99,17 +115,49 @@ class PanaderiaDemoSeeder extends Seeder
         }
     }
 
+    /** Consumo de producción de un día (determinista: la misma semilla da los mismos datos). */
+    private function consumoProduccion(array $m, int $hace): float
+    {
+        return round($m['diario'] * (0.85 + (crc32($m['code'] . $hace) % 30) / 100), 3);
+    }
+
+    /** Todo lo que sale de un insumo en un día: producción (no domingos) y la prueba semanal del ACPM. */
+    private function consumoDelDia(array $m, int $hace): float
+    {
+        $dia = Carbon::today()->subDays($hace);
+        $total = ($m['diario'] > 0 && !$dia->isSunday()) ? $this->consumoProduccion($m, $hace) : 0;
+        if ($m['code'] === 'CB-ACPM-01' && $dia->isSaturday()) $total += 4;
+        return $total;
+    }
+
     /** Producción diaria y despacho a clientes, ambos por lote y con FEFO. */
     private function simularProductoTerminado(Material $material, array $m, Bodega $bodega): void
     {
-        for ($hace = 10; $hace >= 0; $hace--) {
+        for ($hace = 40; $hace >= 0; $hace--) {
             $dia = Carbon::today()->subDays($hace);
+            // El pan que venció sin despacharse se retira como desperdicio (queda en el Kardex).
+            Lote::where('material_id', $material->id)->where('status', 'active')->where('quantity', '>', 0)
+                ->whereDate('expiration_date', '<', $dia->toDateString())->get()
+                ->each(function (Lote $lote) use ($dia) {
+                    $sobrante = (float) $lote->quantity;
+                    $lote->quantity = 0;
+                    $lote->status = 'consumed';
+                    $lote->saveQuietly();
+                    $this->kardex($lote, $this->operario, 'salida', $sobrante, 'desperdicio', 'Producto vencido retirado de despacho.', $dia->copy()->setTime(6, 0));
+                });
             if ($dia->isSunday()) continue;
-            $producido = (int) round($m['produccion'] * (0.9 + (crc32($m['code'] . $hace) % 20) / 100));
-            $this->nuevoLote($material, $bodega, $producido, $dia->copy()->setTime(5, 30), $dia->copy()->addDays($m['vida']),
-                sprintf('%s-%s', substr($m['code'], 3), $dia->format('ymd')), 'Producción del día ingresada a bodega de despacho.');
-            if ($hace > 0) {
-                $despacho = (int) round($m['diario'] * (0.9 + (crc32('d' . $m['code'] . $hace) % 20) / 100));
+            $produccion = $dia->copy()->setTime(5, 30);
+            if ($produccion->isFuture()) break; // hoy aún no se ha producido
+            $despacho = (int) round($m['diario'] * (0.9 + (crc32('d' . $m['code'] . $hace) % 20) / 100));
+            // Se produce lo que se despachará hoy más lo que falte para dejar un día de despacho como
+            // stock de seguridad, sin pasar de la capacidad de producción del catálogo.
+            $stock = (float) Lote::where('material_id', $material->id)->where('status', 'active')->sum('quantity');
+            $producido = (int) max(0, min($m['produccion'], round($despacho + $m['diario'] - $stock)));
+            if ($producido > 0) {
+                $this->nuevoLote($material, $bodega, $producido, $produccion, $dia->copy()->addDays($m['vida']),
+                    sprintf('%s-%s', substr($m['code'], 3), $dia->format('ymd')), 'Producción del día ingresada a bodega de despacho.');
+            }
+            if ($dia->copy()->setTime(16, 0)->isPast()) {
                 $this->consumirFefo($material, $despacho, $dia->copy()->setTime(16, 0), 'venta', 'Despacho a clientes.');
             }
         }
@@ -117,6 +165,7 @@ class PanaderiaDemoSeeder extends Seeder
 
     private function nuevoLote(Material $material, Bodega $bodega, float $cantidad, Carbon $cuando, Carbon $vence, string $batch, string $desc, string $estado = 'active'): Lote
     {
+        $cuando = $cuando->min(now()); // nunca con fecha futura (si el seeder corre de madrugada)
         $costo = collect(json_decode(file_get_contents(database_path('seeders/data/panaderia.json')), true)['materiales'])
             ->firstWhere('code', $material->code)['cost'];
         $lote = new Lote([
@@ -182,6 +231,7 @@ class PanaderiaDemoSeeder extends Seeder
 
     private function kardex(Lote $lote, User $user, string $type, float $qty, string $reason, string $desc, Carbon $when): void
     {
+        $when = $when->min(now());
         $mov = new Movimiento(['lote_id' => $lote->id, 'user_id' => $user->id, 'type' => $type,
             'quantity' => $qty, 'reason' => $reason, 'description' => $desc]);
         $mov->created_at = $when;

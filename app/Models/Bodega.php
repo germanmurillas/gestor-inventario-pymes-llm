@@ -14,6 +14,7 @@ class Bodega extends Model
         'code',
         'description',
         'capacity',
+        'capacity_unit',
         'status',
         'image_path',
     ];
@@ -31,12 +32,25 @@ class Bodega extends Model
         return $this->hasMany(Lote::class);
     }
 
-    /**
-     * Calcula la ocupación actual en KG.
-     */
+    /** Lotes en bodega que cuentan para la ocupación: los que están en la unidad de la capacidad. */
+    private function lotesEnUnidad()
+    {
+        return $this->lotes()->where('status', '!=', 'consumed')
+            ->when($this->capacity_unit, fn ($q) => $q->whereHas('material', fn ($m) => $m->where('unit', $this->capacity_unit)));
+    }
+
+    /** Ocupación actual, en la unidad de la capacidad (capacity_unit). */
     public function getOccupiedCapacityAttribute(): float
     {
-        return $this->lotes()->where('status', '!=', 'consumed')->sum('quantity');
+        return (float) $this->lotesEnUnidad()->sum('quantity');
+    }
+
+    /** Lotes en bodega expresados en otra unidad: no suman a la ocupación (no hay conversión). */
+    public function getLotesOtraUnidadAttribute(): int
+    {
+        if (!$this->capacity_unit) return 0;
+        return $this->lotes()->where('status', '!=', 'consumed')
+            ->whereHas('material', fn ($m) => $m->where('unit', '!=', $this->capacity_unit))->count();
     }
 
     /**

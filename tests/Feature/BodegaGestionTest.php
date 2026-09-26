@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Bodega;
+use App\Models\Lote;
+use App\Models\Material;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -25,7 +27,7 @@ class BodegaGestionTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
 
         $this->actingAs($admin)->post('/bodegas', [
-            'name' => 'Cuarto frío 2', 'code' => 'bod-f2', 'capacity' => 800,
+            'name' => 'Cuarto frío 2', 'code' => 'bod-f2', 'capacity' => 800, 'capacity_unit' => 'kg',
             'image' => $this->png('frio.png'),
         ])->assertRedirect();
 
@@ -42,7 +44,7 @@ class BodegaGestionTest extends TestCase
         $vieja = $bodega->image_path;
 
         $this->actingAs($admin)->post("/bodegas/{$bodega->id}", [
-            'name' => 'Renombrada', 'capacity' => 500, 'status' => 'maintenance', 'remove_image' => 1,
+            'name' => 'Renombrada', 'capacity' => 500, 'capacity_unit' => 'kg', 'status' => 'maintenance', 'remove_image' => 1,
         ])->assertRedirect();
 
         $bodega->refresh();
@@ -65,11 +67,25 @@ class BodegaGestionTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
 
         $this->actingAs($admin)->post('/bodegas', [
-            'name' => 'Bodega externa', 'code' => 'BOD-EXT', 'capacity' => 100,
+            'name' => 'Bodega externa', 'code' => 'BOD-EXT', 'capacity' => 100, 'capacity_unit' => 'und',
             'image_link' => 'https://example.com/bodega.jpg',
         ])->assertRedirect();
 
         $this->assertSame('https://example.com/bodega.jpg', Bodega::where('code', 'BOD-EXT')->value('image_path'));
         $this->assertSame('https://example.com/bodega.jpg', Bodega::where('code', 'BOD-EXT')->first()->image_url);
+    }
+
+    public function test_la_ocupacion_no_mezcla_unidades(): void
+    {
+        $bodega = Bodega::factory()->create(['capacity' => 1000, 'capacity_unit' => 'kg', 'status' => 'active']);
+        $harina = Material::factory()->create(['unit' => 'kg']);
+        $aceite = Material::factory()->create(['unit' => 'L']);
+        Lote::factory()->create(['bodega_id' => $bodega->id, 'material_id' => $harina->id, 'quantity' => 250, 'status' => 'active']);
+        Lote::factory()->create(['bodega_id' => $bodega->id, 'material_id' => $aceite->id, 'quantity' => 400, 'status' => 'active']);
+
+        $bodega->refresh();
+        $this->assertEquals(250, $bodega->occupied_capacity);
+        $this->assertEquals(25, $bodega->occupancy_percentage);
+        $this->assertSame(1, $bodega->lotes_otra_unidad);
     }
 }

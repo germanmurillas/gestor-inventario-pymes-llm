@@ -23,6 +23,8 @@ class InventoryStoreTest extends TestCase
             'stock_initial'   => 200,
             'expiration_date' => now()->addYear()->format('Y-m-d'),
             'batch_number'    => 'CEM-LT1',
+            'unit'            => 'kg',
+            'unit_cost'       => 1500,
         ]);
 
         $resp->assertRedirect()

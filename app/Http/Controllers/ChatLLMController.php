@@ -150,13 +150,16 @@ class ChatLLMController extends Controller {
                 $context = "CONSULTA DE STOCK - Datos actuales del inventario solicitado:\n";
                 break;
             case 'critical_alerts':
-                $dias = $ventana ?? Lote::diasCriticos();
                 $lotes = $conStock()
                     ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
-                    ->whereDate('expiration_date', '<=', now()->addDays($dias))
+                    ->when($ventana !== null,
+                        fn($q) => $q->whereDate('expiration_date', '<=', now()->addDays($ventana)),
+                        fn($q) => $q->criticos())
                     ->orderBy('expiration_date')
                     ->take(12)->get();
-                $context = "ALERTAS FEFO - Lotes con existencias que vencen en los próximos {$dias} días (o ya vencidos):\n";
+                $context = $ventana !== null
+                    ? "ALERTAS FEFO - Lotes con existencias que vencen en los próximos {$ventana} días (o ya vencidos):\n"
+                    : "ALERTAS FEFO - Lotes con existencias dentro del umbral de criticidad de su insumo (o ya vencidos):\n";
                 break;
             case 'expiration':
                 $lotes = $conStock()

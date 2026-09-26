@@ -155,17 +155,17 @@ const FigmaTablero = ({ stats, user, onViewChange, onOpenBodega, onManageBodegas
                         </h3>
                         <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/40 rounded-xl p-4 space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Precisión</span>
-                                <span className="text-sm font-black text-emerald-400 font-display">{efficiency.accuracy}%</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exactitud</span>
+                                <span className="text-sm font-black text-emerald-400 font-display">{efficiency.accuracy != null ? `${efficiency.accuracy}%` : '—'}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rotación</span>
-                                <span className="text-sm font-black text-indigo-400 font-display">{efficiency.turnoverRatio}x</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider" title="Costo de lo que salió en 30 días ÷ valor del inventario">Rotación 30 d</span>
+                                <span className="text-sm font-black text-indigo-400 font-display">{efficiency.turnoverRatio != null ? `${efficiency.turnoverRatio}x` : '—'}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ocupación Total</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider" title="Promedio de la ocupación de cada bodega en su propia unidad">Ocupación media</span>
                                 <span className={`text-sm font-black font-display ${efficiency.occupancyTotal >= 80 ? 'text-red-400' : efficiency.occupancyTotal >= 60 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                                    {efficiency.occupancyTotal}%
+                                    {efficiency.occupancyTotal != null ? `${efficiency.occupancyTotal}%` : '—'}
                                 </span>
                             </div>
                         </div>

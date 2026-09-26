@@ -74,12 +74,16 @@ class Lote extends Model {
     }
 
     /**
-     * Lote crítico: vence en <= 15 días y no está consumido.
-     * (Umbral ajustado de 7 a 15 días según criterio Prof. Héctor — auditabilidad temprana)
+     * Lote crítico: vence dentro del umbral FEFO de su insumo y no está consumido.
      */
     public function getIsCriticalAttribute(): bool {
-        return $this->days_until_expiration <= self::diasCriticos()
+        return $this->days_until_expiration <= $this->umbralDias()
             && $this->status !== 'consumed';
+    }
+
+    /** Umbral del lote: el del insumo (materials.dias_criticos) o, si no tiene, el general. */
+    public function umbralDias(): int {
+        return (int) ($this->material?->dias_criticos ?: self::diasCriticos());
     }
 
     /** Umbral FEFO configurable en Ajustes (settings.fefo_dias_criticos); 15 días por defecto. */
@@ -120,11 +124,25 @@ class Lote extends Model {
     }
 
     /**
-     * Lotes críticos según el modelo (consistente con getIsCriticalAttribute).
-     * Incluye lotes ya vencidos (días negativos). Umbral: 15 días.
+     * Lotes críticos (consistente con getIsCriticalAttribute): cada lote se compara con el
+     * umbral de su insumo o, si no tiene, con el general. Incluye lotes ya vencidos.
+     * Se agrupa por umbral para no depender de aritmética de fechas propia de cada motor SQL.
      */
     public function scopeCriticos($query) {
-        return $query->where('status', '!=', 'consumed')
-                     ->whereDate('expiration_date', '<=', Carbon::now()->addDays(self::diasCriticos()));
+        $general = self::diasCriticos();
+        $propios = Material::whereNotNull('dias_criticos')->pluck('dias_criticos', 'id');
+
+        return $query->where('status', '!=', 'consumed')->where(function ($q) use ($general, $propios) {
+            $q->where(function ($g) use ($general, $propios) {
+                $g->whereNotIn('material_id', $propios->keys()->all())
+                  ->whereDate('expiration_date', '<=', Carbon::now()->addDays($general));
+            });
+            foreach ($propios->groupBy(fn ($dias) => $dias, true) as $dias => $grupo) {
+                $q->orWhere(function ($p) use ($dias, $grupo) {
+                    $p->whereIn('material_id', $grupo->keys()->all())
+                      ->whereDate('expiration_date', '<=', Carbon::now()->addDays((int) $dias));
+                });
+            }
+        });
     }
 }

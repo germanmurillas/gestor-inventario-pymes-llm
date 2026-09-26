@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Material extends Model {
     use HasFactory;
+    /** Unidades de medida admitidas al registrar un insumo. */
+    public const UNIDADES = ['kg', 'g', 'L', 'mL', 'gal', 'und'];
+
     protected $fillable = [
         'code', 'name', 'unit', 'description',
         'stock_min', 'stock_max', 'photo_path',
-        'unidad_medida', 'categoria', 'stock_minimo',
+        'unidad_medida', 'categoria', 'stock_minimo', 'dias_criticos',
         'custom_fields',
     ];
 
@@ -45,9 +48,9 @@ class Material extends Model {
         return (float) $this->lotes()->where('status', 'active')->sum('quantity');
     }
 
-    /** Si tiene algún lote crítico (vence en ≤ 15 días) */
+    /** Si tiene algún lote crítico según su umbral FEFO (propio o general). */
     public function getTieneCriticosAttribute(): bool {
-        return $this->lotes()->activos()->venceEn(15)->exists();
+        return $this->lotes()->activos()->criticos()->exists();
     }
 
     /** URL pública de la foto del material */

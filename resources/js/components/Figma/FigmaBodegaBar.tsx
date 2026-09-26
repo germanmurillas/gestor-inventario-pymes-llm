@@ -8,6 +8,8 @@ export interface BodegaResumen {
     description?: string | null;
     image_url?: string | null;
     capacity: number;
+    capacity_unit?: string | null;
+    lotes_otra_unidad?: number;
     occupied: number;
     percentage: number;
     status?: string;
@@ -62,7 +64,9 @@ export default function FigmaBodegaBar({ bodega: b, onOpen, onEdit }: Props) {
                         <div className={`h-full rounded-full ${pct >= 85 ? 'bg-rose-400' : pct >= 60 ? 'bg-amber-400' : 'bg-emerald-400'}`} style={{ width: `${pct}%` }} />
                     </div>
                     <p className="flex justify-between text-[10px] text-slate-400">
-                        <span>Ocupación {pct}% de su capacidad</span>
+                        <span title={b.lotes_otra_unidad ? `${b.lotes_otra_unidad} lote(s) en otra unidad no suman a la ocupación` : undefined}>
+                            Ocupación {pct}% de {Math.round(b.capacity).toLocaleString('es-CO')} {b.capacity_unit ?? ''}{b.lotes_otra_unidad ? ` · ${b.lotes_otra_unidad} en otra unidad` : ''}
+                        </span>
                         {b.cuarentena > 0 && <span className="text-amber-300">{b.cuarentena} en cuarentena</span>}
                     </p>
                 </div>

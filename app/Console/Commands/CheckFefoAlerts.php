@@ -17,8 +17,8 @@ class CheckFefoAlerts extends Command
             return 0;
         }
 
-        $diasCriticos = AlertService::fefoThresholdDays();
-        $lotesCriticos = Lote::activos()->venceEn($diasCriticos)->with('material')->get();
+        // Umbral de cada insumo (o el general); los ya vencidos no se re-alertan aquí.
+        $lotesCriticos = Lote::activos()->criticos()->whereDate('expiration_date', '>=', now()->toDateString())->with('material')->get();
 
         if ($lotesCriticos->isEmpty()) {
             return 0;

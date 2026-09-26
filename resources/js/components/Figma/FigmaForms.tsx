@@ -12,6 +12,11 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
         batch_number: '',
         description: '',
         photo: null as File | null,
+        unit: '',
+        categoria: '',
+        unit_cost: '' as number | string,
+        stock_minimo: '' as number | string,
+        dias_criticos: '' as number | string,
     });
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -238,9 +243,46 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                         placeholder="0.00" 
                                         className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl pl-4 pr-12 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" 
                                     />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-tighter">KG</span>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 tracking-tighter">{data.unit}</span>
                                 </div>
                                 {errors.stock_initial && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.stock_initial}</p>}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Unidad</label>
+                                    <select required value={data.unit} onChange={e => setData('unit', e.target.value)}
+                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold">
+                                        <option value="" disabled>Elegir…</option>
+                                        <option value="kg">kg</option><option value="g">g</option><option value="L">L</option>
+                                        <option value="mL">mL</option><option value="gal">gal</option><option value="und">und</option>
+                                    </select>
+                                    {errors.unit && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.unit}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Costo unitario</label>
+                                    <input type="number" required min="0" step="0.01" value={data.unit_cost} onChange={e => setData('unit_cost', e.target.value)}
+                                        placeholder="COP por unidad" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
+                                    {errors.unit_cost && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.unit_cost}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Stock mínimo</label>
+                                    <input type="number" min="0" step="0.01" value={data.stock_minimo} onChange={e => setData('stock_minimo', e.target.value)}
+                                        placeholder="Para alertas" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
+                                    {errors.stock_minimo && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.stock_minimo}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Días críticos</label>
+                                    <input type="number" min="1" max="365" step="1" value={data.dias_criticos} onChange={e => setData('dias_criticos', e.target.value)}
+                                        placeholder="Umbral general" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
+                                    {errors.dias_criticos && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.dias_criticos}</p>}
+                                </div>
+                                <div className="col-span-2 space-y-2">
+                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Categoría</label>
+                                    <input type="text" maxLength={100} value={data.categoria} onChange={e => setData('categoria', e.target.value)}
+                                        placeholder="Ej. Harinas" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
+                                </div>
+                                <p className="col-span-2 text-[10px] text-slate-400">Días críticos: cuántos días antes de vencer un lote de este insumo pasa a crítico. Vacío = el umbral general de Ajustes.</p>
                             </div>
                             
                             <div className="space-y-2">
@@ -265,7 +307,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                     <span>Previsualización de Lote</span>
                                 </div>
                                 <div className="text-[10px] text-indigo-300/60 leading-relaxed font-bold uppercase tracking-tight">
-                                    Al guardar, el sistema generará automáticamente un registro de entrada en el Kardex para el lote <span className="text-indigo-400">#{data.batch_number || '---'}</span> con <span className="text-indigo-400">{data.stock_initial || 0} KG</span>.
+                                    Al guardar, el sistema generará automáticamente un registro de entrada en el Kardex para el lote <span className="text-indigo-400">#{data.batch_number || '---'}</span> con <span className="text-indigo-400">{data.stock_initial || 0} {data.unit}</span>.
                                 </div>
                             </div>
                         </div>
@@ -278,7 +320,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                         <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center text-white">
                             <Info size={12} />
                         </div>
-                        <span className="font-bold">Todos los campos son obligatorios para la trazabilidad.</span>
+                        <span className="font-bold">Lote, cantidad, unidad, costo y vencimiento son obligatorios para la trazabilidad.</span>
                     </div>
                     <button 
                         type="button"

@@ -332,11 +332,11 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                 {/* 3. Rotación */}
                 <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-[2rem] p-8 shadow-sm space-y-6">
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        <Clock size={14} className="text-indigo-400" /><span>Índice de Rotación (FEFO)</span>
+                        <Clock size={14} className="text-indigo-400" /><span>Rotación (30 días)</span>
                     </div>
-                    <div className="text-5xl font-black text-white tracking-tighter">{efficiency.turnoverRatio || 0}x</div>
+                    <div className="text-5xl font-black text-white tracking-tighter">{efficiency.turnoverRatio != null ? `${efficiency.turnoverRatio}x` : '—'}</div>
                     <p className="text-[10px] text-slate-400 font-bold leading-relaxed uppercase">
-                        Velocidad promedio de despacho desde el ingreso del lote.
+                        Costo de lo que salió en los últimos 30 días ÷ valor del inventario actual.
                     </p>
                 </div>
 
@@ -345,18 +345,18 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                     <div className="flex items-center gap-2 text-[10px] font-black text-red-400 uppercase tracking-[0.2em]">
                         <AlertTriangle size={14} /><span>Puntos Críticos</span>
                     </div>
-                    <div className="text-4xl font-black text-red-300 tracking-tighter">{summary.lotesCriticos || 0} Materiales</div>
-                    <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest italic">Acción requerida inmediata</div>
+                    <div className="text-4xl font-black text-red-300 tracking-tighter">{summary.lotesCriticos || 0} lotes</div>
+                    <div className="text-[10px] text-red-300 font-bold uppercase tracking-widest">Por vencer según el umbral de cada insumo</div>
                 </div>
 
                 {/* 5. Ocupación de Bodega */}
                 <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-[2rem] p-8 shadow-sm space-y-4">
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        <LayoutGrid size={14} className="text-indigo-400" /><span>Ocupación Global</span>
+                        <LayoutGrid size={14} className="text-indigo-400" /><span>Ocupación media de bodegas</span>
                     </div>
-                    <div className="text-4xl font-black text-white tracking-tighter">{Math.round(efficiency.occupancyTotal || 0)}%</div>
+                    <div className="text-4xl font-black text-white tracking-tighter">{efficiency.occupancyTotal != null ? `${Math.round(efficiency.occupancyTotal)}%` : '—'}</div>
                     <div className="h-1.5 bg-slate-800/60 rounded-full overflow-hidden">
-                        <div className="h-full bg-slate-900 transition-all duration-1000"
+                        <div className="h-full bg-indigo-500 transition-all duration-1000"
                             style={{ width: `${efficiency.occupancyTotal || 0}%` }}></div>
                     </div>
                 </div>

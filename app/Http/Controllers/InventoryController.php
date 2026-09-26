@@ -33,6 +33,8 @@ class InventoryController extends Controller {
                 'quantity' => $lote->quantity,
                 'stock_total' => (float) ($stockPorMaterial[$lote->material_id] ?? 0),
                 'stock_minimo' => (float) ($lote->material->stock_minimo ?? 0),
+                'dias_criticos' => $lote->material->dias_criticos,
+                'umbral_dias' => $lote->umbralDias(),
                 'categoria' => $lote->material->categoria,
                 'estado' => $lote->status,
             ];
@@ -57,19 +59,23 @@ class InventoryController extends Controller {
             ? round((1 - ($totalAjustes / max($totalMovimientos, 1))) * 100, 1)
             : null; // sin movimientos no hay con qué medirla
 
-        $totalCapacidad = \App\Models\Bodega::where('status', 'active')->sum('capacity');
-        $totalOcupado   = Lote::activos()->sum('quantity');
-        $occupancy      = $totalCapacidad > 0
-            ? round(($totalOcupado / $totalCapacidad) * 100, 1)
-            : 0;
+        // Ocupación global: promedio de la ocupación de cada bodega activa. No se suman
+        // capacidades en unidades distintas (kg, und, gal).
+        $porcentajes = \App\Models\Bodega::where('status', 'active')->where('capacity', '>', 0)->get()
+            ->map(fn ($b) => $b->occupancy_percentage);
+        $occupancy = $porcentajes->isNotEmpty() ? round($porcentajes->avg(), 1) : null;
+
+        // Rotación de los últimos 30 días en valor: costo de lo que salió ÷ valor del inventario actual.
+        $valorInventario = (float) $stats['totalInventoryValue'];
+        $valorSalidas = (float) \App\Models\Movimiento::where('movimientos.type', 'salida')
+            ->where('movimientos.created_at', '>=', now()->subDays(30))
+            ->join('lotes', 'lotes.id', '=', 'movimientos.lote_id')
+            ->selectRaw('COALESCE(SUM(movimientos.quantity * COALESCE(lotes.unit_cost, 0)), 0) as total')
+            ->value('total');
 
         $efficiency = [
             'accuracy'       => $accuracy,
-            // Rotación de los últimos 30 días: salidas del Kardex / existencias actuales.
-            'turnoverRatio'  => $totalOcupado > 0
-                ? round(\App\Models\Movimiento::where('type', 'salida')
-                    ->where('created_at', '>=', now()->subDays(30))->sum('quantity') / $totalOcupado, 2)
-                : 0,
+            'turnoverRatio'  => $valorInventario > 0 ? round($valorSalidas / $valorInventario, 2) : null,
             'occupancyTotal' => $occupancy,
         ];
 
@@ -139,6 +145,8 @@ class InventoryController extends Controller {
                 'description' => $bodega->description,
                 'image_url' => $bodega->image_url,
                 'capacity' => $bodega->capacity,
+                'capacity_unit' => $bodega->capacity_unit,
+                'lotes_otra_unidad' => $bodega->lotes_otra_unidad,
                 'occupied' => $bodega->occupied_capacity,
                 'percentage' => $bodega->occupancy_percentage,
                 'status' => $bodega->status
@@ -175,7 +183,9 @@ class InventoryController extends Controller {
         };
         $trends = [
             'materiales' => $variacion(\App\Models\Material::where('created_at', '<', $hace30)->count(), $stats['totalMaterials']),
-            'lotes'      => $variacion(Lote::where('created_at', '<', $hace30)->count(), Lote::count()),
+            // Misma definición en ambas fechas: el lote ya existía y no se había consumido del todo
+            // (sigue sin consumir o tuvo movimientos después de esa fecha).
+            'lotes'      => $variacion($this->lotesEnBodega($hace30), $this->lotesEnBodega(now())),
             'criticos'   => null,
             'valor'      => null,
         ];
@@ -262,6 +272,7 @@ class InventoryController extends Controller {
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:20|unique:bodegas,code',
             'capacity' => 'required|numeric|min:1',
+            'capacity_unit' => 'required|in:' . implode(',', Material::UNIDADES),
             'description' => 'nullable|string|max:500',
             'image' => 'nullable|image|max:6144',
             'image_link' => 'nullable|url:http,https|max:1000',
@@ -271,6 +282,7 @@ class InventoryController extends Controller {
             'name' => $validated['name'],
             'code' => strtoupper($validated['code']),
             'capacity' => $validated['capacity'],
+            'capacity_unit' => $validated['capacity_unit'],
             'description' => $validated['description'] ?? null,
             'status' => 'active',
             // Archivo subido al servidor o enlace externo; la URL final siempre sale de este campo.
@@ -285,6 +297,7 @@ class InventoryController extends Controller {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'capacity' => 'required|numeric|min:1',
+            'capacity_unit' => 'required|in:' . implode(',', Material::UNIDADES),
             'description' => 'nullable|string|max:500',
             'status' => 'required|in:active,full,maintenance',
             'image' => 'nullable|image|max:6144',
@@ -299,9 +312,37 @@ class InventoryController extends Controller {
             $bodega->image_path = $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public')
                 : ($request->filled('image_link') ? $validated['image_link'] : null);
         }
-        $bodega->fill(collect($validated)->only(['name', 'capacity', 'description', 'status'])->all())->save();
+        $bodega->fill(collect($validated)->only(['name', 'capacity', 'capacity_unit', 'description', 'status'])->all())->save();
 
         return back()->with('success', 'Bodega actualizada.');
+    }
+
+    /** Lotes que estaban en bodega en una fecha (creados hasta esa fecha y no consumidos antes de ella). */
+    private function lotesEnBodega(\Carbon\Carbon $fecha): int {
+        return Lote::where('created_at', '<=', $fecha)
+            ->where(fn ($q) => $q->where('status', '!=', 'consumed')
+                ->orWhereHas('movimientos', fn ($m) => $m->where('created_at', '>', $fecha)))
+            ->count();
+    }
+
+    /**
+     * Ajustes de control de un insumo existente (solo administrador): categoría,
+     * stock mínimo para alertas y umbral FEFO propio. La unidad no se cambia
+     * porque ya hay lotes y movimientos registrados en ella.
+     */
+    public function updateMaterial(\Illuminate\Http\Request $request, Material $material) {
+        $validated = $request->validate([
+            'categoria' => 'nullable|string|max:100',
+            'stock_minimo' => 'nullable|numeric|min:0',
+            'dias_criticos' => 'nullable|integer|min:1|max:365',
+        ]);
+        $material->update([
+            'categoria' => $validated['categoria'] ?? null,
+            'stock_minimo' => $validated['stock_minimo'] ?? 0,
+            'dias_criticos' => $validated['dias_criticos'] ?? null,
+        ]);
+
+        return back()->with('success', 'Insumo actualizado.');
     }
 
     /**
@@ -318,6 +359,11 @@ class InventoryController extends Controller {
                 'batch_number' => 'required|string|max:50',
                 'description' => 'nullable|string',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+                'unit' => 'required|in:' . implode(',', Material::UNIDADES),
+                'categoria' => 'nullable|string|max:100',
+                'unit_cost' => 'required|numeric|min:0', // RF-02: el lote registra su costo unitario
+                'stock_minimo' => 'nullable|numeric|min:0',
+                'dias_criticos' => 'nullable|integer|min:1|max:365',
             ]);
 
             $photoPath = null;
@@ -331,8 +377,11 @@ class InventoryController extends Controller {
                     'name' => $validated['name'],
                     'code' => $validated['code'],
                     'description' => $validated['description'] ?? null,
-                    'unit' => 'kg',
-                    'stock_min' => 10,
+                    'unit' => $validated['unit'],
+                    'unidad_medida' => $validated['unit'],
+                    'categoria' => $validated['categoria'] ?? null,
+                    'stock_minimo' => $validated['stock_minimo'] ?? 0, // 0 = sin mínimo (no genera alertas)
+                    'dias_criticos' => $validated['dias_criticos'] ?? null,
                     'photo_path' => $photoPath,
                 ]);
 
@@ -342,6 +391,7 @@ class InventoryController extends Controller {
                     'bodega_id' => $validated['bodega_id'],
                     'batch_number' => $validated['batch_number'],
                     'quantity' => $validated['stock_initial'],
+                    'unit_cost' => $validated['unit_cost'],
                     'expiration_date' => $validated['expiration_date'],
                     'status' => 'active'
                 ]);

@@ -24,6 +24,8 @@ class InventoryFlowTest extends TestCase
             'stock_initial'   => 200,
             'expiration_date' => now()->addMonths(6)->format('Y-m-d'),
             'batch_number'    => 'HAR-LT-FLOW',
+            'unit'            => 'kg',
+            'unit_cost'       => 2800,
             'description'     => 'Test de flujo completo',
         ])->assertRedirect()->assertSessionHasNoErrors();
 

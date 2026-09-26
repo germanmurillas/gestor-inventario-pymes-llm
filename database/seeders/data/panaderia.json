@@ -1,14 +1,14 @@
 {
-  "_nota": "Catálogo de demostración de una panificadora industrial. Nombres genéricos (sin marcas). Costos unitarios REFERENCIALES en COP, solo para la demo. vida = días de vida útil de un lote nuevo; diario = consumo o despacho diario típico.",
+  "_nota": "Catálogo de demostración de una panificadora industrial. Nombres genéricos (sin marcas). Costos unitarios REFERENCIALES en COP, solo para la demo. vida = días de vida útil de un lote nuevo; diario = consumo o despacho diario típico; critico = umbral FEFO propio en días (parámetro de demostración; sin él se usa el general).",
   "bodegas": [
-    {"code": "BOD-MP", "name": "Bodega de materia prima seca", "capacity": 20000, "description": "Harinas, azúcar, sal, semillas y polvos en estibas."},
-    {"code": "BOD-FRIO", "name": "Cuarto frío", "capacity": 2500, "description": "Levadura fresca, lácteos y huevo pasteurizado entre 2 y 6 °C."},
-    {"code": "BOD-ADI", "name": "Cuarto de aditivos y pesaje", "capacity": 1200, "description": "Enzimas, mejoradores, emulsificantes y conservantes en uso diario."},
-    {"code": "BOD-GRA", "name": "Bodega de grasas y rellenos", "capacity": 4000, "description": "Margarinas, mantecas, aceites, arequipe, bocadillo y cremas."},
-    {"code": "BOD-EMP", "name": "Bodega de empaques", "capacity": 120000, "description": "Bolsas, cajas, etiquetas y material de embalaje."},
-    {"code": "BOD-PT", "name": "Producto terminado y despacho", "capacity": 15000, "description": "Pan empacado listo para despacho a clientes."},
-    {"code": "BOD-COMB", "name": "Cuarto de combustibles", "capacity": 1000, "description": "Reserva de ACPM para la planta eléctrica de respaldo."},
-    {"code": "BOD-CUA", "name": "Cuarentena", "capacity": 1500, "description": "Mercancía recibida con novedad, pendiente de revisión o devolución."}
+    {"code": "BOD-MP", "name": "Bodega de materia prima seca", "capacity": 20000, "capacity_unit": "kg", "description": "Harinas, azúcar, sal, semillas y polvos en estibas."},
+    {"code": "BOD-FRIO", "name": "Cuarto frío", "capacity": 2500, "capacity_unit": "kg", "description": "Levadura fresca, lácteos y huevo pasteurizado entre 2 y 6 °C."},
+    {"code": "BOD-ADI", "name": "Cuarto de aditivos y pesaje", "capacity": 1200, "capacity_unit": "kg", "description": "Enzimas, mejoradores, emulsificantes y conservantes en uso diario."},
+    {"code": "BOD-GRA", "name": "Bodega de grasas y rellenos", "capacity": 4000, "capacity_unit": "kg", "description": "Margarinas, mantecas, aceites, arequipe, bocadillo y cremas."},
+    {"code": "BOD-EMP", "name": "Bodega de empaques", "capacity": 120000, "capacity_unit": "und", "description": "Bolsas, cajas, etiquetas y material de embalaje."},
+    {"code": "BOD-PT", "name": "Producto terminado y despacho", "capacity": 15000, "capacity_unit": "und", "description": "Pan empacado listo para despacho a clientes."},
+    {"code": "BOD-COMB", "name": "Cuarto de combustibles", "capacity": 1000, "capacity_unit": "gal", "description": "Reserva de ACPM para la planta eléctrica de respaldo."},
+    {"code": "BOD-CUA", "name": "Cuarentena", "capacity": 1500, "capacity_unit": "kg", "description": "Mercancía recibida con novedad, pendiente de revisión o devolución."}
   ],
   "materiales": [
     {"code": "MP-HAR-01", "name": "Harina de trigo panificable", "cat": "Harinas", "unit": "kg", "bodega": "BOD-MP", "min": 3000, "cost": 3100, "vida": 180, "diario": 95, "lotes": [5000, 4000], "img": "a stack of plain kraft-paper 50 kg flour sacks, one open showing white wheat flour"},
@@ -48,13 +48,13 @@
     {"code": "EMP-BOL-02", "name": "Bolsa para pan pequeño", "cat": "Empaques", "unit": "und", "bodega": "BOD-EMP", "min": 5000, "cost": 38, "vida": 900, "diario": 400, "lotes": [20000], "img": "a bundle of small clear plastic bags for bread rolls, stacked neatly"},
     {"code": "EMP-CAJ-01", "name": "Caja corrugada de despacho", "cat": "Empaques", "unit": "und", "bodega": "BOD-EMP", "min": 400, "cost": 1450, "vida": 1800, "diario": 45, "lotes": [2000], "img": "a stack of flat plain brown corrugated shipping boxes and one assembled box"},
     {"code": "EMP-ETI-01", "name": "Etiqueta adhesiva de lote", "cat": "Empaques", "unit": "und", "bodega": "BOD-EMP", "min": 3000, "cost": 22, "vida": 900, "diario": 700, "lotes": [25000], "img": "rolls of blank white adhesive labels with a small handheld label printer"},
-    {"code": "PT-TAJ-01", "name": "Pan tajado blanco 500 g", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 300, "cost": 2900, "vida": 7, "diario": 420, "produccion": 450, "img": "a loaf of sliced white sandwich bread in a clear unbranded bag"},
-    {"code": "PT-TAJ-02", "name": "Pan tajado integral 500 g", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 120, "cost": 3400, "vida": 7, "diario": 160, "produccion": 170, "img": "a loaf of sliced whole wheat bread with oats on top, in a clear unbranded bag"},
-    {"code": "PT-HAM-01", "name": "Pan hamburguesa x 8 con ajonjolí", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 150, "cost": 3700, "vida": 6, "diario": 210, "produccion": 220, "img": "eight golden hamburger buns with sesame seeds in a clear unbranded bag"},
-    {"code": "PT-PER-01", "name": "Pan perro x 8", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 100, "cost": 3300, "vida": 6, "diario": 150, "produccion": 160, "img": "eight soft hot dog buns in a clear unbranded bag"},
-    {"code": "PT-MOG-01", "name": "Mogolla integral x 6", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 80, "cost": 3100, "vida": 5, "diario": 110, "produccion": 115, "img": "six round Colombian whole wheat bread rolls (mogolla) with bran, in a clear bag"},
-    {"code": "PT-TOS-01", "name": "Tostadas de pan x 20", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 60, "cost": 4200, "vida": 90, "diario": 40, "produccion": 45, "img": "a clear bag of golden crispy toasted bread slices (tostadas)"},
-    {"code": "PT-RIP-01", "name": "Ripio de pan (miga para apanar) 1 kg", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 40, "cost": 3600, "vida": 120, "diario": 25, "produccion": 28, "img": "a clear bag of golden breadcrumbs made from bread trimmings, some crumbs on the table"},
+    {"code": "PT-TAJ-01", "name": "Pan tajado blanco 500 g", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 300, "cost": 2900, "vida": 7, "critico": 2, "diario": 420, "produccion": 450, "img": "a loaf of sliced white sandwich bread in a clear unbranded bag"},
+    {"code": "PT-TAJ-02", "name": "Pan tajado integral 500 g", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 120, "cost": 3400, "vida": 7, "critico": 2, "diario": 160, "produccion": 170, "img": "a loaf of sliced whole wheat bread with oats on top, in a clear unbranded bag"},
+    {"code": "PT-HAM-01", "name": "Pan hamburguesa x 8 con ajonjolí", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 150, "cost": 3700, "vida": 6, "critico": 2, "diario": 210, "produccion": 220, "img": "eight golden hamburger buns with sesame seeds in a clear unbranded bag"},
+    {"code": "PT-PER-01", "name": "Pan perro x 8", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 100, "cost": 3300, "vida": 6, "critico": 2, "diario": 150, "produccion": 160, "img": "eight soft hot dog buns in a clear unbranded bag"},
+    {"code": "PT-MOG-01", "name": "Mogolla integral x 6", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 80, "cost": 3100, "vida": 5, "critico": 2, "diario": 110, "produccion": 115, "img": "six round Colombian whole wheat bread rolls (mogolla) with bran, in a clear bag"},
+    {"code": "PT-TOS-01", "name": "Tostadas de pan x 20", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 60, "cost": 4200, "vida": 90, "critico": 2, "diario": 40, "produccion": 45, "img": "a clear bag of golden crispy toasted bread slices (tostadas)"},
+    {"code": "PT-RIP-01", "name": "Ripio de pan (miga para apanar) 1 kg", "cat": "Producto terminado", "unit": "und", "bodega": "BOD-PT", "min": 40, "cost": 3600, "vida": 120, "critico": 2, "diario": 25, "produccion": 28, "img": "a clear bag of golden breadcrumbs made from bread trimmings, some crumbs on the table"},
     {"code": "CB-ACPM-01", "name": "ACPM para planta eléctrica", "cat": "Combustibles", "unit": "gal", "bodega": "BOD-COMB", "min": 60, "cost": 11200, "vida": 365, "diario": 0, "lotes": [110], "img": "a sealed red metal diesel fuel drum and a yellow diesel jerrycan in a clean ventilated room next to a small backup generator"}
   ]
 }
