@@ -1,5 +1,5 @@
 {
- "generado": "2026-09-25",
+ "generado": "2026-09-26",
  "fuentes": "Issues del GitHub Project #3 (tablero privado del autor) e historial de git del repositorio",
  "tarjetas": [
   {
@@ -508,9 +508,9 @@
   },
   {
    "columna": "review",
-   "titulo": "Documento final entregado al director para revisión",
-   "fecha": "2026-09-25",
-   "descripcion": "Versión de 113 páginas con los capítulos 8 a 14, anexos y manual de usuario con capturas de producción (25-sep-2026).",
+   "titulo": "Documento final listo para revisión del director",
+   "fecha": "2026-09-26",
+   "descripcion": "Versión de 115 páginas con los capítulos 8 a 14 (incluye asistente, Nielsen y WCAG en el Capítulo 11), anexos y manual de usuario.",
    "fuente": "https://tesis.pymetory.com/"
   },
   {
@@ -524,29 +524,29 @@
    "columna": "todo",
    "titulo": "Prueba con usuario con la administradora (tareas + SUS)",
    "fecha": "2026-09-25",
-   "descripcion": "Pendiente del objetivo 4. Protocolo en el Capítulo 11.",
+   "descripcion": "Pendiente del objetivo 4. Guía y tareas listas y ensayadas en producción; falta la sesión. Protocolo en el Capítulo 11.",
    "fuente": null
   },
   {
-   "columna": "todo",
-   "titulo": "Medir el asistente con 50 consultas",
+   "columna": "done",
+   "titulo": "Asistente medido con 50 consultas y criterio fijado de antemano",
    "fecha": "2026-09-25",
-   "descripcion": "Pendiente del indicador del objetivo 4.",
-   "fuente": null
+   "descripcion": "Commit c57d796 (2026-09-25). Batería 34/50 → 49/50, validación 11/20 → 20/20 y prueba ciega 8/10, en producción.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/c57d796"
   },
   {
-   "columna": "todo",
+   "columna": "done",
    "titulo": "Evaluación heurística de Nielsen",
    "fecha": "2026-09-25",
-   "descripcion": "Pendiente del indicador del objetivo 4.",
-   "fuente": null
+   "descripcion": "Commit fb0e9bb (2026-09-25). 14 hallazgos, 13 corregidos; queda uno cosmético.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/fb0e9bb"
   },
   {
-   "columna": "todo",
+   "columna": "done",
    "titulo": "Auditoría de accesibilidad WCAG 2.1 AA",
-   "fecha": "2026-09-25",
-   "descripcion": "Pendiente del indicador del objetivo 4.",
-   "fuente": null
+   "fecha": "2026-09-26",
+   "descripcion": "Commit 9483bdd (2026-09-26). axe-core sin incumplimientos automáticos en 6 temas, 34 vistas y 11 ventanas.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/9483bdd"
   },
   {
    "columna": "todo",
@@ -570,11 +570,74 @@
    "fuente": null
   },
   {
-   "columna": "todo",
+   "columna": "done",
    "titulo": "Actualizar axios (vulnerabilidades altas de npm audit)",
    "fecha": "2026-09-25",
-   "descripcion": "Issue #65, sigue abierto: npm audit reporta axios 1.0.0–1.17.0 con severidad alta.",
-   "fuente": null
+   "descripcion": "Commit de53e61 (2026-09-25). axios 1.20; npm audit sin vulnerabilidades.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/de53e61"
+  },
+  {
+   "columna": "done",
+   "titulo": "README nuevo y contraseña de demostración fuera del código",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 5db987e (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/5db987e"
+  },
+  {
+   "columna": "done",
+   "titulo": "Documento sin cifras desactualizadas (111 casos, 99,1 %, despliegue en GCP)",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit c85c6a6 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/c85c6a6"
+  },
+  {
+   "columna": "done",
+   "titulo": "Repositorio público con el historial depurado de credenciales",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 5f50a4e (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/5f50a4e"
+  },
+  {
+   "columna": "done",
+   "titulo": "Datos de la demostración: umbral FEFO por insumo, ocupación por unidad y rotación en valor",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit de53e61 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/de53e61"
+  },
+  {
+   "columna": "done",
+   "titulo": "Asistente: contextos completos y clasificador de preguntas corregido",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 48f092f (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/48f092f"
+  },
+  {
+   "columna": "done",
+   "titulo": "Recepción de órdenes con el lote real (número, vencimiento y bodega)",
+   "fecha": "2026-09-25",
+   "descripcion": "Commit 2987679 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/2987679"
+  },
+  {
+   "columna": "done",
+   "titulo": "Producción con Nginx y PHP-FPM (antes, un servidor de una petición a la vez)",
+   "fecha": "2026-09-26",
+   "descripcion": "Commit 9f45699 (2026-09-26).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/9f45699"
+  },
+  {
+   "columna": "done",
+   "titulo": "Documento: Capítulo 11 con asistente, evaluación heurística y accesibilidad",
+   "fecha": "2026-09-26",
+   "descripcion": "Commit c3c46ae (2026-09-26).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/c3c46ae"
+  },
+  {
+   "columna": "done",
+   "titulo": "Kardex paginado: el tablero carga en 0,3 s en vez de 2,2 s",
+   "fecha": "2026-09-26",
+   "descripcion": "Commit 8b6b91d (2026-09-26).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/8b6b91d"
   }
  ]
 }
