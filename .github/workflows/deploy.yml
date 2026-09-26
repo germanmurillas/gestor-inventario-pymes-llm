@@ -68,10 +68,13 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            # Cualquier error detiene el despliegue y marca el job como fallido
+            # (antes un git pull fallido terminaba igual en "Deploy completado").
+            set -e
             cd /var/www/portafolio/SolucionesWeb/pymetoryTesis
             # Repositorio público: el servidor actualiza sin credenciales.
             sudo git remote set-url origin https://github.com/germanmurillas/gestor-inventario-pymes-llm.git
-            sudo git pull origin main
+            sudo git pull --ff-only origin main
             sudo composer install --no-dev --optimize-autoloader --no-interaction
             sudo php artisan migrate --force
             sudo chown -R www-data:www-data .
