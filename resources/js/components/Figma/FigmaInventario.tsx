@@ -438,14 +438,14 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-obsidiana/40 backdrop-blur-xl p-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-obsidiana/40 backdrop-blur-xl p-4" role="dialog" aria-modal="true" aria-label="Conciliación física">
             <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-white/20 w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
                 <div className="p-4 sm:p-8 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/50">
                     <div>
                         <h3 className="text-lg font-black text-white tracking-tight font-display">Conciliación Física</h3>
                         <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest">Ajuste de Stock: {lote.codigo}</p>
                     </div>
-                    <button onClick={onClose} className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
+                    <button onClick={onClose} aria-label="Cerrar" className="w-10 h-10 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 text-slate-400 flex items-center justify-center rounded-2xl hover:bg-slate-800/50 transition-colors">
                         <X size={20} />
                     </button>
                 </div>
@@ -457,8 +457,8 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
                         </div>
                         
                         <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Stock físico real ({lote.unit})</label>
-                            <input 
+                            <label htmlFor="ajuste-cantidad" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Stock físico real ({lote.unit})</label>
+                            <input id="ajuste-cantidad" 
                                 type="number" 
                                 step="0.01"
                                 value={data.new_quantity}
@@ -469,8 +469,8 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
                         </div>
 
                         <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Motivo del Ajuste</label>
-                            <textarea 
+                            <label htmlFor="ajuste-motivo" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Motivo del ajuste</label>
+                            <textarea id="ajuste-motivo" 
                                 value={data.reason}
                                 onChange={e => setData('reason', e.target.value)}
                                 placeholder="Indica por qué cambió el stock (ej: pérdida por humedad, error de pesaje...)"

@@ -415,7 +415,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Desde</label>
                                 <div className="relative">
                                     <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
-                                    <input
+                                    <input aria-label="Desde"
                                         type="date"
                                         value={filters.from}
                                         onChange={(e) => setFilters(prev => ({ ...prev, from: e.target.value }))}
@@ -428,7 +428,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Hasta</label>
                                 <div className="relative">
                                     <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
-                                    <input
+                                    <input aria-label="Hasta"
                                         type="date"
                                         value={filters.to}
                                         onChange={(e) => setFilters(prev => ({ ...prev, to: e.target.value }))}
@@ -441,7 +441,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">
                                     <Warehouse size={12} className="inline mr-1" />Bodega
                                 </label>
-                                <select
+                                <select aria-label="Bodega"
                                     value={filters.bodega_id}
                                     onChange={(e) => setFilters(prev => ({ ...prev, bodega_id: e.target.value }))}
                                     className="w-full px-3 py-2.5 border border-slate-700/50 rounded-xl text-xs font-bold text-slate-300 bg-slate-800/50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"
@@ -457,7 +457,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">
                                     <PackageSearch size={12} className="inline mr-1" />Material
                                 </label>
-                                <select
+                                <select aria-label="Material"
                                     value={filters.material_id}
                                     onChange={(e) => setFilters(prev => ({ ...prev, material_id: e.target.value }))}
                                     className="w-full px-3 py-2.5 border border-slate-700/50 rounded-xl text-xs font-bold text-slate-300 bg-slate-800/50 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 outline-none transition-all"

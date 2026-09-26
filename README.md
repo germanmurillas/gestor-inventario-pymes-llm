@@ -58,4 +58,4 @@ npx playwright test         # de extremo a extremo (requiere la app en http://lo
 
 ## Despliegue
 
-GitHub Actions ejecuta lint y PHPUnit en cada cambio a `main` y, si pasan, actualiza el servidor (Oracle Cloud, capa gratuita) por SSH. La aplicación se publica con un túnel de Cloudflare.
+GitHub Actions ejecuta lint y PHPUnit en cada cambio a `main` y, si pasan, actualiza el servidor (Oracle Cloud, capa gratuita) por SSH. La aplicación corre con Nginx y PHP-FPM y se publica con un túnel de Cloudflare.

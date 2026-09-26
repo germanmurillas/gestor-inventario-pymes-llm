@@ -75,5 +75,10 @@ jobs:
             sudo composer install --no-dev --optimize-autoloader --no-interaction
             sudo php artisan migrate --force
             sudo chown -R www-data:www-data .
+            # Cachés de configuración y rutas con el código nuevo; PHP-FPM toma los archivos cambiados.
+            sudo -u www-data php artisan config:cache
+            sudo -u www-data php artisan route:cache
+            sudo -u www-data php artisan view:clear
+            sudo systemctl reload php8.3-fpm
             echo "✅ Deploy completado"
 

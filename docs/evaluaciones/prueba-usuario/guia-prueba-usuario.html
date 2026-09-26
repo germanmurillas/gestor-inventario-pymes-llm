@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Pymetory · Guía de la prueba con usuario</title>
+<style>
+  @page { size: letter; margin: 16mm 16mm 18mm; }
+  * { box-sizing: border-box; }
+  body { font: 11pt/1.45 "Helvetica Neue", Arial, sans-serif; color: #111; margin: 0; }
+  h1 { font-size: 18pt; margin: 0 0 4pt; }
+  h2 { font-size: 13pt; margin: 18pt 0 6pt; padding-bottom: 3pt; border-bottom: 1.5pt solid #333; }
+  h3 { font-size: 11.5pt; margin: 12pt 0 4pt; }
+  p, li { margin: 3pt 0; }
+  .sub { color: #444; margin-bottom: 10pt; }
+  .caja { border: 1pt solid #999; border-radius: 4pt; padding: 8pt 10pt; margin: 8pt 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0; }
+  th, td { border: 1pt solid #888; padding: 5pt 6pt; vertical-align: top; text-align: left; }
+  th { background: #eee; font-weight: 700; }
+  .linea { border-bottom: 1pt solid #888; height: 16pt; }
+  .salto { page-break-before: always; }
+  .num { width: 22pt; text-align: center; }
+  .esc td { text-align: center; }
+  .esc td:first-child { text-align: left; }
+  .peq { font-size: 9.5pt; color: #444; }
+  .check { display: inline-block; width: 10pt; height: 10pt; border: 1pt solid #333; margin: 0 4pt -1pt 8pt; }
+</style>
+</head>
+<body>
+
+<h1>Prueba con usuario · Pymetory</h1>
+<p class="sub">Trabajo de grado · Universidad del Valle, sede Tuluá · Protocolo del Capítulo 11</p>
+
+<table>
+  <tr><th style="width:30%">Fecha</th><td></td><th style="width:20%">Duración</th><td></td></tr>
+  <tr><th>Participante (rol)</th><td colspan="3">Administradora de la empresa del caso de estudio</td></tr>
+  <tr><th>Dispositivo</th><td colspan="3"><span class="check"></span>Computador <span class="check"></span>Celular</td></tr>
+  <tr><th>Facilitador</th><td colspan="3">Germán David Murillas Mondragón</td></tr>
+</table>
+
+<h2>1. Antes de empezar (para el facilitador)</h2>
+<ul>
+  <li>Abrir <b>app.pymetory.com</b> e iniciar sesión antes de la sesión, para no gastar tiempo en eso.</li>
+  <li>Tener a mano un cronómetro (el del celular sirve) y esta hoja.</li>
+  <li>Leerle a la participante el texto de consentimiento (abajo) y confirmar que acepta.</li>
+  <li>Pedirle que <b>piense en voz alta</b>: que diga lo que busca, lo que espera y lo que la confunde.</li>
+  <li><b>No ayudar</b> mientras intenta una tarea. Si pide ayuda o lleva más de 5 minutos atascada, se puede ayudar, y la tarea se marca "con ayuda".</li>
+  <li>Leer cada tarea en voz alta, tal como está escrita, y cronometrar desde que termina la lectura hasta que ella dice que terminó.</li>
+</ul>
+
+<div class="caja">
+  <b>Consentimiento (leer en voz alta)</b><br>
+  "Vamos a probar el sistema, no a usted: si algo no sale, es un problema del sistema. Los datos son de demostración, no de la empresa, y nada de lo que haga afecta información real. Voy a anotar lo que pasa y el tiempo de cada tarea. En el documento no aparecerá su nombre ni el de la empresa. Puede parar cuando quiera. ¿Está de acuerdo?"
+  <p style="margin-top:6pt">Acepta: <span class="check"></span>Sí <span class="check"></span>No</p>
+</div>
+
+<h2>2. Tareas</h2>
+<p class="peq">Leer cada tarea en voz alta. Los valores (cantidades, lotes) son de la demostración.</p>
+
+<h3>Tarea 1 · Registrar el ingreso de un lote</h3>
+<div class="caja">"Llegaron 250 kilos de <b>azúcar blanca</b> con el número de lote <b>AZU-PRUEBA-01</b>. Vencen en seis meses, costaron <b>4.100 pesos el kilo</b> y se guardan en la bodega de materia prima seca. Regístrelos en el sistema."</div>
+<p class="peq">Criterio de éxito: el lote AZU-PRUEBA-01 aparece en el inventario del azúcar blanca con 250 kg y su fecha.</p>
+
+<h3>Tarea 2 · Consumir por FEFO</h3>
+<div class="caja">"Producción le pide <b>30 kilos de harina de trigo panificable</b>. Registre ese consumo y dígame de qué lote salió la harina."</div>
+<p class="peq">Criterio de éxito: el consumo queda registrado y ella identifica el lote (el sistema descuenta primero el que vence antes).</p>
+
+<h3>Tarea 3 · Consultar al asistente</h3>
+<div class="caja">"Pregúntele al asistente <b>cuánta levadura fresca prensada queda</b>. Después compruebe en el inventario si la respuesta es correcta."</div>
+<p class="peq">Criterio de éxito: obtiene la cantidad del asistente y la contrasta con el inventario.</p>
+
+<h3>Tarea 4 · Conciliar un conteo físico</h3>
+<div class="caja">"En el conteo físico de hoy encontró <b>5 kilos menos de sal refinada</b> de lo que dice el sistema. Registre esa diferencia con su justificación."</div>
+<p class="peq">Criterio de éxito: queda un movimiento de ajuste en el Kardex con la justificación.</p>
+
+<h3>Tarea 5 · Generar un reporte</h3>
+<div class="caja">"Genere el <b>reporte de consumo de la última semana</b> en PDF."</div>
+<p class="peq">Criterio de éxito: descarga o abre el PDF del reporte de consumo con el periodo pedido.</p>
+
+<div class="salto"></div>
+<h2>3. Hoja de observación</h2>
+<table>
+  <tr><th style="width:12%">Tarea</th><th style="width:26%">¿La completó?</th><th style="width:14%">Tiempo (min:s)</th><th>Errores, dudas y comentarios</th></tr>
+  <tr><td>1. Ingreso</td><td><span class="check"></span>Sí<br><span class="check"></span>Con ayuda<br><span class="check"></span>No</td><td></td><td></td></tr>
+  <tr><td>2. FEFO</td><td><span class="check"></span>Sí<br><span class="check"></span>Con ayuda<br><span class="check"></span>No</td><td></td><td></td></tr>
+  <tr><td>3. Asistente</td><td><span class="check"></span>Sí<br><span class="check"></span>Con ayuda<br><span class="check"></span>No</td><td></td><td></td></tr>
+  <tr><td>4. Conciliación</td><td><span class="check"></span>Sí<br><span class="check"></span>Con ayuda<br><span class="check"></span>No</td><td></td><td></td></tr>
+  <tr><td>5. Reporte</td><td><span class="check"></span>Sí<br><span class="check"></span>Con ayuda<br><span class="check"></span>No</td><td></td><td></td></tr>
+</table>
+
+<h2>4. Cuestionario SUS</h2>
+<p>Marque qué tan de acuerdo está con cada frase (1 = totalmente en desacuerdo, 5 = totalmente de acuerdo). Responda con la primera impresión.</p>
+<table class="esc">
+  <tr><th style="width:62%">Frase</th><th class="num">1</th><th class="num">2</th><th class="num">3</th><th class="num">4</th><th class="num">5</th></tr>
+  <tr><td>1. Creo que me gustaría usar este sistema con frecuencia.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>2. Encontré el sistema innecesariamente complejo.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>3. Pensé que el sistema era fácil de usar.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>4. Creo que necesitaría la ayuda de una persona con conocimientos técnicos para usar este sistema.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>5. Las funciones del sistema están bien integradas.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>6. Pensé que había demasiada inconsistencia en el sistema.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>7. Imagino que la mayoría de las personas aprendería a usar este sistema rápidamente.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>8. Encontré el sistema muy difícil de usar.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>9. Me sentí muy seguro(a) usando el sistema.</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>10. Necesité aprender muchas cosas antes de poder usar el sistema.</td><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+<p class="peq">Cálculo (lo hace el facilitador después): en las frases impares se resta 1 al valor marcado; en las pares, el valor marcado se resta de 5. Se suman los diez resultados y se multiplica por 2,5. El puntaje va de 0 a 100; 68 es el promedio de referencia.</p>
+
+<h2>5. Entrevista final</h2>
+<p>1. ¿Qué fue lo más fácil y lo más difícil?</p><div class="linea"></div><div class="linea"></div>
+<p>2. ¿Qué cambiaría del sistema?</p><div class="linea"></div><div class="linea"></div>
+<p>3. ¿Lo usaría en la bodega en lugar de lo que usan hoy? ¿Por qué?</p><div class="linea"></div><div class="linea"></div>
+
+<p class="peq" style="margin-top:14pt">Después de la sesión: tomar una foto de estas hojas y pasarla para calcular el SUS e incorporar los resultados al Capítulo 11.</p>
+</body>
+</html>

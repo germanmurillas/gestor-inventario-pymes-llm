@@ -11,12 +11,14 @@ Este capítulo presenta las pruebas con que se verificó Pymetory: pruebas unita
 \section{Estrategia}
 \label{sec:pru_estrategia}
 
-Las pruebas se organizaron en cuatro niveles:
+Las pruebas se organizaron en seis niveles:
 
 \begin{enumerate}
     \item \textbf{Unitarias y de integración (PHPUnit).} Verifican reglas de negocio, controladores y permisos ejecutando la aplicación contra una base de datos SQLite en memoria que se reconstruye en cada prueba.
     \item \textbf{De extremo a extremo (Playwright \cite{playwright}).} Manejan un navegador real contra la aplicación y recorren los casos del plan de pruebas, en escritorio y en celular.
     \item \textbf{Verificación en producción.} Después de cada despliegue se comprueba en \url{https://app.pymetory.com} el funcionamiento de los cambios.
+    \item \textbf{Precisión del asistente.} Batería de 50 consultas cuya respuesta correcta se obtiene de la base de datos de producción (Sección \ref{sec:pru_asistente}).
+    \item \textbf{Usabilidad y accesibilidad.} Evaluación heurística con los principios de Nielsen y auditoría WCAG 2.1 AA (secciones \ref{sec:pru_nielsen} y \ref{sec:pru_wcag}).
     \item \textbf{Pruebas con usuario.} Tareas reales ejecutadas por la administradora de la empresa del caso de estudio (Sección \ref{sec:pru_usuario}).
 \end{enumerate}
 
@@ -103,6 +105,68 @@ Sobre la versión desplegada se verificó que el operario recibe acceso denegado
 \end{tabular}
 \end{table}
 
+\section{Precisión del asistente}
+\label{sec:pru_asistente}
+
+\subsection{Método}
+La batería tiene 50 consultas en español repartidas en 11 grupos (existencias, ubicación, vencimiento de un insumo, vencimientos por periodo, lotes críticos, valorización, movimientos, información de un lote, conciliación, resumen e insumos que no existen). Para cada consulta se fijaron de antemano la intención esperada y el criterio de acierto; por ejemplo, en existencias la respuesta debe contener el total de los lotes activos del insumo, y en los vencimientos por periodo debe mencionar exactamente los lotes de la ventana, ni uno más ni uno menos. La respuesta correcta se calcula con una consulta directa a la base de datos en el momento de preguntar, y la respuesta del asistente se obtiene por el mismo flujo que usa la interfaz. La batería se ejecuta con \texttt{php artisan rag:evaluar} y cada ejecución guarda las preguntas, las respuestas completas y la calificación en el repositorio (\texttt{docs/evaluaciones}).
+
+Para evitar que las correcciones se ajustaran solo a estas preguntas se usaron dos conjuntos adicionales: uno de validación con 20 consultas sobre otros insumos y con otras redacciones, y una prueba ciega de 10 consultas que se escribió y se guardó en el repositorio antes de corregir el asistente y no se ejecutó hasta la medición final. Todas las mediciones se hicieron en producción con el modelo \texttt{gpt-oss:120b-cloud}.
+
+Durante la primera medición se encontraron dos fallos del evaluador, no del asistente: no reconocía fechas y códigos escritos con guiones tipográficos ni algunas frases válidas para decir que un insumo no existe. Se corrigió el evaluador y se volvieron a calificar las mismas respuestas guardadas, sin volver a preguntar; esa es la línea base que se reporta.
+
+\subsection{Resultados}
+
+\begin{table}[H]
+\centering
+\caption{Precisión del asistente antes y después de las correcciones.}
+\label{tab:pru_asistente}
+\begin{tabular}{|p{4.6cm}|c|c|p{4.2cm}|}
+\hline
+\textbf{Conjunto} & \textbf{Línea base} & \textbf{Final} & \textbf{Observación} \\
+\hline
+Batería (50 consultas) & 34/50 (68\,\%) & 49/50 (98\,\%) & Clasificador de intención: 43/50 $\rightarrow$ 50/50. \\ \hline
+Validación (20 consultas) & 11/20 (55\,\%) & 20/20 (100\,\%) & Sus fallos de la línea base se revisaron al corregir. \\ \hline
+Prueba ciega (10 consultas) & --- & 8/10 (80\,\%) & Estimación más honesta de la precisión con preguntas nuevas. \\ \hline
+\end{tabular}
+\end{table}
+
+Por grupo, la línea base fallaba por completo en valorización (0 de 5), información de lote (0 de 4), conciliación (0 de 3) y resumen (0 de 2): el contexto no incluía costos, no reconocía los lotes por su número real ni traía los ajustes del Kardex ni los totales. Tras corregirlo (Capítulo \ref{chap:implementacion}), esos grupos pasaron a 4 de 5, 4 de 4, 3 de 3 y 2 de 2. La mediana del tiempo de respuesta fue de 0,6 segundos.
+
+Los fallos que quedan son tres. En la batería, ante ``¿cuál es el costo del aceite de soya en bodega?'' el asistente dio el costo unitario y no el valor total que pedía el criterio; la pregunta es ambigua. En la prueba ciega, ante ``¿cuándo fue el último movimiento del huevo líquido?'' respondió la fecha y la hora correctas, pero el criterio exigía también la cantidad; y ante ``hazme un panorama de la bodega'' entendió ``la bodega'' como las bodegas físicas y solo dio sus ocupaciones. Se mantienen como fallos porque así lo dicta el criterio fijado de antemano.
+
+\section{Evaluación heurística}
+\label{sec:pru_nielsen}
+
+Se recorrieron las 17 pantallas de la aplicación, en escritorio y en celular, contra las 10 heurísticas de Nielsen \cite{nielsen1994heuristics}, y cada hallazgo se verificó en la interfaz y en el código. La severidad se calificó con la escala de Nielsen, de 0 (no es problema) a 4 (catastrófico). La evaluación la hizo un solo evaluador; Nielsen recomienda de tres a cinco para encontrar la mayoría de los problemas, de modo que no reemplaza la prueba con usuario. El informe completo, con la pantalla y el elemento de cada hallazgo, está en \texttt{docs/evaluaciones/evaluacion-heuristica-nielsen.md}.
+
+\begin{table}[H]
+\centering
+\caption{Hallazgos de la evaluación heurística por severidad.}
+\label{tab:pru_nielsen}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Severidad} & \textbf{Hallazgos} & \textbf{Corregidos} \\
+\hline
+4 --- catastrófico & 1 & 1 \\ \hline
+3 --- mayor & 8 & 8 \\ \hline
+2 --- menor & 4 & 4 \\ \hline
+1 --- cosmético & 1 & 0 \\ \hline
+\textbf{Total} & \textbf{14} & \textbf{13} \\ \hline
+\end{tabular}
+\end{table}
+
+El hallazgo catastrófico era la pantalla de alertas, que mostraba avisos de ejemplo escritos en el código en lugar de las alertas que genera el sistema. Entre los mayores estaban la eliminación de órdenes de compra sin confirmación, los mensajes técnicos de error mostrados al usuario, el ingreso manual del escáner que exigía escribir el contenido del código QR, las unidades fijas en kilogramos y el registro de insumos sin unidad ni costo. El único pendiente es cosmético: algunas etiquetas usan mayúsculas sostenidas con espaciado amplio en textos pequeños.
+
+\section{Accesibilidad}
+\label{sec:pru_wcag}
+
+\subsection{Revisión automática}
+Se auditaron las 17 pantallas en escritorio y en celular (34 vistas) con axe-core \cite{axe_core} y las reglas de WCAG 2.1 niveles A y AA \cite{w3c_wcag_overview}. La primera auditoría, con el tema visual por defecto, encontró seis reglas incumplidas: contraste de color insuficiente (41 elementos), enlaces y botones sin nombre accesible (44), campos de formulario y listas desplegables sin etiqueta (20) y zonas con desplazamiento que no se alcanzaban con el teclado (3). Tras corregirlas, la misma auditoría sobre producción no encontró incumplimientos. %TEMAS%
+
+\subsection{Revisión manual}
+Las herramientas automáticas no detectan todos los problemas de accesibilidad, así que se comprobaron por separado cinco criterios sobre todas las pantallas: la aplicación se puede usar sin mouse (inicio de sesión completo con el teclado, criterio 2.1.1); todos los elementos recorridos con la tecla Tab muestran un indicador de foco visible (2.4.7); a 320 píxeles de ancho ninguna pantalla obliga a desplazarse horizontalmente (1.4.10); cada pantalla tiene título (2.4.2) y el documento declara el idioma español (3.1.1). Los cinco se cumplen. Quedan por verificar con un lector de pantalla real el orden de lectura y los anuncios de los cambios dinámicos.
+
 \section{Pruebas con usuario}
 \label{sec:pru_usuario}
 
@@ -137,7 +201,8 @@ El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La
 Tasa de éxito global $\geq$ 95\% & 135 de 135 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
 Casos de uso automatizados con Playwright & 34 casos del plan que recorren los casos de uso. & Cumplido \\ \hline
 7 escenarios de despacho FEFO & 7 pruebas sobre la regla FEFO (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
-50 consultas en español para medir la precisión del asistente & Consultas verificadas en producción (Tabla \ref{tab:pru_rag}); falta la batería completa de 50 con su medición. & Pendiente \\ \hline
-Evaluación heurística de Nielsen & --- & Pendiente \\ \hline
-Auditoría de accesibilidad WCAG AA & --- & Pendiente \\ \hline
+50 consultas en español para medir la precisión del asistente & Batería de 50: 49 correctas (98\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
+Evaluación heurística de Nielsen & 14 hallazgos, 13 corregidos (Tabla \ref{tab:pru_nielsen}). & Cumplido \\ \hline
+Auditoría de accesibilidad WCAG AA & Sin incumplimientos automáticos en las 34 vistas; cinco criterios manuales cumplidos (Sección \ref{sec:pru_wcag}). & Cumplido \\ \hline
+Prueba con usuario & Protocolo listo (Sección \ref{sec:pru_usuario}). & Pendiente \\ \hline
 \end{longtable}
