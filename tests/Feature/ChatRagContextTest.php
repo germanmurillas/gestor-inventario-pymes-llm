@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Http\Controllers\ChatLLMController;
 use App\Models\Lote;
 use App\Models\Material;
+use App\Models\Movimiento;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -88,5 +90,62 @@ class ChatRagContextTest extends TestCase
         $this->assertStringContainsString('(en 3 días)', $ctx);
         $this->assertStringNotContainsString('LT-CONSUMIDO', $ctx);
         $this->assertStringNotContainsString('LT-MES', $ctx);
+    }
+
+    public function test_reconoce_lotes_por_su_numero_real(): void
+    {
+        $m = Material::factory()->create(['name' => 'Azúcar blanca', 'unit' => 'kg']);
+        Lote::factory()->create(['material_id' => $m->id, 'batch_number' => 'AZU-01-260817-1', 'quantity' => 207.24, 'status' => 'active']);
+
+        $pregunta = '¿Qué información hay del lote AZU-01-260817-1?';
+        $this->assertSame('batch_info', $this->invokePrivate('classifyQuery', $pregunta));
+        $ctx = $this->invokePrivate('buildRagContext', $pregunta, 'batch_info');
+        $this->assertStringContainsString('AZU-01-260817-1', $ctx);
+        $this->assertStringContainsString('207.24 kg', $ctx);
+    }
+
+    public function test_conciliacion_lista_los_ajustes_del_kardex(): void
+    {
+        $user = User::factory()->create();
+        $lote = Lote::factory()->create(['batch_number' => 'MEJ-1', 'status' => 'active']);
+        Movimiento::create(['lote_id' => $lote->id, 'user_id' => $user->id, 'type' => 'salida', 'quantity' => 2.5, 'reason' => 'ajuste', 'description' => 'Conteo físico menor']);
+
+        $pregunta = '¿Hubo ajustes de conciliación?';
+        $this->assertSame('conciliation', $this->invokePrivate('classifyQuery', $pregunta));
+        $ctx = $this->invokePrivate('buildRagContext', $pregunta, 'conciliation');
+        $this->assertStringContainsString('MEJ-1', $ctx);
+        $this->assertStringContainsString('2.5', $ctx);
+    }
+
+    public function test_valorizacion_incluye_costo_y_total(): void
+    {
+        $m = Material::factory()->create(['name' => 'Sal refinada', 'unit' => 'kg']);
+        Lote::factory()->create(['material_id' => $m->id, 'quantity' => 10, 'unit_cost' => 1500, 'status' => 'active']);
+        Lote::factory()->create(['material_id' => $m->id, 'quantity' => 4, 'unit_cost' => 1500, 'status' => 'active']);
+
+        $pregunta = '¿Cuánto vale la sal refinada?';
+        $this->assertSame('valuation', $this->invokePrivate('classifyQuery', $pregunta));
+        $ctx = $this->invokePrivate('buildRagContext', $pregunta, 'valuation');
+        $this->assertStringContainsString('TOTAL Sal refinada: 14 kg', $ctx);
+        $this->assertStringContainsString('$21.000 COP', $ctx);
+    }
+
+    public function test_elige_el_insumo_que_coincide_con_mas_palabras(): void
+    {
+        $perro = Material::factory()->create(['name' => 'Pan perro x 8', 'unit' => 'und']);
+        $tajado = Material::factory()->create(['name' => 'Pan tajado blanco 500 g', 'unit' => 'und']);
+        Lote::factory()->create(['material_id' => $perro->id, 'batch_number' => 'PER-1', 'status' => 'active']);
+        Lote::factory()->create(['material_id' => $tajado->id, 'batch_number' => 'TAJ-1', 'status' => 'active']);
+
+        $ctx = $this->invokePrivate('buildRagContext', '¿Dónde está el pan perro x 8?', 'location');
+        $this->assertStringContainsString('PER-1', $ctx);
+        $this->assertStringNotContainsString('TAJ-1', $ctx);
+    }
+
+    public function test_las_cantidades_no_llevan_ceros_sobrantes(): void
+    {
+        $this->assertSame('403', $this->invokePrivate('num', 403.000));
+        $this->assertSame('71.015', $this->invokePrivate('num', 71.015));
+        $this->assertSame('2.5', $this->invokePrivate('num', '2.500'));
     }
 }

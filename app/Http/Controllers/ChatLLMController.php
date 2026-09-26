@@ -68,16 +68,51 @@ class ChatLLMController extends Controller {
 
     private function classifyQuery($query) {
         $q = mb_strtolower($query);
-        if (preg_match('/cu[aá]nt[oa]s?.+(hay|queda|tengo|tenemos)|stock|cantidad|existencias|disponible/iu', $q)) return 'stock_check';
-        if (preg_match('/cr[ií]tic[oa]|por vencer|pr[oó]xim[oa].+venc|alerta|urgente/iu', $q)) return 'critical_alerts';
-        if (preg_match('/vence|fecha.+vencimient|cu[aá]ndo.+vence|expira/iu', $q)) return 'expiration';
-        if (preg_match('/d[oó]nde|ubicaci[oó]n|bodega|almac[eé]n|est[aá].+guardado/iu', $q)) return 'location';
-        if (preg_match('/valor|cu[aá]nto.+vale|precio|costo|cu[aá]nto.+cuest/iu', $q)) return 'valuation';
-        if (preg_match('/entr[oó]|sali[oó]|movimient|historial|kardex|qui[eé]n.+mov/iu', $q) && !preg_match('/lote/iu', $q)) return 'movements';
-        if (preg_match('/lote\s*LT-\d+|batch\s*\d+/iu', $q)) return 'batch_info';
-        if (preg_match('/resumen|panorama|todo el inventario|estado general/iu', $q)) return 'summary';
+        // El orden importa: primero lo más específico.
+        if ($this->lotesMencionados($query)->isNotEmpty() || preg_match('/\blote\s+[a-z0-9]+-[a-z0-9-]+/iu', $q)) return 'batch_info';
         if (preg_match('/concili|ajust|diferencia|descuadr/iu', $q)) return 'conciliation';
+        if (preg_match('/resumen|panorama|todo el inventario|estado general|en general|c[oó]mo est[aá] el inventario/iu', $q)) return 'summary';
+        if (preg_match('/valor|\bvale\b|precio|costo|cuesta|dinero|plata|invertid/iu', $q)) return 'valuation';
+        if (preg_match('/entr[oó]|sali[oó]|salida|movimient|movi[oó]|historial|kardex|qui[eé]n.+mov/iu', $q)) return 'movements';
+        if (preg_match('/cr[ií]tic[oa]|por vencer|pr[oó]xim[oa].+venc|alerta|urgente/iu', $q)) return 'critical_alerts';
+        if (preg_match('/vence|vencimient|expira|caduc|hasta cu[aá]ndo/iu', $q)) return 'expiration';
+        if (preg_match('/d[oó]nde|ubicaci[oó]n|en qu[eé] (bodega|parte|lugar)|almac[eé]n|guardad|se guarda/iu', $q)) return 'location';
+        if (preg_match('/cu[aá]nt[oa]s?|stock|cantidad|existencias|disponible|queda|quedan|\bhay\b|tenemos/iu', $q)) return 'stock_check';
         return 'general';
+    }
+
+    /** Lotes cuyo número aparece en la pregunta (se buscan en la base, sin suponer un formato). */
+    private function lotesMencionados(string $query)
+    {
+        preg_match_all('/[A-Za-z0-9]+(?:[-‑][A-Za-z0-9]+)+/u', $query, $m);
+        $tokens = collect($m[0])->map(fn ($t) => strtoupper(str_replace('‑', '-', $t)))->unique()->values();
+        return $tokens->isEmpty() ? collect() : Lote::whereIn('batch_number', $tokens)->with(['material', 'bodega'])->get();
+    }
+
+    /** Cantidad legible: sin ceros sobrantes (403.000 → 403; 71.015 se conserva). */
+    private function num($n): string
+    {
+        return rtrim(rtrim(number_format((float) $n, 3, '.', ''), '0'), '.');
+    }
+
+    private function cop($n): string
+    {
+        return '$' . number_format((float) $n, 0, ',', '.') . ' COP';
+    }
+
+    /** Insumos que mejor coinciden con la pregunta: los que contienen más palabras de ella en el nombre. */
+    private function materialesDeLaPregunta(array $keywords): array
+    {
+        if (empty($keywords)) return [];
+        $candidatos = \App\Models\Material::where(function ($q) use ($keywords) {
+            foreach ($keywords as $w) $q->orWhere('name', 'like', "%{$w}%")->orWhere('description', 'like', "%{$w}%");
+        })->get(['id', 'name', 'description']);
+        if ($candidatos->isEmpty()) return [];
+        $puntaje = fn ($m) => collect($keywords)->filter(fn ($w) => str_contains(mb_strtolower($m->name), $w))->count();
+        $max = $candidatos->max($puntaje);
+        return $max > 0
+            ? $candidatos->filter(fn ($m) => $puntaje($m) === $max)->pluck('id')->all()
+            : $candidatos->pluck('id')->all(); // solo coincidió la descripción (categoría)
     }
 
     /** Palabras de la pregunta que pueden nombrar un material (sin términos genéricos del dominio). */
@@ -92,7 +127,10 @@ class ChatLLMController extends Controller {
             'días','dias','próximo','proximo','próximos','proximos','crítico','critico','críticos','criticos','alerta','alertas','urgente',
             'valor','precio','costo','vale','movimiento','movimientos','entradas','salidas','historial','kardex','resumen','general',
             'ubicación','ubicacion','almacén','almacen','kilos','kg','bultos','cajas','sobre','acerca',
-            'pronto','ahora','actualmente','favor','porfa','necesito','quiero','saber','tiene','tienes','hoy','mañana'];
+            'pronto','ahora','actualmente','favor','porfa','necesito','quiero','saber','tiene','tienes','hoy','mañana',
+            'quincena','próxima','proxima','primero','sacar','debo','información','informacion','datos','dinero','guardada','guardado',
+            'último','ultimo','última','ultima','movió','movio','tuvo','hubo','registraron','ajuste','ajustes','conciliación','conciliacion',
+            'diferencias','física','fisica','estado','consumir','urgentes','insumo','kilos','cuál','qué'];
 
         return collect(preg_split('/\s+/u', mb_strtolower($query)))
             ->map(fn($w) => preg_replace('/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/u', '', $w))
@@ -120,100 +158,121 @@ class ChatLLMController extends Controller {
         // Solo lotes con existencias: los consumidos quedan en el Kardex, no en el inventario.
         $conStock = fn () => Lote::with(['material', 'bodega'])->activos()->where('quantity', '>', 0);
         $ventana = $this->ventanaDias($query);
-
-        $materialIds = [];
-        if (!empty($keywords)) {
-            $materialIds = \App\Models\Material::where(function($q) use ($keywords) {
-                foreach ($keywords as $word) {
-                    $q->orWhere('name', 'like', "%{$word}%")
-                      ->orWhere('description', 'like', "%{$word}%");
-                }
-            })->pluck('id')->toArray();
-        }
+        $materialIds = in_array($intent, ['summary', 'conciliation', 'batch_info'], true) ? [] : $this->materialesDeLaPregunta($keywords);
 
         // Si la pregunta nombra un material que no existe, se dice explícitamente
         // en lugar de devolver lotes de otros materiales.
         if (!empty($keywords) && empty($materialIds)
-            && in_array($intent, ['stock_check', 'location', 'valuation'], true)) {
+            && (in_array($intent, ['stock_check', 'location', 'valuation'], true) || ($intent === 'expiration' && $ventana === null))) {
             $catalogo = \App\Models\Material::orderBy('name')->pluck('name')->join(', ');
             return "MATERIAL NO ENCONTRADO: ningún material registrado coincide con \"" . implode(' ', $keywords) . "\".\n"
                  . "MATERIALES REGISTRADOS: {$catalogo}\n\n"
                  . "INSTRUCCIÓN: Indica al usuario que ese material no está registrado en el inventario y menciona los materiales registrados que podrían ser lo que busca. No inventes cantidades.";
         }
 
+        $linea = function (Lote $l, bool $costo = false) {
+            $dias = $l->expiration_date ? (int) now()->startOfDay()->diffInDays($l->expiration_date->copy()->startOfDay(), false) : null;
+            $cuando = $dias === null ? 'N/A'
+                : $l->expiration_date->format('Y-m-d') . ($dias < 0 ? ' (VENCIDO hace ' . abs($dias) . ' días)' : ($dias === 0 ? ' (vence HOY)' : " (en {$dias} días)"));
+            $u = $l->material->unit;
+            return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$this->num($l->quantity)} {$u} | Vence: {$cuando} | Bodega: " . ($l->bodega?->name ?? 'Sin bodega')
+                . ($costo ? " | Costo unitario: {$this->cop($l->unit_cost)} por {$u} | Valor: {$this->cop($l->quantity * $l->unit_cost)}" : '');
+        };
+        $porMaterial = fn ($q) => $q->when(!empty($materialIds), fn ($x) => $x->whereIn('material_id', $materialIds));
+
         switch ($intent) {
             case 'stock_check':
-                $lotes = $conStock()
-                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
-                    ->orderBy('quantity', 'desc')
-                    ->take(6)->get();
-                $context = "CONSULTA DE STOCK - Datos actuales del inventario solicitado:\n";
+            case 'valuation':
+                $valor = $intent === 'valuation';
+                $lotes = $porMaterial($conStock())->orderBy('expiration_date')->when(empty($materialIds), fn ($q) => $q->take(15))->get();
+                $totales = $lotes->groupBy('material_id')->map(function ($g) use ($valor) {
+                    $m = $g->first()->material;
+                    return "TOTAL {$m->name}: {$this->num($g->sum('quantity'))} {$m->unit} en {$g->count()} lote(s)"
+                        . ($valor ? ' | Valor total: ' . $this->cop($g->sum(fn ($l) => $l->quantity * $l->unit_cost)) : '');
+                })->join("\n");
+                $context = ($valor ? "VALORIZACIÓN (cantidad × costo unitario de cada lote):\n" : "CONSULTA DE STOCK - Existencias actuales:\n")
+                    . ($totales ? $totales . "\n" : '')
+                    . $lotes->map(fn ($l) => $linea($l, $valor))->join("\n");
+                if (empty($materialIds) && $valor) {
+                    $context .= "\nVALOR TOTAL DEL INVENTARIO: " . $this->cop(Lote::activos()->selectRaw('SUM(quantity * unit_cost) as v')->value('v'));
+                }
                 break;
             case 'critical_alerts':
-                $lotes = $conStock()
-                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
+                $lotes = $porMaterial($conStock())
                     ->when($ventana !== null,
-                        fn($q) => $q->whereDate('expiration_date', '<=', now()->addDays($ventana)),
-                        fn($q) => $q->criticos())
-                    ->orderBy('expiration_date')
-                    ->take(12)->get();
-                $context = $ventana !== null
+                        fn ($q) => $q->whereDate('expiration_date', '<=', now()->addDays($ventana)),
+                        fn ($q) => $q->criticos())
+                    ->orderBy('expiration_date')->take(40)->get();
+                $context = ($ventana !== null
                     ? "ALERTAS FEFO - Lotes con existencias que vencen en los próximos {$ventana} días (o ya vencidos):\n"
-                    : "ALERTAS FEFO - Lotes con existencias dentro del umbral de criticidad de su insumo (o ya vencidos):\n";
+                    : "ALERTAS FEFO - Lotes con existencias dentro del umbral de criticidad de su insumo (o ya vencidos). Son {COUNT} lotes:\n")
+                    . $lotes->map(fn ($l) => $linea($l))->join("\n");
+                $context = str_replace('{COUNT}', (string) $lotes->count(), $context);
                 break;
             case 'expiration':
-                $lotes = $conStock()
-                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
-                    ->whereNotNull('expiration_date')
-                    ->when($ventana !== null, fn($q) => $q->whereDate('expiration_date', '<=', now()->addDays($ventana)))
-                    ->orderBy('expiration_date', 'asc')
-                    ->take(12)->get();
-                $context = $ventana !== null
-                    ? "FECHAS DE VENCIMIENTO - Lotes con existencias que vencen en los próximos {$ventana} días (o ya vencidos), del más próximo al más lejano:\n"
-                    : "FECHAS DE VENCIMIENTO - Lotes con existencias ordenados por cercanía de vencimiento:\n";
+                $lotes = $porMaterial($conStock())->whereNotNull('expiration_date')
+                    ->when($ventana !== null, fn ($q) => $q->whereDate('expiration_date', '<=', now()->addDays($ventana)))
+                    ->orderBy('expiration_date')->take($ventana !== null || !empty($materialIds) ? 40 : 12)->get();
+                $context = ($ventana !== null
+                    ? "FECHAS DE VENCIMIENTO - Lotes con existencias que vencen en los próximos {$ventana} días (o ya vencidos), del más próximo al más lejano. Son {$lotes->count()} lotes:\n"
+                    : "FECHAS DE VENCIMIENTO - Lotes con existencias ordenados por cercanía de vencimiento (el primero es el que vence antes):\n")
+                    . $lotes->map(fn ($l) => $linea($l))->join("\n");
                 break;
             case 'location':
-                $lotes = $conStock()
-                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
-                    ->take(10)->get();
-                $context = "UBICACIÓN EN BODEGAS - Distribución física de los materiales:\n";
+                $lotes = $porMaterial($conStock())->when(empty($materialIds), fn ($q) => $q->take(15))->get();
+                $context = "UBICACIÓN EN BODEGAS - Distribución física de los materiales:\n" . $lotes->map(fn ($l) => $linea($l))->join("\n");
                 break;
             case 'movements':
-                $movimientos = DB::table('movimientos')
-                    ->join('lotes', 'movimientos.lote_id', '=', 'lotes.id')
-                    ->join('materials', 'lotes.material_id', '=', 'materials.id')
-                    ->join('users', 'movimientos.user_id', '=', 'users.id')
-                    ->select('movimientos.*', 'materials.name as material', 'users.name as usuario')
-                    ->when(!empty($materialIds), fn($q) => $q->whereIn('lotes.material_id', $materialIds))
-                    ->orderBy('movimientos.created_at', 'desc')
-                    ->take(8)->get();
-                $context = "KARDEX DE MOVIMIENTOS (Historial inmutable):\n" . $movimientos->map(function($m) {
-                    return "- [{$m->created_at}] {$m->type}: {$m->quantity}u de {$m->material} | Razón: {$m->reason} | Usuario: {$m->usuario}";
+                $movimientos = \App\Models\Movimiento::with(['lote.material', 'user'])
+                    ->when(!empty($materialIds), fn ($q) => $q->whereHas('lote', fn ($l) => $l->whereIn('material_id', $materialIds)))
+                    ->latest('created_at')->latest('id')->take(10)->get();
+                $context = "KARDEX DE MOVIMIENTOS (historial inmutable, del más reciente al más antiguo):\n" . $movimientos->map(fn ($m) =>
+                    "- [{$m->created_at->format('Y-m-d H:i')}] " . ($m->type === 'entrada' ? 'ENTRADA' : 'SALIDA') . ": {$this->num($m->quantity)} {$m->lote->material->unit} de {$m->lote->material->name} (lote {$m->lote->batch_number}) | Motivo: {$m->reason} | Usuario: " . ($m->user->name ?? 'Sistema')
+                )->join("\n");
+                break;
+            case 'batch_info':
+                $lotes = $this->lotesMencionados($query);
+                if ($lotes->isEmpty()) {
+                    return "LOTE NO ENCONTRADO: ningún lote registrado coincide con el número de la pregunta.\n\nINSTRUCCIÓN: Indica que ese lote no está registrado. No inventes datos.";
+                }
+                $context = "FICHA DEL LOTE:\n" . $lotes->map(function ($l) use ($linea) {
+                    $movs = $l->movimientos()->with('user')->latest('created_at')->take(5)->get()->map(fn ($m) =>
+                        "    · [{$m->created_at->format('Y-m-d H:i')}] {$m->type} de {$this->num($m->quantity)} {$l->material->unit} | Motivo: {$m->reason} | Usuario: " . ($m->user->name ?? 'Sistema'))->join("\n");
+                    $estado = ['active' => 'activo', 'quarantined' => 'en cuarentena', 'consumed' => 'consumido'][$l->status] ?? $l->status;
+                    return $linea($l, true) . " | Estado: {$estado}\n  Últimos movimientos del lote:\n{$movs}";
                 })->join("\n");
                 break;
+            case 'conciliation':
+                $ajustes = \App\Models\Movimiento::with(['lote.material', 'user'])->where('reason', 'ajuste')->latest('created_at')->take(20)->get();
+                $context = "AJUSTES DE CONCILIACIÓN REGISTRADOS EN EL KARDEX (diferencias entre el conteo físico y el sistema):\n"
+                    . ($ajustes->isEmpty() ? '- No hay ajustes de conciliación registrados.' : $ajustes->map(fn ($m) =>
+                        "- [{$m->created_at->format('Y-m-d H:i')}] {$m->lote->material->name} (lote {$m->lote->batch_number}): " . ($m->type === 'salida' ? 'se descontaron ' : 'se sumaron ')
+                        . "{$this->num($m->quantity)} {$m->lote->material->unit} | Justificación: {$m->description} | Usuario: " . ($m->user->name ?? 'Sistema'))->join("\n"));
+                break;
+            case 'summary':
+                $activos = Lote::activos();
+                $criticos = $conStock()->criticos()->orderBy('expiration_date')->get();
+                $context = "RESUMEN DEL INVENTARIO:\n"
+                    . "- Insumos registrados: " . \App\Models\Material::count() . "\n"
+                    . "- Lotes activos: " . (clone $activos)->count() . "\n"
+                    . "- Lotes en cuarentena: " . Lote::where('status', 'quarantined')->count() . "\n"
+                    . "- Valor total del inventario: " . $this->cop((clone $activos)->selectRaw('SUM(quantity * unit_cost) as v')->value('v')) . "\n"
+                    . "- Lotes críticos por vencimiento: {$criticos->count()}" . ($criticos->isNotEmpty() ? ' (' . $criticos->map(fn ($l) => "{$l->material->name} lote {$l->batch_number}, vence {$l->expiration_date->format('Y-m-d')}")->join('; ') . ')' : '') . "\n"
+                    . "- Insumos bajo su stock mínimo: " . \App\Models\Material::where('stock_minimo', '>', 0)->get()->filter(fn ($m) => $m->stock_total < $m->stock_minimo)->pluck('name')->join(', ');
+                break;
             default:
-                $lotes = $conStock()->orderBy('expiration_date')
-                    ->when(!empty($materialIds), fn($q) => $q->whereIn('material_id', $materialIds))
-                    ->take(6)->get();
-                $context = "INVENTARIO ACTUAL:\n";
+                $lotes = $porMaterial($conStock())->orderBy('expiration_date')->take(6)->get();
+                $context = "INVENTARIO ACTUAL:\n" . ($lotes->isNotEmpty() ? $lotes->map(fn ($l) => $linea($l))->join("\n") : '- No hay lotes con existencias que cumplan esta consulta.');
         }
 
-        if ($intent !== 'movements') {
-            $context .= (isset($lotes) && $lotes->isNotEmpty())
-                ? $lotes->map(function($l) {
-                    $dias = $l->expiration_date ? (int) now()->startOfDay()->diffInDays($l->expiration_date->copy()->startOfDay(), false) : null;
-                    $cuando = $dias === null ? 'N/A'
-                        : $l->expiration_date->format('Y-m-d') . ($dias < 0 ? " (VENCIDO hace " . abs($dias) . " días)" : ($dias === 0 ? ' (vence HOY)' : " (en {$dias} días)"));
-                    return "- {$l->material->name} | Lote: {$l->batch_number} | Stock: {$l->quantity} {$l->material->unit} | Vence: {$cuando}" .
-                           " | Bodega: " . ($l->bodega?->name ?? 'Sin bodega');
-                  })->join("\n")
-                : "- No hay lotes con existencias que cumplan esta consulta.";
+        if (isset($lotes) && $lotes->isEmpty() && !in_array($intent, ['batch_info'], true)) {
+            $context .= "- No hay lotes con existencias que cumplan esta consulta.";
         }
         $context = "FECHA DE HOY: " . now()->locale('es')->isoFormat('dddd D [de] MMMM [de] YYYY') . ' (' . now()->toDateString() . ")\n\n" . $context;
 
-        $bodegas = \App\Models\Bodega::all()->map(fn($b) => "{$b->name}: {$b->occupancy_percentage}% ocupación")->join(' | ');
+        $bodegas = \App\Models\Bodega::all()->map(fn ($b) => "{$b->name}: {$b->occupancy_percentage}% de " . $this->num($b->capacity) . " {$b->capacity_unit}")->join(' | ');
         $context .= "\n\nESTADO DE BODEGAS: {$bodegas}";
-        $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó. Si pregunta por un material, habla solo de ese material e indica la unidad. Si pregunta por vencimientos, indica material, lote y fecha de vencimiento, del más próximo al más lejano. NO repitas todo el inventario a menos que te lo pidan explícitamente.";
+        $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó, usando exactamente las cifras del contexto (si hay una línea TOTAL, da ese total con su unidad). Si pregunta por un material, habla solo de ese material. Si pregunta por vencimientos, indica material, lote y fecha, del más próximo al más lejano, e incluye todos los lotes listados. NO repitas todo el inventario a menos que te lo pidan.";
 
         return $context;
     }
