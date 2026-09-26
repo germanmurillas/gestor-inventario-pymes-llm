@@ -16,7 +16,7 @@ Resume el estado del inventario: número de insumos, lotes en bodega, lotes crí
 \capturaManual{02-tablero.png}{Tablero de control.}
 
 \subsection*{Inventario}
-Tiene dos pestañas. En \textbf{Insumos} cada tarjeta es un insumo con su existencia total en su unidad (kg, L, gal, und), el número de lotes y avisos de lotes por vencer o de existencia bajo el mínimo; se puede filtrar por bodega y por categoría, y al tocar un insumo se ven sus lotes en orden FEFO. Desde aquí se registran ingresos (\textbf{Ingreso}) y consumos (\textbf{Consumo FEFO}); al consumir, el sistema descuenta primero del lote que vence primero.
+Tiene dos pestañas. En \textbf{Insumos} cada tarjeta es un insumo con su existencia total en su unidad (kg, L, gal, und), el número de lotes y avisos de lotes por vencer o de existencia bajo el mínimo; se puede filtrar por bodega y por categoría, y al tocar un insumo se ven sus lotes en orden FEFO. Con \textbf{Ingreso} se registra un insumo nuevo con su primer lote (unidad, costo, stock mínimo y, si se quiere, un umbral de días críticos propio). Para un insumo que ya existe, su ficha tiene \textbf{Registrar ingreso de lote}: número de lote, cantidad, costo unitario, fecha de vencimiento y bodega. \textbf{Consumo FEFO} registra una salida; el sistema descuenta primero del lote que vence primero.
 \capturaManual{03-inventario.png}{Inventario por insumo.}
 
 En \textbf{Bodegas} cada tarjeta resume lo que hay en esa bodega según la base de datos: lotes, insumos, lotes por vencer, valor y ocupación. Al tocarla se abre el inventario filtrado por esa bodega. El administrador puede crear una bodega o editarla (nombre, capacidad, descripción, estado e imagen de fondo, que puede ser un archivo subido o un enlace \texttt{https}).
@@ -39,7 +39,7 @@ Lista todos los movimientos con tipo, material, lote, responsable, cantidad y fe
 \capturaManual{07-kardex.png}{Log maestro de movimientos.}
 
 \subsection*{Etiquetas y escáner}
-El módulo de etiquetas genera códigos QR y de barras por lote para imprimir. El escáner lee esas etiquetas con la cámara del dispositivo (o con ingreso manual del código) y registra la entrada o salida correspondiente en el Kardex.
+El módulo de etiquetas genera códigos QR y de barras por lote para imprimir. El escáner lee esas etiquetas con la cámara del dispositivo; si no hay cámara, basta escribir el número de lote impreso en la etiqueta. Después registra la entrada o salida correspondiente en el Kardex.
 \capturaManual{08-etiquetas.png}{Generación de etiquetas.}
 \capturaManual{09-escaner.png}{Escáner de códigos QR.}
 
@@ -48,7 +48,7 @@ Traslada cantidad de un lote entre bodegas. La operación registra la salida en 
 \capturaManual{10-transferencias.png}{Transferencias entre bodegas.}
 
 \subsection*{Órdenes de compra}
-Registra órdenes a proveedores. Al recibir una orden, el sistema crea el lote recibido y su entrada en el Kardex.
+Registra órdenes a proveedores. Al recibir una orden se indica, por cada insumo, la cantidad recibida, el número de lote, la fecha de vencimiento y la bodega; el sistema crea el lote y su entrada en el Kardex.
 \capturaManual{11-ordenes.png}{Órdenes de compra.}
 
 \subsection*{Alertas}
@@ -60,5 +60,5 @@ Configura el umbral FEFO, las notificaciones, el proveedor y modelo de lenguaje 
 \capturaManual{13-ajustes.png}{Ajustes del sistema.}
 
 \subsection*{Uso en el celular}
-En pantallas pequeñas el menú lateral se reemplaza por una barra inferior con Tablero, Inventario, Escanear y Asistente; el botón \textbf{Más} abre el resto de módulos agrupados.
+En pantallas pequeñas el menú lateral se reemplaza por una barra inferior con Tablero, Inventario, Escanear y Asistente; el botón \textbf{Más} abre el resto de módulos agrupados. Este manual se puede abrir desde el menú, en \textbf{Manual de usuario}.
 \begin{figure}[H]\centering\includegraphics[width=0.8\textwidth]{Anexos/Imagenes/manual/14-movil.png}\caption{Tablero, inventario y escáner en el celular.}\end{figure}

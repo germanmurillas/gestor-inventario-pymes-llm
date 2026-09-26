@@ -141,7 +141,7 @@ const PEDIDOS = [
   { e: 'ok', t: 'Capítulo de implementación: patrones, problemas, infraestructura y despliegue',
     d: 'Patrones con la alternativa descartada y su evidencia en el código; problemas reales con su causa y su commit; infraestructura en la capa gratuita de Oracle Cloud y despliegue con GitHub Actions.', w: 'Capítulo 10, p. 55' },
   { e: 'parcial', t: 'Capítulo de pruebas: unitarias, de integración, con usuario y un reporte',
-    d: '85 pruebas PHPUnit (84 aprobadas, 1 omitida) y 60/60 de extremo a extremo con Playwright; consultas al asistente verificadas en producción. La prueba con usuario tiene protocolo (tareas y SUS) pero falta hacerla.', w: 'Capítulo 11, p. 61' },
+    d: '97 pruebas PHPUnit (96 aprobadas, 1 omitida) y 60/60 de extremo a extremo con Playwright; batería de 50 consultas al asistente, evaluación heurística y auditoría WCAG. La prueba con usuario tiene protocolo y guía impresa, pero falta hacerla.', w: 'Capítulo 11, p. 61' },
   { e: 'ok', t: 'Metodología: tickets, pantallazo del GitHub Project, criterios de aceptación, DoR y DoD',
     d: 'Tablero real de GitHub Projects, flujo de una tarea, criterios dado/cuando/entonces ligados a pruebas, Definition of Ready y Definition of Done (pruebas + desplegado y funcionando).', w: 'Capítulo 12, p. 66' },
   { e: 'ok', t: 'Trabajos futuros y conclusiones',
@@ -150,8 +150,8 @@ const PEDIDOS = [
     d: 'Las expresiones no reconocían tildes y un material inexistente devolvía lotes de otros. Corregido con pruebas y verificado en producción. En la revisión del 25-sep apareció y se corrigió otro caso: “¿qué vence esta semana?”.', w: 'Capítulo 10 (tabla de problemas) y 11' },
   { e: 'pend', t: 'Prueba con usuario con la administradora',
     d: 'Sesión con las tareas del protocolo y el cuestionario SUS.', w: 'Capítulo 11, sección de pruebas con usuario' },
-  { e: 'pend', t: 'Indicador del objetivo 4: asistente, heurísticas y accesibilidad',
-    d: 'Medir el asistente con 50 consultas, evaluación heurística de Nielsen y auditoría WCAG 2.1 AA.', w: 'Capítulo 11 y conclusiones' },
+  { e: 'ok', t: 'Indicador del objetivo 4: asistente, heurísticas y accesibilidad',
+    d: 'Asistente: 49 de 50 consultas correctas (línea base 34 de 50; prueba ciega 8 de 10). Nielsen: 14 hallazgos, 13 corregidos. WCAG 2.1 AA: sin incumplimientos automáticos en 6 temas y 11 ventanas; 5 criterios manuales cumplidos.', w: 'Capítulo 11' },
 ];
 
 const REUNIONES = [

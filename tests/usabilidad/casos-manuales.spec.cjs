@@ -289,6 +289,8 @@ test.describe('Casos Manuales - Plan de Pruebas @casos @visual', () => {
                 expiration_date: '2099-12-31',
                 batch_number: `L-${Date.now().toString(36).toUpperCase().slice(-8)}`,
                 description: 'Material creado por caso-04 automatizado',
+                unit: 'kg',          // obligatorios desde la revisión final (RF-02)
+                unit_cost: 2500,
             }),
         });
 

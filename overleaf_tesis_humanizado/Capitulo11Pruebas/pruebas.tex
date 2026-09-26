@@ -2,7 +2,7 @@
 % Capítulo: Pruebas
 % Orden del director (19-sep-2026): pruebas unitarias, de integración, con usuario y
 % algún reporte. Todas las cifras salen de ejecuciones del 25-sep-2026:
-%   php artisan test  -> 85 pruebas (84 aprobadas, 1 omitida), 282 aserciones
+%   php artisan test  -> 97 pruebas (96 aprobadas, 1 omitida), 327 aserciones
 %   npx playwright test -> 60 de 60 aprobadas
 % -------------------------------------------------
 
@@ -27,7 +27,7 @@ Las pruebas PHPUnit se ejecutan automáticamente en cada cambio que llega a la r
 \section{Pruebas unitarias y de integración}
 \label{sec:pru_phpunit}
 
-La suite PHPUnit tiene \textbf{85 pruebas en 36 clases}: 84 aprobadas y 1 omitida, con \textbf{282 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
+La suite PHPUnit tiene \textbf{97 pruebas en 36 clases}: 96 aprobadas y 1 omitida, con \textbf{327 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
 
 En Laravel, la mayoría de estas pruebas son de integración: envían una petición HTTP y recorren rutas, \textit{middleware}, controladores y base de datos. Algunas prueban un componente aislado, como el modelo \texttt{Movimiento} (inmutabilidad), el umbral del modelo \texttt{Lote} o el clasificador del asistente, y cumplen el papel de pruebas unitarias. La Tabla \ref{tab:pru_phpunit} las agrupa por área.
 
@@ -42,22 +42,22 @@ En Laravel, la mayoría de estas pruebas son de integración: envían una petici
 \textbf{Área} & \textbf{Pruebas} & \textbf{Clases y qué verifican} \\
 \hline
 \endhead
-FEFO & 7 & \texttt{FefoTest}, \texttt{ConsumptionFefoTest}, \texttt{FefoUmbralTest}, \texttt{ExpiredLoteRegressionTest}, \texttt{DashboardCriticosConsistencyTest}: orden de despacho por vencimiento, consumo que atraviesa varios lotes, lotes vencidos y umbral configurable. \\ \hline
+FEFO & 10 & \texttt{FefoTest}, \texttt{ConsumptionFefoTest}, \texttt{FefoUmbralTest}, \texttt{ExpiredLoteRegressionTest}, \texttt{DashboardCriticosConsistencyTest}: orden de despacho por vencimiento, consumo que atraviesa varios lotes, lotes vencidos, umbral general y umbral propio de cada insumo. \\ \hline
 Kardex & 7 & \texttt{KardexTest}, \texttt{KardexInmutableTest}: registro de movimientos, rechazo de edición y borrado, protección en la base de datos y entrada al recibir órdenes de compra. \\ \hline
 Seguridad y roles & 13 & \texttt{UserManagementTest}, \texttt{ApiKeyTest}, \texttt{Auth\textbackslash AuthenticationTest}, \texttt{SettingsTest}: acceso por rol, registro público sin privilegios y claves cifradas. \\ \hline
-Asistente & 9 & \texttt{ChatLLMTest}, \texttt{ChatRagContextTest}, \texttt{ChatLLMLiveTest} (omitida): clasificación con tildes, material inexistente, filtrado del contexto y vencimientos de la semana calculados solo sobre lotes con existencias. \\ \hline
-Operación de inventario & 20 & \texttt{InventoryTest}, \texttt{InventoryStoreTest}, \texttt{TransferTest}, \texttt{PurchaseOrderTest}, \texttt{QRScanTest}, \texttt{LabelTest}, \texttt{TagTest}, \texttt{BodegaGestionTest} (crear y editar bodegas con imagen, solo administrador). \\ \hline
+Asistente & 14 & \texttt{ChatLLMTest}, \texttt{ChatRagContextTest}, \texttt{ChatLLMLiveTest} (omitida): clasificación con tildes, material inexistente, filtrado del contexto y vencimientos de la semana calculados solo sobre lotes con existencias, valorización con costos, conciliación, lotes por su número real y elección del insumo correcto. \\ \hline
+Operación de inventario & 24 & \texttt{InventoryTest}, \texttt{InventoryStoreTest}, \texttt{TransferTest}, \texttt{PurchaseOrderTest}, \texttt{QRScanTest}, \texttt{LabelTest}, \texttt{TagTest}, \texttt{BodegaGestionTest}: bodegas con imagen (solo administrador) y ocupación sin mezclar unidades; recepción de órdenes con lote, vencimiento y bodega reales, e ingreso de lotes de insumos existentes. \\ \hline
 Reportes & 9 & \texttt{ReportExportTest}: los tipos de reporte en PDF y CSV y sus filtros. \\ \hline
 Kanban & 7 & \texttt{KanbanTest}, \texttt{KanbanReorderTest}, \texttt{KanbanProyectoSeederTest} (cada tarea terminada del tablero del proyecto cita su issue o su commit). \\ \hline
 Flujos completos & 5 & \texttt{Flujos\textbackslash *}: autenticación, inventario, exportación, escaneo QR y consulta al asistente de principio a fin. \\ \hline
 Alertas, esquema y servicios & 8 & \texttt{NotificacionesTest}, \texttt{AlertServiceTest}, \texttt{MigrationsSchemaSanityTest} y pruebas base del framework: bandeja de alertas por usuario, marcado como leída y no repetición de avisos. \\ \hline
-\textbf{Total} & \textbf{85} & 84 aprobadas, 1 omitida, 282 aserciones. \\ \hline
+\textbf{Total} & \textbf{97} & 96 aprobadas, 1 omitida, 327 aserciones. \\ \hline
 \end{longtable}
 
 \section{Pruebas de extremo a extremo}
 \label{sec:pru_e2e}
 
-La suite Playwright tiene \textbf{60 pruebas} y las \textbf{60 aprobaron}. Se ejecutan en Chromium con una ventana de escritorio de 1366$\times$768 y, para las pruebas móviles, con una pantalla de 390$\times$844.
+La suite Playwright tiene \textbf{60 pruebas} y las \textbf{60 aprobaron}. Se ejecutan en Chromium con una ventana de escritorio de 1366$\times$768 y, para las pruebas móviles, con una pantalla de 390$\times$844. En la corrida anterior a la final, la prueba de inicio de sesión superó su tiempo límite de 15 segundos porque el servidor de desarrollo estaba ocupado; la corrida completa siguiente aprobó las 60.
 
 \begin{table}[H]
 \centering
@@ -162,7 +162,7 @@ El hallazgo catastrófico era la pantalla de alertas, que mostraba avisos de eje
 \label{sec:pru_wcag}
 
 \subsection{Revisión automática}
-Se auditaron las 17 pantallas en escritorio y en celular (34 vistas) con axe-core \cite{axe_core} y las reglas de WCAG 2.1 niveles A y AA \cite{w3c_wcag_overview}. La primera auditoría, con el tema visual por defecto, encontró seis reglas incumplidas: contraste de color insuficiente (41 elementos), enlaces y botones sin nombre accesible (44), campos de formulario y listas desplegables sin etiqueta (20) y zonas con desplazamiento que no se alcanzaban con el teclado (3). Tras corregirlas, la misma auditoría sobre producción no encontró incumplimientos. %TEMAS%
+Se auditaron las 17 pantallas en escritorio y en celular (34 vistas) con axe-core \cite{axe_core} y las reglas de WCAG 2.1 niveles A y AA \cite{w3c_wcag_overview}. La primera auditoría, con el tema visual por defecto, encontró seis reglas incumplidas: contraste de color insuficiente (41 elementos), enlaces y botones sin nombre accesible (44), campos de formulario y listas desplegables sin etiqueta (20) y zonas con desplazamiento que no se alcanzaban con el teclado (3). Tras corregirlas, la misma auditoría sobre producción no encontró incumplimientos en ninguno de los seis temas visuales (204 vistas en total). También se auditaron once ventanas y formularios que solo aparecen tras una acción del usuario (la ficha de un insumo, el ingreso de un lote, la conciliación, la creación de insumos, bodegas y órdenes de compra, la recepción de órdenes, los filtros de reportes, el consumo FEFO y el menú del celular); tenían campos sin etiqueta y un botón con poco contraste, y tras corregirlos quedaron sin incumplimientos.
 
 \subsection{Revisión manual}
 Las herramientas automáticas no detectan todos los problemas de accesibilidad, así que se comprobaron por separado cinco criterios sobre todas las pantallas: la aplicación se puede usar sin mouse (inicio de sesión completo con el teclado, criterio 2.1.1); todos los elementos recorridos con la tecla Tab muestran un indicador de foco visible (2.4.7); a 320 píxeles de ancho ninguna pantalla obliga a desplazarse horizontalmente (1.4.10); cada pantalla tiene título (2.4.2) y el documento declara el idioma español (3.1.1). Los cinco se cumplen. Quedan por verificar con un lector de pantalla real el orden de lectura y los anuncios de los cambios dinámicos.
@@ -197,8 +197,8 @@ El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La
 \textbf{Componente del indicador} & \textbf{Evidencia} & \textbf{Estado} \\
 \hline
 \endhead
-111 casos de prueba ejecutados & 145 pruebas automatizadas (85 PHPUnit y 60 de extremo a extremo). & Cumplido \\ \hline
-Tasa de éxito global $\geq$ 95\% & 135 de 135 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
+111 casos de prueba ejecutados & 157 pruebas automatizadas (97 PHPUnit y 60 de extremo a extremo). & Cumplido \\ \hline
+Tasa de éxito global $\geq$ 95\% & 156 de 156 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
 Casos de uso automatizados con Playwright & 34 casos del plan que recorren los casos de uso. & Cumplido \\ \hline
 7 escenarios de despacho FEFO & 7 pruebas sobre la regla FEFO (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
 50 consultas en español para medir la precisión del asistente & Batería de 50: 49 correctas (98\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
