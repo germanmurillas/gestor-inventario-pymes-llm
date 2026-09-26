@@ -21,7 +21,7 @@ const FigmaMovements = ({ lote, onBack }: { lote: any, onBack: () => void }) => 
         <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20">
             {/* Header */}
             <div className="flex items-center gap-6">
-                <button 
+                <button aria-label="Volver" 
                     onClick={onBack}
                     className="w-12 h-12 bg-slate-900/80 backdrop-blur-xl hover:bg-slate-800/50 border border-slate-700/50 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-95 group"
                 >

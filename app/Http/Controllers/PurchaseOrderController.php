@@ -95,7 +95,8 @@ class PurchaseOrderController extends Controller
             return response()->json(['order' => $po->load('items.material', 'vendor'), 'message' => 'Orden creada']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+            \Illuminate\Support\Facades\Log::error('Órdenes de compra: ' . $e->getMessage());
+            return response()->json(['message' => 'No se pudo completar la operación con la orden. No se guardó ningún cambio; intenta de nuevo.'], 500);
         }
     }
 
@@ -190,7 +191,8 @@ class PurchaseOrderController extends Controller
             return response()->json(['order' => $order->load('items.material'), 'message' => 'Items recibidos']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+            \Illuminate\Support\Facades\Log::error('Órdenes de compra: ' . $e->getMessage());
+            return response()->json(['message' => 'No se pudo completar la operación con la orden. No se guardó ningún cambio; intenta de nuevo.'], 500);
         }
     }
 

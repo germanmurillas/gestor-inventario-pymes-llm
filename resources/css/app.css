@@ -25,50 +25,50 @@
   color-scheme: dark;
   --pm-bg: #0A0E1A; --pm-panel: #121829; --pm-panel-2: #1A2136; --pm-border: #262F49;
   --pm-text: #E9ECF6; --pm-text-muted: #939BB6;
-  --pm-accent: #7C6CF5; --pm-accent-2: #F2B45C; --pm-accent-fg: #FFFFFF;
+  --pm-accent: #7C6CF5; --pm-accent-2: #F2B45C; --pm-accent-fg: #FFFFFF; --pm-accent-solid: #6F61DC;
 }
 [data-theme="obsidian-teal"] {
   color-scheme: dark;
   --pm-bg: #061215; --pm-panel: #0D1F23; --pm-panel-2: #132B30; --pm-border: #1E3C42;
   --pm-text: #E4F3F0; --pm-text-muted: #86A9A5;
-  --pm-accent: #2DD4BF; --pm-accent-2: #F6C177; --pm-accent-fg: #04211F;
+  --pm-accent: #2DD4BF; --pm-accent-2: #F6C177; --pm-accent-fg: #04211F; --pm-accent-solid: #2DD4BF;
 }
 [data-theme="carbon-amber"] {
   color-scheme: dark;
   --pm-bg: #0B0B0C; --pm-panel: #151618; --pm-panel-2: #1D1F22; --pm-border: #2B2D31;
   --pm-text: #EEEEF0; --pm-text-muted: #A0A1A8;
-  --pm-accent: #F59E0B; --pm-accent-2: #60A5FA; --pm-accent-fg: #1A1206;
+  --pm-accent: #F59E0B; --pm-accent-2: #60A5FA; --pm-accent-fg: #1A1206; --pm-accent-solid: #F59E0B;
 }
 [data-theme="royal-plum"] {
   color-scheme: dark;
   --pm-bg: #110818; --pm-panel: #1A1026; --pm-panel-2: #241734; --pm-border: #352346;
   --pm-text: #F3EAFB; --pm-text-muted: #AC93C3;
-  --pm-accent: #C084FC; --pm-accent-2: #F9C06A; --pm-accent-fg: #1B0B27;
+  --pm-accent: #C084FC; --pm-accent-2: #F9C06A; --pm-accent-fg: #1B0B27; --pm-accent-solid: #C084FC;
 }
 [data-theme="nordic-steel"] {
   color-scheme: dark;
   --pm-bg: #0C1016; --pm-panel: #151B24; --pm-panel-2: #1C2430; --pm-border: #2E3743;
   --pm-text: #E6EDF3; --pm-text-muted: #8D97A3;
-  --pm-accent: #3B82F6; --pm-accent-2: #F5B45C; --pm-accent-fg: #FFFFFF;
+  --pm-accent: #3B82F6; --pm-accent-2: #F5B45C; --pm-accent-fg: #FFFFFF; --pm-accent-solid: #3372D8;
 }
 [data-theme="paper-light"] {
   color-scheme: light;
   --pm-bg: #F3F5F9; --pm-panel: #FFFFFF; --pm-panel-2: #EEF1F6; --pm-border: #DCE1EA;
   --pm-text: #151920; --pm-text-muted: #5B6474;
-  --pm-accent: #4F46E5; --pm-accent-2: #B45309; --pm-accent-fg: #FFFFFF;
+  --pm-accent: #4F46E5; --pm-accent-2: #B45309; --pm-accent-fg: #FFFFFF; --pm-accent-solid: #4F46E5;
 }
 
 /* ── Derivados comunes (valen para todos los temas) ───────────────────────── */
 :root, [data-theme], .pm-fixed-dark {
-  --pm-grad-from: var(--pm-accent);
+  --pm-grad-from: var(--pm-accent-solid, var(--pm-accent));
   --pm-grad-to: color-mix(in oklab, var(--pm-accent) 70%, black);
   --pm-on-card: var(--pm-text);
   --pm-on-card-muted: var(--pm-text-muted);
-  --pm-on-card-faint: color-mix(in oklab, var(--pm-text) 45%, var(--pm-panel));
+  --pm-on-card-faint: color-mix(in oklab, var(--pm-text) 62%, var(--pm-panel));
   --pm-on-accent: var(--pm-accent-fg);
   --pm-on-accent-muted: color-mix(in oklab, var(--pm-accent-fg) 75%, var(--pm-accent));
   --pm-border-color: var(--pm-border);
-  --pm-placeholder: color-mix(in oklab, var(--pm-text) 45%, var(--pm-panel));
+  --pm-placeholder: color-mix(in oklab, var(--pm-text) 58%, var(--pm-panel));
   --pm-focus-ring: color-mix(in oklab, var(--pm-accent) 75%, white);
   --pm-hist-active-bg: color-mix(in oklab, var(--pm-accent) 14%, var(--pm-panel));
   --pm-hist-active-border: color-mix(in oklab, var(--pm-accent) 40%, var(--pm-panel));
@@ -96,7 +96,7 @@
   --color-slate-800: var(--pm-panel-2);
   --color-slate-700: var(--pm-border);
   --color-slate-600: color-mix(in oklab, var(--pm-border) 65%, var(--pm-text));
-  --color-slate-500: color-mix(in oklab, var(--pm-text-muted) 80%, var(--pm-border));
+  --color-slate-500: color-mix(in oklab, var(--pm-text-muted) 84%, var(--pm-panel));
   --color-slate-400: var(--pm-text-muted);
   --color-slate-300: color-mix(in oklab, var(--pm-text) 70%, var(--pm-text-muted));
   --color-slate-200: color-mix(in oklab, var(--pm-text) 88%, var(--pm-text-muted));
@@ -113,7 +113,7 @@
   --color-slate-800: var(--pm-panel-2);
   --color-slate-700: var(--pm-border);
   --color-slate-600: #C3CAD6;
-  --color-slate-500: #8A93A5;
+  --color-slate-500: #5B6475;
   --color-slate-400: var(--pm-text-muted);
   --color-slate-300: #3F4756;
   --color-slate-200: #2A303B;
@@ -122,17 +122,18 @@
   --color-white: var(--pm-text);
   --pm-surface-ink: #FFFFFF;
   /* colores de estado: los tonos claros (usados como texto sobre oscuro) pasan a tonos oscuros */
-  --color-emerald-200: #065F46; --color-emerald-300: #047857; --color-emerald-400: #059669;
-  --color-green-300: #15803D;   --color-green-400: #16A34A;
-  --color-rose-200: #9F1239;    --color-rose-300: #BE123C;    --color-rose-400: #E11D48;
-  --color-red-300: #B91C1C;     --color-red-400: #DC2626;
-  --color-amber-200: #92400E;   --color-amber-300: #B45309;   --color-amber-400: #D97706;
-  --color-yellow-300: #A16207;  --color-yellow-400: #CA8A04;
-  --color-orange-300: #C2410C;  --color-orange-400: #EA580C;
-  --color-sky-300: #0369A1;     --color-sky-400: #0284C7;
-  --color-blue-300: #1D4ED8;    --color-blue-400: #2563EB;
-  --color-cyan-300: #0E7490;    --color-cyan-400: #0891B2;
-  --color-teal-300: #0F766E;    --color-teal-400: #0D9488;
+  /* Tonos de estado usados como texto: al menos 4.5:1 sobre fondo claro. */
+  --color-emerald-200: #064E3B; --color-emerald-300: #065F46; --color-emerald-400: #047857; --color-emerald-500: #047857;
+  --color-green-300: #166534;   --color-green-400: #15803D;
+  --color-rose-200: #881337;    --color-rose-300: #9F1239;    --color-rose-400: #BE123C;    --color-rose-500: #BE123C;
+  --color-red-300: #991B1B;     --color-red-400: #B91C1C;     --color-red-500: #B91C1C;
+  --color-amber-200: #78350F;   --color-amber-300: #92400E;   --color-amber-400: #B45309;   --color-amber-500: #B45309;
+  --color-yellow-300: #854D0E;  --color-yellow-400: #A16207;
+  --color-orange-300: #9A3412;  --color-orange-400: #C2410C;
+  --color-sky-300: #075985;     --color-sky-400: #0369A1;
+  --color-blue-300: #1E40AF;    --color-blue-400: #1D4ED8;
+  --color-cyan-300: #155E75;    --color-cyan-400: #0E7490;
+  --color-teal-300: #115E59;    --color-teal-400: #0F766E;
 }
 
 /* Los otros neutros de Tailwind siguen a slate en todos los temas */
@@ -151,8 +152,8 @@
   --color-indigo-200: color-mix(in oklab, var(--pm-accent) 38%, var(--color-white));
   --color-indigo-300: color-mix(in oklab, var(--pm-accent) 62%, var(--color-white));
   --color-indigo-400: color-mix(in oklab, var(--pm-accent) 82%, var(--color-white));
-  --color-indigo-500: var(--pm-accent);
-  --color-indigo-600: color-mix(in oklab, var(--pm-accent) 88%, black);
+  --color-indigo-500: var(--pm-accent-solid, var(--pm-accent));
+  --color-indigo-600: color-mix(in oklab, var(--pm-accent-solid, var(--pm-accent)) 88%, black);
   --color-indigo-700: color-mix(in oklab, var(--pm-accent) 72%, black);
   --color-indigo-800: color-mix(in oklab, var(--pm-accent) 55%, var(--pm-bg));
   --color-indigo-900: color-mix(in oklab, var(--pm-accent) 35%, var(--pm-bg));
@@ -177,21 +178,20 @@
   --color-blue-300: #93C5FD;    --color-blue-400: #60A5FA;
   --color-cyan-300: #67E8F9;    --color-cyan-400: #22D3EE;
   --color-teal-300: #5EEAD4;    --color-teal-400: #2DD4BF;
+  --color-emerald-500: #10B981; --color-rose-500: #F43F5E; --color-red-500: #EF4444; --color-amber-500: #F59E0B;
   background-color: var(--pm-bg); color: var(--pm-text);
 }
 
-/* Superficies de color sólido: su texto "blanco" es blanco real en cualquier tema */
-:is([class*="bg-indigo-5"], [class*="bg-indigo-6"], [class*="bg-indigo-7"], [class*="bg-violet-6"], [class*="bg-purple-6"],
-    [class*="from-indigo-5"], [class*="from-indigo-6"], [class*="bg-rose-5"], [class*="bg-rose-6"], [class*="bg-red-5"], [class*="bg-red-6"],
-    [class*="bg-emerald-5"], [class*="bg-emerald-6"], [class*="bg-blue-6"], [class*="bg-amber-5"], [class*="bg-amber-6"], .pm-accent, .pm-panel2-plain):not([class*="/"]) {
-  --color-white: var(--pm-surface-ink);
+/* Superficies de acento sólidas (coincidencia exacta de clase: las variantes translúcidas como
+   bg-indigo-500/10 no cuentan): su texto "blanco" es el primer plano del acento del tema. */
+:is([class~="bg-indigo-500"], [class~="bg-indigo-600"], [class~="bg-indigo-700"], [class~="bg-violet-600"], [class~="bg-purple-600"],
+    [class~="from-indigo-500"], [class~="from-indigo-600"], .pm-accent, .pm-panel2-plain) {
+  --color-white: var(--pm-accent-fg);
 }
-
-/* Contenido sobre fotografía y velos oscuros: siempre paleta oscura, en cualquier tema */
-.pm-media, [class*="bg-black"] {
-  --color-white: #FFFFFF;
-  --color-slate-950: #0A0D14; --color-slate-900: #121722; --color-slate-800: #1C2230;
-  --color-slate-300: #CBD2DE; --color-slate-200: #E2E7EF; --color-slate-400: #9AA3B5;
+/* Superficies semánticas sólidas (error, éxito, aviso): texto blanco real en cualquier tema. */
+:is([class~="bg-rose-500"], [class~="bg-rose-600"], [class~="bg-red-500"], [class~="bg-red-600"], [class~="bg-emerald-500"],
+    [class~="bg-emerald-600"], [class~="bg-blue-600"], [class~="bg-amber-500"], [class~="bg-amber-600"]) {
+  --color-white: var(--pm-surface-ink);
 }
 
 @layer base {
@@ -212,8 +212,8 @@
 .pm-panel { background-color: var(--pm-panel); }
 .pm-panel-2 { background-color: var(--pm-panel-2); }
 .pm-border { border-color: var(--pm-border); }
-.pm-accent { background-color: var(--pm-accent); color: var(--pm-accent-fg); }
-.pm-panel2-plain { background-color: var(--pm-accent); color: var(--pm-accent-fg); }
+.pm-accent { background-color: var(--pm-accent-solid, var(--pm-accent)); color: var(--pm-accent-fg); }
+.pm-panel2-plain { background-color: var(--pm-accent-solid, var(--pm-accent)); color: var(--pm-accent-fg); }
 .pm-accent-hover { background-color: var(--pm-accent); opacity: .9; }
 .pm-accent-text { color: var(--pm-accent); }
 .pm-accent-fg { color: var(--pm-accent-fg); }
@@ -226,7 +226,7 @@
 /* Papel de etiqueta impresa: blanco con tinta oscura en cualquier tema */
 .pm-paper { background-color: #FFFFFF; color: #111418; --color-white: #FFFFFF; }
 .pm-paper-line { border-color: #E2E6EE; }
-.pm-bubble-user { background-color: var(--pm-accent); color: var(--pm-accent-fg); }
+.pm-bubble-user { background-color: var(--pm-accent-solid, var(--pm-accent)); color: var(--pm-accent-fg); }
 .pm-bubble-ai { background-color: var(--pm-panel-2); color: var(--pm-text); border-color: var(--pm-border); }
 
 .custom-scrollbar { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--pm-text) 15%, transparent) transparent; overscroll-behavior: contain; }
@@ -250,7 +250,7 @@
     --pm-kb-accent: var(--pm-accent, oklch(0.80 0.115 86));
     --pm-kb-ink: var(--pm-on-card, oklch(0.24 0.02 265));
     --pm-kb-muted: color-mix(in oklab, var(--pm-kb-ink) 52%, transparent);
-    --pm-kb-faint: color-mix(in oklab, var(--pm-kb-ink) 30%, transparent);
+    --pm-kb-faint: color-mix(in oklab, var(--pm-kb-ink) 72%, transparent);
     --pm-kb-line: var(--pm-border-color, color-mix(in oklab, var(--pm-kb-ink) 12%, transparent));
     --pm-kb-surface: color-mix(in oklab, var(--pm-kb-ink) 3%, transparent);
 

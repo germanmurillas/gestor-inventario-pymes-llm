@@ -412,11 +412,12 @@ class InventoryController extends Controller {
             \Illuminate\Support\Facades\Log::error('Validation Error mapping to "Invalid ID": ', $e->errors());
             throw $e;
         } catch (\Exception $e) {
+            // El detalle técnico va al log; al usuario, un mensaje comprensible (sin SQL ni rutas).
             \Illuminate\Support\Facades\Log::critical('Pymetory System Failure: ' . $e->getMessage(), [
                 'stack' => $e->getTraceAsString(),
-                'input' => $request->all()
+                'input' => $request->except(['photo']),
             ]);
-            return back()->withErrors(['error' => 'Error Interno: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'No se pudo registrar el insumo. Revisa los datos e intenta de nuevo; si persiste, avisa al administrador.']);
         }
     }
 

@@ -16,8 +16,7 @@ import {
     ArrowRightLeft,
     Truck,
     Printer,
-    X,
-} from 'lucide-react';
+    X, BookOpen } from 'lucide-react';
 
 interface NavItem {
     icon: React.ElementType;
@@ -133,8 +132,8 @@ export default function Sidebar({
                     </div>
                     <Link
                         href="/dashboard"
+                        aria-label="Pymetory, ir al tablero"
                         className={`pm-logo font-display text-2xl tracking-tighter text-white ${sidebarOpen ? 'block' : 'hidden lg:block'}`}
-                        role="banner"
                     >
                         Pymetory
                     </Link>
@@ -211,11 +210,17 @@ export default function Sidebar({
                         <div className="text-[10px] text-slate-500 font-black uppercase tracking-tighter">{user?.role}</div>
                     </div>
                 </div>
+                <a href="https://tesis.pymetory.com/manual-de-usuario.pdf" target="_blank" rel="noopener"
+                    aria-label="Manual de usuario (se abre en una pestaña nueva)"
+                    className="w-full mt-2 flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all text-[10px] font-black uppercase tracking-widest rounded-lg">
+                    <BookOpen size={16} />
+                    <span className={`${sidebarOpen ? 'block' : 'hidden lg:block'}`}>Manual de usuario</span>
+                </a>
                 <Link
                     href="/logout"
                     method="post"
                     as="button"
-                    className="w-full mt-2 flex items-center gap-3 px-4 py-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all text-[10px] font-black uppercase tracking-widest rounded-lg"
+                    className="w-full mt-1 flex items-center gap-3 px-4 py-2 text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all text-[10px] font-black uppercase tracking-widest rounded-lg"
                 >
                     <LogOut size={16} />
                     <span className={`${sidebarOpen ? 'block' : 'hidden lg:block'}`}>Cerrar Sesión</span>

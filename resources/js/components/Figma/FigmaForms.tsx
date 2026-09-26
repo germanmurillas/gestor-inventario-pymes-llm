@@ -59,7 +59,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
             {/* Header (Mockup 14 Top) */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                    <button 
+                    <button aria-label="Volver" 
                         type="button"
                         onClick={onBack}
                         className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
@@ -306,7 +306,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                     <Tag size={14} />
                                     <span>Previsualización de Lote</span>
                                 </div>
-                                <div className="text-[10px] text-indigo-300/60 leading-relaxed font-bold uppercase tracking-tight">
+                                <div className="text-[10px] text-indigo-300 leading-relaxed font-bold uppercase tracking-tight">
                                     Al guardar, el sistema generará automáticamente un registro de entrada en el Kardex para el lote <span className="text-indigo-400">#{data.batch_number || '---'}</span> con <span className="text-indigo-400">{data.stock_initial || 0} {data.unit}</span>.
                                 </div>
                             </div>

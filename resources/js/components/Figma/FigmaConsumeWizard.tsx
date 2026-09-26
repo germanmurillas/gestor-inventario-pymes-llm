@@ -200,7 +200,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                    <button
+                    <button aria-label="Volver"
                         type="button"
                         onClick={onBack}
                         className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
@@ -334,7 +334,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                             </div>
                             <div className="relative z-10 space-y-6">
                                 <div>
-                                    <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Material</div>
+                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Material</div>
                                     <div className="text-xl font-black mt-1">{selectedMaterial.name}</div>
                                     <div className="text-[10px] font-bold text-indigo-400 uppercase mt-1">{selectedMaterial.code}</div>
                                 </div>
@@ -350,9 +350,9 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                 )}
 
                                 <div className="pt-4 border-t border-white/10">
-                                    <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Stock Total</div>
+                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Stock Total</div>
                                     <div className="text-3xl font-black mt-1">
-                                        {suggestion?.total_available ?? '...'} <span className="text-xs text-white/40">{selectedMaterial.unit?.toUpperCase() || 'KG'}</span>
+                                        {suggestion?.total_available ?? '...'} <span className="text-xs text-slate-400">{selectedMaterial.unit?.toUpperCase() || 'KG'}</span>
                                     </div>
                                 </div>
 
@@ -366,7 +366,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
 
                                 {suggestion?.suggested_lote && !suggestionLoading && (
                                     <div className="pt-4 border-t border-white/10 space-y-3">
-                                        <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Sugerencia FEFO</div>
+                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Sugerencia FEFO</div>
                                         <div className="bg-slate-900/80 backdrop-blur-xl/5 p-4 rounded-2xl border border-white/10 space-y-3">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-bold">{suggestion.suggested_lote.batch_number}</span>

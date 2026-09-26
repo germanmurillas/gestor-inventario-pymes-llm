@@ -156,7 +156,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
         const isE2E = window.localStorage.getItem('e2e') === '1';
 
         w.document.open();
-        w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>PYMETORY Labels</title><style>body{margin:20px}@page{size:auto;margin:10mm}</style></head><body>' + svg + (isE2E ? '' : '<script>setTimeout(function(){window.print()},600)</script>') + '</body></html>');
+        w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiquetas PYMETORY</title><style>body{margin:20px}@page{size:auto;margin:10mm}</style></head><body>' + svg + (isE2E ? '' : '<script>setTimeout(function(){window.print()},600)</script>') + '</body></html>');
         w.document.close();
     };
 
@@ -198,7 +198,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-bold uppercase tracking-tight text-white">Impresion de Labels</h2>
+                    <h2 className="text-xl font-bold uppercase tracking-tight text-white">Impresión de etiquetas</h2>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
                         Codigos de Barras & QR para Trazabilidad Fisica
                     </p>
@@ -287,7 +287,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                 }`}
                             >
                                 <Barcode size={24} className={labelType === 'CODE128' ? 'text-indigo-400' : ''} />
-                                <span className="text-xs font-bold uppercase tracking-wider">Codigo Barras</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">Código de barras</span>
                             </button>
                             <button
                                 onClick={() => setLabelType('QR')}
@@ -298,7 +298,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
                                 }`}
                             >
                                 <QrCode size={24} className={labelType === 'QR' ? 'text-indigo-400' : ''} />
-                                <span className="text-xs font-bold uppercase tracking-wider">Codigo QR</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">Código QR</span>
                             </button>
                         </div>
                     </div>
@@ -384,7 +384,7 @@ export default function FigmaLabelPrint({ initialLotes = [] }: { initialLotes: a
 
                                         <div className="w-full grid grid-cols-2 gap-2 border-t border-slate-200 pt-2">
                                             <div className="space-y-0.5">
-                                                <div className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Codigo</div>
+                                                <div className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Código</div>
                                                 <div className="text-[9px] font-bold text-white uppercase">{lote.codigo}</div>
                                             </div>
                                             <div className="space-y-0.5 text-right">

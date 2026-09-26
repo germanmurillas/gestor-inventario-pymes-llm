@@ -213,7 +213,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                     {(['insumos', 'bodegas'] as const).map((t) => (
                         <button key={t} role="tab" aria-selected={pestana === t} onClick={() => setPestana(t)}
                             className={`whitespace-nowrap rounded-xl px-3 sm:px-4 py-2 text-sm font-bold capitalize transition ${pestana === t ? 'bg-indigo-600 text-white shadow' : 'text-slate-300'}`}>
-                            {t} <span className="ml-1 text-xs opacity-70">{t === 'insumos' ? new Set(lotes.map((l: any) => l.codigo)).size : bodegas.length}</span>
+                            {t} <span className="ml-1 text-xs font-normal">{t === 'insumos' ? new Set(lotes.map((l: any) => l.codigo)).size : bodegas.length}</span>
                         </button>
                     ))}
                 </div>
@@ -397,7 +397,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
 
 const Chip = ({ activo, sutil, onClick, children }: { activo: boolean; sutil?: boolean; onClick: () => void; children: React.ReactNode }) => (
     <button onClick={onClick}
-        className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition [&_b]:ml-1 [&_b]:opacity-60 ${activo
+        className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition [&_b]:ml-1 [&_b]:font-normal ${activo
             ? (sutil ? 'border-amber-400/40 bg-amber-400/15 text-amber-200' : 'border-indigo-400/50 bg-indigo-500/20 text-indigo-100')
             : 'border-slate-700/50 bg-slate-800/40 text-slate-300'}`}>
         {children}

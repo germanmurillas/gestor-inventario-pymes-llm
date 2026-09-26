@@ -343,6 +343,7 @@ const FigmaLLM = () => {
                         <button 
                             disabled={isThinking}
                             onClick={handleSendMessage}
+                            aria-label="Enviar pregunta"
                             className="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-20"
                         >
                             <Send size={16} />

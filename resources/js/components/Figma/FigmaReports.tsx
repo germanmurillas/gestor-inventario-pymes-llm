@@ -83,7 +83,7 @@ const HistoryChart = ({ data }: { data: any[] }) => {
             <div className="flex items-center justify-between mb-6 relative z-10">
                 <div>
                     <h4 className="text-white text-xs font-black uppercase tracking-[0.2em] opacity-60">Historial de Valoración</h4>
-                    <p className="text-white/40 text-[9px] font-bold uppercase mt-1">Últimos 12 meses (COP)</p>
+                    <p className="text-slate-400 text-[9px] font-bold uppercase mt-1">Últimos 12 meses (COP)</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
@@ -268,7 +268,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
         return (
             <div key={key} className="flex flex-col items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xl/5 rounded-2xl min-w-[90px]">
                 <div className="text-xl font-black text-white tracking-tight">{display}</div>
-                <div className="text-[9px] font-bold text-white/50 uppercase tracking-wider mt-1 text-center">{key}</div>
+                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 text-center">{key}</div>
             </div>
         );
     };
@@ -308,8 +308,8 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                             ${new Intl.NumberFormat('es-CO').format(summary.totalInventoryValue || 0)}
                         </div>
                         <div className="pt-4 border-t border-white/10 flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-white/40 uppercase">Base: {summary.totalLotes || 0} Lotes</span>
-                            <span className="text-[10px] font-bold text-white/40 uppercase">Costo × cantidad por lote</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">Base: {summary.totalLotes || 0} Lotes</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">Costo × cantidad por lote</span>
                         </div>
                     </div>
                 </div>
@@ -476,7 +476,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                 {reportSummary && Object.keys(reportSummary).length > 0 && (
                     <div className="bg-obsidiana rounded-2xl p-6 mb-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <FileText size={14} className="text-white/50" />
+                            <FileText size={14} className="text-slate-400" />
                             <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em]">
                                 Resumen — {REPORT_TYPES.find(r => r.value === filters.type)?.label}
                             </span>
@@ -492,7 +492,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                                 : val
                                         }
                                     </div>
-                                    <div className="text-[9px] font-bold text-white/40 uppercase tracking-wider mt-1">{labelFor(key)}</div>
+                                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">{labelFor(key)}</div>
                                 </div>
                             ))}
                         </div>
@@ -535,7 +535,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                                 </div>
                             )}
                         </div>
-                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto" tabIndex={0} role="region" aria-label="Vista previa del reporte (desplazable)">
                             {reportData && reportData.length > 0 ? (
                                 <table className="w-full text-left">
                                     <thead className="sticky top-0 z-10">

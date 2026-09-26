@@ -227,13 +227,13 @@ export default function Settings() {
 
                     {/* ── 1. GENERAL ── */}
                     <Section icon={SlidersHorizontal} title="General" subtitle="Identidad del sistema y parametros operativos" open={openSec === 'general'} onToggle={() => toggle('general')}>                        <div className="grid md:grid-cols-2 gap-4">
-                            <div><label className={label}>Nombre App</label><input className={field} value={settings.app_nombre ?? ''} onChange={e => setVal('app_nombre', e.target.value)} /></div>
-                            <div><label className={label}>Empresa</label><input className={field} value={settings.app_empresa ?? ''} onChange={e => setVal('app_empresa', e.target.value)} /></div>
-                            <div><label className={label}>Zona Horaria</label><input className={field} value={settings.zona_horaria ?? ''} onChange={e => setVal('zona_horaria', e.target.value)} /></div>
-                            <div><label className={label}>Dias Criticos FEFO</label><input type="number" className={field} value={settings.fefo_dias_criticos ?? ''} onChange={e => setVal('fefo_dias_criticos', e.target.value)} /></div>
-                            <div><label className={label}>Stock Umbral Bajo</label><input type="number" className={field} value={settings.stock_umbral_bajo ?? ''} onChange={e => setVal('stock_umbral_bajo', e.target.value)} /></div>
-                            <div><label className={label}>Timeout Sesion (min)</label><input type="number" className={field} value={settings.sesion_timeout_min ?? ''} onChange={e => setVal('sesion_timeout_min', e.target.value)} /></div>
-                            <div><label className={label}>Max Intentos Login</label><input type="number" className={field} value={settings.max_intentos_login ?? ''} onChange={e => setVal('max_intentos_login', e.target.value)} /></div>
+                            <div><label className={label}>Nombre App</label><input aria-label="Nombre App" className={field} value={settings.app_nombre ?? ''} onChange={e => setVal('app_nombre', e.target.value)} /></div>
+                            <div><label className={label}>Empresa</label><input aria-label="Empresa" className={field} value={settings.app_empresa ?? ''} onChange={e => setVal('app_empresa', e.target.value)} /></div>
+                            <div><label className={label}>Zona Horaria</label><input aria-label="Zona Horaria" className={field} value={settings.zona_horaria ?? ''} onChange={e => setVal('zona_horaria', e.target.value)} /></div>
+                            <div><label className={label}>Dias Criticos FEFO</label><input aria-label="Dias Criticos FEFO" type="number" className={field} value={settings.fefo_dias_criticos ?? ''} onChange={e => setVal('fefo_dias_criticos', e.target.value)} /></div>
+                            <div><label className={label}>Stock Umbral Bajo</label><input aria-label="Stock Umbral Bajo" type="number" className={field} value={settings.stock_umbral_bajo ?? ''} onChange={e => setVal('stock_umbral_bajo', e.target.value)} /></div>
+                            <div><label className={label}>Timeout Sesion (min)</label><input aria-label="Timeout Sesion (min)" type="number" className={field} value={settings.sesion_timeout_min ?? ''} onChange={e => setVal('sesion_timeout_min', e.target.value)} /></div>
+                            <div><label className={label}>Max Intentos Login</label><input aria-label="Max Intentos Login" type="number" className={field} value={settings.max_intentos_login ?? ''} onChange={e => setVal('max_intentos_login', e.target.value)} /></div>
                         </div>
                         <button className={`${btn} mt-4 pm-panel2-plain pm-accent-fg`} onClick={() => saveSettings(['app_nombre','app_empresa','zona_horaria','fefo_dias_criticos','stock_umbral_bajo','sesion_timeout_min','max_intentos_login'])}><Save size={15} /> Guardar General</button>
                     </Section>
@@ -253,7 +253,7 @@ export default function Settings() {
                             <div className="grid md:grid-cols-2 gap-3">
                                 <div>
                                     <label className={label}>Origen</label>
-                                    <select className={field} value={settings.llm_source ?? 'local'} onChange={e => setVal('llm_source', e.target.value)}>
+                                    <select aria-label="Origen" className={field} value={settings.llm_source ?? 'local'} onChange={e => setVal('llm_source', e.target.value)}>
                                         <option value="local">Ollama (local)</option>
                                         {Object.entries(providers).filter(([,p]:[string,any]) => p.enabled !== false).map(([k,v]:[string,any]) => (
                                             <option key={k} value={k}>{v.label}</option>
@@ -262,7 +262,7 @@ export default function Settings() {
                                 </div>
                                 <div>
                                     <label className={label}>Activo</label>
-                                    <select className={field} value={settings.llm_activo ?? 'true'} onChange={e => setVal('llm_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select>
+                                    <select aria-label="Activo" className={field} value={settings.llm_activo ?? 'true'} onChange={e => setVal('llm_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select>
                                 </div>
                             </div>
                         </div>
@@ -304,9 +304,9 @@ export default function Settings() {
 
                         {/* ── Parametros ── */}
                         <div className="grid md:grid-cols-3 gap-3 mb-4">
-                            <div><label className={label}>Temperatura</label><input type="number" step="0.1" min="0" max="2" className={field} value={settings.llm_temperatura ?? '0.3'} onChange={e => setVal('llm_temperatura', e.target.value)} /></div>
-                            <div><label className={label}>Max Tokens</label><input type="number" className={field} value={settings.llm_max_tokens ?? '1024'} onChange={e => setVal('llm_max_tokens', e.target.value)} /></div>
-                            <div><label className={label}>Contexto Lotes</label><input type="number" className={field} value={settings.llm_contexto_lotes ?? '20'} onChange={e => setVal('llm_contexto_lotes', e.target.value)} /></div>
+                            <div><label className={label}>Temperatura</label><input aria-label="Temperatura" type="number" step="0.1" min="0" max="2" className={field} value={settings.llm_temperatura ?? '0.3'} onChange={e => setVal('llm_temperatura', e.target.value)} /></div>
+                            <div><label className={label}>Max Tokens</label><input aria-label="Max Tokens" type="number" className={field} value={settings.llm_max_tokens ?? '1024'} onChange={e => setVal('llm_max_tokens', e.target.value)} /></div>
+                            <div><label className={label}>Contexto Lotes</label><input aria-label="Contexto Lotes" type="number" className={field} value={settings.llm_contexto_lotes ?? '20'} onChange={e => setVal('llm_contexto_lotes', e.target.value)} /></div>
                         </div>
 
                         {/* ── System Prompt ── */}
@@ -334,11 +334,11 @@ export default function Settings() {
                     {/* ── 3. ALERTAS ── */}
                     <Section icon={Bell} title="Alertas y Notificaciones" subtitle="Configuracion de avisos FEFO, stock bajo y canales" open={openSec === 'alertas'} onToggle={() => toggle('alertas')}>
                         <div className="grid md:grid-cols-2 gap-4">
-                            <div><label className={label}>Alertas FEFO</label><select className={field} value={settings.notif_fefo_activo ?? 'true'} onChange={e => setVal('notif_fefo_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
-                            <div><label className={label}>Alertas Stock Bajo</label><select className={field} value={settings.notif_stock_bajo ?? 'true'} onChange={e => setVal('notif_stock_bajo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
-                            <div className="md:col-span-2"><label className={label}>Email Admin</label><input type="email" className={field} value={settings.notif_email_admin ?? ''} onChange={e => setVal('notif_email_admin', e.target.value)} /></div>
-                            <div><label className={label}>Notificar por Email</label><select className={field} value={settings.notif_email_activo ?? 'false'} onChange={e => setVal('notif_email_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
-                            <div><label className={label}>Notificar por Telegram</label><select className={field} value={settings.notif_telegram_activo ?? 'false'} onChange={e => setVal('notif_telegram_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
+                            <div><label className={label}>Alertas FEFO</label><select aria-label="Alertas FEFO" className={field} value={settings.notif_fefo_activo ?? 'true'} onChange={e => setVal('notif_fefo_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
+                            <div><label className={label}>Alertas Stock Bajo</label><select aria-label="Alertas Stock Bajo" className={field} value={settings.notif_stock_bajo ?? 'true'} onChange={e => setVal('notif_stock_bajo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
+                            <div className="md:col-span-2"><label className={label}>Email Admin</label><input aria-label="Email Admin" type="email" className={field} value={settings.notif_email_admin ?? ''} onChange={e => setVal('notif_email_admin', e.target.value)} /></div>
+                            <div><label className={label}>Notificar por Email</label><select aria-label="Notificar por Email" className={field} value={settings.notif_email_activo ?? 'false'} onChange={e => setVal('notif_email_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
+                            <div><label className={label}>Notificar por Telegram</label><select aria-label="Notificar por Telegram" className={field} value={settings.notif_telegram_activo ?? 'false'} onChange={e => setVal('notif_telegram_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
                         </div>
                         <button className={`${btn} mt-4 pm-panel2-plain pm-accent-fg`} onClick={() => saveSettings(['notif_fefo_activo','notif_stock_bajo','notif_email_admin','notif_email_activo','notif_telegram_activo'])}><Save size={15} /> Guardar Alertas</button>
                     </Section>
@@ -466,10 +466,10 @@ export default function Settings() {
                     {/* ── 6. SEGURIDAD ── */}
                     <Section icon={Shield} title="Seguridad" subtitle="Auditoria, politicas de acceso y configuracion de sesion" open={openSec === 'seguridad'} onToggle={() => toggle('seguridad')}>
                         <div className="grid md:grid-cols-2 gap-4">
-                            <div><label className={label}>Audit Log Activo</label><select className={field} value={settings.audit_log_activo ?? 'true'} onChange={e => setVal('audit_log_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
-                            <div><label className={label}>Max Intentos Login</label><input type="number" className={field} value={settings.max_intentos_login ?? ''} onChange={e => setVal('max_intentos_login', e.target.value)} /></div>
-                            <div><label className={label}>Timeout Sesion (min)</label><input type="number" className={field} value={settings.sesion_timeout_min ?? ''} onChange={e => setVal('sesion_timeout_min', e.target.value)} /></div>
-                            <div><label className={label}>Passwords en Backend</label><input className={field} value="✅ .env (nunca expuesto)" disabled /></div>
+                            <div><label className={label}>Audit Log Activo</label><select aria-label="Audit Log Activo" className={field} value={settings.audit_log_activo ?? 'true'} onChange={e => setVal('audit_log_activo', e.target.value)}><option value="true">Activado</option><option value="false">Desactivado</option></select></div>
+                            <div><label className={label}>Max Intentos Login</label><input aria-label="Max Intentos Login" type="number" className={field} value={settings.max_intentos_login ?? ''} onChange={e => setVal('max_intentos_login', e.target.value)} /></div>
+                            <div><label className={label}>Timeout Sesion (min)</label><input aria-label="Timeout Sesion (min)" type="number" className={field} value={settings.sesion_timeout_min ?? ''} onChange={e => setVal('sesion_timeout_min', e.target.value)} /></div>
+                            <div><label className={label}>Passwords en Backend</label><input aria-label="Passwords en Backend" className={field} value="✅ .env (nunca expuesto)" disabled /></div>
                         </div>
                         <button className={`${btn} mt-4 pm-panel2-plain pm-accent-fg`} onClick={() => saveSettings(['audit_log_activo','max_intentos_login','sesion_timeout_min'])}><Save size={15} /> Guardar Seguridad</button>
                     </Section>
@@ -484,11 +484,11 @@ export default function Settings() {
                             const saveQr = () => { localStorage.setItem('pymetory_qr_config', JSON.stringify(qrLocal)); notify('Configuracion QR guardada'); };
                             return <>
                                 <div className="grid md:grid-cols-2 gap-4">
-                                    <div><label className={label}>Tamaño QR (px)</label><input type="number" className={field} value={qrLocal.size} onChange={e => setQrLocal({...qrLocal, size: parseInt(e.target.value) || 200})} /></div>
-                                    <div><label className={label}>Correccion de Error</label><select className={field} value={qrLocal.correction} onChange={e => setQrLocal({...qrLocal, correction: e.target.value})}>
+                                    <div><label className={label}>Tamaño QR (px)</label><input aria-label="Tamaño QR (px)" type="number" className={field} value={qrLocal.size} onChange={e => setQrLocal({...qrLocal, size: parseInt(e.target.value) || 200})} /></div>
+                                    <div><label className={label}>Correccion de Error</label><select aria-label="Correccion de Error" className={field} value={qrLocal.correction} onChange={e => setQrLocal({...qrLocal, correction: e.target.value})}>
                                         <option value="L">L - Baja (7%)</option><option value="M">M - Media (15%)</option><option value="Q">Q - Alta (25%)</option><option value="H">H - Maxima (30% · Bodega)</option>
                                     </select></div>
-                                    <div><label className={label}>Contenido del QR</label><select className={field} value={qrLocal.payload} onChange={e => setQrLocal({...qrLocal, payload: e.target.value})}>
+                                    <div><label className={label}>Contenido del QR</label><select aria-label="Contenido del QR" className={field} value={qrLocal.payload} onChange={e => setQrLocal({...qrLocal, payload: e.target.value})}>
                                         <option value="full">JSON completo (id, SKU, lote)</option><option value="id">Solo ID del lote</option><option value="url">URL a ficha del lote</option>
                                     </select></div>
                                 </div>

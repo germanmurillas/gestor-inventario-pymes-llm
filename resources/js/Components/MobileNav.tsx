@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import gsap from 'gsap';
 import {
-    ArrowRightLeft, BarChart3, Bell, Box, History, LayoutGrid, LogOut, MessageSquare, MoreHorizontal,
+    ArrowRightLeft, BarChart3, Bell, BookOpen, Box, History, LayoutGrid, LogOut, MessageSquare, MoreHorizontal,
     Printer, ScanLine, ScrollText, Search, Settings, Tag, Truck, Columns3, X,
 } from 'lucide-react';
 
@@ -13,7 +13,7 @@ export const VIEW_LABELS: Record<string, string> = {
     TABLERO: 'Tablero', INVENTARIO: 'Inventario', BUSCAR: 'Buscar', LLM: 'Asistente', REPORTES: 'Reportes',
     LOG_MAESTRO: 'Kardex', ETIQUETAS: 'Etiquetas', ESCANER: 'Escáner QR', SCAN_HISTORY: 'Historial QR',
     TRANSFERENCIAS: 'Transferencias', PURCHASE_ORDERS: 'Órdenes de compra', LABELS_PRINT: 'Imprimir etiquetas',
-    NOTIFICACIONES: 'Alertas', AYUDA: 'Ayuda',
+    NOTIFICACIONES: 'Alertas',
 };
 
 const PRINCIPALES: Item[] = [
@@ -147,6 +147,10 @@ export default function MobileNav({ activeView, onNavigate, user }: Props) {
                                 </div>
                             </section>
                         ))}
+                        <a href="https://tesis.pymetory.com/manual-de-usuario.pdf" target="_blank" rel="noopener" data-mas-item
+                            className="mb-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-700/50 bg-slate-800/50 py-3 text-sm font-bold text-slate-200">
+                            <BookOpen size={17} /> Manual de usuario
+                        </a>
                         <Link href="/logout" method="post" as="button" data-mas-item
                             className="mt-1 flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 py-3 text-sm font-bold text-rose-300">
                             <LogOut size={17} /> Cerrar sesión

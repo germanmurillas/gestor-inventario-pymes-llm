@@ -85,7 +85,7 @@ const FigmaSearch = ({ lotes = [] }: { lotes: LoteBusqueda[] }) => {
                 {([['TODOS', 'Todos'], ['CRITICO', 'Por vencer'], ['NORMAL', 'Vigentes'], ['CUARENTENA', 'Cuarentena']] as [Filtro, string][]).map(([id, txt]) => (
                     <button key={id} onClick={() => setFiltro(id)}
                         className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${filtro === id ? 'border-indigo-400/50 bg-indigo-500/15 text-indigo-200' : 'border-slate-700 text-slate-400 hover:text-white'}`}>
-                        {txt} <span className="opacity-60">{conteo(id)}</span>
+                        {txt} <span className="font-normal">{conteo(id)}</span>
                     </button>
                 ))}
                 <label className="ml-auto flex items-center gap-2 text-xs text-slate-400">

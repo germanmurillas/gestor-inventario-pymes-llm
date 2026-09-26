@@ -74,10 +74,26 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
         return () => { cancelled = true; safeStop(); };
     }, [inputMode, step]);
 
-    const handleDecode = () => {
+    const handleDecode = async () => {
         setScanError('');
+        const texto = qrInput.trim();
+        // Ingreso manual: se acepta el número de lote impreso en la etiqueta, además del contenido del QR.
+        if (texto && !texto.startsWith('{')) {
+            try {
+                const r = await fetch(`/inventory/qr-lookup-lote/${encodeURIComponent(texto)}`, { headers: { Accept: 'application/json' } });
+                if (!r.ok) { setScanError(`No existe un lote con el número ${texto}.`); return; }
+                const l = await r.json();
+                const qrStr = JSON.stringify({ id: l.id, sku: l.codigo, batch: l.lote, v: '1.0' });
+                setDecodedLote(l);
+                setData('qr_data', qrStr);
+                setStep('ACTION');
+            } catch {
+                setScanError('No se pudo consultar el lote. Revisa la conexión.');
+            }
+            return;
+        }
         try {
-            const parsed = JSON.parse(qrInput);
+            const parsed = JSON.parse(texto);
             if (!parsed.id || !parsed.v) {
                 setScanError('Código QR inválido: faltan campos requeridos (id, v).');
                 return;
@@ -135,7 +151,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                    <button
+                    <button aria-label="Volver"
                         type="button"
                         onClick={onBack}
                         className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
@@ -204,7 +220,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     <div className="h-px w-full bg-indigo-500/60 absolute animate-scan" />
                                     <QrCode size={80} className="text-indigo-400/40" />
                                 </div>
-                                <p className="relative z-10 text-white/40 text-[10px] font-black uppercase tracking-[0.3em] mt-6">
+                                <p className="relative z-10 text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-6">
                                     Seleccione Camara para escanear
                                 </p>
                             </div>
@@ -213,7 +229,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                             {/* Manual Input */}
                             <div className="space-y-4">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">
-                                    Código QR (JSON)
+                                    Número de lote o código QR
                                 </label>
                                 <div className="flex gap-4">
                                     <textarea
@@ -222,7 +238,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                             setQrInput(e.target.value);
                                             setScanError('');
                                         }}
-                                        placeholder='{"id":1,"sku":"MAT-001","batch":"L-001","v":"1.0"}'
+                                        placeholder='Número de lote (ej. HAR-01-260917-1) o contenido del código QR'
                                         className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 transition-all"
                                     />
                                     <button
@@ -268,7 +284,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
 
                                 <div className="bg-indigo-500/10 p-6 rounded-3xl border border-indigo-500/25 flex gap-4 items-center">
                                     <QrCode size={20} className="text-indigo-500 shrink-0" />
-                                    <p className="text-[10px] text-indigo-300/60 font-bold uppercase tracking-tight leading-relaxed">
+                                    <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-tight leading-relaxed">
                                         Código verificado v{decodedLote.v}. Seleccione el tipo de movimiento a registrar.
                                     </p>
                                 </div>
@@ -291,7 +307,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                         </div>
                                         <div>
                                             <div className="text-sm font-black uppercase tracking-tight">Entrada</div>
-                                            <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">Check-in de Material</div>
+                                            <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">Entrada de material</div>
                                         </div>
                                     </div>
                                 </button>
@@ -311,7 +327,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                         </div>
                                         <div>
                                             <div className="text-sm font-black uppercase tracking-tight">Salida</div>
-                                            <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">Check-out / Despacho</div>
+                                            <div className="text-[10px] text-slate-400 font-bold uppercase mt-1">Salida / despacho</div>
                                         </div>
                                     </div>
                                 </button>
@@ -407,13 +423,13 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                         </div>
                         <div className="relative z-10 space-y-6">
                             <div>
-                                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Formato QR</div>
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Formato QR</div>
                                 <div className="text-xs font-mono text-indigo-400 mt-2 bg-slate-900/80 backdrop-blur-xl/5 p-3 rounded-xl break-all">
                                     {'{"id":1,"sku":"MAT-001","batch":"L-001","v":"1.0"}'}
                                 </div>
                             </div>
                             <div className="pt-4 border-t border-white/10">
-                                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Compatibilidad</div>
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Compatibilidad</div>
                                 <p className="text-[10px] text-white/60 mt-2 leading-relaxed">
                                     Escanee etiquetas generadas desde <span className="text-indigo-400 font-bold">Etiquetas & QR</span>.
                                     Cada escaneo queda registrado en el Kardex con usuario, timestamp y razón "qr_scan".
@@ -427,7 +443,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                             <Camera size={14} className="text-indigo-500" />
                             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Nota</span>
                         </div>
-                        <p className="text-[10px] text-indigo-300/60 leading-relaxed">
+                        <p className="text-[10px] text-indigo-300 leading-relaxed">
                             Para escaneo con cámara se requiere HTTPS. Use el ingreso manual como alternativa en entornos de desarrollo local.
                         </p>
                     </div>

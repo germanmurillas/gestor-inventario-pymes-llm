@@ -41,7 +41,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                    <button
+                    <button aria-label="Volver"
                         type="button"
                         onClick={onBack}
                         className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
@@ -78,7 +78,7 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
             {!loading && !error && scans.length === 0 && (
                 <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-dashed border-slate-700/50 rounded-[3rem] py-32 flex flex-col items-center justify-center text-slate-300">
                     <ScanLine size={56} className="mb-6 opacity-20" />
-                    <p className="text-sm font-black uppercase tracking-[0.3em] opacity-40 text-white">
+                    <p className="text-sm font-black uppercase tracking-[0.3em] text-slate-400">
                         Sin escaneos QR registrados
                     </p>
                     <p className="text-[10px] text-slate-400 mt-2">
@@ -169,13 +169,13 @@ const FigmaScanHistory = ({ onBack }: { onBack: () => void }) => {
                         <div className="text-2xl font-black text-white mt-2">{scans.length}</div>
                     </div>
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entradas (Check-in)</div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entradas</div>
                         <div className="text-2xl font-black text-green-400 mt-2">
                             {scans.filter(s => s.type === 'entrada').length}
                         </div>
                     </div>
                     <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-sm">
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Salidas (Check-out)</div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Salidas</div>
                         <div className="text-2xl font-black text-red-400 mt-2">
                             {scans.filter(s => s.type === 'salida').length}
                         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head } from '@inertiajs/react';
-import { HelpCircle, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import gsap from 'gsap';
 import Sidebar from '../Components/Sidebar';
 import MobileNav, { VIEW_LABELS } from '../Components/MobileNav';
@@ -22,7 +22,7 @@ import FigmaPurchaseOrders from '../components/Figma/FigmaPurchaseOrders';
 import FigmaLabelPrint from '../components/Figma/FigmaLabelPrint';
 import FigmaBodegaManager from '../components/Figma/FigmaBodegaManager';
 
-type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'AYUDA' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
+type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
 
 export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth: any, initialLotes: any[], dashboardStats: any }) {
     const [lotes, setLotes] = useState(initialLotes || []);
@@ -119,16 +119,6 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                         {activeView === 'PURCHASE_ORDERS' && <FigmaPurchaseOrders />}
                         {activeView === 'LABELS_PRINT' && <FigmaLabelPrint initialLotes={lotes} />}
 
-                        {(['AYUDA'].includes(activeView)) && (
-                            <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/30 rounded-3xl p-24 flex flex-col items-center justify-center text-slate-500">
-                                <div className="w-16 h-16 bg-slate-700/40 rounded-full flex items-center justify-center mb-6">
-                                    <HelpCircle size={32} className="text-champan/30" />
-                                </div>
-                                <div className="text-sm font-black uppercase tracking-[0.3em] text-slate-500 text-center">
-                                    Módulo en<br/>Laboratorio
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </main>

@@ -32,7 +32,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                    <button 
+                    <button aria-label="Volver" 
                         type="button"
                         onClick={onBack}
                         className="p-2 hover:bg-slate-800/30 rounded-lg transition-colors border border-slate-700/30 shadow-sm"
@@ -64,7 +64,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                         
                         <div className="relative z-10 space-y-6">
                             <div>
-                                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Producto Seleccionado</div>
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Producto Seleccionado</div>
                                 <div className="text-xl font-black mt-1 leading-tight">{lote.codigo}</div>
                                 <div className="flex items-center gap-2 mt-1">
                                     <div className="text-[10px] font-bold text-indigo-400 uppercase">Lote #{lote.lote}</div>
@@ -79,13 +79,13 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                             </div>
 
                             <div className="pt-6 border-t border-white/10">
-                                <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Stock Disponible</div>
-                                <div className="text-3xl font-black mt-1">{lote.cantidad} <span className="text-xs text-white/40">{lote.unit}</span></div>
+                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Stock Disponible</div>
+                                <div className="text-3xl font-black mt-1">{lote.cantidad} <span className="text-xs text-slate-400">{lote.unit}</span></div>
                             </div>
 
                             {lote.photo_url && (
                                 <div className="pt-6 border-t border-white/10">
-                                    <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-3">Verificación Visual</div>
+                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Verificación Visual</div>
                                     <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-white/10 group cursor-pointer">
                                         <img
                                             src={lote.photo_url}
@@ -112,7 +112,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
 
                             <div className="pt-6 border-t border-white/10 space-y-4">
                                 <div className="flex justify-between items-end">
-                                    <div className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Proyección de Salida</div>
+                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Proyección de Salida</div>
                                     <div className="text-xs font-bold text-indigo-400">-{data.quantity} {lote.unit || "kg"}</div>
                                 </div>
                                 <div className="h-2 bg-slate-900/80 backdrop-blur-xl/10 rounded-full overflow-hidden">
@@ -121,7 +121,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                         style={{ width: `${percentage}%` }}
                                     ></div>
                                 </div>
-                                <div className="text-[9px] text-white/30 italic">
+                                <div className="text-[9px] text-slate-400 italic">
                                     Stock remanente: {(lote.cantidad - data.quantity).toFixed(2)} {lote.unit || "kg"}
                                 </div>
                             </div>
@@ -230,7 +230,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
 
                         <div className="bg-indigo-500/10 p-6 rounded-3xl border border-indigo-500/25 flex gap-4 items-center">
                             <Info size={18} className="text-indigo-400 shrink-0" />
-                            <p className="text-[10px] text-indigo-300/60 font-bold uppercase tracking-tight leading-relaxed">
+                            <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-tight leading-relaxed">
                                 Esta acción es irreversible. Al procesar el despacho, el sistema actualizará el stock físico y dejará un rastro en el historial para auditoría.
                             </p>
                         </div>

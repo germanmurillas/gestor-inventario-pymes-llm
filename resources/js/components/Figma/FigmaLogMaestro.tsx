@@ -22,14 +22,14 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div className="flex items-center gap-4">
                     {onBack && (
-                        <button onClick={onBack} className="p-2 hover:bg-slate-700/60 rounded-xl border border-slate-700/50 transition-all">
+                        <button aria-label="Volver" onClick={onBack} className="p-2 hover:bg-slate-700/60 rounded-xl border border-slate-700/50 transition-all">
                             <ArrowLeft size={18} className="text-slate-300" />
                         </button>
                     )}
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <History size={20} className="text-indigo-400" />
-                            <h2 className="text-xl font-bold uppercase tracking-tight text-white font-display">Log Maestro de Movimientos</h2>
+                            <h2 className="text-xl font-bold uppercase tracking-tight text-white font-display">Kardex de movimientos</h2>
                         </div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Kardex Histórico Completo de la PYME</p>
                     </div>
@@ -72,7 +72,7 @@ const FigmaLogMaestro = ({ movements = [], onBack }: { movements: any[], onBack?
 
             {/* Main Table Container */}
             <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col relative">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabla de movimientos (desplazable)">
                     <table className="w-full text-left font-sans">
                         <thead className="bg-slate-800/50/80 border-b border-slate-700/50">
                             <tr>

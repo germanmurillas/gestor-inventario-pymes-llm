@@ -209,7 +209,7 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
         <div className="space-y-10 animate-in fade-in duration-500 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-bold uppercase tracking-tight text-white">Etiquetas & Clasificacion</h2>
+                    <h2 className="text-xl font-bold uppercase tracking-tight text-white">Etiquetas y clasificación</h2>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestion de tags personalizados para inventario</p>
                 </div>
                 <button

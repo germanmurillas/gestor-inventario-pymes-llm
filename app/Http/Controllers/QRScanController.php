@@ -82,6 +82,13 @@ class QRScanController extends Controller
      *
      * GET /inventory/qr-lookup/{id}
      */
+    /** Búsqueda por número de lote (ingreso manual del código impreso en la etiqueta). */
+    public function lookupPorLote(string $batch)
+    {
+        $lote = Lote::where('batch_number', strtoupper(trim($batch)))->first();
+        return $lote ? $this->lookup($lote->id) : response()->json(['error' => 'Lote no encontrado'], 404);
+    }
+
     public function lookup($id)
     {
         $lote = Lote::with('material')->find($id);

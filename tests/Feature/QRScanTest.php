@@ -48,4 +48,14 @@ class QRScanTest extends TestCase
         $resp->assertSessionHasErrors('quantity');
         $this->assertEquals(5, $lote->fresh()->quantity);
     }
+
+    public function test_el_escaner_encuentra_un_lote_por_su_numero(): void
+    {
+        $user = \App\Models\User::factory()->create(['role' => 'operario']);
+        $lote = \App\Models\Lote::factory()->create(['batch_number' => 'HAR-01-260917-1']);
+
+        $this->actingAs($user)->getJson('/inventory/qr-lookup-lote/har-01-260917-1')
+            ->assertOk()->assertJsonPath('id', $lote->id)->assertJsonPath('lote', 'HAR-01-260917-1');
+        $this->actingAs($user)->getJson('/inventory/qr-lookup-lote/NO-EXISTE-1')->assertNotFound();
+    }
 }

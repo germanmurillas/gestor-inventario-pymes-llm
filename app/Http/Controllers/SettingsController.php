@@ -83,9 +83,10 @@ class SettingsController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Ajustes: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al guardar: ' . $e->getMessage(),
+                'message' => 'No se pudieron guardar los ajustes. No se cambió nada; intenta de nuevo.',
             ], 500);
         }
     }

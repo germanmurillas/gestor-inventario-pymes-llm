@@ -11,9 +11,10 @@ const STATUS_LABELS: Record<string, string> = {
     draft: 'Borrador', ready_for_review: 'Pendiente Revisión', approved: 'Aprobado',
     ordered: 'Ordenado', received: 'Recibido', closed: 'Cerrado'
 };
+// Insignias tintadas: texto claro sobre fondo translúcido (contraste AA en todos los temas).
 const STATUS_COLORS: Record<string, string> = {
-    draft: 'bg-slate-500', ready_for_review: 'bg-yellow-500', approved: 'bg-blue-500',
-    ordered: 'bg-purple-500', received: 'bg-emerald-500', closed: 'bg-slate-400'
+    draft: 'bg-slate-700 text-slate-200', ready_for_review: 'bg-amber-500/15 text-amber-300', approved: 'bg-sky-500/15 text-sky-300',
+    ordered: 'bg-indigo-500/15 text-indigo-200', received: 'bg-emerald-500/15 text-emerald-300', closed: 'bg-slate-700 text-slate-300'
 };
 
 export default function FigmaPurchaseOrders() {
@@ -137,7 +138,7 @@ export default function FigmaPurchaseOrders() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 className="text-lg font-black text-white uppercase tracking-tight">Órdenes de Compra</h2>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Purchase Orders · Crear, aprobar y recibir</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Crear, aprobar y recibir órdenes a proveedores</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <input type="text" placeholder="Buscar orden..." value={searchTerm}
@@ -167,7 +168,7 @@ export default function FigmaPurchaseOrders() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase text-white ${STATUS_COLORS[po.status]}`}>
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${STATUS_COLORS[po.status]}`}>
                                     {STATUS_LABELS[po.status]}
                                 </span>
                                 <div className="flex items-center gap-1">
@@ -179,8 +180,9 @@ export default function FigmaPurchaseOrders() {
                                                 onClick={() => handleStatusChange(po, s)}
                                                 disabled={s === po.status}
                                                 title={STATUS_LABELS[s]}
+                                                aria-label={s === po.status ? `Estado actual: ${STATUS_LABELS[s]}` : `Cambiar a ${STATUS_LABELS[s]}`}
                                                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-black transition-all ${
-                                                    s === po.status ? STATUS_COLORS[s] + ' text-white scale-125' :
+                                                    s === po.status ? 'bg-indigo-600 text-white scale-125' :
                                                     isPast ? 'bg-slate-600 text-slate-400' : 'bg-slate-700/30 text-slate-300'
                                                 } ${s !== po.status ? 'hover:scale-110 cursor-pointer' : 'cursor-default'}`}
                                             >
@@ -194,8 +196,9 @@ export default function FigmaPurchaseOrders() {
                                     className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 disabled:opacity-30 text-[9px] font-black uppercase rounded-lg transition-all">
                                     Recibir
                                 </button>
-                                <button onClick={async () => { await fetch(`/api/purchase-orders/${po.id}`, { method: 'DELETE', headers: {'X-XSRF-TOKEN': csrf()} }); fetchOrders(); }}
-                                    className="p-1.5 hover:bg-red-500/10 rounded-lg text-slate-500 hover:text-red-400 transition-colors">
+                                <button aria-label={`Eliminar la orden ${po.po_number}`}
+                                    onClick={async () => { if (!confirm(`¿Eliminar la orden ${po.po_number}? Esta acción no se puede deshacer.`)) return; await fetch(`/api/purchase-orders/${po.id}`, { method: 'DELETE', headers: {'X-XSRF-TOKEN': csrf()} }); fetchOrders(); }}
+                                    className="p-1.5 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-400 transition-colors">
                                     <Trash2 size={14} />
                                 </button>
                             </div>
