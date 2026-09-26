@@ -234,7 +234,7 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
                         <form onSubmit={handleCreate} className="p-6 space-y-5">
                             <div>
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Nombre del Tag</label>
-                                <input
+                                <input aria-label="Nombre del Tag"
                                     type="text"
                                     value={formName}
                                     onChange={e => setFormName(e.target.value)}

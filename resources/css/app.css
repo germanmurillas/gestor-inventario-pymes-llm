@@ -96,7 +96,7 @@
   --color-slate-800: var(--pm-panel-2);
   --color-slate-700: var(--pm-border);
   --color-slate-600: color-mix(in oklab, var(--pm-border) 65%, var(--pm-text));
-  --color-slate-500: color-mix(in oklab, var(--pm-text-muted) 84%, var(--pm-panel));
+  --color-slate-500: color-mix(in oklab, var(--pm-text-muted) 90%, var(--pm-panel));
   --color-slate-400: var(--pm-text-muted);
   --color-slate-300: color-mix(in oklab, var(--pm-text) 70%, var(--pm-text-muted));
   --color-slate-200: color-mix(in oklab, var(--pm-text) 88%, var(--pm-text-muted));

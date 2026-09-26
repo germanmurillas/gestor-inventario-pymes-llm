@@ -104,7 +104,7 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                         )}
                         <div>
                             <label className="mb-1 block text-xs font-semibold text-slate-400">…o pega el enlace de una imagen (https)</label>
-                            <input type="url" className={campo} value={enlace} placeholder="https://…" disabled={!!imagen}
+                            <input aria-label="…o pega el enlace de una imagen (https)" type="url" className={campo} value={enlace} placeholder="https://…" disabled={!!imagen}
                                 onChange={(e) => { setEnlace(e.target.value); setQuitarImagen(false); setPreview(e.target.value || actual?.image_url || null); }} />
                         </div>
                         {(errores.image || errores.image_link) && <p className="text-xs text-rose-300">{errores.image || errores.image_link}</p>}
@@ -112,20 +112,20 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div className="sm:col-span-2">
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Nombre</label>
-                                <input className={campo} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej. Cuarto frío" required />
+                                <input aria-label="Nombre" className={campo} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej. Cuarto frío" required />
                                 {errores.name && <p className="mt-1 text-xs text-rose-300">{errores.name}</p>}
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Código</label>
-                                <input className={`${campo} uppercase disabled:opacity-60`} value={form.code} disabled={!!actual}
+                                <input aria-label="Código" className={`${campo} uppercase disabled:opacity-60`} value={form.code} disabled={!!actual}
                                     onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="BOD-XXX" required />
                                 {errores.code && <p className="mt-1 text-xs text-rose-300">{errores.code}</p>}
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Capacidad</label>
                                 <div className="flex gap-2">
-                                    <input type="number" min={1} className={campo} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} required />
-                                    <select className={`${campo} w-24`} value={form.capacity_unit} onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })} required aria-label="Unidad de la capacidad">
+                                    <input aria-label="Capacidad" type="number" min={1} className={campo} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} required />
+                                    <select aria-label="Capacidad" className={`${campo} w-24`} value={form.capacity_unit} onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })} required aria-label="Unidad de la capacidad">
                                         <option value="" disabled>Unidad</option>
                                         {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                                     </select>
@@ -135,12 +135,12 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                             </div>
                             <div className="sm:col-span-2">
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Descripción</label>
-                                <textarea rows={2} className={`${campo} resize-none`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Qué se guarda aquí" />
+                                <textarea aria-label="Descripción" rows={2} className={`${campo} resize-none`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Qué se guarda aquí" />
                             </div>
                             {actual && (
                                 <div className="sm:col-span-2">
                                     <label className="mb-1 block text-xs font-semibold text-slate-400">Estado</label>
-                                    <select className={campo} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Form['status'] })}>
+                                    <select aria-label="Estado" className={campo} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Form['status'] })}>
                                         <option value="active">Activa</option>
                                         <option value="full">Llena</option>
                                         <option value="maintenance">En mantenimiento</option>

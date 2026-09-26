@@ -304,7 +304,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                                     Cantidad a transferir{unidad ? ` (${unidad})` : ''}
                                 </label>
                                 <div className="relative">
-                                    <input
+                                    <input aria-label="Cantidad a transferir"
                                         type="number"
                                         step="0.001"
                                         required
@@ -336,7 +336,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                             <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                 Motivo de la Transferencia
                             </label>
-                            <input
+                            <input aria-label="Motivo de la Transferencia"
                                 type="text"
                                 required
                                 value={data.reason}

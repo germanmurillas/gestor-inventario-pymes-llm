@@ -232,7 +232,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     Número de lote o código QR
                                 </label>
                                 <div className="flex gap-4">
-                                    <textarea
+                                    <textarea aria-label="Número de lote o código QR"
                                         value={qrInput}
                                         onChange={e => {
                                             setQrInput(e.target.value);
@@ -339,7 +339,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                         <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                             Cantidad{decodedLote?.unit ? ` (${decodedLote.unit})` : ''}
                                         </label>
-                                        <input
+                                        <input aria-label="Cantidad"
                                             type="number"
                                             step="0.01"
                                             min="0.01"
@@ -358,7 +358,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                         <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                             Nota / Observación
                                         </label>
-                                        <textarea
+                                        <textarea aria-label="Nota / Observación"
                                             value={data.description}
                                             onChange={e => setData('description', e.target.value)}
                                             placeholder="Ej: Retorno de producción, material de cuarentena..."

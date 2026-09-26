@@ -249,23 +249,23 @@ export default function FigmaPurchaseOrders() {
                         <div className="bg-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-3xl max-h-[85vh] overflow-y-auto p-8 space-y-6 animate-in zoom-in-95 duration-200">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-black text-white uppercase">Nueva Orden de Compra</h3>
-                                <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X size={20} /></button>
+                                <button onClick={() => setShowForm(false)} aria-label="Cerrar" className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X size={20} /></button>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase">N° Orden</div>
-                                    <input type="text" value={poNumber} onChange={e => setPoNumber(e.target.value)}
+                                    <input aria-label="N° Orden" type="text" value={poNumber} onChange={e => setPoNumber(e.target.value)}
                                         className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500" />
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase">Fecha Esperada</div>
-                                    <input type="date" value={dateExpected} onChange={e => setDateExpected(e.target.value)}
+                                    <input aria-label="Fecha Esperada" type="date" value={dateExpected} onChange={e => setDateExpected(e.target.value)}
                                         className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500" />
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase">Proveedor</div>
-                                    <select value={vendorId || ''} onChange={e => setVendorId(e.target.value ? Number(e.target.value) : null)}
+                                    <select aria-label="Proveedor" value={vendorId || ''} onChange={e => setVendorId(e.target.value ? Number(e.target.value) : null)}
                                         className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500">
                                         <option value="">Sin proveedor</option>
                                         {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
@@ -273,16 +273,16 @@ export default function FigmaPurchaseOrders() {
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase">Enviado por</div>
-                                    <input type="text" value={submittedBy} onChange={e => setSubmittedBy(e.target.value)}
+                                    <input aria-label="Enviado por" type="text" value={submittedBy} onChange={e => setSubmittedBy(e.target.value)}
                                         placeholder="Nombre del solicitante" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500" />
                                 </div>
                             </div>
 
                             {/* Quick add vendor */}
                             <div className="flex items-center gap-3 p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30">
-                                <input type="text" value={newVendorName} onChange={e => setNewVendorName(e.target.value)}
+                                <input aria-label="Nombre del proveedor" type="text" value={newVendorName} onChange={e => setNewVendorName(e.target.value)}
                                     placeholder="Nuevo proveedor rápido" className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-indigo-500" />
-                                <input type="text" value={newVendorPhone} onChange={e => setNewVendorPhone(e.target.value)}
+                                <input aria-label="Teléfono del proveedor" type="text" value={newVendorPhone} onChange={e => setNewVendorPhone(e.target.value)}
                                     placeholder="Teléfono" className="w-40 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-indigo-500" />
                                 <button onClick={handleAddVendor} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl">
                                     Agregar
@@ -291,12 +291,12 @@ export default function FigmaPurchaseOrders() {
 
                             <div className="space-y-1">
                                 <div className="text-[9px] font-black text-slate-400 uppercase">Dirección de envío</div>
-                                <input type="text" value={shipTo} onChange={e => setShipTo(e.target.value)}
+                                <input aria-label="Dirección de envío" type="text" value={shipTo} onChange={e => setShipTo(e.target.value)}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500" />
                             </div>
                             <div className="space-y-1">
                                 <div className="text-[9px] font-black text-slate-400 uppercase">Notas</div>
-                                <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+                                <textarea aria-label="Notas" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500 resize-none" />
                             </div>
 
@@ -306,10 +306,10 @@ export default function FigmaPurchaseOrders() {
                                 {selectedItems.map((item, idx) => (
                                     <div key={idx} className="flex items-center gap-3 p-3 bg-slate-800/40 rounded-xl border border-slate-700/30">
                                         <span className="flex-1 text-xs font-bold text-white">{item.material_name}</span>
-                                        <input type="number" min="0.01" step="0.01" value={item.quantity}
+                                        <input aria-label="Cantidad" type="number" min="0.01" step="0.01" value={item.quantity}
                                             onChange={e => updateItem(idx, 'quantity', Number(e.target.value))}
                                             className="w-24 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white text-center outline-none" placeholder="Cant" />
-                                        <input type="number" min="0" step="0.01" value={item.unit_cost}
+                                        <input aria-label="Costo unitario" type="number" min="0" step="0.01" value={item.unit_cost}
                                             onChange={e => updateItem(idx, 'unit_cost', Number(e.target.value))}
                                             className="w-28 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white text-center outline-none" placeholder="$ Costo" />
                                         <button onClick={() => removeItem(idx)} className="p-1.5 text-slate-500 hover:text-red-400"><Trash2 size={14} /></button>
@@ -385,7 +385,7 @@ export default function FigmaPurchaseOrders() {
                             })}
                             {erroresRecibo.general && <p className="text-xs text-rose-300">{erroresRecibo.general}</p>}
                             <button onClick={handleReceive}
-                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-xl transition-all">
+                                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black rounded-xl transition-all">
                                 <CheckCircle size={14} /> Confirmar recepción
                             </button>
                         </div>

@@ -100,7 +100,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Nombre del Producto</label>
-                                <input 
+                                <input aria-label="Nombre del Producto" 
                                     type="text" 
                                     required
                                     value={data.name}
@@ -113,7 +113,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Código</label>
-                                    <input 
+                                    <input aria-label="Código" 
                                         type="text" 
                                         required
                                         value={data.code}
@@ -125,7 +125,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Lote Interno</label>
-                                    <input 
+                                    <input aria-label="Lote Interno" 
                                         type="text" 
                                         required
                                         value={data.batch_number}
@@ -138,7 +138,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Ubicación / Bodega</label>
-                                <select 
+                                <select aria-label="Ubicación / Bodega" 
                                     required
                                     value={data.bodega_id}
                                     onChange={e => setData('bodega_id', e.target.value)}
@@ -153,7 +153,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Descripción del Material</label>
-                                <textarea 
+                                <textarea aria-label="Descripción del Material" 
                                     value={data.description}
                                     onChange={e => setData('description', e.target.value)}
                                     placeholder="Detalles sobre el proveedor o uso comercial..." 
@@ -233,7 +233,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Stock Inicial</label>
                                 <div className="relative">
-                                    <input 
+                                    <input aria-label="Stock Inicial" 
                                         type="number" 
                                         required
                                         min="0"
@@ -251,7 +251,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Unidad</label>
-                                    <select required value={data.unit} onChange={e => setData('unit', e.target.value)}
+                                    <select aria-label="Unidad" required value={data.unit} onChange={e => setData('unit', e.target.value)}
                                         className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold">
                                         <option value="" disabled>Elegir…</option>
                                         <option value="kg">kg</option><option value="g">g</option><option value="L">L</option>
@@ -261,25 +261,25 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Costo unitario</label>
-                                    <input type="number" required min="0" step="0.01" value={data.unit_cost} onChange={e => setData('unit_cost', e.target.value)}
+                                    <input aria-label="Costo unitario" type="number" required min="0" step="0.01" value={data.unit_cost} onChange={e => setData('unit_cost', e.target.value)}
                                         placeholder="COP por unidad" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
                                     {errors.unit_cost && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.unit_cost}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Stock mínimo</label>
-                                    <input type="number" min="0" step="0.01" value={data.stock_minimo} onChange={e => setData('stock_minimo', e.target.value)}
+                                    <input aria-label="Stock mínimo" type="number" min="0" step="0.01" value={data.stock_minimo} onChange={e => setData('stock_minimo', e.target.value)}
                                         placeholder="Para alertas" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
                                     {errors.stock_minimo && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.stock_minimo}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Días críticos</label>
-                                    <input type="number" min="1" max="365" step="1" value={data.dias_criticos} onChange={e => setData('dias_criticos', e.target.value)}
+                                    <input aria-label="Días críticos" type="number" min="1" max="365" step="1" value={data.dias_criticos} onChange={e => setData('dias_criticos', e.target.value)}
                                         placeholder="Umbral general" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
                                     {errors.dias_criticos && <p className="text-red-500 text-[10px] font-bold mt-1">{errors.dias_criticos}</p>}
                                 </div>
                                 <div className="col-span-2 space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Categoría</label>
-                                    <input type="text" maxLength={100} value={data.categoria} onChange={e => setData('categoria', e.target.value)}
+                                    <input aria-label="Categoría" type="text" maxLength={100} value={data.categoria} onChange={e => setData('categoria', e.target.value)}
                                         placeholder="Ej. Harinas" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
                                 </div>
                                 <p className="col-span-2 text-[10px] text-slate-400">Días críticos: cuántos días antes de vencer un lote de este insumo pasa a crítico. Vacío = el umbral general de Ajustes.</p>
@@ -289,7 +289,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                 <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Fecha de Vencimiento (FEFO)</label>
                                 <div className="relative">
                                     <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <input 
+                                    <input aria-label="Fecha de Vencimiento (FEFO)" 
                                         type="date" 
                                         required
                                         value={data.expiration_date}

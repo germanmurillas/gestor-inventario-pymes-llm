@@ -163,7 +163,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                             <div className="space-y-4">
                                 <div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre de la Bodega</label>
-                                    <input 
+                                    <input aria-label="Nombre de la Bodega" 
                                         type="text" 
                                         value={data.name}
                                         onChange={e => setData('name', e.target.value)}
@@ -175,7 +175,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Código</label>
-                                        <input 
+                                        <input aria-label="Código" 
                                             type="text" 
                                             value={data.code}
                                             onChange={e => setData('code', e.target.value.toUpperCase())}
@@ -186,7 +186,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Capacidad</label>
-                                        <input 
+                                        <input aria-label="Capacidad" 
                                             type="number" 
                                             value={data.capacity}
                                             onChange={e => setData('capacity', parseInt(e.target.value))}

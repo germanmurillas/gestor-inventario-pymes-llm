@@ -180,7 +180,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Cantidad a retirar ({lote.unit})</label>
                                     <div className="relative">
-                                        <input 
+                                        <input aria-label="Cantidad a retirar" 
                                             type="number" 
                                             step="0.01"
                                             required
@@ -199,7 +199,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Motivo del Despacho</label>
-                                    <select 
+                                    <select aria-label="Motivo del Despacho" 
                                         required
                                         value={data.reason}
                                         onChange={e => setData('reason', e.target.value)}
@@ -217,7 +217,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                             <div className="space-y-4">
                                 <div className="space-y-2 h-full flex flex-col">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Descripción / Observaciones</label>
-                                    <textarea 
+                                    <textarea aria-label="Descripción / Observaciones" 
                                         value={data.description}
                                         onChange={e => setData('description', e.target.value)}
                                         placeholder="Indica el número de orden de producción o cualquier detalle relevante..."

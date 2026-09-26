@@ -394,7 +394,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                                     Cantidad a Consumir ({selectedMaterial.unit?.toUpperCase() || 'KG'})
                                 </label>
                                 <div className="relative">
-                                    <input
+                                    <input aria-label="Cantidad a consumir"
                                         type="number"
                                         step="0.001"
                                         value={quantity || ''}
@@ -447,7 +447,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                             {/* Reason */}
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Motivo</label>
-                                <select
+                                <select aria-label="Motivo"
                                     value={reason}
                                     onChange={e => setReason(e.target.value)}
                                     className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
@@ -461,7 +461,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                             {/* Description */}
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Observaciones</label>
-                                <textarea
+                                <textarea aria-label="Observaciones"
                                     value={description}
                                     onChange={e => setDescription(e.target.value)}
                                     placeholder="Nº de orden de producción, receta o detalle relevante..."
