@@ -1,0 +1,834 @@
+{
+    "resumen": {
+        "etiqueta": "linea-base",
+        "fecha": "2026-09-26 03:19:41",
+        "total": 50,
+        "correctas": 26,
+        "precision": 52,
+        "intenciones_correctas": 43,
+        "precision_clasificador": 86,
+        "tiempo_mediano_s": 0.555,
+        "por_grupo": {
+            "Existencias": {
+                "total": 9,
+                "correctas": 9
+            },
+            "Ubicación": {
+                "total": 5,
+                "correctas": 4
+            },
+            "Vencimiento": {
+                "total": 5,
+                "correctas": 0
+            },
+            "Vencimiento por periodo": {
+                "total": 2,
+                "correctas": 1
+            },
+            "Críticos": {
+                "total": 4,
+                "correctas": 4
+            },
+            "Valorización": {
+                "total": 5,
+                "correctas": 0
+            },
+            "Movimientos": {
+                "total": 5,
+                "correctas": 4
+            },
+            "Información de lote": {
+                "total": 4,
+                "correctas": 0
+            },
+            "Conciliación": {
+                "total": 3,
+                "correctas": 0
+            },
+            "Resumen": {
+                "total": 2,
+                "correctas": 0
+            },
+            "Insumo inexistente": {
+                "total": 6,
+                "correctas": 4
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánta harina de trigo panificable hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 5731.05,
+            "respuesta": "Hay 5731.05 kg de harina de trigo panificable.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.53,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 2,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánta azúcar blanca hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 207.24,
+            "respuesta": "207.24 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.49,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 3,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánta sal refinada queda?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 71.1,
+            "respuesta": "71.1 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.5,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 4,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánto ajonjolí descortezado queda?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 212.25,
+            "respuesta": "212.25 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.46,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 5,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánta levadura fresca prensada tenemos?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 287.36,
+            "respuesta": "Tenemos **287.36 kg** de levadura fresca prensada.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.48,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 6,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánto aceite de soya hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 58.84,
+            "respuesta": "Hay 58.84 L de aceite de soya.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.42,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 7,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuántas bolsas para pan tajado quedan?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 7458,
+            "respuesta": "7458 und.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.44,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 8,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánto ACPM hay para la planta eléctrica?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 90,
+            "respuesta": "90 gal.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.42,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 9,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuántas cajas corrugadas de despacho hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 433.1,
+            "respuesta": "Hay **433.1 unidades** de caja corrugada de despacho.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.48,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 10,
+            "grupo": "Ubicación",
+            "pregunta": "¿Dónde está la levadura fresca prensada?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Cuarto frío"
+            ],
+            "respuesta": "La levadura fresca prensada se encuentra en el **Cuarto frío** (ambos lotes: LEV-01-260905-1 y LEV-01-260912-2).",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.52,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 11,
+            "grupo": "Ubicación",
+            "pregunta": "¿Dónde está guardada la margarina de hojaldre?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Bodega de grasas y rellenos"
+            ],
+            "respuesta": "Bodega de grasas y rellenos.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.38,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 12,
+            "grupo": "Ubicación",
+            "pregunta": "¿En qué bodega están las cajas corrugadas de despacho?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Bodega de empaques"
+            ],
+            "respuesta": "Las cajas corrugadas de despacho se encuentran en la **Bodega de empaques**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.49,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 13,
+            "grupo": "Ubicación",
+            "pregunta": "¿Dónde está el pan perro x 8?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Producto terminado y despacho"
+            ],
+            "respuesta": "No hay registro de “pan perro x 8” en el inventario.",
+            "correcta": false,
+            "motivo": "falta alguna bodega: Producto terminado y despacho",
+            "segundos": 0.47,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 14,
+            "grupo": "Ubicación",
+            "pregunta": "¿Dónde está la harina de trigo integral?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Bodega de materia prima seca"
+            ],
+            "respuesta": "Harina de trigo integral | Lote HAR‑02‑260817‑1 | Stock 576.84 kg | Bodega de materia prima seca.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.55,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 15,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Cuándo vence el huevo líquido pasteurizado?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2026-10-05",
+            "respuesta": "El huevo líquido pasteurizado (lote HUE-01-260914-1) vence el 2026‑10‑05.",
+            "correcta": false,
+            "motivo": "no aparece la fecha 2026-10-05",
+            "segundos": 0.43,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 16,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Cuándo vence la crema pastelera base?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2026-10-08",
+            "respuesta": "Crema pastelera base | Lote: CRE-01-260908-1 | Vence: 2026‑10‑08 (en 12 días).",
+            "correcta": false,
+            "motivo": "no aparece la fecha 2026-10-08",
+            "segundos": 0.43,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 17,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Cuándo vence la levadura fresca prensada?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2026-10-10",
+            "respuesta": "Levadura fresca prensada:  \n- Lote LEV‑01‑260905‑1 – vence 2026‑10‑10 (en 14 días)  \n- Lote LEV‑01‑260912‑2 – vence 2026‑10‑17 (en 21 días)",
+            "correcta": false,
+            "motivo": "no aparece la fecha 2026-10-10",
+            "segundos": 0.69,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 18,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Cuándo vence el arequipe para relleno?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2026-12-15",
+            "respuesta": "Arequipe para relleno – Lote ARE-01-260817-1 – Vence el 2026‑12‑15.",
+            "correcta": false,
+            "motivo": "no aparece la fecha 2026-12-15",
+            "segundos": 0.5,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 19,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Cuándo vence la leche en polvo?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2027-08-17",
+            "respuesta": "Leche en polvo – Lote LEC-01-260817-1 – vence el 2027‑08‑17.",
+            "correcta": false,
+            "motivo": "no aparece la fecha 2027-08-17",
+            "segundos": 0.64,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 20,
+            "grupo": "Vencimiento por periodo",
+            "pregunta": "¿Qué lotes vencen esta semana?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": [
+                "TAJ-01-260924",
+                "TAJ-01-260925",
+                "TAJ-02-260924",
+                "TAJ-02-260925",
+                "HAM-01-260925",
+                "PER-01-260924",
+                "PER-01-260925",
+                "MOG-01-260925"
+            ],
+            "respuesta": "- Pan perro x 8 | Lote: PER-01-260924 | Vence: 2026‑09‑30 (en 4 días)  \n- Mogolla integral x 6 | Lote: MOG-01-260925 | Vence: 2026‑09‑30 (en 4 días)  \n- Pan tajado blanco 500 g | Lote: TAJ-01-260924 | Vence: 2026‑10‑01 (en 5 días)  \n- Pan tajado integral 500 g | Lote: TAJ-02-260924 | Vence: 2026‑10‑01 (en 5 días)  \n- Pan hamburguesa x 8 con ajonjolí | Lote: HAM-01-260925 | Vence: 2026‑10‑01 (en 5 días)  \n- Pan perro x 8 | Lote: PER-01-260925 | Vence: 2026‑10‑01 (en 5 días)  \n- Pan tajado blanco 500 g | Lote: TAJ-01-260925 | Vence: 2026‑10‑02 (en 6 días)  \n- Pan tajado integral 500 g | Lote: TAJ-02-260925 | Vence: 2026‑10‑02 (en 6 días)",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.93,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 21,
+            "grupo": "Vencimiento por periodo",
+            "pregunta": "¿Qué lotes vencen en la próxima quincena?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1",
+                "TAJ-01-260924",
+                "TAJ-01-260925",
+                "TAJ-02-260924",
+                "TAJ-02-260925",
+                "HAM-01-260925",
+                "PER-01-260924",
+                "PER-01-260925",
+                "MOG-01-260925"
+            ],
+            "respuesta": "- Pan perro x 8 – Lote PER‑01‑260924 – Vence 2026‑09‑30 (en 4 días)  \n- Mogolla integral x 6 – Lote MOG‑01‑260925 – Vence 2026‑09‑30 (en 4 días)  \n- Pan tajado blanco 500 g – Lote TAJ‑01‑260924 – Vence 2026‑10‑01 (en 5 días)  \n- Pan tajado integral 500 g – Lote TAJ‑02‑260924 – Vence 2026‑10‑01 (en 5 días)  \n- Pan hamburguesa x 8 con ajonjolí – Lote HAM‑01‑260925 – Vence 2026‑10‑01 (en 5 días)  \n- Pan perro x 8 – Lote PER‑01‑260925 – Vence 2026‑10‑01 (en 5 días)  \n- Pan tajado blanco 500 g – Lote TAJ‑01‑260925 – Vence 2026‑10‑02 (en 6 días)  \n- Pan tajado integral 500 g – Lote TAJ‑02‑260925 – Vence 2026‑10‑02 (en 6 días)  \n- Huevo líquido pasteurizado – Lote HUE‑01‑260914‑1 – Vence 2026‑10‑05 (en 9 días)  \n- Crema pastelera base – Lote CRE‑01‑260908‑1 – Vence 2026‑10‑08 (en 12 días)  \n- Levadura fresca prensada – Lote LEV‑01‑260905‑1 – Vence 2026‑10‑10 (en 14 días)",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1, TAJ-01-260924, TAJ-01-260925, TAJ-02-260924, TAJ-02-260925, HAM-01-260925, PER-01-260924, PER-01-260925, MOG-01-260925",
+            "segundos": 1.01,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 22,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué lotes están críticos?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- Huevo líquido pasteurizado | Lote: HUE-01-260914-1 | Stock: 84.24 kg | Vence: 2026‑10‑05 (en 9 días)  \n- Crema pastelera base | Lote: CRE-01-260908-1 | Stock: 28.9 kg | Vence: 2026‑10‑08 (en 12 días)  \n- Levadura fresca prensada | Lote: LEV-01-260905-1 | Stock: 87.36 kg | Vence: 2026‑10‑10 (en 14 días)",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.79,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 23,
+            "grupo": "Críticos",
+            "pregunta": "¿Hay alertas de vencimiento?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "Sí. Alertas de vencimiento (más próximo → más lejano):\n\n- Huevo líquido pasteurizado | Lote: HUE-01-260914-1 | Vence: 2026‑10‑05  \n- Crema pastelera base | Lote: CRE-01-260908-1 | Vence: 2026‑10‑08  \n- Levadura fresca prensada | Lote: LEV-01-260905-1 | Vence: 2026‑10‑10",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.99,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 24,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué insumos están por vencer?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- Huevo líquido pasteurizado | Lote: HUE-01-260914-1 | Vence: 2026-10-05  \n- Crema pastelera base | Lote: CRE-01-260908-1 | Vence: 2026-10-08  \n- Levadura fresca prensada | Lote: LEV-01-260905-1 | Vence: 2026-10-10",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.9,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 25,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué lotes son urgentes de consumir?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- **Huevo líquido pasteurizado** – Lote **HUE-01-260914-1** – Vence **2026‑10‑05** (en 9 días)  \n- **Crema pastelera base** – Lote **CRE-01-260908-1** – Vence **2026‑10‑08** (en 12 días)  \n- **Levadura fresca prensada** – Lote **LEV-01-260905-1** – Vence **2026‑10‑10** (en 14 días)",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.07,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 26,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuánto vale el inventario de azúcar blanca?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "valuation",
+            "esperado": 849684,
+            "respuesta": "No dispongo del precio unitario del azúcar blanca, por lo que no puedo calcular su valor total. Sólo tengo el stock: 207.24 kg.",
+            "correcta": false,
+            "motivo": "no aparece el valor 849684",
+            "segundos": 0.82,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 27,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuál es el valor de la harina de trigo panificable?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "valuation",
+            "esperado": 17766255,
+            "respuesta": "Harina de trigo panificable:  \n- Lote HAR‑01‑260817‑1: 1 731.05 kg  \n- Lote HAR‑01‑260912‑2: 4 000 kg  \n\n**Total disponible:** 5 731.05 kg.",
+            "correcta": false,
+            "motivo": "no aparece el valor 17766255",
+            "segundos": 0.94,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 28,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuánto vale la levadura fresca prensada que hay?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "stock_check",
+            "esperado": 3592000,
+            "respuesta": "No dispongo de información sobre el precio de la levadura fresca prensada.",
+            "correcta": false,
+            "motivo": "no aparece el valor 3592000",
+            "segundos": 0.52,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 29,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuál es el costo del aceite de soya en bodega?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "location",
+            "esperado": 506024,
+            "respuesta": "No dispongo del dato de costo del aceite de soya en la bodega.",
+            "correcta": false,
+            "motivo": "no aparece el valor 506024",
+            "segundos": 0.57,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 30,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuánto vale el ajonjolí descortezado?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "valuation",
+            "esperado": 3141300,
+            "respuesta": "No dispongo del precio del ajonjolí descortezado.",
+            "correcta": false,
+            "motivo": "no aparece el valor 3141300",
+            "segundos": 0.53,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 31,
+            "grupo": "Movimientos",
+            "pregunta": "¿Cuál fue el último movimiento de la sal refinada?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 9.12,
+                "tipo": "salida"
+            },
+            "respuesta": "Último movimiento: [2026‑09‑25 15:00:00] salida de 9.120 u de Sal refinada.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.79,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 32,
+            "grupo": "Movimientos",
+            "pregunta": "¿Cuál fue el último movimiento del azúcar blanca?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 32.68,
+                "tipo": "salida"
+            },
+            "respuesta": "2026‑09‑25 15:00 – salida: 32.680 u de Azúcar blanca | Razón: producción | Usuario: Operario de Bodega.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.63,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 33,
+            "grupo": "Movimientos",
+            "pregunta": "¿Qué movimientos tuvo la levadura fresca prensada?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 10.8,
+                "tipo": "salida"
+            },
+            "respuesta": "- 2026‑09‑25 15:00:00 | salida | 10.800 u | producción | Operario de Bodega  \n- 2026‑09‑24 15:00:00 | salida | 13.440 u | producción | Operario de Bodega  \n- 2026‑09‑23 15:00:00 | salida | 12.960 u | producción | Operario de Bodega  \n- 2026‑09‑22 15:00:00 | salida | 10.680 u | producción | Operario de Bodega",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.08,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 34,
+            "grupo": "Movimientos",
+            "pregunta": "Muéstrame el historial de la harina de trigo panificable",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 82.65,
+                "tipo": "salida"
+            },
+            "respuesta": "**Historial de Harina de trigo panificable**\n\n- **2026-09-25 15:00:00** – salida: **82.650 u** | Razón: producción | Usuario: Operario de Bodega  \n- **2026-09-24 15:00:00** – salida: **82.650 u** | Razón: producción | Usuario: Operario de Bodega  \n- **2026-09-24 08:00:00** – entrada: **150.000 u** | Razón: ingreso | Usuario: Administrador Demo  \n- **2026-09-23 15:00:00** – salida: **97.850 u** | Razón: producción | Usuario: Operario de Bodega",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.85,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 35,
+            "grupo": "Movimientos",
+            "pregunta": "¿Cuál fue el último movimiento del pan tajado blanco 500 g?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 403,
+                "tipo": "salida"
+            },
+            "respuesta": "Salida de 403 000 u de Pan tajado blanco 500 g el 2026‑09‑25 16:00:00 (Razón: venta, Usuario: Operario de Bodega).",
+            "correcta": false,
+            "motivo": "no aparece salida de 403",
+            "segundos": 1.01,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 36,
+            "grupo": "Información de lote",
+            "pregunta": "¿Qué información hay del lote HAR-NOV-01?",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "general",
+            "esperado": 150,
+            "respuesta": "No hay registros de ningún lote con el código **HAR‑NOV‑01** en el inventario actual.",
+            "correcta": false,
+            "motivo": "no aparece la cantidad 150 del lote",
+            "segundos": 0.71,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 37,
+            "grupo": "Información de lote",
+            "pregunta": "¿Qué información hay del lote AZU-01-260817-1?",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "general",
+            "esperado": 207.24,
+            "respuesta": "No hay información de ese lote en el inventario actual.",
+            "correcta": false,
+            "motivo": "no aparece la cantidad 207.24 del lote",
+            "segundos": 0.48,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 38,
+            "grupo": "Información de lote",
+            "pregunta": "¿Qué información hay del lote LEV-01-260905-1?",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "general",
+            "esperado": 87.36,
+            "respuesta": "No hay información registrada para el lote **LEV-01-260905-1** en el inventario actual.",
+            "correcta": false,
+            "motivo": "no aparece la cantidad 87.36 del lote",
+            "segundos": 0.45,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 39,
+            "grupo": "Información de lote",
+            "pregunta": "¿Qué información hay del lote ACE-01-260817-1?",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "general",
+            "esperado": 58.84,
+            "respuesta": "No hay registro del lote ACE-01-260817-1 en el inventario actual.",
+            "correcta": false,
+            "motivo": "no aparece la cantidad 58.84 del lote",
+            "segundos": 0.5,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 40,
+            "grupo": "Conciliación",
+            "pregunta": "¿Hubo ajustes de conciliación?",
+            "intencion_esperada": "conciliation",
+            "intencion_obtenida": "conciliation",
+            "esperado": [
+                2.5
+            ],
+            "respuesta": "No se registraron ajustes de conciliación en la información disponible.",
+            "correcta": false,
+            "motivo": "no aparecen los ajustes: 2.5",
+            "segundos": 0.5,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 41,
+            "grupo": "Conciliación",
+            "pregunta": "¿Qué diferencias se encontraron en la conciliación del inventario?",
+            "intencion_esperada": "conciliation",
+            "intencion_obtenida": "conciliation",
+            "esperado": [
+                2.5
+            ],
+            "respuesta": "No se registraron diferencias en la conciliación del inventario.",
+            "correcta": false,
+            "motivo": "no aparecen los ajustes: 2.5",
+            "segundos": 0.59,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 42,
+            "grupo": "Conciliación",
+            "pregunta": "¿Qué ajustes se registraron en el Kardex?",
+            "intencion_esperada": "conciliation",
+            "intencion_obtenida": "movements",
+            "esperado": [
+                2.5
+            ],
+            "respuesta": "No se registraron ajustes en el Kardex; únicamente aparecen salidas por venta el 25‑09‑2026.",
+            "correcta": false,
+            "motivo": "no aparecen los ajustes: 2.5",
+            "segundos": 0.56,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 43,
+            "grupo": "Resumen",
+            "pregunta": "Dame un resumen del inventario",
+            "intencion_esperada": "summary",
+            "intencion_obtenida": "summary",
+            "esperado": {
+                "lotes": 51,
+                "valor": 54942624
+            },
+            "respuesta": "**Resumen del inventario (26‑09‑2026)**  \n\n- **Productos en Producto terminado y despacho:** 7 líneas (9 lotes) con 387 unidades totales.  \n- **Vencimientos próximos (≤ 5 días):**  \n  1. Pan perro x 8 – Lote PER‑01‑260924 – vence 2026‑09‑30 (4 días) – 4 und.  \n  2. Mogolla integral x 6 – Lote MOG‑01‑260925 – vence 2026‑09‑30 (4 días) – 110 und.  \n  3. Pan tajado integral 500 g – Lote TAJ‑02‑260924 – vence 2026‑10‑01 (5 días) – 13 und.  \n  4. Pan tajado blanco 500 g – Lote TAJ‑01‑260924 – vence 2026‑10‑01 (5 días) – 4 und.  \n  5. Pan hamburguesa x 8 con ajonjolí – Lote HAM‑01‑260925 – vence 2026‑10‑01 (5 días) – 210 und.  \n  6. Pan perro x 8 – Lote PER‑01‑260925 – vence 2026‑10‑01 (5 días) – 146 und.  \n\n- **Ocupación de bodegas:**  \n  - Materia prima seca: 35.69 %  \n  - Cuarto frío: 17.26 %  \n  - Aditivos y pesaje: 21.67 %  \n  - Grasas y rellenos: 7.52 %  \n  - Empaques: 12.33 %  \n  - Producto terminado y despacho: 7.43 %  \n  - Combustibles: 9 %  \n  - Cuarentena: 10 %  \n\nTodo el stock está dentro del rango de vencimiento próximo (máximo 5 días).",
+            "correcta": false,
+            "motivo": "no aparece 51 lotes ni el valor 54942624",
+            "segundos": 1.45,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 44,
+            "grupo": "Resumen",
+            "pregunta": "¿Cuál es el estado general del inventario?",
+            "intencion_esperada": "summary",
+            "intencion_obtenida": "summary",
+            "esperado": {
+                "lotes": 51,
+                "valor": 54942624
+            },
+            "respuesta": "Estado general del inventario (27 \/ 09 \/ 2026):\n\n**Productos y stock**  \n- Pan perro x 8: 150 und (lotes PER‑01‑260924: 4 und, PER‑01‑260925: 146 und) – vencen 2026‑09‑30 y 2026‑10‑01.  \n- Mogolla integral x 6: 110 und (lote MOG‑01‑260925) – vence 2026‑09‑30.  \n- Pan tajado integral 500 g: 13 und (lote TAJ‑02‑260924) – vence 2026‑10‑01.  \n- Pan tajado blanco 500 g: 4 und (lote TAJ‑01‑260924) – vence 2026‑10‑01.  \n- Pan hamburguesa x 8 con ajonjolí: 210 und (lote HAM‑01‑260925) – vence 2026‑10‑01.  \n\n**Resumen de vencimientos próximos** (más próximos primero)  \n1. Pan perro x 8 – lote PER‑01‑260924 – 2026‑09‑30 (en 4 días)  \n2. Mogolla integral x 6 – lote MOG‑01‑260925 – 2026‑09‑30 (en 4 días)  \n3. Pan tajado integral 500 g – lote TAJ‑02‑260924 – 2026‑10‑01 (en 5 días)  \n4. Pan tajado blanco 500 g – lote TAJ‑01‑260924 – 2026‑10‑01 (en 5 días)  \n5. Pan hamburguesa x 8 – lote HAM‑01‑260925 – 2026‑10‑01 (en 5 días)  \n6. Pan perro x 8 – lote PER‑01‑260925 – 2026‑10‑01 (en 5 días)  \n\n**Ocupación de bodegas**  \n- Materia prima seca: 35.69 %  \n- Cuarto frío: 17.26 %  \n- Cuarto de aditivos y pesaje: 21.67 %  \n- Grasas y rellenos: 7.52 %  \n- Empaques: 12.33 %  \n- Producto terminado y despacho: 7.43 %  \n- Cuarto de combustibles: 9 %  \n- Cuarentena: 10 %  \n\nEn conjunto, el inventario está dentro de los niveles de capacidad de todas las bodegas y los productos con vencimiento próximo son los listados arriba.",
+            "correcta": false,
+            "motivo": "no aparece 51 lotes ni el valor 54942624",
+            "segundos": 1.85,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 45,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Cuánto queso hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "El material **queso** no está registrado en el inventario.  \nLos materiales registrados que podrían ser lo que buscas son:\n\n- Arequipe para relleno  \n- Mantequilla sin sal  \n- Margarina de hojaldre  \n- Crema pastelera base  \n- Leche en polvo  \n\nSi necesitas información de alguno de ellos, indícalo.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.64,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 46,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Cuánto chocolate blanco queda?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No hay registro de stock de chocolate blanco en la base de datos.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.57,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 47,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Cuánta harina de almendras hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No hay registro de harina de almendras en el inventario actual.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.48,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 48,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Dónde está el colorante rojo?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": "no registrado",
+            "respuesta": "El material **colorante rojo** no está registrado en el inventario.\n\nAlgunos materiales registrados que podrían ser lo que busca son:\n\n- Cocoa en polvo  \n- Azúcar blanca  \n- Esencia de vainilla  \n- Emulsificante SSL (estearoil lactilato de sodio)  \n- Sorbato de potasio  \n\nSi necesita alguno de estos u otro producto, indíquelo y lo consultamos.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.63,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 49,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Cuánto papel aluminio tenemos?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No hay ningún material llamado “papel aluminio” registrado en el inventario.  \nLos materiales que están registrados y podrían ser lo que buscas son, por ejemplo:\n\n- Bolsa para pan pequeño  \n- Bolsa para pan tajado  \n- Caja corrugada de despacho  \n\nSi necesitas información de alguno de estos u otro material de la lista completa, indícalo y te lo consulto.",
+            "correcta": false,
+            "motivo": "no indicó que no está registrado o dio una cantidad",
+            "segundos": 1.2,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 50,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Cuándo vence la mermelada de fresa?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "no registrado",
+            "respuesta": "No tengo registro de mermelada de fresa en el inventario.",
+            "correcta": false,
+            "motivo": "no indicó que no está registrado o dio una cantidad",
+            "segundos": 0.47,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        }
+    ]
+}

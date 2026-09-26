@@ -1,0 +1,359 @@
+{
+    "resumen": {
+        "conjunto": "validacion",
+        "etiqueta": "validacion-linea-base",
+        "fecha": "2026-09-26 03:24:38",
+        "total": 20,
+        "correctas": 10,
+        "precision": 50,
+        "intenciones_correctas": 15,
+        "precision_clasificador": 75,
+        "tiempo_mediano_s": 0.52,
+        "modelo": [
+            "gpt-oss:120b-cloud"
+        ],
+        "por_grupo": {
+            "Existencias": {
+                "total": 4,
+                "correctas": 3
+            },
+            "Ubicación": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Vencimiento": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Críticos": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Valorización": {
+                "total": 3,
+                "correctas": 0
+            },
+            "Movimientos": {
+                "total": 2,
+                "correctas": 1
+            },
+            "Información de lote": {
+                "total": 2,
+                "correctas": 0
+            },
+            "Conciliación": {
+                "total": 1,
+                "correctas": 0
+            },
+            "Resumen": {
+                "total": 1,
+                "correctas": 0
+            },
+            "Insumo inexistente": {
+                "total": 2,
+                "correctas": 1
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Existencias",
+            "pregunta": "¿Qué cantidad de gluten vital de trigo tenemos?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 83.07,
+            "respuesta": "Gluten vital de trigo: 83.07 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.48,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 2,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánta leche en polvo hay disponible?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 113.52,
+            "respuesta": "Leche en polvo: 113.52 kg disponible.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.44,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 3,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuántos kilos de margarina de hojaldre quedan?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 128.9,
+            "respuesta": "Quedan **128.9 kg** de margarina de hojaldre.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.49,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 4,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánto pan tajado integral 500 g hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 160,
+            "respuesta": "No hay registro de stock de pan tajado integral 500 g.",
+            "correcta": false,
+            "motivo": "no aparece el total 160",
+            "segundos": 0.49,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 5,
+            "grupo": "Ubicación",
+            "pregunta": "¿En qué bodega está el huevo líquido pasteurizado?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Cuarto frío"
+            ],
+            "respuesta": "Cuarto frío.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.36,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 6,
+            "grupo": "Ubicación",
+            "pregunta": "¿Dónde se guarda el sorbato de potasio?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Cuarto de aditivos y pesaje"
+            ],
+            "respuesta": "Se guarda en el **Cuarto de aditivos y pesaje**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.55,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 7,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Para cuándo vence la avena en hojuelas?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2027-04-14",
+            "respuesta": "La avena en hojuelas (lote AVE-01-260817-1) vence el **14 de abril de 2027**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.51,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 8,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Cuál es la fecha de vencimiento del bocadillo de guayaba?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2027-02-13",
+            "respuesta": "Bocadillo de guayaba | Lote: BOC-01-260817-1 | Vence: 2027‑02‑13.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.55,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 9,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué lotes debo sacar primero porque están por vencer?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- Huevo líquido pasteurizado | Lote: HUE-01-260914-1 | Vence: 2026‑10‑05  \n- Crema pastelera base | Lote: CRE-01-260908-1 | Vence: 2026‑10‑08  \n- Levadura fresca prensada | Lote: LEV-01-260905-1 | Vence: 2026‑10‑10",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.57,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 10,
+            "grupo": "Valorización",
+            "pregunta": "¿Qué valor tiene la leche en polvo en inventario?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "valuation",
+            "esperado": 2100120,
+            "respuesta": "Leche en polvo: 113.52 kg.",
+            "correcta": false,
+            "motivo": "no aparece el valor 2100120",
+            "segundos": 0.46,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 11,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuánto dinero hay en margarina de hojaldre?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "stock_check",
+            "esperado": 1521020,
+            "respuesta": "No dispongo del valor monetario de la margarina de hojaldre; solo está registrado el stock (128.9 kg).",
+            "correcta": false,
+            "motivo": "no aparece el valor 1521020",
+            "segundos": 0.55,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 12,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuál es el valor del huevo líquido pasteurizado?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "valuation",
+            "esperado": 825552,
+            "respuesta": "84.24 kg.",
+            "correcta": false,
+            "motivo": "no aparece el valor 825552",
+            "segundos": 0.44,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 13,
+            "grupo": "Movimientos",
+            "pregunta": "¿Qué fue lo último que se movió de la avena en hojuelas?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "general",
+            "esperado": {
+                "cantidad": 2.67,
+                "tipo": "salida"
+            },
+            "respuesta": "No tengo registro de la última salida o entrada de la avena en hojuelas. Sólo dispongo del stock actual (94.73 kg, lote AVE‑01‑260817‑1).",
+            "correcta": false,
+            "motivo": "no aparece salida de 2.67",
+            "segundos": 0.6,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 14,
+            "grupo": "Movimientos",
+            "pregunta": "¿Cuál fue el último movimiento de la margarina de hojaldre?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 4.85,
+                "tipo": "salida"
+            },
+            "respuesta": "Salida de 4.850 u de Margarina de hojaldre – 25 sep 2026 15:00 – Razón: producción – Usuario: Operario de Bodega.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.62,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 15,
+            "grupo": "Información de lote",
+            "pregunta": "Dame los datos del lote GLU-01-260817-1",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "general",
+            "esperado": 83.07,
+            "respuesta": "No hay registro del lote **GLU-01-260817-1** en el inventario actual.",
+            "correcta": false,
+            "motivo": "no aparece la cantidad 83.07 del lote",
+            "segundos": 0.58,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 16,
+            "grupo": "Información de lote",
+            "pregunta": "Dame los datos del lote LEC-01-260817-1",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "general",
+            "esperado": 113.52,
+            "respuesta": "Lote **LEC-01-260817-1** no se encuentra registrado en el inventario.",
+            "correcta": false,
+            "motivo": "no aparece la cantidad 113.52 del lote",
+            "segundos": 0.53,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 17,
+            "grupo": "Conciliación",
+            "pregunta": "¿Se hizo alguna conciliación física del inventario?",
+            "intencion_esperada": "conciliation",
+            "intencion_obtenida": "conciliation",
+            "esperado": [
+                2.5
+            ],
+            "respuesta": "No se ha registrado ninguna conciliación física del inventario.",
+            "correcta": false,
+            "motivo": "no aparecen los ajustes: 2.5",
+            "segundos": 0.49,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 18,
+            "grupo": "Resumen",
+            "pregunta": "¿Cómo está el inventario en general?",
+            "intencion_esperada": "summary",
+            "intencion_obtenida": "general",
+            "esperado": {
+                "lotes": 51,
+                "valor": 54942624
+            },
+            "respuesta": "**Resumen general del inventario (26‑09‑2026)**  \n\n- **Unidades totales:** 487 und.  \n- **Productos con vencimiento próximo (≤ 5 días):**  \n  - Pan perro x 8 – Lote PER‑01‑260924 – vence 2026‑09‑30 (4 días) – 4 und.  \n  - Mogolla integral – Lote MOG‑01‑260925 – vence 2026‑09‑30 (4 días) – 110 und.  \n  - Pan tajado integral 500 g – Lote TAJ‑02‑260924 – vence 2026‑10‑01 (5 días) – 13 und.  \n  - Pan tajado blanco 500 g – Lote TAJ‑01‑260924 – vence 2026‑10‑01 (5 días) – 4 und.  \n  - Pan hamburguesa x 8 con ajonjolí – Lote HAM‑01‑260925 – vence 2026‑10‑01 (5 días) – 210 und.  \n  - Pan perro x 8 – Lote PER‑01‑260925 – vence 2026‑10‑01 (5 días) – 146 und.  \n\n- **Ocupación de bodegas (principales):**  \n  - Producto terminado y despacho: **7.43 %**  \n  - Materia prima seca: 35.69 %  \n  - Cuarto frío: 17.26 %  \n  - Cuarto de aditivos y pesaje: 21.67 %  \n  - Bodega de grasas y rellenos: 7.52 %  \n  - Bodega de empaques: 12.33 %  \n  - Cuarto de combustibles: 9 %  \n  - Cuarentena: 10 %  \n\nTodo el inventario está dentro de los límites de capacidad y los productos próximos a vencerse deben gestionarse en los próximos 4‑5 días.",
+            "correcta": false,
+            "motivo": "no aparece 51 lotes ni el valor 54942624",
+            "segundos": 2.13,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 19,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Cuánta canela molida hay?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No hay canela molida registrada en el inventario. Entre los materiales disponibles que podrían servir según su uso están: Azúcar blanca, Cocoa en polvo, Esencia de vainilla, Manteca vegetal panadera, Mantequilla sin sal, Margarina de hojaldre.",
+            "correcta": false,
+            "motivo": "no indicó que no está registrado o dio una cantidad",
+            "segundos": 0.8,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 20,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Dónde está el polvo de hornear?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": "no registrado",
+            "respuesta": "No se encuentra registrado polvo de hornear en el inventario.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.49,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        }
+    ]
+}
