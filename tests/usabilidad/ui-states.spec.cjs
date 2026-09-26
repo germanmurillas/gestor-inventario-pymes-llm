@@ -36,7 +36,7 @@ test.describe('Estados de UI @visual', () => {
 
     test('módulo settings renderiza secciones colapsables', async ({ page }) => {
         await loginAsAdmin(page);
-        await page.goto('/settings');
+        await page.goto('/settings-page');
         await page.waitForLoadState('networkidle');
         await page.screenshot({ path: 'docs/screenshots/pruebas/settings-estado.png', fullPage: true });
         await expect(page.locator('body')).toBeVisible();

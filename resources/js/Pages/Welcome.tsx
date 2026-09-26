@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -231,7 +231,7 @@ export default function Welcome() {
                         <a href="#asistente" onClick={irA('#asistente')} className="lx-link">Asistente</a>
                         <a href="#proyecto" onClick={irA('#proyecto')} className="lx-link">Proyecto</a>
                     </div>
-                    <Link href="/login" className="lx-btn lx-btn-primary !px-5 !py-2.5">Entrar <ArrowRight size={16} /></Link>
+                    <a href="/login" className="lx-btn lx-btn-primary !px-5 !py-2.5">Entrar <ArrowRight size={16} /></a>
                 </div>
             </nav>
 
@@ -256,7 +256,7 @@ export default function Welcome() {
                                 </p>
                                 {estatico && (
                                     <div className="mt-9 flex flex-wrap gap-3">
-                                        <Link href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></Link>
+                                        <a href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></a>
                                     </div>
                                 )}
                             </div>
@@ -280,7 +280,7 @@ export default function Welcome() {
                                             Pregúntale en español cuánto queda o qué vence primero. Responde con lo que hay en tu bodega.
                                         </p>
                                         <div className="mt-9 flex flex-wrap gap-3">
-                                            <Link href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></Link>
+                                            <a href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></a>
                                             <a href="#como" onClick={irA('#como')} className="lx-btn lx-btn-ghost">Cómo funciona</a>
                                         </div>
                                     </div>
@@ -386,7 +386,7 @@ export default function Welcome() {
                             <div className="flex flex-col justify-end gap-3">
                                 <a href="https://tesis.pymetory.com" className="lx-btn lx-btn-ghost justify-between">Documento de tesis <ArrowRight size={16} /></a>
                                 <a href="https://reuniones.pymetory.com" className="lx-btn lx-btn-ghost justify-between">Bitácora de reuniones <ArrowRight size={16} /></a>
-                                <Link href="/login" className="lx-btn lx-btn-primary justify-between">Entrar a la demo <ArrowRight size={16} /></Link>
+                                <a href="/login" className="lx-btn lx-btn-primary justify-between">Entrar a la demo <ArrowRight size={16} /></a>
                             </div>
                         </div>
                     </section>

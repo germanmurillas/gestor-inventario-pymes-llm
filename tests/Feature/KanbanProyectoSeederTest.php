@@ -27,7 +27,7 @@ class KanbanProyectoSeederTest extends TestCase
         $this->assertDatabaseHas('kanban_items', ['title' => 'De otro usuario']);
 
         KanbanItem::where('user_id', $admin->id)->where('column', 'done')->each(function (KanbanItem $k) {
-            $this->assertMatchesRegularExpression('/Issue #\d+|Commit [0-9a-f]{7}/', $k->description, $k->title);
+            $this->assertMatchesRegularExpression('/Issue #\d+|Commit [0-9a-f]{7}|reuniones\.pymetory\.com/', $k->description, $k->title);
         });
     }
 }

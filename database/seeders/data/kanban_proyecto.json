@@ -314,8 +314,8 @@
    "columna": "done",
    "titulo": "QA: Dark mode inconsistente entre páginas de Pymetory",
    "fecha": "2026-09-25",
-   "descripcion": "Issue #61 (abierto en GitHub). Los temas se reescribieron: cada tema redefine la paleta completa. Commit 1dd9537.",
-   "fuente": null
+   "descripcion": "Issue #61 (abierto en GitHub). Los temas se reescribieron: cada tema redefine la paleta completa. Commit 10787fd.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/10787fd"
   },
   {
    "columna": "done",
@@ -342,169 +342,169 @@
    "columna": "done",
    "titulo": "[SORTLY-001] Custom Fields para materiales",
    "fecha": "2026-09-25",
-   "descripcion": "Issue #71 (abierto en GitHub). Campos personalizados implementados (custom_field_definitions, /api/custom-fields). Commit acaea50.",
-   "fuente": null
+   "descripcion": "Issue #71 (abierto en GitHub). Campos personalizados implementados (custom_field_definitions, /api/custom-fields). Commit 2eb3767.",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/2eb3767"
   },
   {
    "columna": "done",
    "titulo": "Estructura de la tesis, órdenes de compra, etiquetas y campos personalizados",
    "fecha": "2026-05-21",
-   "descripcion": "Commit acaea50 (2026-05-21).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/acaea50"
+   "descripcion": "Commit 2eb3767 (2026-05-21).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/2eb3767"
   },
   {
    "columna": "done",
    "titulo": "Auditoría y corrección de enlaces rotos",
    "fecha": "2026-05-22",
-   "descripcion": "Commit f7bc7a0 (2026-05-22).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/f7bc7a0"
+   "descripcion": "Commit 4522605 (2026-05-22).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/4522605"
   },
   {
    "columna": "done",
    "titulo": "Kanban v2: arrastrar y soltar con teclado y táctil, filtros y atajos",
    "fecha": "2026-05-23",
-   "descripcion": "Commit 3ad9fd5 (2026-05-23).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/3ad9fd5"
+   "descripcion": "Commit a468b06 (2026-05-23).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/a468b06"
   },
   {
    "columna": "done",
    "titulo": "Integración de OpenCode (capa gratuita) como proveedor del asistente",
    "fecha": "2026-05-24",
-   "descripcion": "Commit 6a618a7 (2026-05-24).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/6a618a7"
+   "descripcion": "Commit 8ff17fc (2026-05-24).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/8ff17fc"
   },
   {
    "columna": "done",
    "titulo": "Selector de modelo del asistente (Ollama local y OpenCode)",
    "fecha": "2026-06-10",
-   "descripcion": "Commit eb5cc99 (2026-06-10).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/eb5cc99"
+   "descripcion": "Commit 10bcd57 (2026-06-10).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/10bcd57"
   },
   {
    "columna": "done",
    "titulo": "Motor RAG unificado en Ajustes: proveedor, clave, modelo, parámetros y prueba en vivo",
    "fecha": "2026-06-11",
-   "descripcion": "Commit 0284e96 (2026-06-11).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/0284e96"
+   "descripcion": "Commit fbf584a (2026-06-11).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/fbf584a"
   },
   {
    "columna": "done",
    "titulo": "Gestión de proveedores de modelos de lenguaje desde la interfaz",
    "fecha": "2026-06-11",
-   "descripcion": "Commit 418f208 (2026-06-11).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/418f208"
+   "descripcion": "Commit 3bb3f52 (2026-06-11).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/3bb3f52"
   },
   {
    "columna": "done",
    "titulo": "Reunión 13: revisión de objetivos y objeciones preparadas para la defensa",
    "fecha": "2026-06-12",
-   "descripcion": "Commit b9c9856 (2026-06-12).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/b9c9856"
+   "descripcion": "Registro en reuniones.pymetory.com (2026-06-12).",
+   "fuente": "https://reuniones.pymetory.com/reunion13/"
   },
   {
    "columna": "done",
    "titulo": "CI/CD: el despliegue en el servidor autentica con token efímero",
    "fecha": "2026-09-24",
-   "descripcion": "Commit 5d7c5af (2026-09-24).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/5d7c5af"
+   "descripcion": "Commit 91732b6 (2026-09-24).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/91732b6"
   },
   {
    "columna": "done",
    "titulo": "Rediseño del tablero Kanban",
    "fecha": "2026-09-24",
-   "descripcion": "Commit 85a49b3 (2026-09-24).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/85a49b3"
+   "descripcion": "Commit 0d3fa78 (2026-09-24).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/0d3fa78"
   },
   {
    "columna": "done",
    "titulo": "Seguridad: el registro público ya no crea administradores; rutas sensibles solo para admin",
    "fecha": "2026-09-25",
-   "descripcion": "Commit d5b4b16 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/d5b4b16"
+   "descripcion": "Commit a802cbb (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/a802cbb"
   },
   {
    "columna": "done",
    "titulo": "Kardex inmutable también en la base de datos",
    "fecha": "2026-09-25",
-   "descripcion": "Commit be72cd3 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/be72cd3"
+   "descripcion": "Commit f53a7d0 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/f53a7d0"
   },
   {
    "columna": "done",
    "titulo": "Asistente: corregido el error de “la lista completa” (tildes y material inexistente)",
    "fecha": "2026-09-25",
-   "descripcion": "Commit 89cd440 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/89cd440"
+   "descripcion": "Commit 5c7c2ef (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/5c7c2ef"
   },
   {
    "columna": "done",
    "titulo": "Producción: inicio de sesión detrás del túnel de Cloudflare",
    "fecha": "2026-09-25",
-   "descripcion": "Commit e18afb2 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/e18afb2"
+   "descripcion": "Commit f174905 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/f174905"
   },
   {
    "columna": "done",
    "titulo": "Tablero sin cifras fijas: tendencias y rotación calculadas desde la base de datos",
    "fecha": "2026-09-25",
-   "descripcion": "Commit 3c83fa9 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/3c83fa9"
+   "descripcion": "Commit 361d0af (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/361d0af"
   },
   {
    "columna": "done",
    "titulo": "El umbral FEFO configurado se respeta en tablero e inventario",
    "fecha": "2026-09-25",
-   "descripcion": "Commit 154dce6 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/154dce6"
+   "descripcion": "Commit 66456a3 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/66456a3"
   },
   {
    "columna": "done",
    "titulo": "Página de inicio nueva",
    "fecha": "2026-09-25",
-   "descripcion": "Commit 5155041 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/5155041"
+   "descripcion": "Commit c597c60 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/c597c60"
   },
   {
    "columna": "done",
    "titulo": "Documento: capítulos 8 a 14 con cifras verificadas",
    "fecha": "2026-09-25",
-   "descripcion": "Commit ea27881 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/ea27881"
+   "descripcion": "Commit 82462c2 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/82462c2"
   },
   {
    "columna": "done",
    "titulo": "Datos de demostración del caso de estudio y rediseño móvil",
    "fecha": "2026-09-25",
-   "descripcion": "Commit bc52fd7 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/bc52fd7"
+   "descripcion": "Commit ba2a9a8 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/ba2a9a8"
   },
   {
    "columna": "done",
    "titulo": "Gestión de bodegas con imagen, conectadas al inventario real",
    "fecha": "2026-09-25",
-   "descripcion": "Commit b8dea4d (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/b8dea4d"
+   "descripcion": "Commit 4644389 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/4644389"
   },
   {
    "columna": "done",
    "titulo": "Sistema de temas reescrito y alertas leídas de la base de datos",
    "fecha": "2026-09-25",
-   "descripcion": "Commit 1dd9537 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/1dd9537"
+   "descripcion": "Commit 10787fd (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/10787fd"
   },
   {
    "columna": "done",
    "titulo": "Asistente: vencimientos de la semana solo con lotes con existencias",
    "fecha": "2026-09-25",
-   "descripcion": "Commit 08d8312 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/08d8312"
+   "descripcion": "Commit ec76a78 (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/ec76a78"
   },
   {
    "columna": "done",
    "titulo": "Sitios tesis.pymetory.com y reuniones.pymetory.com",
    "fecha": "2026-09-25",
-   "descripcion": "Commit 359fc46 (2026-09-25).",
-   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/359fc46"
+   "descripcion": "Commit 8f93c8d (2026-09-25).",
+   "fuente": "https://github.com/germanmurillas/gestor-inventario-pymes-llm/commit/8f93c8d"
   },
   {
    "columna": "review",
