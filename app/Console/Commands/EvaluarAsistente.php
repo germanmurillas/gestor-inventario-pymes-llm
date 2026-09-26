@@ -11,222 +11,306 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /**
- * Batería de 50 consultas al asistente (indicador del objetivo 4).
+ * Evaluación del asistente (indicador del objetivo 4).
  *
- * Cada pregunta trae su intención esperada y un criterio de acierto fijado ANTES de ejecutar.
- * La respuesta correcta se calcula con una consulta directa a la base de datos en el momento
- * de preguntar; la respuesta del asistente se obtiene por el mismo flujo que usa la interfaz.
- * Se guarda cada respuesta completa en storage/app/rag/ como evidencia.
+ * Dos conjuntos fijados antes de cualquier corrección del asistente:
+ *  - bateria:    50 consultas en 11 grupos.
+ *  - validacion: 20 consultas distintas (otros insumos y redacciones) para comprobar que las
+ *                correcciones generalizan y no se ajustan solo a la batería.
+ *
+ * Cada pregunta trae su intención esperada y su criterio de acierto. La respuesta esperada se
+ * calcula con una consulta directa a la base de datos al momento de preguntar; la del asistente
+ * se obtiene por el mismo flujo que usa la interfaz. Todo se guarda en storage/app/rag/.
  */
 class EvaluarAsistente extends Command
 {
-    protected $signature = 'rag:evaluar {--etiqueta=medicion : Nombre de la ejecución} {--solo= : Ejecutar solo las N primeras preguntas}';
-    protected $description = 'Ejecuta la batería de 50 consultas al asistente y mide su precisión contra la base de datos';
+    protected $signature = 'rag:evaluar
+        {--conjunto=bateria : bateria | validacion}
+        {--etiqueta=medicion : Nombre de la ejecución}
+        {--solo= : Ejecutar solo las N primeras preguntas}
+        {--recalificar= : Volver a calificar un archivo de resultados guardado (sin consultar al asistente)}';
+    protected $description = 'Mide la precisión del asistente contra la base de datos';
 
     public function handle(): int
     {
-        $admin = User::where('role', 'admin')->where('email', 'admin@pymetory.com')->first() ?? User::where('role', 'admin')->first();
+        if ($archivo = $this->option('recalificar')) return $this->recalificar($archivo);
+
+        $admin = User::where('email', 'admin@pymetory.com')->first() ?? User::where('role', 'admin')->first();
         Auth::login($admin);
         $ctrl = app(ChatLLMController::class);
 
-        $bateria = $this->bateria();
-        if ($this->option('solo')) $bateria = array_slice($bateria, 0, (int) $this->option('solo'));
+        $preguntas = $this->conjunto($this->option('conjunto'));
+        if ($this->option('solo')) $preguntas = array_slice($preguntas, 0, (int) $this->option('solo'));
 
         $resultados = [];
-        foreach ($bateria as $i => $c) {
-            $n = $i + 1;
+        foreach ($preguntas as $i => $c) {
             $esperado = ($c['verdad'])();
             $intencion = $this->privado($ctrl, 'classifyQuery', $c['pregunta']);
-
             $t0 = microtime(true);
             $resp = $ctrl->ask(Request::create('/chat-rag', 'POST', ['prompt' => $c['pregunta']]));
             $seg = round(microtime(true) - $t0, 2);
             $datos = json_decode($resp->getContent(), true) ?? [];
             $texto = (string) ($datos['response'] ?? '');
-
             [$ok, $motivo] = ($c['criterio'])($texto, $esperado);
             $resultados[] = [
-                'n' => $n, 'grupo' => $c['grupo'], 'pregunta' => $c['pregunta'],
+                'n' => $i + 1, 'grupo' => $c['grupo'], 'pregunta' => $c['pregunta'],
                 'intencion_esperada' => $c['intencion'], 'intencion_obtenida' => $intencion,
                 'esperado' => $esperado, 'respuesta' => $texto, 'correcta' => $ok, 'motivo' => $motivo,
                 'segundos' => $seg, 'modelo' => $datos['model'] ?? null, 'fuente' => $datos['source'] ?? null,
             ];
-            $this->line(sprintf('%2d %s %-55s %s', $n, $ok ? '✓' : '✗', mb_substr($c['pregunta'], 0, 55), $ok ? '' : $motivo));
+            $this->line(sprintf('%2d %s %-55s %s', $i + 1, $ok ? '✓' : '✗', mb_substr($c['pregunta'], 0, 55), $ok ? '' : $motivo));
         }
 
-        $total = count($resultados);
-        $correctas = collect($resultados)->where('correcta', true)->count();
-        $intenciones = collect($resultados)->filter(fn ($r) => $r['intencion_esperada'] === $r['intencion_obtenida'])->count();
+        return $this->guardar($resultados, $this->option('etiqueta'));
+    }
+
+    /** Recalifica respuestas ya guardadas con los criterios actuales (mismas respuestas, mismo valor esperado). */
+    private function recalificar(string $archivo): int
+    {
+        $previo = json_decode(file_get_contents($archivo), true);
+        $conjunto = $previo['resumen']['conjunto'] ?? 'bateria';
+        $criterios = collect($this->conjunto($conjunto))->values();
+        $resultados = collect($previo['resultados'])->map(function ($r) use ($criterios) {
+            [$ok, $motivo] = ($criterios[$r['n'] - 1]['criterio'])($r['respuesta'], $r['esperado']);
+            $this->line(sprintf('%2d %s→%s %s', $r['n'], $r['correcta'] ? '✓' : '✗', $ok ? '✓' : '✗', mb_substr($r['pregunta'], 0, 55)));
+            return array_merge($r, ['correcta' => $ok, 'motivo' => $motivo]);
+        })->all();
+
+        return $this->guardar($resultados, ($previo['resumen']['etiqueta'] ?? 'medicion') . '-recalificada', $conjunto);
+    }
+
+    private function guardar(array $resultados, string $etiqueta, ?string $conjunto = null): int
+    {
+        $r = collect($resultados);
+        $total = $r->count();
+        $correctas = $r->where('correcta', true)->count();
+        $intenciones = $r->filter(fn ($x) => $x['intencion_esperada'] === $x['intencion_obtenida'])->count();
         $resumen = [
-            'etiqueta' => $this->option('etiqueta'), 'fecha' => now()->toDateTimeString(),
+            'conjunto' => $conjunto ?? $this->option('conjunto'), 'etiqueta' => $etiqueta, 'fecha' => now()->toDateTimeString(),
             'total' => $total, 'correctas' => $correctas, 'precision' => $total ? round($correctas / $total * 100, 1) : 0,
             'intenciones_correctas' => $intenciones, 'precision_clasificador' => $total ? round($intenciones / $total * 100, 1) : 0,
-            'tiempo_mediano_s' => collect($resultados)->pluck('segundos')->median(),
-            'por_grupo' => collect($resultados)->groupBy('grupo')->map(fn ($g) => ['total' => $g->count(), 'correctas' => $g->where('correcta', true)->count()]),
+            'tiempo_mediano_s' => $r->pluck('segundos')->median(),
+            'modelo' => $r->pluck('modelo')->filter()->unique()->values()->all(),
+            'por_grupo' => $r->groupBy('grupo')->map(fn ($g) => ['total' => $g->count(), 'correctas' => $g->where('correcta', true)->count()]),
         ];
-
         $dir = storage_path('app/rag');
         if (!is_dir($dir)) mkdir($dir, 0775, true);
-        $archivo = $dir . '/' . $this->option('etiqueta') . '-' . now()->format('Ymd-His') . '.json';
+        $archivo = "{$dir}/{$etiqueta}-" . now()->format('Ymd-His') . '.json';
         file_put_contents($archivo, json_encode(['resumen' => $resumen, 'resultados' => $resultados], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
         $this->newLine();
         $this->info("Precisión: {$correctas}/{$total} ({$resumen['precision']} %). Clasificador: {$intenciones}/{$total}. Tiempo mediano: {$resumen['tiempo_mediano_s']} s.");
         $this->line("Detalle: {$archivo}");
         return 0;
     }
 
-    // ── Batería ───────────────────────────────────────────────────────────────
+    // ── Conjuntos ─────────────────────────────────────────────────────────────
+
+    private function conjunto(string $nombre): array
+    {
+        return $nombre === 'validacion' ? $this->validacion() : $this->bateria();
+    }
 
     private function bateria(): array
     {
-        $b = [];
-        $mat = fn (string $code) => Material::where('code', $code)->firstOrFail();
-        $activos = fn (Material $m) => Lote::activos()->where('material_id', $m->id)->where('quantity', '>', 0);
-
-        // 1. Existencias (9): el total en lotes activos debe aparecer en la respuesta.
-        foreach ([
-            ['¿Cuánta harina de trigo panificable hay?', 'MP-HAR-01'], ['¿Cuánta azúcar blanca hay?', 'MP-AZU-01'],
-            ['¿Cuánta sal refinada queda?', 'MP-SAL-01'], ['¿Cuánto ajonjolí descortezado queda?', 'MP-AJO-01'],
-            ['¿Cuánta levadura fresca prensada tenemos?', 'MP-LEV-01'], ['¿Cuánto aceite de soya hay?', 'GR-ACE-01'],
-            ['¿Cuántas bolsas para pan tajado quedan?', 'EMP-BOL-01'], ['¿Cuánto ACPM hay para la planta eléctrica?', 'CB-ACPM-01'],
-            ['¿Cuántas cajas corrugadas de despacho hay?', 'EMP-CAJ-01'],
-        ] as [$p, $code]) {
-            $b[] = ['grupo' => 'Existencias', 'intencion' => 'stock_check', 'pregunta' => $p,
-                'verdad' => fn () => round((float) $activos($mat($code))->sum('quantity'), 2),
-                'criterio' => fn ($t, $e) => $this->contieneNumero($t, $e) ? [true, ''] : [false, "no aparece el total {$e}"]];
-        }
-
-        // 2. Ubicación (5): todas las bodegas donde hay lotes activos del insumo.
-        foreach ([
-            ['¿Dónde está la levadura fresca prensada?', 'MP-LEV-01'], ['¿Dónde está guardada la margarina de hojaldre?', 'GR-MAR-01'],
-            ['¿En qué bodega están las cajas corrugadas de despacho?', 'EMP-CAJ-01'], ['¿Dónde está el pan perro x 8?', 'PT-PER-01'],
-            ['¿Dónde está la harina de trigo integral?', 'MP-HAR-02'],
-        ] as [$p, $code]) {
-            $b[] = ['grupo' => 'Ubicación', 'intencion' => 'location', 'pregunta' => $p,
-                'verdad' => fn () => $activos($mat($code))->with('bodega')->get()->pluck('bodega.name')->unique()->values()->all(),
-                'criterio' => fn ($t, $e) => $this->contieneTodos($t, $e) ? [true, ''] : [false, 'falta alguna bodega: ' . implode(', ', $e)]];
-        }
-
-        // 3. Vencimiento de un insumo (5): la fecha del lote activo que vence primero.
-        foreach ([
-            ['¿Cuándo vence el huevo líquido pasteurizado?', 'MP-HUE-01'], ['¿Cuándo vence la crema pastelera base?', 'RE-CRE-01'],
-            ['¿Cuándo vence la levadura fresca prensada?', 'MP-LEV-01'], ['¿Cuándo vence el arequipe para relleno?', 'RE-ARE-01'],
-            ['¿Cuándo vence la leche en polvo?', 'MP-LEC-01'],
-        ] as [$p, $code]) {
-            $b[] = ['grupo' => 'Vencimiento', 'intencion' => 'expiration', 'pregunta' => $p,
-                'verdad' => fn () => optional($activos($mat($code))->orderBy('expiration_date')->first())->expiration_date?->toDateString(),
-                'criterio' => fn ($t, $e) => $e && $this->contieneFecha($t, $e) ? [true, ''] : [false, "no aparece la fecha {$e}"]];
-        }
-
-        // 4. Vencimientos en una ventana (2): exactamente los lotes activos de la ventana.
-        foreach ([['¿Qué lotes vencen esta semana?', 7], ['¿Qué lotes vencen en la próxima quincena?', 15]] as [$p, $dias]) {
-            $b[] = ['grupo' => 'Vencimiento por periodo', 'intencion' => 'expiration', 'pregunta' => $p,
-                'verdad' => fn () => Lote::activos()->where('quantity', '>', 0)->whereDate('expiration_date', '<=', now()->addDays($dias))->pluck('batch_number')->all(),
-                'criterio' => fn ($t, $e) => $this->listaExacta($t, $e)];
-        }
-
-        // 5. Lotes críticos (4): exactamente los lotes activos dentro del umbral de su insumo.
-        foreach (['¿Qué lotes están críticos?', '¿Hay alertas de vencimiento?', '¿Qué insumos están por vencer?', '¿Qué lotes son urgentes de consumir?'] as $p) {
-            $b[] = ['grupo' => 'Críticos', 'intencion' => 'critical_alerts', 'pregunta' => $p,
-                'verdad' => fn () => Lote::activos()->where('quantity', '>', 0)->criticos()->pluck('batch_number')->all(),
-                'criterio' => fn ($t, $e) => $this->listaExacta($t, $e)];
-        }
-
-        // 6. Valorización (5): cantidad × costo de los lotes activos del insumo.
-        foreach ([
-            ['¿Cuánto vale el inventario de azúcar blanca?', 'MP-AZU-01'], ['¿Cuál es el valor de la harina de trigo panificable?', 'MP-HAR-01'],
-            ['¿Cuánto vale la levadura fresca prensada que hay?', 'MP-LEV-01'], ['¿Cuál es el costo del aceite de soya en bodega?', 'GR-ACE-01'],
-            ['¿Cuánto vale el ajonjolí descortezado?', 'MP-AJO-01'],
-        ] as [$p, $code]) {
-            $b[] = ['grupo' => 'Valorización', 'intencion' => 'valuation', 'pregunta' => $p,
-                'verdad' => fn () => round((float) $activos($mat($code))->selectRaw('SUM(quantity * unit_cost) as v')->value('v'), 0),
-                'criterio' => fn ($t, $e) => $this->contieneNumero($t, $e, 0.01) ? [true, ''] : [false, "no aparece el valor {$e}"]];
-        }
-
-        // 7. Movimientos (5): la cantidad y el tipo del último movimiento del insumo.
-        foreach ([
-            ['¿Cuál fue el último movimiento de la sal refinada?', 'MP-SAL-01'], ['¿Cuál fue el último movimiento del azúcar blanca?', 'MP-AZU-01'],
-            ['¿Qué movimientos tuvo la levadura fresca prensada?', 'MP-LEV-01'], ['Muéstrame el historial de la harina de trigo panificable', 'MP-HAR-01'],
-            ['¿Cuál fue el último movimiento del pan tajado blanco 500 g?', 'PT-TAJ-01'],
-        ] as [$p, $code]) {
-            $b[] = ['grupo' => 'Movimientos', 'intencion' => 'movements', 'pregunta' => $p,
-                'verdad' => function () use ($mat, $code) {
-                    $m = Movimiento::whereHas('lote', fn ($q) => $q->where('material_id', $mat($code)->id))->latest('created_at')->latest('id')->first();
-                    return ['cantidad' => (float) $m->quantity, 'tipo' => $m->type];
-                },
-                'criterio' => fn ($t, $e) => ($this->contieneNumero($t, $e['cantidad']) && preg_match('/' . ($e['tipo'] === 'entrada' ? 'entrada|ingreso' : 'salida|consumo|despacho') . '/iu', $t))
-                    ? [true, ''] : [false, "no aparece {$e['tipo']} de {$e['cantidad']}"]];
-        }
-
-        // 8. Información de un lote (4): la cantidad actual del lote nombrado.
-        $lotesEjemplo = ['HAR-NOV-01'];
-        foreach (['MP-AZU-01', 'MP-LEV-01', 'GR-ACE-01'] as $code) {
-            $l = Lote::activos()->where('material_id', Material::where('code', $code)->value('id'))->orderBy('expiration_date')->first();
-            if ($l) $lotesEjemplo[] = $l->batch_number;
-        }
-        foreach ($lotesEjemplo as $batch) {
-            $b[] = ['grupo' => 'Información de lote', 'intencion' => 'batch_info', 'pregunta' => "¿Qué información hay del lote {$batch}?",
-                'verdad' => fn () => round((float) Lote::where('batch_number', $batch)->value('quantity'), 2),
-                'criterio' => fn ($t, $e) => $this->contieneNumero($t, $e) ? [true, ''] : [false, "no aparece la cantidad {$e} del lote"]];
-        }
-
-        // 9. Conciliación (3): el ajuste registrado (cantidad) debe aparecer.
-        foreach (['¿Hubo ajustes de conciliación?', '¿Qué diferencias se encontraron en la conciliación del inventario?', '¿Qué ajustes se registraron en el Kardex?'] as $p) {
-            $b[] = ['grupo' => 'Conciliación', 'intencion' => 'conciliation', 'pregunta' => $p,
-                'verdad' => fn () => Movimiento::where('reason', 'ajuste')->pluck('quantity')->map(fn ($q) => (float) $q)->all(),
-                'criterio' => fn ($t, $e) => $e && collect($e)->every(fn ($q) => $this->contieneNumero($t, $q)) ? [true, ''] : [false, 'no aparecen los ajustes: ' . implode(', ', $e)]];
-        }
-
-        // 10. Resumen (2): el número de lotes activos o el valor total del inventario.
-        foreach (['Dame un resumen del inventario', '¿Cuál es el estado general del inventario?'] as $p) {
-            $b[] = ['grupo' => 'Resumen', 'intencion' => 'summary', 'pregunta' => $p,
-                'verdad' => fn () => ['lotes' => Lote::activos()->count(), 'valor' => round((float) Lote::activos()->selectRaw('SUM(quantity * unit_cost) as v')->value('v'))],
-                'criterio' => fn ($t, $e) => ($this->contieneNumero($t, $e['lotes'], 0) || $this->contieneNumero($t, $e['valor'], 0.01)) ? [true, ''] : [false, "no aparece {$e['lotes']} lotes ni el valor {$e['valor']}"]];
-        }
-
-        // 11. Insumos que no existen (6): debe decir que no está registrado y no dar cantidades.
-        foreach (['¿Cuánto queso hay?', '¿Cuánto chocolate blanco queda?', '¿Cuánta harina de almendras hay?', '¿Dónde está el colorante rojo?',
-                  '¿Cuánto papel aluminio tenemos?', '¿Cuándo vence la mermelada de fresa?'] as $p) {
-            $b[] = ['grupo' => 'Insumo inexistente', 'intencion' => str_contains($p, 'Dónde') ? 'location' : (str_contains($p, 'vence') ? 'expiration' : 'stock_check'), 'pregunta' => $p,
-                'verdad' => fn () => 'no registrado',
-                'criterio' => fn ($t, $e) => preg_match('/no (est[aá]|se encuentra|aparece|existe|figura|hay registro)|no registrad|sin registro/iu', $t)
-                    && !preg_match('/\d+(?:[.,]\d+)?\s*(kg|und|unidades|litros|L|gal|g)\b(?![^.]*no)/u', $this->sinCatalogo($t))
-                    ? [true, ''] : [false, 'no indicó que no está registrado o dio una cantidad']];
-        }
-
-        return $b;
+        return array_merge(
+            $this->existencias([
+                ['¿Cuánta harina de trigo panificable hay?', 'MP-HAR-01'], ['¿Cuánta azúcar blanca hay?', 'MP-AZU-01'],
+                ['¿Cuánta sal refinada queda?', 'MP-SAL-01'], ['¿Cuánto ajonjolí descortezado queda?', 'MP-AJO-01'],
+                ['¿Cuánta levadura fresca prensada tenemos?', 'MP-LEV-01'], ['¿Cuánto aceite de soya hay?', 'GR-ACE-01'],
+                ['¿Cuántas bolsas para pan tajado quedan?', 'EMP-BOL-01'], ['¿Cuánto ACPM hay para la planta eléctrica?', 'CB-ACPM-01'],
+                ['¿Cuántas cajas corrugadas de despacho hay?', 'EMP-CAJ-01'],
+            ]),
+            $this->ubicacion([
+                ['¿Dónde está la levadura fresca prensada?', 'MP-LEV-01'], ['¿Dónde está guardada la margarina de hojaldre?', 'GR-MAR-01'],
+                ['¿En qué bodega están las cajas corrugadas de despacho?', 'EMP-CAJ-01'], ['¿Dónde está el pan perro x 8?', 'PT-PER-01'],
+                ['¿Dónde está la harina de trigo integral?', 'MP-HAR-02'],
+            ]),
+            $this->vencimiento([
+                ['¿Cuándo vence el huevo líquido pasteurizado?', 'MP-HUE-01'], ['¿Cuándo vence la crema pastelera base?', 'RE-CRE-01'],
+                ['¿Cuándo vence la levadura fresca prensada?', 'MP-LEV-01'], ['¿Cuándo vence el arequipe para relleno?', 'RE-ARE-01'],
+                ['¿Cuándo vence la leche en polvo?', 'MP-LEC-01'],
+            ]),
+            $this->ventana([['¿Qué lotes vencen esta semana?', 7], ['¿Qué lotes vencen en la próxima quincena?', 15]]),
+            $this->criticos(['¿Qué lotes están críticos?', '¿Hay alertas de vencimiento?', '¿Qué insumos están por vencer?', '¿Qué lotes son urgentes de consumir?']),
+            $this->valorizacion([
+                ['¿Cuánto vale el inventario de azúcar blanca?', 'MP-AZU-01'], ['¿Cuál es el valor de la harina de trigo panificable?', 'MP-HAR-01'],
+                ['¿Cuánto vale la levadura fresca prensada que hay?', 'MP-LEV-01'], ['¿Cuál es el costo del aceite de soya en bodega?', 'GR-ACE-01'],
+                ['¿Cuánto vale el ajonjolí descortezado?', 'MP-AJO-01'],
+            ]),
+            $this->movimientos([
+                ['¿Cuál fue el último movimiento de la sal refinada?', 'MP-SAL-01'], ['¿Cuál fue el último movimiento del azúcar blanca?', 'MP-AZU-01'],
+                ['¿Qué movimientos tuvo la levadura fresca prensada?', 'MP-LEV-01'], ['Muéstrame el historial de la harina de trigo panificable', 'MP-HAR-01'],
+                ['¿Cuál fue el último movimiento del pan tajado blanco 500 g?', 'PT-TAJ-01'],
+            ]),
+            $this->lotes('¿Qué información hay del lote %s?', ['HAR-NOV-01'], ['MP-AZU-01', 'MP-LEV-01', 'GR-ACE-01']),
+            $this->conciliacion(['¿Hubo ajustes de conciliación?', '¿Qué diferencias se encontraron en la conciliación del inventario?', '¿Qué ajustes se registraron en el Kardex?']),
+            $this->resumen(['Dame un resumen del inventario', '¿Cuál es el estado general del inventario?']),
+            $this->inexistentes([
+                ['¿Cuánto queso hay?', 'stock_check'], ['¿Cuánto chocolate blanco queda?', 'stock_check'], ['¿Cuánta harina de almendras hay?', 'stock_check'],
+                ['¿Dónde está el colorante rojo?', 'location'], ['¿Cuánto papel aluminio tenemos?', 'stock_check'], ['¿Cuándo vence la mermelada de fresa?', 'expiration'],
+            ]),
+        );
     }
 
-    // ── Criterios ─────────────────────────────────────────────────────────────
+    /** Conjunto de validación: escrito antes de corregir el asistente, con otros insumos y redacciones. */
+    private function validacion(): array
+    {
+        return array_merge(
+            $this->existencias([
+                ['¿Qué cantidad de gluten vital de trigo tenemos?', 'MP-GLU-01'], ['¿Cuánta leche en polvo hay disponible?', 'MP-LEC-01'],
+                ['¿Cuántos kilos de margarina de hojaldre quedan?', 'GR-MAR-01'], ['¿Cuánto pan tajado integral 500 g hay?', 'PT-TAJ-02'],
+            ]),
+            $this->ubicacion([['¿En qué bodega está el huevo líquido pasteurizado?', 'MP-HUE-01'], ['¿Dónde se guarda el sorbato de potasio?', 'AD-CON-02']]),
+            $this->vencimiento([['¿Para cuándo vence la avena en hojuelas?', 'MP-AVE-01'], ['¿Cuál es la fecha de vencimiento del bocadillo de guayaba?', 'RE-BOC-01']]),
+            $this->criticos(['¿Qué lotes debo sacar primero porque están por vencer?']),
+            $this->valorizacion([
+                ['¿Qué valor tiene la leche en polvo en inventario?', 'MP-LEC-01'], ['¿Cuánto dinero hay en margarina de hojaldre?', 'GR-MAR-01'],
+                ['¿Cuál es el valor del huevo líquido pasteurizado?', 'MP-HUE-01'],
+            ]),
+            $this->movimientos([['¿Qué fue lo último que se movió de la avena en hojuelas?', 'MP-AVE-01'], ['¿Cuál fue el último movimiento de la margarina de hojaldre?', 'GR-MAR-01']]),
+            $this->lotes('Dame los datos del lote %s', [], ['MP-GLU-01', 'MP-LEC-01']),
+            $this->conciliacion(['¿Se hizo alguna conciliación física del inventario?']),
+            $this->resumen(['¿Cómo está el inventario en general?']),
+            $this->inexistentes([['¿Cuánta canela molida hay?', 'stock_check'], ['¿Dónde está el polvo de hornear?', 'location']]),
+        );
+    }
+
+    // ── Grupos (pregunta + intención + verdad desde la base + criterio) ───────
+
+    private function mat(string $code): Material { return Material::where('code', $code)->firstOrFail(); }
+    private function activos(Material $m) { return Lote::activos()->where('material_id', $m->id)->where('quantity', '>', 0); }
+
+    /** El total en lotes activos debe aparecer. */
+    private function existencias(array $items): array
+    {
+        return array_map(fn ($x) => ['grupo' => 'Existencias', 'intencion' => 'stock_check', 'pregunta' => $x[0],
+            'verdad' => fn () => round((float) $this->activos($this->mat($x[1]))->sum('quantity'), 2),
+            'criterio' => fn ($t, $e) => $this->contieneNumero($t, $e) ? [true, ''] : [false, "no aparece el total {$e}"]], $items);
+    }
+
+    /** Todas las bodegas con lotes activos del insumo deben aparecer. */
+    private function ubicacion(array $items): array
+    {
+        return array_map(fn ($x) => ['grupo' => 'Ubicación', 'intencion' => 'location', 'pregunta' => $x[0],
+            'verdad' => fn () => $this->activos($this->mat($x[1]))->with('bodega')->get()->pluck('bodega.name')->unique()->values()->all(),
+            'criterio' => fn ($t, $e) => $this->contieneTodos($t, $e) ? [true, ''] : [false, 'falta alguna bodega: ' . implode(', ', $e)]], $items);
+    }
+
+    /** La fecha del lote activo que vence primero debe aparecer. */
+    private function vencimiento(array $items): array
+    {
+        return array_map(fn ($x) => ['grupo' => 'Vencimiento', 'intencion' => 'expiration', 'pregunta' => $x[0],
+            'verdad' => fn () => optional($this->activos($this->mat($x[1]))->orderBy('expiration_date')->first())->expiration_date?->toDateString(),
+            'criterio' => fn ($t, $e) => $e && $this->contieneFecha($t, $e) ? [true, ''] : [false, "no aparece la fecha {$e}"]], $items);
+    }
+
+    /** Exactamente los lotes activos que vencen en la ventana. */
+    private function ventana(array $items): array
+    {
+        return array_map(fn ($x) => ['grupo' => 'Vencimiento por periodo', 'intencion' => 'expiration', 'pregunta' => $x[0],
+            'verdad' => fn () => Lote::activos()->where('quantity', '>', 0)->whereDate('expiration_date', '<=', now()->addDays($x[1]))->pluck('batch_number')->all(),
+            'criterio' => fn ($t, $e) => $this->listaExacta($t, $e)], $items);
+    }
+
+    /** Exactamente los lotes activos dentro del umbral de su insumo. */
+    private function criticos(array $preguntas): array
+    {
+        return array_map(fn ($p) => ['grupo' => 'Críticos', 'intencion' => 'critical_alerts', 'pregunta' => $p,
+            'verdad' => fn () => Lote::activos()->where('quantity', '>', 0)->criticos()->pluck('batch_number')->all(),
+            'criterio' => fn ($t, $e) => $this->listaExacta($t, $e)], $preguntas);
+    }
+
+    /** Cantidad × costo de los lotes activos (tolerancia 1 %). */
+    private function valorizacion(array $items): array
+    {
+        return array_map(fn ($x) => ['grupo' => 'Valorización', 'intencion' => 'valuation', 'pregunta' => $x[0],
+            'verdad' => fn () => round((float) $this->activos($this->mat($x[1]))->selectRaw('SUM(quantity * unit_cost) as v')->value('v'), 0),
+            'criterio' => fn ($t, $e) => $this->contieneNumero($t, $e, 0.01) ? [true, ''] : [false, "no aparece el valor {$e}"]], $items);
+    }
+
+    /** Cantidad y tipo del último movimiento del insumo. */
+    private function movimientos(array $items): array
+    {
+        return array_map(fn ($x) => ['grupo' => 'Movimientos', 'intencion' => 'movements', 'pregunta' => $x[0],
+            'verdad' => function () use ($x) {
+                $m = Movimiento::whereHas('lote', fn ($q) => $q->where('material_id', $this->mat($x[1])->id))->latest('created_at')->latest('id')->first();
+                return ['cantidad' => (float) $m->quantity, 'tipo' => $m->type];
+            },
+            'criterio' => fn ($t, $e) => ($this->contieneNumero($t, $e['cantidad']) && preg_match('/' . ($e['tipo'] === 'entrada' ? 'entrada|ingreso' : 'salida|consumo|despacho') . '/iu', $t))
+                ? [true, ''] : [false, "no aparece {$e['tipo']} de {$e['cantidad']}"]], $items);
+    }
+
+    /** Cantidad actual del lote nombrado; lotes fijos y el primer lote activo de los insumos dados. */
+    private function lotes(string $plantilla, array $fijos, array $codigos): array
+    {
+        $lotes = $fijos;
+        foreach ($codigos as $code) {
+            $l = Lote::activos()->where('material_id', Material::where('code', $code)->value('id'))->orderBy('expiration_date')->first();
+            if ($l) $lotes[] = $l->batch_number;
+        }
+        return array_map(fn ($batch) => ['grupo' => 'Información de lote', 'intencion' => 'batch_info', 'pregunta' => sprintf($plantilla, $batch),
+            'verdad' => fn () => round((float) Lote::where('batch_number', $batch)->value('quantity'), 2),
+            'criterio' => fn ($t, $e) => $this->contieneNumero($t, $e) ? [true, ''] : [false, "no aparece la cantidad {$e} del lote"]], $lotes);
+    }
+
+    /** Todos los ajustes registrados (cantidad) deben aparecer. */
+    private function conciliacion(array $preguntas): array
+    {
+        return array_map(fn ($p) => ['grupo' => 'Conciliación', 'intencion' => 'conciliation', 'pregunta' => $p,
+            'verdad' => fn () => Movimiento::where('reason', 'ajuste')->pluck('quantity')->map(fn ($q) => (float) $q)->all(),
+            'criterio' => fn ($t, $e) => $e && collect($e)->every(fn ($q) => $this->contieneNumero($t, $q)) ? [true, ''] : [false, 'no aparecen los ajustes: ' . implode(', ', $e)]], $preguntas);
+    }
+
+    /** El número de lotes activos o el valor total del inventario. */
+    private function resumen(array $preguntas): array
+    {
+        return array_map(fn ($p) => ['grupo' => 'Resumen', 'intencion' => 'summary', 'pregunta' => $p,
+            'verdad' => fn () => ['lotes' => Lote::activos()->count(), 'valor' => round((float) Lote::activos()->selectRaw('SUM(quantity * unit_cost) as v')->value('v'))],
+            'criterio' => fn ($t, $e) => ($this->contieneNumero($t, $e['lotes'], 0) || $this->contieneNumero($t, $e['valor'], 0.01)) ? [true, ''] : [false, "no aparece {$e['lotes']} lotes ni el valor {$e['valor']}"]], $preguntas);
+    }
+
+    /** Debe decir que no está registrado y no dar cantidades de ese insumo. */
+    private function inexistentes(array $items): array
+    {
+        return array_map(fn ($x) => ['grupo' => 'Insumo inexistente', 'intencion' => $x[1], 'pregunta' => $x[0],
+            'verdad' => fn () => 'no registrado',
+            'criterio' => function ($t, $e) {
+                $n = $this->normalizar($t);
+                $dice = preg_match('/no (esta|se encuentra|aparece|existe|figura)|no registrad|sin registro|no hay (ningun|registro)|no tengo (registro|informacion)|no se encontr/u', $n);
+                $cantidad = preg_match('/\d+(?:[.,]\d+)?\s*(kg|und|unidades|litros|l|gal|g)\b/u', $this->normalizar($this->sinCatalogo($t)));
+                return $dice && !$cantidad ? [true, ''] : [false, 'no indicó que no está registrado o dio una cantidad'];
+            }], $items);
+    }
+
+    // ── Comparaciones ─────────────────────────────────────────────────────────
 
     /** Todos los números de un texto, aceptando 5 810,85 · 5.810,85 · 5810.85 · 5,810.85. */
     private function numeros(string $t): array
     {
-        preg_match_all('/\d[\d.,\x{00A0}\x{202F} ]*\d|\d/u', $t, $m);
+        $t = $this->unificar($t);
+        preg_match_all('/\d[\d., ]*\d|\d/u', $t, $m);
         $out = [];
         foreach ($m[0] as $raw) {
-            $s = preg_replace('/[\x{00A0}\x{202F} ]/u', '', $raw);
-            $cands = [];
+            $s = str_replace(' ', '', $raw);
             $lp = strrpos($s, '.'); $lc = strrpos($s, ',');
             if ($lp !== false && $lc !== false) {
                 $dec = $lp > $lc ? '.' : ',';
-                $cands[] = (float) str_replace([$dec === '.' ? ',' : '.', $dec], ['', '.'], $s);
+                $out[] = (float) str_replace([$dec === '.' ? ',' : '.', $dec], ['', '.'], $s);
             } elseif ($lc !== false || $lp !== false) {
                 $sep = $lc !== false ? ',' : '.';
-                $cands[] = (float) str_replace($sep, '.', preg_replace('/\\' . $sep . '(?=.*\\' . $sep . ')/', '', $s)); // separador decimal
-                $cands[] = (float) str_replace($sep, '', $s);                                                           // separador de miles
+                $out[] = (float) str_replace($sep, '.', preg_replace('/\\' . $sep . '(?=.*\\' . $sep . ')/', '', $s));
+                $out[] = (float) str_replace($sep, '', $s);
             } else {
-                $cands[] = (float) $s;
+                $out[] = (float) $s;
             }
-            foreach ($cands as $c) $out[] = $c;
         }
         return $out;
     }
 
-    /** El número esperado aparece (tolerancia relativa, y se acepta redondeo a entero o a un decimal). */
+    /** El número esperado aparece (tolerancia relativa; se acepta redondeo a entero o a un decimal). */
     private function contieneNumero(string $t, float $esperado, float $tolRel = 0.005): bool
     {
         foreach ($this->numeros($t) as $n) {
@@ -243,14 +327,14 @@ class EvaluarAsistente extends Command
         return collect($esperados)->every(fn ($e) => str_contains($n, $this->normalizar($e)));
     }
 
-    /** Menciona todos los lotes esperados y ningún otro lote existente (precisión y exhaustividad). */
+    /** Menciona todos los lotes esperados y ningún otro lote existente. */
     private function listaExacta(string $t, array $esperados): array
     {
-        $todos = Lote::pluck('batch_number')->all();
-        $mencionados = array_values(array_filter($todos, fn ($b) => str_contains($t, $b)));
+        $n = $this->unificar($t);
+        $mencionados = array_values(array_filter(Lote::pluck('batch_number')->all(), fn ($b) => str_contains($n, $b)));
+        if (!$esperados) return preg_match('/no hay|ning[uú]n/iu', $n) ? [true, ''] : [false, 'no hay lotes y no lo dijo'];
         $faltan = array_diff($esperados, $mencionados);
         $sobran = array_diff($mencionados, $esperados);
-        if (!$esperados) return preg_match('/no hay|ning[uú]n/iu', $t) ? [true, ''] : [false, 'no hay lotes y no lo dijo'];
         if ($faltan) return [false, 'faltan: ' . implode(', ', $faltan)];
         if ($sobran) return [false, 'sobran: ' . implode(', ', $sobran)];
         return [true, ''];
@@ -268,12 +352,18 @@ class EvaluarAsistente extends Command
     /** Quita la lista de materiales sugeridos (sus cantidades no cuentan como invención). */
     private function sinCatalogo(string $t): string
     {
-        return preg_replace('/materiales registrados.*$/isu', '', $t);
+        return preg_replace('/(materiales|insumos)[^.:\n]*(registrados|disponibles|podr[ií]an)[\s\S]*$/iu', '', $t);
+    }
+
+    /** Guiones y espacios tipográficos (‑ – — ‐ · espacio fino) a su forma simple. */
+    private function unificar(string $s): string
+    {
+        return preg_replace(['/[\x{2010}-\x{2015}\x{2212}]/u', '/[\x{00A0}\x{2007}\x{202F}\x{2009}]/u'], ['-', ' '], $s);
     }
 
     private function normalizar(string $s): string
     {
-        return mb_strtolower(preg_replace('/\s+/u', ' ', \Illuminate\Support\Str::ascii($s)));
+        return mb_strtolower(preg_replace('/\s+/u', ' ', Str::ascii($this->unificar($s))));
     }
 
     private function privado(object $o, string $metodo, ...$args)

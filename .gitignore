@@ -160,6 +160,7 @@ sitios/tesis/pymetory-tesis.pdf
 /scripts/serve-watchdog.sh
 /docs/*
 !/docs/screenshots/
+!/docs/evaluaciones/
 /docs/screenshots/*
 !/docs/screenshots/pruebas/
 !/docs/screenshots/version-anterior/
