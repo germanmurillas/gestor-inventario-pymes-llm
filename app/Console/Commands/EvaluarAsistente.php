@@ -28,7 +28,7 @@ use Illuminate\Support\Str;
 class EvaluarAsistente extends Command
 {
     protected $signature = 'rag:evaluar
-        {--conjunto=bateria : bateria | validacion}
+        {--conjunto=bateria : bateria | validacion | ciega}
         {--etiqueta=medicion : Nombre de la ejecución}
         {--solo= : Ejecutar solo las N primeras preguntas}
         {--recalificar= : Volver a calificar un archivo de resultados guardado (sin consultar al asistente)}';
@@ -110,7 +110,11 @@ class EvaluarAsistente extends Command
 
     private function conjunto(string $nombre): array
     {
-        return $nombre === 'validacion' ? $this->validacion() : $this->bateria();
+        return match ($nombre) {
+            'validacion' => $this->validacion(),
+            'ciega' => $this->ciega(),
+            default => $this->bateria(),
+        };
     }
 
     private function bateria(): array
@@ -175,6 +179,25 @@ class EvaluarAsistente extends Command
             $this->conciliacion(['¿Se hizo alguna conciliación física del inventario?']),
             $this->resumen(['¿Cómo está el inventario en general?']),
             $this->inexistentes([['¿Cuánta canela molida hay?', 'stock_check'], ['¿Dónde está el polvo de hornear?', 'location']]),
+        );
+    }
+
+    /**
+     * Prueba ciega: 10 preguntas escritas antes de corregir el asistente y NO ejecutadas hasta la
+     * medición final, con redacciones distintas a las de la batería y la validación.
+     */
+    private function ciega(): array
+    {
+        return array_merge(
+            $this->existencias([['¿Me dices cuánta mantequilla sin sal nos queda?', 'MP-MAN-01'], ['Stock de cocoa en polvo', 'MP-COC-01']]),
+            $this->ubicacion([['¿En qué parte está el ACPM para planta eléctrica?', 'CB-ACPM-01']]),
+            $this->vencimiento([['¿Hasta cuándo sirve la esencia de vainilla?', 'AD-ESE-01']]),
+            $this->valorizacion([['¿Cuánta plata tenemos invertida en salsa de tomate para pizza?', 'RE-SAL-01']]),
+            $this->movimientos([['¿Cuándo fue el último movimiento del huevo líquido pasteurizado?', 'MP-HUE-01']]),
+            $this->lotes('Detalle del lote %s', [], ['MP-MAN-01']),
+            $this->criticos(['¿Qué hay próximo a vencerse?']),
+            $this->resumen(['Hazme un panorama de la bodega']),
+            $this->inexistentes([['¿Tenemos fécula de maíz?', 'stock_check']]),
         );
     }
 
@@ -279,7 +302,7 @@ class EvaluarAsistente extends Command
             'verdad' => fn () => 'no registrado',
             'criterio' => function ($t, $e) {
                 $n = $this->normalizar($t);
-                $dice = preg_match('/no (esta|se encuentra|aparece|existe|figura)|no registrad|sin registro|no hay (ningun|registro)|no tengo (registro|informacion)|no se encontr/u', $n);
+                $dice = preg_match('/\bno\b[^.]{0,60}(registr|exist|inventario|encontr|figura|aparece)|sin registro/u', $n);
                 $cantidad = preg_match('/\d+(?:[.,]\d+)?\s*(kg|und|unidades|litros|l|gal|g)\b/u', $this->normalizar($this->sinCatalogo($t)));
                 return $dice && !$cantidad ? [true, ''] : [false, 'no indicó que no está registrado o dio una cantidad'];
             }], $items);
