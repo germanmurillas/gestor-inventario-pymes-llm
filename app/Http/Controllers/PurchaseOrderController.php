@@ -146,10 +146,24 @@ class PurchaseOrderController extends Controller
 
         $validated = $request->validate([
             'items' => 'required|array',
-            'items.*.id'     => 'required|exists:purchase_order_items,id',
-            'items.*.received'=> 'required|numeric|min:0',
-            'folder'          => 'nullable|string|max:100',
+            'items.*.id'              => 'required|exists:purchase_order_items,id',
+            'items.*.received'        => 'required|numeric|min:0',
+            // Datos reales del lote recibido (FEFO necesita la fecha de vencimiento del proveedor).
+            'items.*.batch_number'    => 'nullable|string|max:50|distinct',
+            'items.*.expiration_date' => 'nullable|date|after:today',
+            'items.*.bodega_id'       => 'nullable|exists:bodegas,id',
         ]);
+        $faltantes = [];
+        foreach ($validated['items'] as $i => $item) {
+            if ($item['received'] <= 0) continue;
+            foreach (['batch_number' => 'el número de lote', 'expiration_date' => 'la fecha de vencimiento', 'bodega_id' => 'la bodega'] as $campo => $nombre) {
+                if (empty($item[$campo])) $faltantes["items.{$i}.{$campo}"] = "Indique {$nombre} de lo recibido.";
+            }
+            if (!empty($item['batch_number']) && Lote::where('batch_number', $item['batch_number'])->exists()) {
+                $faltantes["items.{$i}.batch_number"] = "Ya existe un lote con el número {$item['batch_number']}.";
+            }
+        }
+        if ($faltantes) throw \Illuminate\Validation\ValidationException::withMessages($faltantes);
 
         DB::beginTransaction();
         try {
@@ -165,13 +179,13 @@ class PurchaseOrderController extends Controller
 
                 // Registrar el lote recibido y su entrada en el Kardex
                 $lote = Lote::create([
-                    'material_id'    => $poi->material_id,
-                    'batch_number'   => 'PO-' . $order->po_number . '-' . now()->format('Ymd'),
-                    'quantity'       => $item['received'],
-                    'unit_cost'      => $poi->unit_cost,
-                    'expiration_date'=> now()->addYear(),
-                    'status'         => 'active',
-                    'notes'          => 'Recibido de orden ' . $order->po_number,
+                    'material_id'     => $poi->material_id,
+                    'bodega_id'       => $item['bodega_id'],
+                    'batch_number'    => $item['batch_number'],
+                    'quantity'        => $item['received'],
+                    'unit_cost'       => $poi->unit_cost,
+                    'expiration_date' => $item['expiration_date'],
+                    'status'          => 'active',
                 ]);
 
                 \App\Models\Movimiento::create([

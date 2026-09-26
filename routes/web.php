@@ -94,6 +94,10 @@ Route::post('/bodegas/{bodega}', [InventoryController::class, 'updateBodega'])
     ->middleware(['auth', 'verified', 'role:admin'])
     ->name('bodegas.update');
 
+Route::post('/inventory/material/{material}/lotes', [InventoryController::class, 'storeLote'])
+    ->middleware(['auth', 'verified'])
+    ->name('inventory.lote.store');
+
 Route::put('/inventory/material/{material}', [InventoryController::class, 'updateMaterial'])
     ->middleware(['auth', 'verified', 'role:admin'])
     ->name('inventory.material.update');

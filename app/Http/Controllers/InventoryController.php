@@ -31,6 +31,7 @@ class InventoryController extends Controller {
                 'status' => $lote->is_critical ? 'CRITICO' : 'NORMAL',
                 'photo_url' => $lote->photo_url ?? $lote->material->photo_url,
                 'quantity' => $lote->quantity,
+                'unit_cost' => (float) $lote->unit_cost,
                 'stock_total' => (float) ($stockPorMaterial[$lote->material_id] ?? 0),
                 'stock_minimo' => (float) ($lote->material->stock_minimo ?? 0),
                 'dias_criticos' => $lote->material->dias_criticos,
@@ -315,6 +316,34 @@ class InventoryController extends Controller {
         $bodega->fill(collect($validated)->only(['name', 'capacity', 'capacity_unit', 'description', 'status'])->all())->save();
 
         return back()->with('success', 'Bodega actualizada.');
+    }
+
+    /**
+     * Ingreso de un lote nuevo de un insumo ya registrado (RF-02): número de lote, cantidad,
+     * costo unitario, bodega y fecha de vencimiento; queda su entrada en el Kardex.
+     */
+    public function storeLote(\Illuminate\Http\Request $request, Material $material) {
+        $validated = $request->validate([
+            'batch_number' => 'required|string|max:50|unique:lotes,batch_number',
+            'quantity' => 'required|numeric|min:0.001',
+            'unit_cost' => 'required|numeric|min:0',
+            'expiration_date' => 'required|date|after:today',
+            'bodega_id' => 'required|exists:bodegas,id',
+        ]);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $material) {
+            $lote = Lote::create($validated + ['material_id' => $material->id, 'status' => 'active']);
+            \App\Models\Movimiento::create([
+                'lote_id' => $lote->id,
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+                'type' => 'entrada',
+                'quantity' => $validated['quantity'],
+                'reason' => 'ingreso',
+                'description' => 'Ingreso de lote registrado en inventario.',
+            ]);
+        });
+
+        return back()->with('success', "Lote {$validated['batch_number']} registrado.");
     }
 
     /** Lotes que estaban en bodega en una fecha (creados hasta esa fecha y no consumidos antes de ella). */

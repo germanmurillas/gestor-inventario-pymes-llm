@@ -1,4 +1,5 @@
 import FigmaMaterialAjustes from './FigmaMaterialAjustes';
+import FigmaIngresoLote from './FigmaIngresoLote';
 import React, { useState, useMemo } from 'react';
 import { Box, Plus, ChevronRight, X, Warehouse, ScanLine, Sparkles, Search } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
@@ -357,6 +358,13 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                             className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white active:scale-[0.99]">
                             <Sparkles size={16} /> Consumir por FEFO
                         </button>
+                        {materialSel.materialId && (
+                            <FigmaIngresoLote key={`ing-${materialSel.codigo}`} materialId={materialSel.materialId} unidad={materialSel.unidad}
+                                bodegas={bodegas.map((b: any) => ({ id: b.id, name: b.name }))}
+                                costoSugerido={materialSel.lotes[materialSel.lotes.length - 1]?.unit_cost ?? null}
+                                bodegaSugerida={materialSel.lotes[0]?.bodega_id ?? null}
+                                onListo={() => setMaterialAbierto(null)} />
+                        )}
 
                         {user?.role === 'admin' && materialSel.materialId && (
                             <FigmaMaterialAjustes key={materialSel.codigo} materialId={materialSel.materialId} unidad={materialSel.unidad}

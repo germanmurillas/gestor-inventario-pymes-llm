@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Plus, Truck, Package, CheckCircle, Clock, X, Search, Save, Trash2, ArrowRight, ChevronRight } from 'lucide-react';
 
 interface POItem { id?: number; material_id: number; material_name?: string; material_code?: string; quantity: number; unit_cost: number; received_qty?: number; }
@@ -23,6 +24,16 @@ export default function FigmaPurchaseOrders() {
     const [materials, setMaterials] = useState<Material[]>([]);
     const [showForm, setShowForm] = useState(false);
     const [showReceive, setShowReceive] = useState<PO | null>(null);
+    // Recepción: por cada ítem, lo recibido ahora y los datos reales del lote (FEFO necesita el vencimiento del proveedor).
+    type Recibo = { received: string; batch_number: string; expiration_date: string; bodega_id: string };
+    const [recibos, setRecibos] = useState<Record<number, Recibo>>({});
+    const [erroresRecibo, setErroresRecibo] = useState<Record<string, string>>({});
+    const bodegas: { id: number; name: string }[] = (usePage().props as any)?.dashboardStats?.bodegas ?? [];
+    const abrirRecepcion = (po: PO) => {
+        setErroresRecibo({});
+        setRecibos(Object.fromEntries(po.items.map((i) => [i.id!, { received: String(Math.max(0, i.quantity - (i.received_qty || 0))), batch_number: '', expiration_date: '', bodega_id: '' }])));
+        setShowReceive(po);
+    };
     const [searchTerm, setSearchTerm] = useState('');
     const [saving, setSaving] = useState(false);
 
@@ -85,11 +96,20 @@ export default function FigmaPurchaseOrders() {
 
     const handleReceive = async () => {
         if (!showReceive) return;
-        const items = showReceive.items.map(i => ({ id: i.id!, received: i.received_qty || i.quantity }));
-        await fetch(`/api/purchase-orders/${showReceive.id}/receive`, {
+        const items = showReceive.items.map((i) => {
+            const r = recibos[i.id!];
+            return { id: i.id!, received: Number(r?.received || 0), batch_number: r?.batch_number || null, expiration_date: r?.expiration_date || null, bodega_id: r?.bodega_id || null };
+        });
+        const res = await fetch(`/api/purchase-orders/${showReceive.id}/receive`, {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-XSRF-TOKEN': csrf() },
             body: JSON.stringify({ items }),
         });
+        if (res.status === 422) {
+            const data = await res.json();
+            setErroresRecibo(Object.fromEntries(Object.entries(data.errors ?? {}).map(([k, v]) => [k, (v as string[])[0]])));
+            return;
+        }
+        if (!res.ok) { setErroresRecibo({ general: (await res.json().catch(() => ({})))?.message ?? 'No se pudo registrar la recepción.' }); return; }
         setShowReceive(null); fetchOrders();
     };
 
@@ -191,7 +211,7 @@ export default function FigmaPurchaseOrders() {
                                         );
                                     })}
                                 </div>
-                                <button onClick={() => setShowReceive(po)}
+                                <button onClick={() => abrirRecepcion(po)}
                                     disabled={!['approved','ordered'].includes(po.status)}
                                     className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 disabled:opacity-30 text-[9px] font-black uppercase rounded-lg transition-all">
                                     Recibir
@@ -326,30 +346,47 @@ export default function FigmaPurchaseOrders() {
                 <>
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" onClick={() => setShowReceive(null)} />
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
-                        <div className="bg-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-lg p-8 space-y-6 animate-in zoom-in-95 duration-200">
+                        <div className="bg-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-5 animate-in zoom-in-95 duration-200">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-black text-white uppercase">Recibir Items · {showReceive.po_number}</h3>
-                                <button onClick={() => setShowReceive(null)} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X size={20} /></button>
+                                <h3 className="text-lg font-black text-white">Recibir orden {showReceive.po_number}</h3>
+                                <button onClick={() => setShowReceive(null)} aria-label="Cerrar" className="p-2 hover:bg-slate-800 rounded-xl text-slate-400"><X size={20} /></button>
                             </div>
-                            {showReceive.items.map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-4 p-4 bg-slate-800/40 rounded-xl border border-slate-700/30">
-                                    <div className="flex-1">
-                                        <div className="text-sm font-bold text-white">{item.material_name}</div>
-                                        <div className="text-[9px] text-slate-500 font-bold">Ordenado: {item.quantity} · Recibido: {item.received_qty || 0}</div>
-                                    </div>
-                                    <input type="number" min="0" max={item.quantity} step="0.01"
-                                        defaultValue={item.quantity - (item.received_qty || 0)}
-                                        onChange={e => {
-                                            const updated = [...showReceive.items];
-                                            updated[idx].received_qty = Number(e.target.value);
-                                            setShowReceive({...showReceive, items: updated});
-                                        }}
-                                        className="w-24 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white text-center outline-none" />
-                                </div>
-                            ))}
+                            <p className="text-xs text-slate-400">Registre cada lote tal como llega del proveedor: su número, su fecha de vencimiento y la bodega donde se guarda.</p>
+                            {showReceive.items.map((item, idx) => {
+                                const r = recibos[item.id!] ?? { received: '', batch_number: '', expiration_date: '', bodega_id: '' };
+                                const set = (k: keyof Recibo, v: string) => setRecibos({ ...recibos, [item.id!]: { ...r, [k]: v } });
+                                const err = (k: string) => erroresRecibo[`items.${idx}.${k}`];
+                                return (
+                                    <fieldset key={item.id} className="space-y-3 rounded-xl border border-slate-700/40 bg-slate-800/40 p-4">
+                                        <legend className="px-1 text-sm font-bold text-white">{item.material_name}</legend>
+                                        <p className="text-[11px] text-slate-400">Ordenado: {item.quantity} · Recibido antes: {item.received_qty || 0}</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <label className="text-[11px] font-semibold text-slate-400">Cantidad recibida
+                                                <input type="number" min="0" step="0.001" value={r.received} onChange={(e) => set('received', e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-indigo-400 mt-1" />
+                                            </label>
+                                            <label className="text-[11px] font-semibold text-slate-400">Número de lote
+                                                <input type="text" maxLength={50} value={r.batch_number} onChange={(e) => set('batch_number', e.target.value.toUpperCase())} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-indigo-400 mt-1" placeholder="Del proveedor" />
+                                                {err('batch_number') && <span className="mt-1 block text-rose-300">{err('batch_number')}</span>}
+                                            </label>
+                                            <label className="text-[11px] font-semibold text-slate-400">Vence
+                                                <input type="date" value={r.expiration_date} onChange={(e) => set('expiration_date', e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-indigo-400 mt-1" />
+                                                {err('expiration_date') && <span className="mt-1 block text-rose-300">{err('expiration_date')}</span>}
+                                            </label>
+                                            <label className="text-[11px] font-semibold text-slate-400">Bodega
+                                                <select value={r.bodega_id} onChange={(e) => set('bodega_id', e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-indigo-400 mt-1">
+                                                    <option value="">Elegir…</option>
+                                                    {bodegas.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                                </select>
+                                                {err('bodega_id') && <span className="mt-1 block text-rose-300">{err('bodega_id')}</span>}
+                                            </label>
+                                        </div>
+                                    </fieldset>
+                                );
+                            })}
+                            {erroresRecibo.general && <p className="text-xs text-rose-300">{erroresRecibo.general}</p>}
                             <button onClick={handleReceive}
                                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-xl transition-all">
-                                <CheckCircle size={14} /> Confirmar Recepción
+                                <CheckCircle size={14} /> Confirmar recepción
                             </button>
                         </div>
                     </div>

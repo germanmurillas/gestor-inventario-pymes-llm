@@ -71,7 +71,8 @@ class KardexInmutableTest extends TestCase
         ]);
 
         $this->actingAs($user)->postJson("/api/purchase-orders/{$po->id}/receive", [
-            'items' => [['id' => $item->id, 'received' => 4]],
+            'items' => [['id' => $item->id, 'received' => 4, 'batch_number' => 'K1-LOTE', 'expiration_date' => now()->addDays(60)->toDateString(),
+                'bodega_id' => \App\Models\Bodega::factory()->create()->id]],
         ])->assertOk();
 
         $this->assertDatabaseHas('movimientos', ['user_id' => $user->id, 'type' => 'entrada', 'quantity' => 4, 'reason' => 'ingreso']);
