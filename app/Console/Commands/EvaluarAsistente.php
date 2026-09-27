@@ -48,7 +48,7 @@ class EvaluarAsistente extends Command
         $resultados = [];
         foreach ($preguntas as $i => $c) {
             $esperado = ($c['verdad'])();
-            $intencion = $this->privado($ctrl, 'classifyQuery', $c['pregunta']);
+            $intencion = $this->privado($ctrl, 'intencion', $c['pregunta']);
             $t0 = microtime(true);
             $resp = $ctrl->ask(Request::create('/chat-rag', 'POST', ['prompt' => $c['pregunta']]));
             $seg = round(microtime(true) - $t0, 2);

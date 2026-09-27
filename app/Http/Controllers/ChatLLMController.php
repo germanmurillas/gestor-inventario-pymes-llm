@@ -70,15 +70,66 @@ class ChatLLMController extends Controller {
         $q = mb_strtolower($query);
         // El orden importa: primero lo más específico.
         if ($this->lotesMencionados($query)->isNotEmpty() || preg_match('/\blote\s+[a-z0-9]+-[a-z0-9-]+/iu', $q)) return 'batch_info';
+        if (preg_match('/cuarentena|retenid|bloquead|no conform|rechazad/iu', $q)) return 'quarantine';
         if (preg_match('/concili|ajust|diferencia|descuadr/iu', $q)) return 'conciliation';
+        if (preg_match('/m[ií]nimo|hacen? falta|faltan? (por )?pedir|(toca|hay que) (pedir|comprar|reponer)|reponer|reabastec|bajo de (stock|inventario|existencias)|poco stock|(est[aá]n?|van?) (acabando|agotando)|agotad|escase/iu', $q)) return 'low_stock';
         if (preg_match('/resumen|panorama|todo el inventario|estado general|en general|c[oó]mo est[aá] el inventario/iu', $q)) return 'summary';
         if (preg_match('/valor|\bvale\b|precio|costo|cuesta|dinero|plata|invertid/iu', $q)) return 'valuation';
-        if (preg_match('/entr[oó]|sali[oó]|salida|movimient|movi[oó]|historial|kardex|qui[eé]n.+mov/iu', $q)) return 'movements';
-        if (preg_match('/cr[ií]tic[oa]|por vencer|pr[oó]xim[oa].+venc|alerta|urgente/iu', $q)) return 'critical_alerts';
+        if (preg_match('/(?<!\p{L})(entr[oó]|sali[oó]|movi[oó])(?!\p{L})|salida|movimient|historial|kardex|qui[eé]n.+mov/iu', $q)) return 'movements';
+        if (preg_match('/cr[ií]tic[oa]|por vencer|pr[oó]xim[oa].+venc|alerta|urgente|venc\w*\s+pronto|pronto.{0,15}venc|casi se venc|a punto de venc|antes de que se venz|dañ|echar(se)? a perder|se (va|van) a perder/iu', $q)) return 'critical_alerts';
         if (preg_match('/vence|vencimient|expira|caduc|hasta cu[aá]ndo/iu', $q)) return 'expiration';
         if (preg_match('/d[oó]nde|ubicaci[oó]n|en qu[eé] (bodega|parte|lugar)|almac[eé]n|guardad|se guarda/iu', $q)) return 'location';
         if (preg_match('/cu[aá]nt[oa]s?|stock|cantidad|existencias|disponible|queda|quedan|\bhay\b|tenemos/iu', $q)) return 'stock_check';
         return 'general';
+    }
+
+    /** Categorías que entiende el asistente, con la descripción que recibe el modelo al clasificar. */
+    private const CATEGORIAS = [
+        'stock_check' => 'cuánto hay o queda de un insumo',
+        'valuation' => 'valor o costo en dinero del inventario',
+        'expiration' => 'fechas de vencimiento de un insumo o de un periodo',
+        'critical_alerts' => 'lo que está por vencer, se va a dañar o hay que usar primero',
+        'location' => 'dónde está guardado un insumo',
+        'movements' => 'entradas, salidas o historial de movimientos',
+        'batch_info' => 'datos de un lote por su número',
+        'conciliation' => 'ajustes o diferencias del conteo físico',
+        'summary' => 'resumen o estado general del inventario',
+        'quarantine' => 'lotes en cuarentena, retenidos o apartados por calidad',
+        'low_stock' => 'insumos por debajo del mínimo, que faltan o hay que pedir',
+        'general' => 'ninguna de las anteriores',
+    ];
+
+    /**
+     * Intención de la pregunta: primero el clasificador por patrones; si no la reconoce, el modelo de
+     * lenguaje elige entre las categorías (lenguaje coloquial que los patrones no prevén).
+     */
+    private function intencion(string $query): string
+    {
+        $intent = $this->classifyQuery($query);
+        return $intent === 'general' ? ($this->clasificarConModelo($query) ?? 'general') : $intent;
+    }
+
+    private function clasificarConModelo(string $query): ?string
+    {
+        $s = DB::table('settings')->whereIn('clave', ['llm_modelo', 'llm_source'])->pluck('valor', 'clave');
+        if (($s['llm_source'] ?? 'local') !== 'local' || empty($s['llm_modelo'])) return null;
+        $lista = collect(self::CATEGORIAS)->map(fn ($d, $k) => "- {$k}: {$d}")->join("\n");
+        try {
+            $r = Http::timeout(20)->post(config('services.ollama.url') . '/api/chat', [
+                'model' => $s['llm_modelo'], 'stream' => false, 'options' => ['temperature' => 0],
+                'messages' => [
+                    ['role' => 'system', 'content' => "Clasifica la pregunta de un usuario de un sistema de inventario de una panadería en UNA categoría. Responde solo con el nombre de la categoría.\n{$lista}"],
+                    ['role' => 'user', 'content' => $query],
+                ],
+            ]);
+            $texto = mb_strtolower((string) $r->json('message.content'));
+            foreach (array_keys(self::CATEGORIAS) as $k) {
+                if (str_contains($texto, $k)) return $k;
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Clasificación con el modelo falló: ' . $e->getMessage());
+        }
+        return null;
     }
 
     /** Lotes cuyo número aparece en la pregunta (se buscan en la base, sin suponer un formato). */
@@ -101,7 +152,7 @@ class ChatLLMController extends Controller {
     }
 
     /** Insumos que mejor coinciden con la pregunta: los que contienen más palabras de ella en el nombre. */
-    private function materialesDeLaPregunta(array $keywords): array
+    private function materialesDeLaPregunta(array $keywords, bool $soloNombre = false): array
     {
         if (empty($keywords)) return [];
         $candidatos = \App\Models\Material::where(function ($q) use ($keywords) {
@@ -110,6 +161,7 @@ class ChatLLMController extends Controller {
         if ($candidatos->isEmpty()) return [];
         $puntaje = fn ($m) => collect($keywords)->filter(fn ($w) => str_contains(mb_strtolower($m->name), $w))->count();
         $max = $candidatos->max($puntaje);
+        if ($max === 0 && $soloNombre) return [];
         return $max > 0
             ? $candidatos->filter(fn ($m) => $puntaje($m) === $max)->pluck('id')->all()
             : $candidatos->pluck('id')->all(); // solo coincidió la descripción (categoría)
@@ -130,7 +182,12 @@ class ChatLLMController extends Controller {
             'pronto','ahora','actualmente','favor','porfa','necesito','quiero','saber','tiene','tienes','hoy','mañana',
             'quincena','próxima','proxima','primero','sacar','debo','información','informacion','datos','dinero','guardada','guardado',
             'último','ultimo','última','ultima','movió','movio','tuvo','hubo','registraron','ajuste','ajustes','conciliación','conciliacion',
-            'diferencias','física','fisica','estado','consumir','urgentes','insumo','kilos','cuál','qué'];
+            'diferencias','física','fisica','estado','consumir','urgentes','insumo','kilos','cuál','qué',
+            // Lenguaje coloquial que no nombra insumos.
+            'algo','alguno','alguna','algún','nada','toca','usar','gastar','sacar','casi','vaya','van','echar','perder','dañar','daña','dañe','dañado',
+            'bajo','baja','falta','faltan','hace','hacen','pedir','comprar','reponer','mínimo','minimo','encuentro','encontrar','encuentra','sirve',
+            'nos','les','esté','estén','sea','porque','ahorita','cuarentena','retenido','retenida','calidad','bloqueado','menos','poco','poca',
+            'agotado','agotando','acabando','cortos','viejo','apartada','apartado','despachar','venza','vencerse','mercancía','mercancia','problemas'];
 
         return collect(preg_split('/\s+/u', mb_strtolower($query)))
             ->map(fn($w) => preg_replace('/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/u', '', $w))
@@ -158,7 +215,9 @@ class ChatLLMController extends Controller {
         // Solo lotes con existencias: los consumidos quedan en el Kardex, no en el inventario.
         $conStock = fn () => Lote::with(['material', 'bodega'])->activos()->where('quantity', '>', 0);
         $ventana = $this->ventanaDias($query);
-        $materialIds = in_array($intent, ['summary', 'conciliation', 'batch_info'], true) ? [] : $this->materialesDeLaPregunta($keywords);
+        $materialIds = in_array($intent, ['summary', 'conciliation', 'batch_info'], true) ? []
+            // En las listas (por vencer, cuarentena, stock bajo) solo filtra un insumo nombrado, no una palabra suelta.
+            : $this->materialesDeLaPregunta($keywords, in_array($intent, ['critical_alerts', 'quarantine', 'low_stock'], true));
 
         // Si la pregunta nombra un material que no existe, se dice explícitamente
         // en lugar de devolver lotes de otros materiales.
@@ -249,6 +308,19 @@ class ChatLLMController extends Controller {
                         "- [{$m->created_at->format('Y-m-d H:i')}] {$m->lote->material->name} (lote {$m->lote->batch_number}): " . ($m->type === 'salida' ? 'se descontaron ' : 'se sumaron ')
                         . "{$this->num($m->quantity)} {$m->lote->material->unit} | Justificación: {$m->description} | Usuario: " . ($m->user->name ?? 'Sistema'))->join("\n"));
                 break;
+            case 'quarantine':
+                $lotes = $porMaterial(Lote::with(['material', 'bodega'])->where('status', 'quarantined'))->orderBy('expiration_date')->get();
+                $context = "LOTES EN CUARENTENA (retenidos; no se despachan hasta liberarlos). Son {$lotes->count()} lotes:\n"
+                    . ($lotes->isEmpty() ? '- No hay lotes en cuarentena.' : $lotes->map(fn ($l) => $linea($l))->join("\n"));
+                unset($lotes);
+                break;
+            case 'low_stock':
+                $bajos = \App\Models\Material::where('stock_minimo', '>', 0)->when(!empty($materialIds), fn ($q) => $q->whereIn('id', $materialIds))
+                    ->orderBy('name')->get()->filter(fn ($m) => $m->stock_total < $m->stock_minimo);
+                $context = "INSUMOS POR DEBAJO DE SU STOCK MÍNIMO (hay que reponerlos). Son {$bajos->count()}:\n"
+                    . ($bajos->isEmpty() ? '- Ningún insumo está por debajo de su stock mínimo.' : $bajos->map(fn ($m) =>
+                        "- {$m->name}: hay {$this->num($m->stock_total)} {$m->unit} | mínimo {$this->num($m->stock_minimo)} {$m->unit} | faltan {$this->num($m->stock_minimo - $m->stock_total)} {$m->unit}")->join("\n"));
+                break;
             case 'summary':
                 $activos = Lote::activos();
                 $criticos = $conStock()->criticos()->orderBy('expiration_date')->get();
@@ -272,7 +344,7 @@ class ChatLLMController extends Controller {
 
         $bodegas = \App\Models\Bodega::all()->map(fn ($b) => "{$b->name}: {$b->occupancy_percentage}% de " . $this->num($b->capacity) . " {$b->capacity_unit}")->join(' | ');
         $context .= "\n\nESTADO DE BODEGAS: {$bodegas}";
-        $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó, usando exactamente las cifras del contexto (si hay una línea TOTAL, da ese total con su unidad). Si pregunta por un material, habla solo de ese material. Si pregunta por vencimientos, indica material, lote y fecha, del más próximo al más lejano, e incluye todos los lotes listados. NO repitas todo el inventario a menos que te lo pidan.";
+        $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó, usando exactamente las cifras del contexto (si hay una línea TOTAL, da ese total con su unidad). Si pregunta por un material, habla solo de ese material. Si pregunta por vencimientos, indica material, lote y fecha, del más próximo al más lejano, e incluye todos los lotes listados. Si pregunta por cuarentena o por insumos bajo el mínimo, menciona todos los del contexto. NO repitas todo el inventario a menos que te lo pidan.";
 
         return $context;
     }
@@ -422,7 +494,7 @@ class ChatLLMController extends Controller {
         $apiBaseUrl = $apiKeyRecord?->base_url;
         $apiModel = $apiKeyRecord?->model_name;
 
-        $intent = $this->classifyQuery($query);
+        $intent = $this->intencion($query);
         $contextoRAG = $this->buildRagContext($query, $intent);
 
         $defaultPrompt = "Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos.";

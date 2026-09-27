@@ -1,0 +1,372 @@
+{
+    "resumen": {
+        "conjunto": "operario",
+        "etiqueta": "operario-linea-base",
+        "fecha": "2026-09-27 04:37:43",
+        "total": 18,
+        "correctas": 6,
+        "precision": 33.3,
+        "intenciones_correctas": 6,
+        "precision_clasificador": 33.3,
+        "tiempo_mediano_s": 1.16,
+        "modelo": [
+            "gpt-oss:120b-cloud"
+        ],
+        "por_grupo": {
+            "Cuarentena": {
+                "total": 4,
+                "correctas": 0
+            },
+            "Críticos": {
+                "total": 6,
+                "correctas": 1
+            },
+            "Stock bajo el mínimo": {
+                "total": 3,
+                "correctas": 0
+            },
+            "Existencias": {
+                "total": 3,
+                "correctas": 3
+            },
+            "Ubicación": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Insumo inexistente": {
+                "total": 1,
+                "correctas": 1
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Cuarentena",
+            "pregunta": "que hay en cuarentena",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "stock_check",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "No hay ningún material registrado con el nombre **“cuarentena”**.\n\nLos materiales que sí están en el inventario son: Aceite de soya, Ácido ascórbico, ACPM para planta eléctrica, Ajonjolí descortezado, Amilasa maltogénica, Arequipe para relleno, Avena en hojuelas, Azúcar blanca, Bocadillo de guayaba, Bolsa para pan pequeño, Bolsa para pan tajado, Caja corrugada de despacho, Cocoa en polvo, Crema pastelera base, Emulsificante SSL, Enzima alfa‑amilasa fúngica, Enzima glucosa oxidasa, Enzima lipasa panadera, Enzima xilanasa, Esencia de vainilla, Etiqueta adhesiva de lote, Gluten vital de trigo, Harina de trigo integral, Harina de trigo panificable, Huevo líquido pasteurizado, Leche en polvo, Levadura fresca prensada, Levadura seca instantánea, Manteca vegetal panadera, Mantequilla sin sal, Margarina de hojaldre, Mejorador panificación caja 20 kg, Mejorador panificación caja 25 kg, Mogolla integral x 6, Mono y diglicéridos, Pan hamburguesa x 8 con ajonjolí, Pan perro x 8, Pan tajado blanco 500 g, Pan tajado integral 500 g, Propionato de calcio, Ripio de pan (miga para apanar) 1 kg, Sal refinada, Salsa de tomate para pizza, Sorbato de potasio, Tostadas de pan x 20.",
+            "correcta": false,
+            "motivo": "faltan: HAR-NOV-01",
+            "segundos": 1.88,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 2,
+            "grupo": "Cuarentena",
+            "pregunta": "¿Qué lotes están en cuarentena?",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "general",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "No hay lotes en cuarentena según la información disponible.",
+            "correcta": false,
+            "motivo": "faltan: HAR-NOV-01",
+            "segundos": 0.59,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 3,
+            "grupo": "Cuarentena",
+            "pregunta": "Muéstrame lo que está en cuarentena",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "general",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "Cuarentena: 150 kg.",
+            "correcta": false,
+            "motivo": "faltan: HAR-NOV-01",
+            "segundos": 0.78,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 4,
+            "grupo": "Cuarentena",
+            "pregunta": "¿Hay algún lote retenido por calidad?",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "stock_check",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "Material no encontrado.  \nLos materiales registrados que podrían coincidir con lo que busca son:\n\n- Aceite de soya  \n- Ácido ascórbico (vitamina C)  \n- ACPM para planta eléctrica  \n- Ajonjolí descortezado  \n- Amilasa maltogénica (antienvejecimiento)  \n- Arequipe para relleno  \n- Avena en hojuelas  \n- Azúcar blanca  \n- Bocadillo de guayaba  \n- Bolsa para pan pequeño  \n- Bolsa para pan tajado  \n- Caja corrugada de despacho  \n- Cocoa en polvo  \n- Crema pastelera base  \n- Emulsificante SSL (estearoil lactilato de sodio)  \n- Enzima alfa-amilasa fúngica  \n- Enzima glucosa oxidasa  \n- Enzima lipasa panadera  \n- Enzima xilanasa (hemicelulasa)  \n- Esencia de vainilla  \n- Etiqueta adhesiva de lote  \n- Gluten vital de trigo  \n- Harina de trigo integral  \n- Harina de trigo panificable  \n- Huevo líquido pasteurizado  \n- Leche en polvo  \n- Levadura fresca prensada  \n- Levadura seca instantánea  \n- Manteca vegetal panadera  \n- Mantequilla sin sal  \n- Margarina de hojaldre  \n- Mejorador panificación caja 20 kg  \n- Mejorador panificación caja 25 kg  \n- Mogolla integral x 6  \n- Mono y diglicéridos  \n- Pan hamburguesa x 8 con ajonjolí  \n- Pan perro x 8  \n- Pan tajado blanco 500 g  \n- Pan tajado integral 500 g  \n- Propionato de calcio  \n- Ripio de pan (miga para apanar) 1 kg  \n- Sal refinada  \n- Salsa de tomate para pizza  \n- Sorbato de potasio  \n- Tostadas de pan x 20",
+            "correcta": false,
+            "motivo": "faltan: HAR-NOV-01",
+            "segundos": 1.58,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 5,
+            "grupo": "Críticos",
+            "pregunta": "que está próximo a vencer",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- Huevo líquido pasteurizado | Lote: HUE-01-260914-1 | Vence: 2026-10-05  \n- Crema pastelera base | Lote: CRE-01-260908-1 | Vence: 2026-10-08  \n- Levadura fresca prensada | Lote: LEV-01-260905-1 | Vence: 2026-10-10",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.74,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 6,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué se me va a vencer pronto?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "expiration",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- Mogolla integral x 6 | Lote: MOG-01-260925 | Vence: 2026‑09‑30 (en 3 días)  \n- Pan perro x 8 | Lote: PER-01-260924 | Vence: 2026‑09‑30 (en 3 días)  \n- Pan tajado blanco 500 g | Lote: TAJ-01-260924 | Vence: 2026‑10‑01 (en 4 días)  \n- Mogolla integral x 6 | Lote: MOG-01-260926 | Vence: 2026‑10‑01 (en 4 días)  \n- Pan tajado integral 500 g | Lote: TAJ-02-260924 | Vence: 2026‑10‑01 (en 4 días)  \n- Pan perro x 8 | Lote: PER-01-260925 | Vence: 2026‑10‑01 (en 4 días)  \n- Pan hamburguesa x 8 con ajonjolí | Lote: HAM-01-260925 | Vence: 2026‑10‑01 (en 4 días)  \n- Pan tajado blanco 500 g | Lote: TAJ-01-260925 | Vence: 2026‑10‑02 (en 5 días)  \n- Pan hamburguesa x 8 con ajonjolí | Lote: HAM-01-260926 | Vence: 2026‑10‑02 (en 5 días)  \n- Pan tajado integral 500 g | Lote: TAJ-02-260925 | Vence: 2026‑10‑02 (en 5 días)  \n- Pan perro x 8 | Lote: PER-01-260926 | Vence: 2026‑10‑02 (en 5 días)  \n- Pan tajado integral 500 g | Lote: TAJ-02-260926 | Vence: 2026‑10‑03 (en 6 días)",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1",
+            "segundos": 2.52,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 7,
+            "grupo": "Críticos",
+            "pregunta": "¿Hay algo que se esté por vencer?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "No hay lotes por vencer.",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1",
+            "segundos": 0.6,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 8,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué toca usar primero porque ya casi se vence?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "expiration",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "El material que menciona no está registrado en el inventario.\n\nPodría estar refiriéndose a alguno de los siguientes productos registrados, que suelen tener fecha de vencimiento:\n\n- Aceite de soya  \n- Leche en polvo  \n- Huevo líquido pasteurizado  \n- Mantequilla sin sal  \n- Margarina de hojaldre  \n- Crema pastelera base  \n- Enzima alfa‑amilasa fúngica  \n- Enzima glucosa oxidasa  \n- Enzima lipasa panadera  \n\nRevise esas referencias y confirme el nombre exacto para poder indicarle cuál usar primero.",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1",
+            "segundos": 1.47,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 9,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué se va a dañar pronto?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "general",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "**Vencimientos próximos**\n\n1. **Mogolla integral x 6** – Lote: MOG-01-260925 – Vence: 2026‑09‑30 (en 3 días)  \n2. **Pan perro x 8** – Lote: PER-01-260924 – Vence: 2026‑09‑30 (en 3 días)  \n3. **Pan tajado blanco 500 g** – Lote: TAJ-01-260924 – Vence: 2026‑10‑01 (en 4 días)  \n4. **Pan perro x 8** – Lote: PER-01-260925 – Vence: 2026‑10‑01 (en 4 días)  \n5. **Pan hamburguesa x 8 con ajonjolí** – Lote: HAM-01-260925 – Vence: 2026‑10‑01 (en 4 días)  \n6. **Pan tajado integral 500 g** – Lote: TAJ-02-260924 – Vence: 2026‑10‑01 (en 4 días)",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1",
+            "segundos": 1.55,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 10,
+            "grupo": "Críticos",
+            "pregunta": "¿Hay algo que se vaya a echar a perder?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "stock_check",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "Material no encontrado: no hay ningún registro que coincida con “algo que se vaya a echar a perder”.\n\nMateriales registrados que podrían ser lo que busca (productos que pueden deteriorarse):  \n- Aceite de soya  \n- Huevo líquido pasteurizado  \n- Leche en polvo  \n- Mantequilla sin sal  \n- Margarina de hojaldre  \n- Levadura fresca prensada  \n- Levadura seca instantánea  \n- Crema pastelera base  \n- Manteca vegetal panadera  \n\nRevise si alguno de estos corresponde a lo que necesita.",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1",
+            "segundos": 1.46,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 11,
+            "grupo": "Stock bajo el mínimo",
+            "pregunta": "¿Qué insumos están por debajo del mínimo?",
+            "intencion_esperada": "low_stock",
+            "intencion_obtenida": "general",
+            "esperado": [
+                "Harina de trigo integral",
+                "Azúcar blanca",
+                "Sal refinada",
+                "Ajonjolí descortezado",
+                "Mantequilla sin sal",
+                "Manteca vegetal panadera",
+                "Aceite de soya",
+                "Arequipe para relleno",
+                "Bocadillo de guayaba",
+                "Crema pastelera base",
+                "Salsa de tomate para pizza",
+                "Bolsa para pan tajado",
+                "Etiqueta adhesiva de lote"
+            ],
+            "respuesta": "- Cuarto de grasas y rellenos: 7.52 % de 4 000 kg  \n- Bodega de empaques: 12.33 % de 120 000 und  \n- Producto terminado y despacho: 14.57 % de 15 000 und  \n- Cuarto de combustibles: 9 % de 1 000 gal  \n- Cuarentena: 10 % de 1 500 kg",
+            "correcta": false,
+            "motivo": "faltan: Harina de trigo integral, Azúcar blanca, Sal refinada, Ajonjolí descortezado, Mantequilla sin sal, Manteca vegetal panadera, Aceite de soya, Arequipe para relleno, Bocadillo de guayaba, Crema pastelera base, Salsa de tomate para pizza, Bolsa para pan tajado, Etiqueta adhesiva de lote",
+            "segundos": 2.05,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 12,
+            "grupo": "Stock bajo el mínimo",
+            "pregunta": "¿Qué nos hace falta pedir?",
+            "intencion_esperada": "low_stock",
+            "intencion_obtenida": "general",
+            "esperado": [
+                "Harina de trigo integral",
+                "Azúcar blanca",
+                "Sal refinada",
+                "Ajonjolí descortezado",
+                "Mantequilla sin sal",
+                "Manteca vegetal panadera",
+                "Aceite de soya",
+                "Arequipe para relleno",
+                "Bocadillo de guayaba",
+                "Crema pastelera base",
+                "Salsa de tomate para pizza",
+                "Bolsa para pan tajado",
+                "Etiqueta adhesiva de lote"
+            ],
+            "respuesta": "Nos hace falta pedir los siguientes productos:\n\n- Crema pastelera base – Stock: 28.9 kg – Vence: 2026‑10‑08  \n- Salsa de tomate para pizza – Stock: 13.71 kg – Vence: 2026‑10‑20  \n- Arequipe para relleno – Stock: 7.72 kg – Vence: 2026‑12‑15  \n- Bocadillo de guayaba – Stock: 15.26 kg – Vence: 2027‑02‑13",
+            "correcta": false,
+            "motivo": "faltan: Harina de trigo integral, Azúcar blanca, Sal refinada, Ajonjolí descortezado, Mantequilla sin sal, Manteca vegetal panadera, Aceite de soya, Bolsa para pan tajado, Etiqueta adhesiva de lote",
+            "segundos": 2.35,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 13,
+            "grupo": "Stock bajo el mínimo",
+            "pregunta": "¿Qué está bajo de stock?",
+            "intencion_esperada": "low_stock",
+            "intencion_obtenida": "stock_check",
+            "esperado": [
+                "Harina de trigo integral",
+                "Azúcar blanca",
+                "Sal refinada",
+                "Ajonjolí descortezado",
+                "Mantequilla sin sal",
+                "Manteca vegetal panadera",
+                "Aceite de soya",
+                "Arequipe para relleno",
+                "Bocadillo de guayaba",
+                "Crema pastelera base",
+                "Salsa de tomate para pizza",
+                "Bolsa para pan tajado",
+                "Etiqueta adhesiva de lote"
+            ],
+            "respuesta": "El material **“bajo”** no está registrado en el inventario.\n\nAlgunos de los materiales que sí aparecen y podrían ser lo que buscas son:  \n- Aceite de soya  \n- Ácido ascórbico (vitamina C)  \n- Ajonjolí descortezado  \n- Amilasa maltogénica (antienvejecimiento)  \n- Arequipe para relleno  \n- Avena en hojuelas  \n- Azúcar blanca  \n- Bolsa para pan pequeño \/ Bolsa para pan tajado  \n- Caja corrugada de despacho  \n- Cocoa en polvo  \n- Crema pastelera base  \n- Emulsificante SSL (estearoil lactilato de sodio)  \n- Enzima alfa‑amilasa fúngica, glucosa oxidasa, lipasa panadera, xilanasa (hemicelulasa)  \n- Esencia de vainilla  \n- Etiqueta adhesiva de lote  \n- Gluten vital de trigo  \n- Harina de trigo integral \/ panificable  \n- Huevo líquido pasteurizado  \n- Leche en polvo  \n- Levadura fresca prensada \/ seca instantánea  \n- Manteca vegetal panadera, mantequilla sin sal, margarina de hojaldre  \n- Mejorador de panificación (cajas 20 kg y 25 kg)  \n- Mogolla integral x 6  \n- Mono y diglicéridos  \n- Panes (hamburguesa, perro, tajado blanco\/integral)  \n- Propionato de calcio  \n- Ripio de pan (miga para apanar) 1 kg  \n- Sal refinada  \n- Salsa de tomate para pizza  \n- Sorbato de potasio  \n- Tostadas de pan x 20  \n\nSi buscas información sobre alguno de estos, indícalo y te proporciono el stock disponible.",
+            "correcta": false,
+            "motivo": "faltan: Bocadillo de guayaba",
+            "segundos": 1.42,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 14,
+            "grupo": "Existencias",
+            "pregunta": "¿Queda harina de trigo panificable?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 5731.05,
+            "respuesta": "Sí, queda harina de trigo panificable: **5731.05 kg**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.47,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 15,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánto huevo líquido nos queda?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 84.24,
+            "respuesta": "84.24 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.57,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 16,
+            "grupo": "Existencias",
+            "pregunta": "¿Hay margarina de hojaldre?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 128.9,
+            "respuesta": "Sí. Total Margarina de hojaldre: 128.9 kg (1 lote).",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.69,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 17,
+            "grupo": "Ubicación",
+            "pregunta": "¿Dónde encuentro la leche en polvo?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "movements",
+            "esperado": [
+                "Bodega de materia prima seca"
+            ],
+            "respuesta": "En la Bodega de materia prima seca.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.9,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 18,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Tenemos queso crema?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No, no hay queso crema registrado en el inventario.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.5,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        }
+    ]
+}

@@ -148,4 +148,64 @@ class ChatRagContextTest extends TestCase
         $this->assertSame('71.015', $this->invokePrivate('num', 71.015));
         $this->assertSame('2.5', $this->invokePrivate('num', '2.500'));
     }
+
+    public function test_cuarentena_y_stock_bajo_tienen_su_categoria(): void
+    {
+        foreach (['que hay en cuarentena', '¿Qué lotes están en cuarentena?', '¿Hay algún lote retenido por calidad?'] as $q) {
+            $this->assertSame('quarantine', $this->invokePrivate('classifyQuery', $q), $q);
+        }
+        foreach (['¿Qué insumos están por debajo del mínimo?', '¿Qué nos hace falta pedir?', '¿Qué está bajo de stock?'] as $q) {
+            $this->assertSame('low_stock', $this->invokePrivate('classifyQuery', $q), $q);
+        }
+    }
+
+    public function test_formas_coloquiales_de_por_vencer_y_encuentro_no_es_entrada(): void
+    {
+        foreach (['¿Qué se me va a vencer pronto?', '¿Qué toca usar primero porque ya casi se vence?', '¿Qué se va a dañar pronto?', '¿Hay algo que se vaya a echar a perder?'] as $q) {
+            $this->assertSame('critical_alerts', $this->invokePrivate('classifyQuery', $q), $q);
+        }
+        $this->assertSame('location', $this->invokePrivate('classifyQuery', '¿Dónde encuentro la leche en polvo?'));
+        $this->assertSame('movements', $this->invokePrivate('classifyQuery', '¿Qué entró ayer?'));
+    }
+
+    public function test_contexto_de_cuarentena_lista_solo_los_lotes_retenidos(): void
+    {
+        $harina = Material::factory()->create(['name' => 'Harina de trigo']);
+        Lote::factory()->create(['material_id' => $harina->id, 'batch_number' => 'LT-RET-1', 'status' => 'quarantined']);
+        Lote::factory()->create(['material_id' => $harina->id, 'batch_number' => 'LT-OK-1', 'status' => 'active']);
+
+        $ctx = $this->invokePrivate('buildRagContext', 'que hay en cuarentena', 'quarantine');
+
+        $this->assertStringContainsString('LOTES EN CUARENTENA', $ctx);
+        $this->assertStringContainsString('LT-RET-1', $ctx);
+        $this->assertStringNotContainsString('LT-OK-1', $ctx);
+        $this->assertStringNotContainsString('MATERIAL NO ENCONTRADO', $ctx);
+    }
+
+    public function test_contexto_de_stock_bajo_lista_los_insumos_bajo_su_minimo(): void
+    {
+        $azucar = Material::factory()->create(['name' => 'Azúcar blanca', 'stock_minimo' => 100, 'unit' => 'kg']);
+        $sal = Material::factory()->create(['name' => 'Sal refinada', 'stock_minimo' => 10, 'unit' => 'kg']);
+        Lote::factory()->create(['material_id' => $azucar->id, 'quantity' => 40, 'status' => 'active']);
+        Lote::factory()->create(['material_id' => $sal->id, 'quantity' => 50, 'status' => 'active']);
+
+        $ctx = $this->invokePrivate('buildRagContext', '¿Qué nos hace falta pedir?', 'low_stock');
+
+        $this->assertStringContainsString('Azúcar blanca: hay 40 kg | mínimo 100 kg | faltan 60 kg', $ctx);
+        $this->assertStringNotContainsString('Sal refinada', $ctx);
+    }
+
+    public function test_palabras_coloquiales_no_filtran_la_lista_de_por_vencer(): void
+    {
+        // "algo" aparece en la descripción de un insumo: no debe tomarse como el insumo pedido.
+        $pan = Material::factory()->create(['name' => 'Pan perro', 'description' => 'algo de pan', 'dias_criticos' => 5]);
+        $huevo = Material::factory()->create(['name' => 'Huevo líquido', 'dias_criticos' => 5]);
+        Lote::factory()->create(['material_id' => $huevo->id, 'batch_number' => 'LT-HUE-9', 'status' => 'active', 'quantity' => 10, 'expiration_date' => now()->addDays(2)]);
+        Lote::factory()->create(['material_id' => $pan->id, 'batch_number' => 'LT-PAN-9', 'status' => 'active', 'quantity' => 10, 'expiration_date' => now()->addDays(60)]);
+
+        $ctx = $this->invokePrivate('buildRagContext', '¿Hay algo que se vaya a echar a perder?', 'critical_alerts');
+
+        $this->assertStringContainsString('LT-HUE-9', $ctx);
+        $this->assertStringNotContainsString('MATERIAL NO ENCONTRADO', $ctx);
+    }
 }
