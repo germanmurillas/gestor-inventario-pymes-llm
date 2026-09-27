@@ -7,130 +7,130 @@
 % Audiencia:   general
 % Verificar antes de editar: bash check_tesis_version.sh overleaf_tesis_humanizado/Final/TrabajosFuturos.tex
 % -------------------------------------------------
+% Revisado contra el código el 26-sep-2026: se retiraron propuestas que ya están
+% implementadas (despliegue en OCI, CI/CD, canales de notificación, órdenes de compra,
+% cifrado de claves de API) y se acotaron las que existen solo en parte.
 
 
 \section{Trabajos Futuros}
 
+Las propuestas se agrupan en siete frentes. El primero recoge lo que quedó pendiente del caso de estudio y es el más directamente útil para la empresa; los demás amplían el sistema en infraestructura, inteligencia artificial, funcionalidades de negocio, experiencia de usuario, seguridad e investigación. En cada caso se indica qué existe hoy, para distinguir lo que falta de lo que ya se construyó.
+
 \subsection{Requerimientos del caso de estudio pendientes}
 Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedaron por completar:
 \begin{itemize}
-    \item \textbf{Punto de reorden (RF-09)}: calcular cuándo pedir a partir del consumo promedio y del tiempo de entrega de cada proveedor, e indicar para cuántos días alcanza la existencia.
+    \item \textbf{Punto de reorden (RF-09)}: calcular cuándo pedir a partir del consumo promedio y del tiempo de entrega de cada proveedor, e indicar para cuántos días alcanza la existencia. Hoy el sistema alerta cuando un insumo baja de su stock mínimo, pero ese mínimo lo fija el usuario.
     \item \textbf{Desglose del consumo por destino (RF-15)}: registrar cuánto se usa en esponja, espolvoreo y cada línea de producto, que es la causa de las diferencias que la empresa detecta en el cierre.
-    \item \textbf{Factura y ficha de calidad en el ingreso (RF-03)} y un \textbf{registro de no conformidades en la recepción (RF-14)}.
-    \item \textbf{Estadísticas de consumo por periodo desde el asistente (RF-10)} y \textbf{lectura de los códigos de barras de fábrica} de los insumos, además de las etiquetas propias.
-    \item \textbf{Conversión automática de presentaciones} (bultos y cajas) a la unidad base en kilogramos (RNF-01).
+    \item \textbf{Factura y ficha de calidad en el ingreso (RF-03)} y un \textbf{registro de no conformidades en la recepción (RF-14)}. Hoy el proveedor queda asociado a la orden de compra y un lote puede pasar a cuarentena, pero la factura, la ficha y la novedad no tienen un registro propio.
+    \item \textbf{Estadísticas de consumo por periodo (RF-10)}: agregar el consumo por día, semana o mes y exponerlo también en el asistente; hoy existe el reporte filtrable por rango de fechas.
+    \item \textbf{Lectura de los códigos de barras de fábrica} de los insumos, además de las etiquetas QR propias del sistema.
+    \item \textbf{Conversión automática de presentaciones} (bultos y cajas) a la unidad base en kilogramos (RNF-01); hoy la conversión la hace el usuario.
 \end{itemize}
-
-Todo proyecto de software llega a un punto en el que la pregunta deja de ser ``¿qué más podemos construir?'' y se convierte en ``¿qué debemos construir después?''. Pymetory, en su estado actual, es un sistema completo y funcional, pero también es una base sobre la cual se pueden edificar mejoras significativas en direcciones muy distintas. Esta sección organiza esas direcciones en cinco categorías, priorizando aquellas que ofrecen el mayor beneficio con la menor barrera de entrada.
 
 \subsection{Infraestructura y Despliegue}
 
 \begin{itemize}
-    \item \textbf{Despliegue en OCI ARM Ampere (24 GB RAM)}: La instancia \texttt{VM.Standard.A1.Flex} con 4 OCPUs y 24 GB de RAM en Oracle Cloud Infrastructure es un recurso gratuito de alta capacidad, pero también de disponibilidad limitada. Completar su obtención ---mediante un sondeo automatizado sobre múltiples regiones y dominios de disponibilidad--- es la prioridad más alta en infraestructura, porque permitiría ejecutar modelos de lenguaje directamente en el servidor sin depender de APIs externas de pago, reduciendo el costo operativo del sistema a cero.
+    \item \textbf{Copias de seguridad automatizadas}: hoy los respaldos de la base de datos se generan a mano con \texttt{mysqldump} antes de los cambios delicados (Capítulo \ref{chap:implementacion}). Se propone una tarea programada que haga un respaldo diario de la base y de los archivos subidos, lo guarde fuera del servidor (por ejemplo, en OCI Object Storage dentro de la capa gratuita) y aplique una política de retención.
 
-    \item \textbf{Modelo de lenguaje local con Ollama}: Una vez disponible la instancia de 24 GB, se propone desplegar un modelo de lenguaje específico para el dominio de inventarios (como Llama 3.1 8B o Mistral 7B) y afinarlo con los datos históricos del Kardex y las consultas previas del módulo RAG. El resultado sería un modelo que comprende el vocabulario del sector y puede operar sin conexión a internet, una ventaja importante para bodegas ubicadas en zonas de conectividad limitada.
+    \item \textbf{Pruebas de extremo a extremo y análisis estático en la integración continua}: el flujo de GitHub Actions ya revisa la sintaxis, ejecuta PHPUnit y despliega por SSH solo si las pruebas pasan. Faltan dos etapas: ejecutar la suite Playwright contra una instancia temporal de la aplicación y correr el análisis estático (PHPStan para PHP y ESLint para TypeScript) como condición para desplegar.
 
-    \item \textbf{Arquitectura multi-tenencia}: Adaptar la base de datos y la lógica de negocio para que una sola instancia del sistema pueda servir a múltiples PYMEs, cada una con sus datos completamente aislados mediante un identificador de inquilino (\texttt{tenant\_id}) en todas las tablas. Esta modificación habilitaría el modelo de distribución como servicio (SaaS), permitiendo ofrecer Pymetory a bajo costo compartiendo la infraestructura.
+    \item \textbf{Contenedores Docker}: el repositorio incluye un \texttt{Dockerfile} y un \texttt{docker-compose.yml}, pero no se usan en producción ni se prueban en la integración continua, y conservan valores de una etapa anterior del proyecto. Se propone actualizarlos, validarlos en el flujo de GitHub Actions y usarlos como entorno de desarrollo reproducible.
 
-    \item \textbf{Integración y despliegue continuo (CI/CD)}: Configurar un pipeline en GitHub Actions que ejecute automáticamente el suite de pruebas Playwright, valide la sintaxis del código con PHP CS Fixer y ESLint, y despliegue los cambios al servidor de producción, eliminando los pasos manuales que hoy requiere cada actualización.
+    \item \textbf{Arquitectura multi-tenencia}: adaptar la base de datos y la lógica de negocio para que una sola instancia del sistema sirva a varias PYMEs, cada una con sus datos aislados mediante un identificador de inquilino (\texttt{tenant\_id}). Esto permitiría ofrecer Pymetory como servicio compartiendo la infraestructura.
 
-    \item \textbf{Contenedores Docker}: Crear una configuración de Docker Compose que empaquete todos los servicios del sistema (PHP-FPM, Nginx, MySQL y Node.js para Vite) en contenedores independientes, garantizando que el entorno de desarrollo sea idéntico en cualquier máquina y eliminando los problemas de configuración que consumen tiempo al iniciar el proyecto.
+    \item \textbf{Modelo local afinado para el dominio}: el servidor ya ejecuta un modelo local pequeño (\texttt{gemma3:4b}) como respaldo del modelo en la nube. Se propone afinar un modelo de tamaño similar con consultas y respuestas del dominio de inventarios, de modo que el respaldo local responda con calidad cercana a la del principal. Por la falta de GPU, el tamaño del modelo debe elegirse según los recursos del servidor.
 \end{itemize}
 
 \subsection{Inteligencia Artificial y RAG}
 
 \begin{itemize}
-    \item \textbf{Clasificación de intenciones con NLP}: El clasificador actual se basa en expresiones regulares: acertó la intención en las 50 consultas de la batería, pero es sensible a redacciones que no contemplan sus patrones (Capítulo \ref{chap:pruebas}). Su limitación de diseño es conocida: no entiende sinónimos ni variaciones sintácticas que se salgan de los patrones definidos (por ejemplo, las tildes no se reconocían hasta que se corrigieron las expresiones). Se propone reemplazarlo por un modelo de procesamiento de lenguaje natural entrenado para español (como un BERT afinado) que pueda clasificar correctamente consultas como ``¿Qué sabes del LT-999?'' sin necesidad de programar explícitamente cada formulación posible.
+    \item \textbf{Clasificación de intenciones con NLP}: el clasificador actual se basa en expresiones regulares. Acertó la intención en las 50 consultas de la batería, pero depende de que la pregunta use palabras previstas en sus patrones: preguntas formuladas con sinónimos o expresiones coloquiales pueden caer en la categoría general (por ejemplo, las tildes no se reconocían hasta que se corrigieron las expresiones). Se propone reemplazarlo o complementarlo con un modelo de clasificación entrenado para español.
 
-    \item \textbf{Búsqueda semántica con embeddings}: Indexar el catálogo de materiales utilizando embeddings vectoriales (representaciones numéricas que capturan el significado, no solo la coincidencia textual) para permitir búsquedas como ``muéstrame todos los abrasivos'' o ``productos para acabados''. El usuario no necesitaría conocer los nombres exactos de los materiales; el sistema encontraría aquellos cuyo significado es cercano a la consulta.
+    \item \textbf{Búsqueda semántica con embeddings}: indexar el catálogo de insumos con representaciones vectoriales para responder preguntas por significado y no por coincidencia de texto, como ``¿qué grasas tenemos?'' o ``insumos para decorar'', sin que el usuario conozca el nombre exacto de cada material.
 
-    \item \textbf{Memoria conversacional}: El módulo RAG actual trata cada consulta de forma aislada. Incorporar el historial de la conversación en el prompt permitiría interacciones naturales como ``¿cuánta harina queda?'' seguido de ``¿y de azúcar?'', donde el sistema entiende que la segunda pregunta se refiere también a cantidades, sin necesidad de que el usuario repita el contexto.
+    \item \textbf{Memoria conversacional en la recuperación}: el modelo ya recibe los dos últimos turnos de la conversación, pero la clasificación y la consulta a la base de datos usan solo la pregunta actual. Por eso, en una secuencia como ``¿cuánta harina queda?'' seguida de ``¿y de azúcar?'', la segunda pregunta se interpreta sin saber que se refiere a existencias. Se propone heredar la intención y el material del turno anterior cuando la nueva pregunta sea incompleta.
 
-    \item \textbf{Análisis predictivo de demanda}: Aplicar modelos de series temporales (como ARIMA o Prophet, desarrollado por Meta) al historial de movimientos del Kardex para predecir la demanda futura de cada material. El sistema podría sugerir cantidades de reposición y alertar sobre posibles desabastecimientos antes de que ocurran.
+    \item \textbf{Análisis predictivo de demanda}: aplicar modelos de series temporales al historial del Kardex para estimar el consumo futuro de cada insumo, sugerir cantidades de reposición y anticipar faltantes. Complementa el punto de reorden (RF-09).
 
-    \item \textbf{Detección de anomalías en el Kardex}: Implementar un módulo que analice los patrones de movimientos y detecte comportamientos atípicos ---consumos inusualmente altos, entradas duplicadas, ajustes frecuentes sobre un mismo lote--- que podrían indicar errores operativos o usos indebidos del sistema.
+    \item \textbf{Detección de anomalías en el Kardex}: analizar los movimientos para señalar comportamientos atípicos ---consumos inusualmente altos, entradas duplicadas, ajustes frecuentes sobre un mismo lote--- que podrían indicar errores operativos o usos indebidos.
 
-    \item \textbf{Pipeline de evaluación continua del RAG}: Desarrollar un framework automatizado que evalúe periódicamente la precisión del clasificador de intenciones y la pertinencia de las respuestas generadas, produciendo reportes que alerten cuando la calidad del módulo RAG se degrade por debajo de un umbral definido.
+    \item \textbf{Evaluación continua del asistente}: la batería de 50 consultas se ejecuta hoy a mano con el comando \texttt{rag:evaluar} (Sección \ref{sec:pru_asistente}). Se propone programarla de forma periódica y generar una alerta cuando la tasa de acierto baje de un umbral, por ejemplo al cambiar de modelo o de proveedor.
 \end{itemize}
 
 \subsection{Funcionalidades de Negocio}
 
 \begin{itemize}
-    \item \textbf{Notificaciones en tiempo real}: Integrar canales de notificación (Telegram, correo electrónico y notificaciones dentro de la propia interfaz) para alertar sobre los eventos que requieren atención: lotes próximos a vencer, stock por debajo del mínimo configurado, discrepancias detectadas en conciliación o hitos de rotación de inventario.
+    \item \textbf{Cotizaciones en las órdenes de compra}: el sistema ya maneja órdenes de compra con proveedor, aprobación y recepción que registra el lote real con su vencimiento y bodega. Falta la etapa previa: solicitar cotizaciones a varios proveedores, compararlas y generar la orden desde la elegida.
 
-    \item \textbf{Aplicación móvil complementaria}: Desarrollar una aplicación móvil ---ya sea nativa con React Native o una PWA (aplicación web progresiva)--- que permita consultar el stock rápidamente, escanear códigos QR para registrar despachos desde el celular y recibir notificaciones sin tener que abrir un computador. La aplicación compartiría el mismo backend de Laravel usando tokens de acceso personal.
+    \item \textbf{Integración con proveedores}: conectar Pymetory con los catálogos de los proveedores para consultar precios y disponibilidad, y proponer la orden de reposición cuando un insumo cruce su punto de reorden.
 
-    \item \textbf{Integración con proveedores}: Conectar Pymetory con las APIs de proveedores para consultar catálogos, precios y disponibilidad, y automatizar la generación de pedidos de reposición cuando el stock de un material cruce su nivel mínimo.
+    \item \textbf{Módulo de producción (BOM)}: registrar las recetas o listas de materiales de cada producto, descontar automáticamente sus ingredientes por FEFO al producir y calcular el costo real de producción. Resolvería también buena parte del desglose por destino (RF-15).
 
-    \item \textbf{Módulo de órdenes de compra}: Implementar el flujo completo: solicitud de cotizaciones a proveedores, comparación, generación de la orden de compra, recepción de la mercancía contra esa orden y actualización automática del inventario al confirmar la recepción.
+    \item \textbf{Contabilidad integrada}: generar los asientos contables de cada movimiento de inventario ---entradas como activos, salidas como costos--- para facilitar la conciliación con el sistema contable de la empresa.
 
-    \item \textbf{Módulo de producción (BOM)}: Para PYMEs manufactureras que transforman materia prima en productos terminados, implementar recetas o listas de materiales (Bill of Materials) que permitan registrar qué ingredientes componen cada producto, consumir automáticamente esos ingredientes al producir un lote, y calcular el costo real de producción.
-
-    \item \textbf{Contabilidad integrada}: Registrar automáticamente los asientos contables correspondientes a cada movimiento de inventario ---entradas como activos, salidas como costos--- facilitando la conciliación fiscal y la generación de estados financieros básicos.
-
-    \item \textbf{Integración con facturación electrónica DIAN}: Conectar el sistema con los servicios de facturación electrónica exigidos por la DIAN en Colombia, generando automáticamente las facturas de venta a partir de los despachos registrados en el sistema.
+    \item \textbf{Integración con facturación electrónica DIAN}: conectar el sistema con los servicios de facturación electrónica exigidos en Colombia.
 \end{itemize}
 
 \subsection{Experiencia de Usuario y Accesibilidad}
 
 \begin{itemize}
-    \item \textbf{Modo offline progresivo}: Implementar un Service Worker que convierta a Pymetory en una PWA con funcionamiento básico sin conexión a internet. Los datos se almacenarían localmente en el navegador y se sincronizarían con el servidor cuando la conexión se restablezca. Esta capacidad es particularmente relevante para bodegas ubicadas en zonas rurales o industriales con conectividad intermitente.
+    \item \textbf{Registro sin conexión en la bodega}: la interfaz ya funciona en el celular (barra de navegación inferior y escáner QR con la cámara) y la aplicación tiene un \textit{Service Worker} que guarda en caché los archivos estáticos y muestra una página de aviso sin conexión. Falta registrar consumos e ingresos sin conexión y sincronizarlos al volver la red, respetando el orden FEFO y la inmutabilidad del Kardex.
 
-    \item \textbf{Personalización de temas}: Permitir que cada empresa adapte la paleta de colores, el logotipo y la tipografía de la interfaz, de modo que el sistema refleje su identidad corporativa sin perder la coherencia visual del diseño base.
+    \item \textbf{Notificaciones en el celular}: las alertas de vencimiento y stock bajo ya llegan dentro de la aplicación y pueden enviarse por Telegram o correo. Se propone agregar notificaciones \textit{push} del navegador para recibirlas en el celular sin tener la aplicación abierta.
 
-    \item \textbf{Tutoriales interactivos}: Incorporar guías paso a paso que acompañen al usuario en su primera experiencia con cada módulo, similares a los que ofrecen herramientas modernas como Notion o Linear. El objetivo es reducir la curva de aprendizaje sin necesidad de leer un manual.
+    \item \textbf{Identidad visual por empresa}: el usuario ya puede elegir entre seis temas visuales, todos verificados con WCAG 2.1 AA. Se propone permitir que cada empresa configure su logotipo y su color principal, conservando el contraste mínimo.
 
-    \item \textbf{Comandos de voz para el módulo RAG}: Integrar la API de reconocimiento de voz del navegador (Web Speech API) en el chat del asistente, permitiendo que un operario haga consultas habladas mientras tiene las manos ocupadas con tareas físicas en la bodega.
+    \item \textbf{Tutoriales interactivos}: guías paso a paso que acompañen al usuario la primera vez que usa cada módulo, para reducir la curva de aprendizaje sin depender del manual.
 
-    \item \textbf{Accesibilidad nivel AAA}: Avanzar del nivel AA al AAA de las WCAG 2.1, lo que implica contraste mejorado (mínimo 7:1), alternativas para contenidos multimedia, explicaciones para abreviaturas y términos técnicos, y opciones de lectura simplificada para usuarios con distintas necesidades de accesibilidad.
+    \item \textbf{Consultas por voz al asistente}: usar el reconocimiento de voz del navegador para que un operario pregunte con las manos ocupadas en la bodega.
+
+    \item \textbf{Accesibilidad nivel AAA}: avanzar de AA a AAA en las WCAG 2.1, lo que implica, entre otros, un contraste mínimo de 7:1 y explicaciones para abreviaturas y términos técnicos. También queda pendiente una revisión con lector de pantalla, que las pruebas automáticas no reemplazan.
 \end{itemize}
 
 \subsection{Seguridad y Auditoría}
 
 \begin{itemize}
-    \item \textbf{Autenticación de dos factores (2FA)}: Agregar una capa de seguridad mediante códigos temporales (TOTP) generados por aplicaciones como Google Authenticator, especialmente relevante para las cuentas con rol de administrador.
+    \item \textbf{Autenticación de dos factores}: códigos temporales (TOTP) de aplicaciones como Google Authenticator, al menos para las cuentas de administrador.
 
-    \item \textbf{Registro de auditoría ampliado}: Extender la tabla \texttt{audit\_log} para registrar no solo los cambios de configuración, sino también los inicios y cierres de sesión, los intentos fallidos de autenticación, las consultas realizadas al módulo RAG y las exportaciones de datos, construyendo una trazabilidad completa de la actividad en el sistema.
+    \item \textbf{Registro de auditoría ampliado}: la tabla \texttt{audit\_log} ya registra los cambios de configuración, de claves de API, de usuarios, de campos personalizados y de órdenes de compra. Se propone agregar los inicios de sesión, los intentos fallidos, las exportaciones de datos y las consultas al asistente.
 
-    \item \textbf{Cifrado de datos sensibles}: Aplicar el sistema de cifrado nativo de Laravel a nivel de campo para proteger información como costos de materiales, datos de proveedores y claves de API, de modo que una filtración de la base de datos no exponga información en texto plano.
-
-    \item \textbf{Copias de seguridad automatizadas}: Desarrollar un script que realice respaldos diarios de la base de datos y los archivos del sistema, almacenándolos en un servicio de almacenamiento en la nube (por ejemplo, OCI Object Storage, dentro de la capa gratuita) con una política de retención configurable según la antigüedad de las copias.
+    \item \textbf{Cifrado de más datos sensibles}: las claves de API de los proveedores de modelos ya se guardan cifradas. Se propone extender el cifrado a nivel de campo a los datos de contacto de proveedores y a otra información que la empresa considere reservada.
 \end{itemize}
 
 \subsection{Investigación Académica}
 
 \begin{itemize}
-    \item \textbf{Estudio de usabilidad con PYMEs reales}: Realizar un estudio formal con al menos 10 PYMEs de los sectores de alimentos y construcción del Valle del Cauca, midiendo métricas como la tasa de error en tareas comunes, el tiempo necesario para completar cada tarea y la satisfacción del usuario mediante la escala SUS (System Usability Scale). Este estudio validaría ---o cuestionaría--- las decisiones de diseño tomadas durante el desarrollo.
+    \item \textbf{Estudio de usabilidad con varias PYMEs}: repetir la prueba con usuario del Capítulo \ref{chap:pruebas} en al menos diez PYMEs de distintos sectores del Valle del Cauca, midiendo la tasa de error, el tiempo por tarea y la satisfacción con la escala SUS, para validar o cuestionar las decisiones de diseño.
 
-    \item \textbf{Comparativa de modelos LLM para el dominio logístico}: Evaluar la precisión, latencia y costo de distintos modelos de lenguaje aplicados a consultas de inventario en español: GPT-4o-mini, GPT-4o, Claude 3 Haiku, Llama 3.1 8B (local vía Ollama) y Mistral 7B. Los resultados orientarían la elección del modelo más adecuado para producción.
+    \item \textbf{Comparativa de modelos de lenguaje para inventarios}: aprovechar el comando \texttt{rag:evaluar}, que ya calcula la respuesta esperada desde la base de datos, para comparar con la misma batería la precisión, la latencia y el costo de modelos gratuitos en la nube, modelos locales y proveedores comerciales.
 
-    \item \textbf{Impacto de la IA conversacional en la eficiencia operativa}: Diseñar un experimento controlado que mida cuánto reduce el módulo RAG el tiempo que necesita un gerente de PYME para responder consultas sobre su inventario, comparando el desempeño con y sin el asistente inteligente.
+    \item \textbf{Impacto del asistente en la operación}: diseñar un experimento que mida cuánto tiempo ahorra el asistente a un administrador para responder preguntas sobre su inventario, comparando con y sin él.
 
-    \item \textbf{Formalización del método de desarrollo multi-IA}: Documentar y formalizar la metodología de trabajo con múltiples asistentes de inteligencia artificial utilizada en este proyecto, analizando qué patrones de colaboración funcionaron, cuáles generaron fricción y bajo qué condiciones este enfoque es más productivo que el desarrollo tradicional.
+    \item \textbf{Método de desarrollo con asistentes de IA}: documentar cómo se usaron los asistentes de inteligencia artificial durante el proyecto, qué prácticas funcionaron, cuáles generaron errores que hubo que corregir y bajo qué controles conviene usarlos.
 \end{itemize}
 
 \subsection{Hoja de Ruta Priorizada}
 
-La Tabla \ref{tab:roadmap} presenta un orden sugerido para abordar estos trabajos futuros. La priorización no es arbitraria: combina el impacto esperado de cada mejora con la factibilidad de implementarla, entendiendo esta como la combinación de recursos necesarios, dependencias técnicas y tiempo estimado.
+La Tabla \ref{tab:roadmap} presenta un orden sugerido. La prioridad combina el impacto esperado para una PYME como la del caso de estudio con la factibilidad, entendida como los recursos, las dependencias técnicas y el tiempo que requiere cada mejora.
 
 \begin{table}[H]
 \centering
 \caption{Hoja de ruta priorizada de trabajos futuros.}
 \label{tab:roadmap}
-\begin{tabular}{|c|p{5cm}|c|c|}
+\begin{tabular}{|c|>{\raggedright\arraybackslash}p{6cm}|c|c|}
 \hline
 \textbf{Prioridad} & \textbf{Trabajo Futuro} & \textbf{Impacto} & \textbf{Factibilidad} \\
 \hline
-1 & Despliegue en OCI ARM 24 GB + Ollama local & Alto & Media \\
-2 & Notificaciones en tiempo real (Telegram/Email) & Alto & Alta \\
-3 & Memoria conversacional en RAG & Alto & Alta \\
-4 & Análisis predictivo de demanda & Alto & Media \\
-5 & Aplicación móvil PWA + escaneo QR & Medio & Alta \\
-6 & Multi-tenencia SaaS & Alto & Baja \\
-7 & Clasificación NLP (reemplazo de regex) & Medio & Media \\
-8 & Integración con facturación DIAN & Alto & Baja \\
-9 & Módulo de producción (BOM) & Medio & Media \\
-10 & Estudio de usabilidad con PYMEs reales & Medio & Alta \\
+1 & Copias de seguridad automatizadas & Alto & Alta \\
+2 & Desglose del consumo por destino (RF-15) & Alto & Alta \\
+3 & Punto de reorden y predicción de demanda (RF-09) & Alto & Media \\
+4 & Pruebas de extremo a extremo y análisis estático en la integración continua & Medio & Alta \\
+5 & Memoria conversacional en la recuperación & Medio & Alta \\
+6 & Registro sin conexión en la bodega & Medio & Media \\
+7 & Módulo de producción (BOM) & Medio & Media \\
+8 & Clasificación de intenciones con NLP & Medio & Media \\
+9 & Arquitectura multi-tenencia & Alto & Baja \\
+10 & Integración con facturación electrónica DIAN & Alto & Baja \\
 \hline
 \end{tabular}
 \end{table}
