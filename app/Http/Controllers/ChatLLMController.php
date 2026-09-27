@@ -611,6 +611,7 @@ class ChatLLMController extends Controller {
                 ];
                 unset($payload['temperature'], $payload['max_tokens']);
             }
+            $inicio = microtime(true);
             $response = Http::timeout($isNativeLocal ? 90 : 60)
                 ->withToken($cfg['key'] ?: null)
                 ->withHeaders($withHeaders)
@@ -649,18 +650,13 @@ class ChatLLMController extends Controller {
                     }
                 }
 
-                if ($text === '' && $llmSource === 'opencode') {
-                    $fallback = Http::timeout(30)->post(config('services.ollama.url') . '/v1/chat/completions', [
-                        'model' => 'gemma3:4b', 'messages' => $payload['messages'],
-                        'temperature' => 0.3, 'max_tokens' => 512,
-                    ]);
-                    $alt = trim((string) $fallback->json('choices.0.message.content'));
-                    if ($alt !== '') { $text = $alt; $llmModelo = 'gemma3:4b (fallback)'; $llmSource = 'local'; }
+                if ($text === '' && ($alt = $this->respaldoLocal($payload['messages'], $llmModelo, $inicio)) !== null) {
+                    [$text, $llmModelo, $llmSource] = [$alt, config('services.ollama.respaldo') . ' (respaldo local)', 'local'];
                 }
 
                 if ($text === '') {
                     $text = 'No pude generar una respuesta con este modelo de razonamiento. '
-                          . 'Probá con un modelo no-reasoning (gemma3:4b, qwen3, etc.) desde el selector de arriba.';
+                          . 'Prueba con otro modelo desde el selector de arriba.';
                 }
 
                 $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle);
@@ -681,6 +677,15 @@ class ChatLLMController extends Controller {
             \Log::error("LLM connection error [{$llmSource}]: " . $e->getMessage());
         }
 
+        // El modelo principal no respondió: se intenta el modelo local antes de pasar a modo texto.
+        if (isset($payload['messages']) && ($alt = $this->respaldoLocal($payload['messages'], $llmModelo, $inicio ?? microtime(true))) !== null) {
+            $this->recordChat($query, $alt, 'local', $sessionId, $sessionTitle);
+            return response()->json([
+                'response' => $alt, 'intent' => $intent, 'session_id' => $sessionId, 'session_title' => $sessionTitle,
+                'model' => config('services.ollama.respaldo') . ' (respaldo local)', 'source' => 'local', 'key_name' => 'Ollama Local',
+            ]);
+        }
+
         // Sin modelo disponible: se entregan los datos recuperados para la consulta, no un listado genérico.
         $datos = trim(explode("\n\nINSTRUCCIÓN:", explode("\n\nESTADO DE BODEGAS:", $contextoRAG)[0])[0]);
         return response()->json([
@@ -690,6 +695,28 @@ class ChatLLMController extends Controller {
             'source' => 'fallback',
             'key_name' => '—',
         ], 200);
+    }
+
+    /**
+     * Respuesta del modelo local de respaldo (config services.ollama.respaldo). Corre en CPU, así que
+     * solo se intenta si queda tiempo antes del límite de la petición (180 s en Nginx y PHP-FPM).
+     */
+    private function respaldoLocal(array $mensajes, string $modeloPrincipal, float $inicio): ?string
+    {
+        $modelo = config('services.ollama.respaldo');
+        $restante = 170 - (microtime(true) - $inicio);
+        if (!$modelo || $modelo === $modeloPrincipal || $restante < 60) return null;
+        try {
+            $r = Http::timeout((int) min(120, $restante))->post(config('services.ollama.url') . '/api/chat', [
+                'model' => $modelo, 'messages' => $mensajes, 'stream' => false, 'think' => false,
+                'options' => ['temperature' => 0.3, 'num_predict' => 400],
+            ]);
+            $texto = trim($this->stripThinking((string) $r->json('message.content')));
+            return $r->successful() && $texto !== '' ? $texto : null;
+        } catch (\Exception $e) {
+            \Log::warning("Respaldo local ({$modelo}) falló: " . $e->getMessage());
+            return null;
+        }
     }
 
     /** FIX-RAG(v2.2): quita bloques de razonamiento (&lt;think&gt;...&lt;/think&gt;) del texto */

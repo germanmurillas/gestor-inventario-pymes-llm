@@ -37,6 +37,8 @@ return [
 
     'ollama' => [
         'url' => env('OLLAMA_URL', 'http://localhost:11434'),
+        // Modelo local que responde si el modelo principal (en la nube) falla o devuelve vacío.
+        'respaldo' => env('OLLAMA_MODELO_RESPALDO', 'qwen3.5:9b'),
     ],
 
 ];
