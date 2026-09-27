@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 /**
  * Evaluación del asistente (indicador del objetivo 4).
  *
- * Dos conjuntos fijados antes de cualquier corrección del asistente:
+ * Conjuntos fijados antes de cualquier corrección del asistente (ciega y operario se describen en su método):
  *  - bateria:    50 consultas en 11 grupos.
  *  - validacion: 20 consultas distintas (otros insumos y redacciones) para comprobar que las
  *                correcciones generalizan y no se ajustan solo a la batería.
@@ -28,7 +28,7 @@ use Illuminate\Support\Str;
 class EvaluarAsistente extends Command
 {
     protected $signature = 'rag:evaluar
-        {--conjunto=bateria : bateria | validacion | ciega}
+        {--conjunto=bateria : bateria | validacion | ciega | operario}
         {--etiqueta=medicion : Nombre de la ejecución}
         {--solo= : Ejecutar solo las N primeras preguntas}
         {--recalificar= : Volver a calificar un archivo de resultados guardado (sin consultar al asistente)}';
@@ -113,6 +113,7 @@ class EvaluarAsistente extends Command
         return match ($nombre) {
             'validacion' => $this->validacion(),
             'ciega' => $this->ciega(),
+            'operario' => $this->operario(),
             default => $this->bateria(),
         };
     }
@@ -199,6 +200,45 @@ class EvaluarAsistente extends Command
             $this->resumen(['Hazme un panorama de la bodega']),
             $this->inexistentes([['¿Tenemos fécula de maíz?', 'stock_check']]),
         );
+    }
+
+    /**
+     * Conjunto de operario (27-sep-2026): escrito ANTES de corregir el asistente, después de que el
+     * autor, usando el sistema, encontró dos preguntas que fallaban ("que está próximo a vencer" y
+     * "que hay en cuarentena", incluidas tal cual). Redacción coloquial, como la de un operario de
+     * bodega, y temas que la batería no cubría: cuarentena y stock bajo el mínimo.
+     */
+    private function operario(): array
+    {
+        return array_merge(
+            $this->cuarentena(['que hay en cuarentena', '¿Qué lotes están en cuarentena?', 'Muéstrame lo que está en cuarentena', '¿Hay algún lote retenido por calidad?']),
+            $this->criticos(['que está próximo a vencer', '¿Qué se me va a vencer pronto?', '¿Hay algo que se esté por vencer?', '¿Qué toca usar primero porque ya casi se vence?', '¿Qué se va a dañar pronto?', '¿Hay algo que se vaya a echar a perder?']),
+            $this->bajoMinimo(['¿Qué insumos están por debajo del mínimo?', '¿Qué nos hace falta pedir?', '¿Qué está bajo de stock?']),
+            $this->existencias([['¿Queda harina de trigo panificable?', 'MP-HAR-01'], ['¿Cuánto huevo líquido nos queda?', 'MP-HUE-01'], ['¿Hay margarina de hojaldre?', 'GR-MAR-01']]),
+            $this->ubicacion([['¿Dónde encuentro la leche en polvo?', 'MP-LEC-01']]),
+            $this->inexistentes([['¿Tenemos queso crema?', 'stock_check']]),
+        );
+    }
+
+    /** Exactamente los lotes en cuarentena (con o sin existencias). */
+    private function cuarentena(array $preguntas): array
+    {
+        return array_map(fn ($p) => ['grupo' => 'Cuarentena', 'intencion' => 'quarantine', 'pregunta' => $p,
+            'verdad' => fn () => Lote::where('status', 'quarantined')->pluck('batch_number')->all(),
+            'criterio' => fn ($t, $e) => $this->listaExacta($t, $e)], $preguntas);
+    }
+
+    /** Todos los insumos con stock por debajo de su mínimo configurado. */
+    private function bajoMinimo(array $preguntas): array
+    {
+        return array_map(fn ($p) => ['grupo' => 'Stock bajo el mínimo', 'intencion' => 'low_stock', 'pregunta' => $p,
+            'verdad' => fn () => Material::where('stock_minimo', '>', 0)->get()->filter(fn ($m) => $m->stock_total < $m->stock_minimo)->pluck('name')->values()->all(),
+            'criterio' => function ($t, $e) {
+                if (!$e) return preg_match('/no hay|ning[uú]n/iu', $t) ? [true, ''] : [false, 'no hay insumos bajo el mínimo y no lo dijo'];
+                $n = $this->normalizar($t);
+                $faltan = array_values(array_filter($e, fn ($x) => !str_contains($n, $this->normalizar($x))));
+                return $faltan ? [false, 'faltan: ' . implode(', ', $faltan)] : [true, ''];
+            }], $preguntas);
     }
 
     // ── Grupos (pregunta + intención + verdad desde la base + criterio) ───────
