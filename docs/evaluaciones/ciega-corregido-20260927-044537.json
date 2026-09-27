@@ -1,0 +1,208 @@
+{
+    "resumen": {
+        "conjunto": "ciega",
+        "etiqueta": "ciega-corregido",
+        "fecha": "2026-09-27 04:45:37",
+        "total": 10,
+        "correctas": 9,
+        "precision": 90,
+        "intenciones_correctas": 10,
+        "precision_clasificador": 100,
+        "tiempo_mediano_s": 0.595,
+        "modelo": [
+            "gpt-oss:120b-cloud"
+        ],
+        "por_grupo": {
+            "Existencias": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Ubicación": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Vencimiento": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Valorización": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Movimientos": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Información de lote": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Críticos": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Resumen": {
+                "total": 1,
+                "correctas": 0
+            },
+            "Insumo inexistente": {
+                "total": 1,
+                "correctas": 1
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Existencias",
+            "pregunta": "¿Me dices cuánta mantequilla sin sal nos queda?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 31.1,
+            "respuesta": "TOTAL Mantequilla sin sal: 31.1 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.48,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 2,
+            "grupo": "Existencias",
+            "pregunta": "Stock de cocoa en polvo",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 47.23,
+            "respuesta": "TOTAL Cocoa en polvo: 47.23 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.46,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 3,
+            "grupo": "Ubicación",
+            "pregunta": "¿En qué parte está el ACPM para planta eléctrica?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Cuarto de combustibles"
+            ],
+            "respuesta": "El ACPM para planta eléctrica está en el **Cuarto de combustibles**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.54,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 4,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Hasta cuándo sirve la esencia de vainilla?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2028-02-08",
+            "respuesta": "Vence el 2028‑02‑08.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.61,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 5,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuánta plata tenemos invertida en salsa de tomate para pizza?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "valuation",
+            "esperado": 106938,
+            "respuesta": "Tenemos invertidos $106.938 COP en salsa de tomate para pizza.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.52,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 6,
+            "grupo": "Movimientos",
+            "pregunta": "¿Cuándo fue el último movimiento del huevo líquido pasteurizado?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 6.84,
+                "tipo": "salida"
+            },
+            "respuesta": "El último movimiento del huevo líquido pasteurizado fue el **2026‑09‑25 15:00** (salida de 6.84 kg).",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.58,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 7,
+            "grupo": "Información de lote",
+            "pregunta": "Detalle del lote MAN-01-260817-1",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "batch_info",
+            "esperado": 31.1,
+            "respuesta": "**Mantequilla sin sal – Lote MAN-01-260817-1**  \n- Stock: **31.1 kg**  \n- Vence: **2026‑11‑15** (en 49 días)  \n- Bodega: **Cuarto frío**  \n- Costo unitario: **$32 000 COP\/kg**  \n- Valor: **$995 200 COP**  \n- Estado: **activo**  \n- Últimos movimientos:  \n  • 2026‑09‑25 15:00 – salida 1.9 kg (producción) – Operario de Bodega  \n  • 2026‑09‑24 15:00 – salida 1.7 kg (producción) – Operario de Bodega  \n  • 2026‑09‑23 15:00 – salida 2.02 kg (producción) – Operario de Bodega  \n  • 2026‑09‑22 15:00 – salida 2.2 kg (producción) – Operario de Bodega  \n  • 2026‑09‑21 15:00 – salida 2.28 kg (producción) – Operario de Bodega  \n\n**Manteca vegetal panadera – Lote MAN-01-260817-1**  \n- Stock: **135.36 kg**  \n- Vence: **2027‑02‑13** (en 139 días)  \n- Bodega: **Bodega de grasas y rellenos**  \n- Costo unitario: **$9 200 COP\/kg**  \n- Valor: **$1 245 312 COP**  \n- Estado: **activo**  \n- Últimos movimientos:  \n  • 2026‑09‑25 15:00 – salida 8.46 kg (producción) – Operario de Bodega  \n  • 2026‑09‑24 15:00 – salida 10.08 kg (producción) – Operario de Bodega  \n  • 2026‑09‑23 15:00 – salida 8.46 kg (producción) – Operario de Bodega  \n  • 2026‑09‑22 15:00 – salida 8.55 kg (producción) – Operario de Bodega  \n  • 2026‑09‑21 15:00 – salida 8.73 kg (producción) – Operario de Bodega",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.37,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 8,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué hay próximo a vencerse?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- Huevo líquido pasteurizado | Lote: HUE-01-260914-1 | Vence: 2026-10-05 (en 8 días)  \n- Crema pastelera base | Lote: CRE-01-260908-1 | Vence: 2026-10-08 (en 11 días)  \n- Levadura fresca prensada | Lote: LEV-01-260905-1 | Vence: 2026-10-10 (en 13 días)",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.67,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 9,
+            "grupo": "Resumen",
+            "pregunta": "Hazme un panorama de la bodega",
+            "intencion_esperada": "summary",
+            "intencion_obtenida": "summary",
+            "esperado": {
+                "lotes": 58,
+                "valor": 58433524
+            },
+            "respuesta": "**Panorama de la bodega (27‑09‑2026)**  \n\n- **Materia prima seca:** 35.69 % de 20 000 kg → **7 138 kg**  \n- **Cuarto frío:** 17.26 % de 2 500 kg → **432 kg** (≈ 431.5 kg)  \n- **Aditivos y pesaje:** 21.67 % de 1 200 kg → **260 kg** (≈ 260.04 kg)  \n- **Grasas y rellenos:** 7.52 % de 4 000 kg → **301 kg** (≈ 300.8 kg)  \n- **Empaques:** 12.33 % de 120 000 und → **14 796 unidades**  \n- **Producto terminado y despacho:** 14.57 % de 15 000 und → **2 186 unidades** (≈ 2185.5)  \n- **Combustibles:** 9 % de 1 000 gal → **90 gal**  \n- **Cuarentena:** 10 % de 1 500 kg → **150 kg**",
+            "correcta": false,
+            "motivo": "no aparece 58 lotes ni el valor 58433524",
+            "segundos": 1.66,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 10,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Tenemos fécula de maíz?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No, el material **fécula de maíz** no está registrado en el inventario.  \nEntre los materiales que sí aparecen y podrían ser lo que busca están:\n\n- Harina de trigo integral  \n- Harina de trigo panificable  \n- Avena en hojuelas  \n- Azúcar blanca  \n- Manteca vegetal panadera  \n\nSi necesita alguno de estos o desea buscar otro producto, indíquelo.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.3,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        }
+    ]
+}

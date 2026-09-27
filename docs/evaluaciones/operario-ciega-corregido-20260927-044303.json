@@ -1,0 +1,192 @@
+{
+    "resumen": {
+        "conjunto": "operario-ciega",
+        "etiqueta": "operario-ciega-corregido",
+        "fecha": "2026-09-27 04:43:03",
+        "total": 8,
+        "correctas": 7,
+        "precision": 87.5,
+        "intenciones_correctas": 7,
+        "precision_clasificador": 87.5,
+        "tiempo_mediano_s": 1.27,
+        "modelo": [
+            "gpt-oss:120b-cloud"
+        ],
+        "por_grupo": {
+            "Cuarentena": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Críticos": {
+                "total": 2,
+                "correctas": 1
+            },
+            "Stock bajo el mínimo": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Existencias": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Insumo inexistente": {
+                "total": 1,
+                "correctas": 1
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Cuarentena",
+            "pregunta": "¿Qué mercancía está apartada por problemas de calidad?",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "quarantine",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "Harina de trigo panificable – Lote HAR‑NOV‑01 – 150 kg (en cuarentena).",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.05,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 2,
+            "grupo": "Cuarentena",
+            "pregunta": "¿Tenemos algo en cuarentena ahorita?",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "quarantine",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "Sí. Tenemos **Harina de trigo panificable** – Lote **HAR-NOV-01** – Stock **150 kg** – Vence **2027‑03‑15** (en 169 días) en la bodega de **Cuarentena**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.11,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 3,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué se está poniendo viejo y hay que sacar ya?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "stock_check",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "El material que menciona no está registrado en el inventario.  \nPuede que se refiera a alguno de estos productos que sí aparecen en la base de datos:\n\n- Aceite de soya  \n- Ácido ascórbico (vitamina C)  \n- Ajonjolí descortezado  \n- Arequipe para relleno  \n- Avena en hojuelas  \n- Azúcar blanca  \n- Bocadillo de guayaba  \n- Cocoa en polvo  \n- Crema pastelera base  \n- Emulsificante SSL (estearoil lactilato de sodio)  \n- Enzima alfa‑amilasa fúngica  \n- Enzima glucosa oxidasa  \n- Enzima lipasa panadera  \n- Enzima xilanasa (hemicelulasa)  \n- Esencia de vainilla  \n- Gluten vital de trigo  \n- Harina de trigo integral \/ panificable  \n- Huevo líquido pasteurizado  \n- Leche en polvo  \n- Levadura fresca prensada \/ seca instantánea  \n- Manteca vegetal panadera, mantequilla sin sal, margarina de hojaldre  \n- Mejorador de panificación (caja 20 kg y 25 kg)  \n- Mono y diglicéridos  \n- Panes (hamburguesa, perro, tajado blanco\/integral, mogolla integral)  \n- Propionato de calcio  \n- Ripio de pan (miga para apanar)  \n- Sal refinada  \n- Salsa de tomate para pizza  \n- Sorbato de potasio  \n- Tostadas de pan x 20  \n\nSi necesita buscar un material específico, por favor indique el nombre exacto.",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1",
+            "segundos": 1.57,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 4,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué hay que despachar ya antes de que se venza?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1"
+            ],
+            "respuesta": "- **Huevo líquido pasteurizado** – Lote HUE-01-260914-1 – Stock 84.24 kg – Vence 2026‑10‑05 (en 8 días)  \n- **Crema pastelera base** – Lote CRE-01-260908-1 – Stock 28.9 kg – Vence 2026‑10‑08 (en 11 días)  \n- **Levadura fresca prensada** – Lote LEV-01-260905-1 – Stock 87.36 kg – Vence 2026‑10‑10 (en 13 días)",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.19,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 5,
+            "grupo": "Stock bajo el mínimo",
+            "pregunta": "¿De qué estamos cortos?",
+            "intencion_esperada": "low_stock",
+            "intencion_obtenida": "low_stock",
+            "esperado": [
+                "Harina de trigo integral",
+                "Azúcar blanca",
+                "Sal refinada",
+                "Ajonjolí descortezado",
+                "Mantequilla sin sal",
+                "Manteca vegetal panadera",
+                "Aceite de soya",
+                "Arequipe para relleno",
+                "Bocadillo de guayaba",
+                "Crema pastelera base",
+                "Salsa de tomate para pizza",
+                "Bolsa para pan tajado",
+                "Etiqueta adhesiva de lote"
+            ],
+            "respuesta": "- Aceite de soya: faltan 21.16 L  \n- Ajonjolí descortezado: faltan 37.75 kg  \n- Arequipe para relleno: faltan 52.28 kg  \n- Azúcar blanca: faltan 592.76 kg  \n- Bocadillo de guayaba: faltan 24.74 kg  \n- Bolsa para pan tajado: faltan 542 und  \n- Crema pastelera base: faltan 1.1 kg  \n- Etiqueta adhesiva de lote: faltan 2 472 und  \n- Harina de trigo integral: faltan 23.16 kg  \n- Manteca vegetal panadera: faltan 64.64 kg  \n- Mantequilla sin sal: faltan 8.9 kg  \n- Sal refinada: faltan 78.9 kg  \n- Salsa de tomate para pizza: faltan 16.29 kg",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.79,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 6,
+            "grupo": "Stock bajo el mínimo",
+            "pregunta": "¿Qué insumos hay que reponer?",
+            "intencion_esperada": "low_stock",
+            "intencion_obtenida": "low_stock",
+            "esperado": [
+                "Harina de trigo integral",
+                "Azúcar blanca",
+                "Sal refinada",
+                "Ajonjolí descortezado",
+                "Mantequilla sin sal",
+                "Manteca vegetal panadera",
+                "Aceite de soya",
+                "Arequipe para relleno",
+                "Bocadillo de guayaba",
+                "Crema pastelera base",
+                "Salsa de tomate para pizza",
+                "Bolsa para pan tajado",
+                "Etiqueta adhesiva de lote"
+            ],
+            "respuesta": "- Aceite de soya: hay 58.84 L | mínimo 80 L | faltan 21.16 L  \n- Ajonjolí descortezado: hay 212.25 kg | mínimo 250 kg | faltan 37.75 kg  \n- Arequipe para relleno: hay 7.72 kg | mínimo 60 kg | faltan 52.28 kg  \n- Azúcar blanca: hay 207.24 kg | mínimo 800 kg | faltan 592.76 kg  \n- Bocadillo de guayaba: hay 15.26 kg | mínimo 40 kg | faltan 24.74 kg  \n- Bolsa para pan tajado: hay 7 458 und | mínimo 8 000 und | faltan 542 und  \n- Crema pastelera base: hay 28.9 kg | mínimo 30 kg | faltan 1.1 kg  \n- Etiqueta adhesiva de lote: hay 528 und | mínimo 3 000 und | faltan 2 472 und  \n- Harina de trigo integral: hay 576.84 kg | mínimo 600 kg | faltan 23.16 kg  \n- Manteca vegetal panadera: hay 135.36 kg | mínimo 200 kg | faltan 64.64 kg  \n- Mantequilla sin sal: hay 31.1 kg | mínimo 40 kg | faltan 8.9 kg  \n- Sal refinada: hay 71.1 kg | mínimo 150 kg | faltan 78.9 kg  \n- Salsa de tomate para pizza: hay 13.71 kg | mínimo 30 kg | faltan 16.29 kg",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.43,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 7,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánta sal refinada nos queda en bodega?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 71.1,
+            "respuesta": "71.1 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.59,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        },
+        {
+            "n": 8,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Tenemos almendras fileteadas?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No, **almendras fileteadas** no están registradas en el inventario.\n\nMateriales registrados que podrían ser lo que busca:\n\n- Aceite de soya  \n- Ácido ascórbico (vitamina C)  \n- ACPM para planta eléctrica  \n- Ajonjolí descortezado  \n- Amilasa maltogénica (antienvejecimiento)  \n- Arequipe para relleno  \n- Avena en hojuelas  \n- Azúcar blanca  \n- Bocadillo de guayaba  \n- Bolsa para pan pequeño  \n- Bolsa para pan tajado  \n- Caja corrugada de despacho  \n- Cocoa en polvo  \n- Crema pastelera base  \n- Emulsificante SSL (estearoil lactilato de sodio)  \n- Enzima alfa-amilasa fúngica  \n- Enzima glucosa oxidasa  \n- Enzima lipasa panadera  \n- Enzima xilanasa (hemicelulasa)  \n- Esencia de vainilla  \n- Etiqueta adhesiva de lote  \n- Gluten vital de trigo  \n- Harina de trigo integral  \n- Harina de trigo panificable  \n- Huevo líquido pasteurizado  \n- Leche en polvo  \n- Levadura fresca prensada  \n- Levadura seca instantánea  \n- Manteca vegetal panadera  \n- Mantequilla sin sal  \n- Margarina de hojaldre  \n- Mejorador panificación caja 20 kg  \n- Mejorador panificación caja 25 kg  \n- Mogolla integral x 6  \n- Mono y diglicéridos  \n- Pan hamburguesa x 8 con ajonjolí  \n- Pan perro x 8  \n- Pan tajado blanco 500 g  \n- Pan tajado integral 500 g  \n- Propionato de calcio  \n- Ripio de pan (miga para apanar) 1 kg  \n- Sal refinada  \n- Salsa de tomate para pizza  \n- Sorbato de potasio  \n- Tostadas de pan x 20",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.35,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local"
+        }
+    ]
+}
