@@ -38,7 +38,7 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
 
     \item \textbf{Arquitectura multi-tenencia}: adaptar la base de datos y la lógica de negocio para que una sola instancia del sistema sirva a varias PYMEs, cada una con sus datos aislados mediante un identificador de inquilino (\texttt{tenant\_id}). Esto permitiría ofrecer Pymetory como servicio compartiendo la infraestructura.
 
-    \item \textbf{Modelo local afinado para el dominio}: el servidor ya ejecuta un modelo local pequeño (\texttt{gemma3:4b}) como respaldo del modelo en la nube. Se propone afinar un modelo de tamaño similar con consultas y respuestas del dominio de inventarios, de modo que el respaldo local responda con calidad cercana a la del principal. Por la falta de GPU, el tamaño del modelo debe elegirse según los recursos del servidor.
+    \item \textbf{Modelo local afinado para el dominio}: el servidor ya ejecuta un modelo local (\texttt{qwen3.5:9b}) como respaldo del modelo en la nube, pero tarda de 30 a 60 segundos por respuesta (Capítulo \ref{chap:implementacion}). Se propone afinar un modelo más pequeño con consultas y respuestas del dominio de inventarios, para que el respaldo responda más rápido con calidad cercana a la del principal, o usar un servidor con GPU si el presupuesto lo permite.
 \end{itemize}
 
 \subsection{Inteligencia Artificial y RAG}
