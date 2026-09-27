@@ -30,7 +30,7 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
 \subsection{Infraestructura y Despliegue}
 
 \begin{itemize}
-    \item \textbf{Copias de seguridad automatizadas}: hoy los respaldos de la base de datos se generan a mano con \texttt{mysqldump} antes de los cambios delicados (Capítulo \ref{chap:implementacion}). Se propone una tarea programada que haga un respaldo diario de la base y de los archivos subidos, lo guarde fuera del servidor (por ejemplo, en OCI Object Storage dentro de la capa gratuita) y aplique una política de retención.
+    \item \textbf{Copias de seguridad fuera del servidor}: una tarea programada ya genera cada noche un volcado comprimido de la base de datos, además de los respaldos manuales antes de los cambios delicados (Capítulo \ref{chap:implementacion}); pero todas las copias quedan en el mismo servidor, de modo que una falla del disco o de la instancia las perdería junto con la base. Se propone enviarlas a otro almacenamiento (por ejemplo, OCI Object Storage dentro de la capa gratuita), incluir los archivos subidos y probar periódicamente la restauración.
 
     \item \textbf{Pruebas de extremo a extremo y análisis estático en la integración continua}: el flujo de GitHub Actions ya revisa la sintaxis, ejecuta PHPUnit y despliega por SSH solo si las pruebas pasan. Faltan dos etapas: ejecutar la suite Playwright contra una instancia temporal de la aplicación y correr el análisis estático (PHPStan para PHP y ESLint para TypeScript) como condición para desplegar.
 
@@ -123,7 +123,7 @@ La Tabla \ref{tab:roadmap} presenta un orden sugerido. La prioridad combina el i
 \hline
 \textbf{Prioridad} & \textbf{Trabajo Futuro} & \textbf{Impacto} & \textbf{Factibilidad} \\
 \hline
-1 & Copias de seguridad automatizadas & Alto & Alta \\
+1 & Copias de seguridad fuera del servidor & Alto & Alta \\
 2 & Desglose del consumo por destino (RF-15) & Alto & Alta \\
 3 & Punto de reorden y predicción de demanda (RF-09) & Alto & Media \\
 4 & Pruebas de extremo a extremo y análisis estático en la integración continua & Medio & Alta \\

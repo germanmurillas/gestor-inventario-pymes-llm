@@ -1,0 +1,156 @@
+{
+ "qwen3:14b": {
+  "contextos": [
+   {
+    "num_ctx": 8192,
+    "carga_ok": true,
+    "pico_ollama_gb": 10.08,
+    "min_disponible_gb": 9.06,
+    "segundos_carga": 87.6,
+    "error": ""
+   },
+   {
+    "num_ctx": 16384,
+    "carga_ok": true,
+    "pico_ollama_gb": 10.79,
+    "min_disponible_gb": 8.34,
+    "segundos_carga": 101.2,
+    "error": ""
+   },
+   {
+    "num_ctx": 32768,
+    "carga_ok": true,
+    "pico_ollama_gb": 12.22,
+    "min_disponible_gb": 6.92,
+    "segundos_carga": 103.7,
+    "error": ""
+   }
+  ],
+  "velocidad_5k": {
+   "error": "timed out",
+   "pico_ollama_gb": 10.36
+  }
+ },
+ "gemma4:12b": {
+  "contextos": [
+   {
+    "num_ctx": 8192,
+    "carga_ok": true,
+    "pico_ollama_gb": 9.14,
+    "min_disponible_gb": 9.99,
+    "segundos_carga": 73.6,
+    "error": ""
+   },
+   {
+    "num_ctx": 16384,
+    "carga_ok": true,
+    "pico_ollama_gb": 9.21,
+    "min_disponible_gb": 9.93,
+    "segundos_carga": 62.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 32768,
+    "carga_ok": true,
+    "pico_ollama_gb": 9.35,
+    "min_disponible_gb": 9.79,
+    "segundos_carga": 62.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 65536,
+    "carga_ok": true,
+    "pico_ollama_gb": 9.82,
+    "min_disponible_gb": 9.33,
+    "segundos_carga": 67.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 131072,
+    "carga_ok": true,
+    "pico_ollama_gb": 10.39,
+    "min_disponible_gb": 8.75,
+    "segundos_carga": 65.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 262144,
+    "carga_ok": true,
+    "pico_ollama_gb": 11.53,
+    "min_disponible_gb": 7.57,
+    "segundos_carga": 64.6,
+    "error": ""
+   }
+  ],
+  "velocidad_5k": {
+   "tokens_leidos": 4099,
+   "seg_lectura": 544.7,
+   "tokens_por_seg_lectura": 7.5,
+   "tokens_por_seg_respuesta": 3.0,
+   "seg_total": 618.0,
+   "respuesta": "En el lote HAR-01-260817-1 hay 450 kg de harina de trigo panificable.",
+   "pico_ollama_gb": 9.76
+  }
+ },
+ "qwen3.5:9b": {
+  "contextos": [
+   {
+    "num_ctx": 8192,
+    "carga_ok": true,
+    "pico_ollama_gb": 7.04,
+    "min_disponible_gb": 12.11,
+    "segundos_carga": 70.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 16384,
+    "carga_ok": true,
+    "pico_ollama_gb": 7.18,
+    "min_disponible_gb": 11.96,
+    "segundos_carga": 32.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 32768,
+    "carga_ok": true,
+    "pico_ollama_gb": 7.47,
+    "min_disponible_gb": 11.67,
+    "segundos_carga": 40.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 65536,
+    "carga_ok": true,
+    "pico_ollama_gb": 8.13,
+    "min_disponible_gb": 11.01,
+    "segundos_carga": 34.1,
+    "error": ""
+   },
+   {
+    "num_ctx": 131072,
+    "carga_ok": true,
+    "pico_ollama_gb": 9.25,
+    "min_disponible_gb": 9.89,
+    "segundos_carga": 45.6,
+    "error": ""
+   },
+   {
+    "num_ctx": 262144,
+    "carga_ok": true,
+    "pico_ollama_gb": 11.56,
+    "min_disponible_gb": 7.61,
+    "segundos_carga": 57.1,
+    "error": ""
+   }
+  ],
+  "velocidad_5k": {
+   "tokens_leidos": 4098,
+   "seg_lectura": 294.7,
+   "tokens_por_seg_lectura": 13.9,
+   "tokens_por_seg_respuesta": 4.6,
+   "seg_total": 359.8,
+   "respuesta": "En el lote HAR-01-260817-1 hay 450 kg de harina de trigo panificable.",
+   "pico_ollama_gb": 7.3
+  }
+ }
+}

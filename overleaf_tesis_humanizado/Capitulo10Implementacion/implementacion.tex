@@ -170,7 +170,7 @@ El sistema corre en una instancia de Oracle Cloud de la capa gratuita \textit{Al
     \item \textbf{Datos.} MySQL 8.0 en el mismo servidor.
     \item \textbf{Modelos de lenguaje.} Ollama sirve un modelo local de respaldo (\texttt{gemma3:4b}) y da acceso a los modelos gratuitos de Ollama Cloud; el principal es \texttt{gpt-oss:120b-cloud}. Con la configuración de la sección anterior, Ollama no puede usar más de 14~GB de memoria.
     \item \textbf{Tareas programadas.} Un \textit{cron} ejecuta cada minuto el programador de Laravel, que revisa cada hora los lotes por vencer y el stock bajo.
-    \item \textbf{Respaldos.} Antes de aplicar en producción la migración que hizo inmutable el Kardex (25 de septiembre de 2026) se generó un volcado comprimido completo de la base de datos con \texttt{mysqldump}, que se conserva en el servidor.
+    \item \textbf{Respaldos.} Una tarea programada genera cada noche un volcado comprimido completo de la base de datos con \texttt{mysqldump}. Además, antes de cada cambio delicado en producción ---por ejemplo, la migración que hizo inmutable el Kardex el 25 de septiembre de 2026--- se generó un volcado adicional. Todas las copias se conservan en el mismo servidor (ver Trabajos Futuros).
 \end{itemize}
 
 \begin{figure}[H]
