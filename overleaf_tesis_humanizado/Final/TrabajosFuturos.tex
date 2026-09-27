@@ -62,6 +62,8 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
 \begin{itemize}
     \item \textbf{Cotizaciones en las órdenes de compra}: el sistema ya maneja órdenes de compra con proveedor, aprobación y recepción que registra el lote real con su vencimiento y bodega. Falta la etapa previa: solicitar cotizaciones a varios proveedores, compararlas y generar la orden desde la elegida.
 
+    \item \textbf{Catálogo de categorías}: hoy la categoría es un texto del insumo; el formulario sugiere las que ya existen y el servidor reutiliza una existente escrita con otras mayúsculas, pero no se pueden renombrar ni fusionar. Se propone un catálogo propio de cada empresa, administrable desde la configuración, que acompañe la arquitectura multi-tenencia.
+
     \item \textbf{Integración con proveedores}: conectar Pymetory con los catálogos de los proveedores para consultar precios y disponibilidad, y proponer la orden de reposición cuando un insumo cruce su punto de reorden.
 
     \item \textbf{Módulo de producción (BOM)}: registrar las recetas o listas de materiales de cada producto, descontar automáticamente sus ingredientes por FEFO al producir y calcular el costo real de producción. Resolvería también buena parte del desglose por destino (RF-15).

@@ -10,7 +10,7 @@ import FigmaConsumeWizard from './FigmaConsumeWizard';
 import FigmaFefoBadge from './FigmaFefoBadge';
 import FigmaBodegaBar from './FigmaBodegaBar';
 
-const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBodegaCode, onManageBodegas }: { lotes?: any[], bodegas?: any[], user?: any, onNavigate?: (view: string) => void, initialBodegaCode?: string | null, onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
+const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], user, onNavigate, initialBodegaCode, onManageBodegas }: { lotes?: any[], bodegas?: any[], categoriasExistentes?: string[], user?: any, onNavigate?: (view: string) => void, initialBodegaCode?: string | null, onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
     const [viewMode, setViewMode] = useState<'GRID' | 'DETAIL' | 'FORM' | 'CONSUME' | 'WIZARD'>('GRID');
     const [showModal, setShowModal] = useState(false);
     const [showBodegaModal, setShowBodegaModal] = useState(false);
@@ -61,24 +61,38 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
         return Array.from(tagsSet).sort();
     }, [lotes]);
 
-    // Lógica de filtrado dinámico (Bodega + Búsqueda + Tags)
-    const filteredLotes = useMemo(() => {
-        return lotes.filter((l: any) => {
-            const matchesBodega = selectedBodega ? l.bodega === selectedBodega.name : true;
-            const matchesSearch = searchQuery 
-                ? (l.material_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                   l.codigo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                   l.lote?.toString().includes(searchQuery))
-                : true;
-            const matchesTag = selectedTag
-                ? (l.tags && l.tags.some((t: any) => (t.name || t) === selectedTag))
-                : true;
-            
-            return matchesBodega && matchesSearch && matchesTag;
-        });
-    }, [lotes, selectedBodega, searchQuery, selectedTag]);
+    // Filtros que no dependen de bodega ni categoría (búsqueda y etiqueta).
+    const lotesBase = useMemo(() => lotes.filter((l: any) => {
+        const matchesSearch = searchQuery
+            ? (l.material_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               l.codigo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               l.lote?.toString().includes(searchQuery))
+            : true;
+        const matchesTag = selectedTag
+            ? (l.tags && l.tags.some((t: any) => (t.name || t) === selectedTag))
+            : true;
+        return matchesSearch && matchesTag;
+    }), [lotes, searchQuery, selectedTag]);
 
-    const categorias = useMemo(() => Array.from(new Set(lotes.map((l: any) => l.categoria).filter(Boolean))).sort() as string[], [lotes]);
+    const filteredLotes = useMemo(
+        () => lotesBase.filter((l: any) => !selectedBodega || l.bodega === selectedBodega.name),
+        [lotesBase, selectedBodega]);
+
+    // Bodega y categoría se filtran entre sí: las categorías son las de la bodega elegida
+    // y cada bodega cuenta solo los lotes de la categoría elegida.
+    const categorias = useMemo(() => {
+        const conteo = new Map<string, number>();
+        filteredLotes.forEach((l: any) => { if (l.categoria) conteo.set(l.categoria, (conteo.get(l.categoria) ?? 0) + 1); });
+        if (categoria && !conteo.has(categoria)) conteo.set(categoria, 0);
+        return Array.from(conteo, ([nombre, n]) => ({ nombre, n })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+    }, [filteredLotes, categoria]);
+    const lotesPorBodega = (nombre?: string) =>
+        lotesBase.filter((l: any) => (!nombre || l.bodega === nombre) && (!categoria || l.categoria === categoria)).length;
+    // Al cambiar de bodega se descarta una categoría que no tiene lotes en ella.
+    const elegirBodega = (b: any) => {
+        setSelectedBodega(b);
+        if (categoria && !lotesBase.some((l: any) => (!b || l.bodega === b.name) && l.categoria === categoria)) setCategoria('');
+    };
 
     // Insumos agrupados (los lotes ya vienen en orden FEFO desde el servidor)
     const materiales = useMemo(() => {
@@ -123,7 +137,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
     }
 
     if (viewMode === 'FORM') {
-        return <FigmaForms onBack={() => setViewMode('GRID')} initialBodega={selectedBodega} bodegas={bodegas} />;
+        return <FigmaForms onBack={() => setViewMode('GRID')} initialBodega={selectedBodega} bodegas={bodegas} categorias={categoriasExistentes} />;
     }
 
     if (viewMode === 'CONSUME') {
@@ -229,7 +243,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {bodegas.map((b: any) => (
                         <FigmaBodegaBar key={b.code} bodega={b}
-                            onOpen={() => { setSelectedBodega(b); setPestana('insumos'); }}
+                            onOpen={() => { elegirBodega(b); setPestana('insumos'); }}
                             onEdit={user?.role === 'admin' && onManageBodegas ? () => onManageBodegas(b.id) : undefined} />
                     ))}
                 </div>
@@ -256,21 +270,24 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
 
             {/* Filtros por bodega y categoría */}
             <div className="-mx-4 space-y-2 px-4 sm:mx-0 sm:px-0">
-                <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
-                    <Chip activo={!selectedBodega} onClick={() => setSelectedBodega(null)}>Todas las bodegas <b>{lotes.length}</b></Chip>
-                    {bodegas.map((b: any) => (
-                        <Chip key={b.code} activo={selectedBodega?.code === b.code} onClick={() => setSelectedBodega(b)}>
-                            {b.name} <b>{lotes.filter((l: any) => l.bodega === b.name).length}</b>
-                        </Chip>
-                    ))}
+                <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
+                    <Chip activo={!selectedBodega} onClick={() => elegirBodega(null)}>Todas las bodegas <b>{lotesPorBodega()}</b></Chip>
+                    {bodegas.map((b: any) => {
+                        const n = lotesPorBodega(b.name);
+                        return (
+                            <Chip key={b.code} activo={selectedBodega?.code === b.code} atenuado={!!categoria && n === 0} onClick={() => elegirBodega(b)}>
+                                {b.name} <b>{n}</b>
+                            </Chip>
+                        );
+                    })}
                     {user?.role === 'admin' && (
                         <button onClick={() => onManageBodegas ? onManageBodegas(null) : setShowBodegaModal(true)} className="shrink-0 rounded-full border border-dashed border-indigo-400/50 px-3 py-1.5 text-xs font-semibold text-indigo-200">Gestionar bodegas</button>
                     )}
                 </div>
-                {categorias.length > 1 && (
-                    <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+                {(categorias.length > 1 || categoria) && (
+                    <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible" role="group" aria-label="Filtrar por categoría">
                         <Chip sutil activo={!categoria} onClick={() => setCategoria('')}>Todas las categorías</Chip>
-                        {categorias.map((c) => <Chip sutil key={c} activo={categoria === c} onClick={() => setCategoria(c)}>{c}</Chip>)}
+                        {categorias.map((c) => <Chip sutil key={c.nombre} activo={categoria === c.nombre} onClick={() => setCategoria(categoria === c.nombre ? '' : c.nombre)}>{c.nombre} <b>{c.n}</b></Chip>)}
                     </div>
                 )}
             </div>
@@ -367,7 +384,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
                         )}
 
                         {user?.role === 'admin' && materialSel.materialId && (
-                            <FigmaMaterialAjustes key={materialSel.codigo} materialId={materialSel.materialId} unidad={materialSel.unidad}
+                            <FigmaMaterialAjustes key={materialSel.codigo} categorias={categoriasExistentes} materialId={materialSel.materialId} unidad={materialSel.unidad}
                                 categoria={materialSel.categoria ?? null} minimo={materialSel.minimo} diasCriticos={materialSel.diasCriticos} umbral={materialSel.umbral} />
                         )}
 
@@ -403,11 +420,11 @@ const FigmaInventario = ({ lotes = [], bodegas = [], user, onNavigate, initialBo
     );
 };
 
-const Chip = ({ activo, sutil, onClick, children }: { activo: boolean; sutil?: boolean; onClick: () => void; children: React.ReactNode }) => (
-    <button onClick={onClick}
+const Chip = ({ activo, sutil, atenuado, onClick, children }: { activo: boolean; sutil?: boolean; atenuado?: boolean; onClick: () => void; children: React.ReactNode }) => (
+    <button onClick={onClick} aria-pressed={activo}
         className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition [&_b]:ml-1 [&_b]:font-normal ${activo
             ? (sutil ? 'border-amber-400/40 bg-amber-400/15 text-amber-200' : 'border-indigo-400/50 bg-indigo-500/20 text-indigo-100')
-            : 'border-slate-700/50 bg-slate-800/40 text-slate-300'}`}>
+            : atenuado ? 'border-dashed border-slate-700/50 bg-transparent text-slate-500' : 'border-slate-700/50 bg-slate-800/40 text-slate-300'}`}>
         {children}
     </button>
 );

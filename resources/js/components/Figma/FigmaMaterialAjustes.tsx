@@ -10,10 +10,12 @@ interface Props {
     diasCriticos: number | null;
     /** Umbral que se está aplicando (propio o general). */
     umbral: number;
+    /** Categorías ya usadas, sugeridas al escribir para no crear duplicados. */
+    categorias?: string[];
 }
 
 /** Ajustes de control del insumo (solo administrador): categoría, stock mínimo y umbral FEFO propio. */
-export default function FigmaMaterialAjustes({ materialId, unidad, categoria, minimo, diasCriticos, umbral }: Props) {
+export default function FigmaMaterialAjustes({ materialId, unidad, categoria, minimo, diasCriticos, umbral, categorias = [] }: Props) {
     const [abierto, setAbierto] = useState(false);
     const [form, setForm] = useState({ categoria: categoria ?? '', stock_minimo: minimo ? String(minimo) : '', dias_criticos: diasCriticos ? String(diasCriticos) : '' });
     const [errores, setErrores] = useState<Record<string, string>>({});
@@ -42,7 +44,8 @@ export default function FigmaMaterialAjustes({ materialId, unidad, categoria, mi
             {abierto && (
                 <form onSubmit={guardar} className="grid grid-cols-1 gap-3 border-t border-slate-700/40 p-4 sm:grid-cols-3">
                     <label className="block text-xs font-semibold text-slate-400">Categoría
-                        <input className={`${campo} mt-1`} maxLength={100} value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} />
+                        <input className={`${campo} mt-1`} list={`categorias-${materialId}`} autoComplete="off" maxLength={100} value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} />
+                        <datalist id={`categorias-${materialId}`}>{categorias.map((c) => <option key={c} value={c} />)}</datalist>
                         {errores.categoria && <span className="mt-1 block text-rose-300">{errores.categoria}</span>}
                     </label>
                     <label className="block text-xs font-semibold text-slate-400">Stock mínimo ({unidad})

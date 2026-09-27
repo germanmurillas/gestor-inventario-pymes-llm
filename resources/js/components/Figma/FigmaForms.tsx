@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { ArrowLeft, Save, Info, Package, DollarSign, Calendar, Tag, Loader2, Camera, Image as ImageIcon } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 
-const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: () => void, initialBodega?: any, bodegas?: any[] }) => {
+const FigmaForms = ({ onBack, initialBodega = null, bodegas = [], categorias = [] }: { onBack: () => void, initialBodega?: any, bodegas?: any[], categorias?: string[] }) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         code: '',
@@ -279,8 +279,9 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [] }: { onBack: ()
                                 </div>
                                 <div className="col-span-2 space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Categoría</label>
-                                    <input aria-label="Categoría" type="text" maxLength={100} value={data.categoria} onChange={e => setData('categoria', e.target.value)}
+                                    <input aria-label="Categoría" type="text" list="categorias-existentes" autoComplete="off" maxLength={100} value={data.categoria} onChange={e => setData('categoria', e.target.value)}
                                         placeholder="Ej. Harinas" className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold" />
+                                    <datalist id="categorias-existentes">{categorias.map((c) => <option key={c} value={c} />)}</datalist>
                                 </div>
                                 <p className="col-span-2 text-[10px] text-slate-400">Días críticos: cuántos días antes de vencer un lote de este insumo pasa a crítico. Vacío = el umbral general de Ajustes.</p>
                             </div>

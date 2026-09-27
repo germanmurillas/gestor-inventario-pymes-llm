@@ -175,6 +175,8 @@ class InventoryController extends Controller {
         return Inertia::render('Dashboard', [
             'initialLotes' => $lotesActivos,
             'dashboardStats' => [
+                // Categorías ya usadas: el formulario las sugiere para no crear duplicados ("Harina" / "Harinas").
+                'categorias' => Material::whereNotNull('categoria')->where('categoria', '!=', '')->distinct()->orderBy('categoria')->pluck('categoria'),
                 'summary' => $stats,
                 'efficiency' => $efficiency,
                 'recentActivity' => $recentActivity,
@@ -230,6 +232,18 @@ class InventoryController extends Controller {
             'total' => $pagina->total(),
             'total_general' => \App\Models\Movimiento::count(),
         ]);
+    }
+
+    /**
+     * Si la categoría ya existe con otras mayúsculas ("harinas" / "Harinas"), usa la existente
+     * para no partir un mismo grupo en dos filtros.
+     */
+    private function categoriaExistente(?string $categoria): ?string
+    {
+        $categoria = trim((string) $categoria);
+        if ($categoria === '') return null;
+        $existentes = Material::whereNotNull('categoria')->distinct()->pluck('categoria');
+        return $existentes->first(fn ($c) => mb_strtolower($c) === mb_strtolower($categoria)) ?? $categoria;
     }
 
     public function exportPdf(\Illuminate\Http\Request $request) {
@@ -392,7 +406,7 @@ class InventoryController extends Controller {
             'dias_criticos' => 'nullable|integer|min:1|max:365',
         ]);
         $material->update([
-            'categoria' => $validated['categoria'] ?? null,
+            'categoria' => $this->categoriaExistente($validated['categoria'] ?? null),
             'stock_minimo' => $validated['stock_minimo'] ?? 0,
             'dias_criticos' => $validated['dias_criticos'] ?? null,
         ]);
@@ -434,7 +448,7 @@ class InventoryController extends Controller {
                     'description' => $validated['description'] ?? null,
                     'unit' => $validated['unit'],
                     'unidad_medida' => $validated['unit'],
-                    'categoria' => $validated['categoria'] ?? null,
+                    'categoria' => $this->categoriaExistente($validated['categoria'] ?? null),
                     'stock_minimo' => $validated['stock_minimo'] ?? 0, // 0 = sin mínimo (no genera alertas)
                     'dias_criticos' => $validated['dias_criticos'] ?? null,
                     'photo_path' => $photoPath,

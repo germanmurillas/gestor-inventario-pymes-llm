@@ -106,7 +106,7 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     <div ref={viewRef} className="px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:p-8 min-h-full">
                         {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} onViewChange={setActiveView} onOpenBodega={abrirBodega} onManageBodegas={setGestorBodegas} />}
-                        {activeView === 'INVENTARIO' && <FigmaInventario key={bodegaFiltro ?? 'todas'} lotes={lotes} bodegas={stats?.bodegas || []} user={user} onNavigate={setActiveView} initialBodegaCode={bodegaFiltro} onManageBodegas={setGestorBodegas} />}
+                        {activeView === 'INVENTARIO' && <FigmaInventario key={bodegaFiltro ?? 'todas'} lotes={lotes} bodegas={stats?.bodegas || []} categoriasExistentes={stats?.categorias || []} user={user} onNavigate={setActiveView} initialBodegaCode={bodegaFiltro} onManageBodegas={setGestorBodegas} />}
                         {activeView === 'BUSCAR' && <FigmaSearch lotes={lotes} />}
                         {activeView === 'ETIQUETAS' && <FigmaLabels lotes={lotes} />}
                         {activeView === 'REPORTES' && <FigmaReports stats={stats} />}
