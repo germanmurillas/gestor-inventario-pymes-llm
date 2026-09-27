@@ -28,7 +28,7 @@ use Illuminate\Support\Str;
 class EvaluarAsistente extends Command
 {
     protected $signature = 'rag:evaluar
-        {--conjunto=bateria : bateria | validacion | ciega | operario}
+        {--conjunto=bateria : bateria | validacion | ciega | operario | operario-ciega}
         {--etiqueta=medicion : Nombre de la ejecución}
         {--solo= : Ejecutar solo las N primeras preguntas}
         {--recalificar= : Volver a calificar un archivo de resultados guardado (sin consultar al asistente)}';
@@ -114,6 +114,7 @@ class EvaluarAsistente extends Command
             'validacion' => $this->validacion(),
             'ciega' => $this->ciega(),
             'operario' => $this->operario(),
+            'operario-ciega' => $this->operarioCiega(),
             default => $this->bateria(),
         };
     }
@@ -217,6 +218,22 @@ class EvaluarAsistente extends Command
             $this->existencias([['¿Queda harina de trigo panificable?', 'MP-HAR-01'], ['¿Cuánto huevo líquido nos queda?', 'MP-HUE-01'], ['¿Hay margarina de hojaldre?', 'GR-MAR-01']]),
             $this->ubicacion([['¿Dónde encuentro la leche en polvo?', 'MP-LEC-01']]),
             $this->inexistentes([['¿Tenemos queso crema?', 'stock_check']]),
+        );
+    }
+
+    /**
+     * Prueba ciega de operario (27-sep-2026): escrita ANTES de corregir el asistente, con redacciones
+     * distintas a las del conjunto de operario, y NO ejecutada hasta la medición final, para comprobar
+     * que la corrección no se ajustó solo a las 18 preguntas anteriores.
+     */
+    private function operarioCiega(): array
+    {
+        return array_merge(
+            $this->cuarentena(['¿Qué mercancía está apartada por problemas de calidad?', '¿Tenemos algo en cuarentena ahorita?']),
+            $this->criticos(['¿Qué se está poniendo viejo y hay que sacar ya?', '¿Qué hay que despachar ya antes de que se venza?']),
+            $this->bajoMinimo(['¿De qué estamos cortos?', '¿Qué insumos hay que reponer?']),
+            $this->existencias([['¿Cuánta sal refinada nos queda en bodega?', 'MP-SAL-01']]),
+            $this->inexistentes([['¿Tenemos almendras fileteadas?', 'stock_check']]),
         );
     }
 
