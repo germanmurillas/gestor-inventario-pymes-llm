@@ -12,7 +12,7 @@ Este capítulo describe cómo se construyó Pymetory: la organización del códi
 
 El repositorio sigue la estructura estándar de Laravel, con el frontend en React dentro de \texttt{resources/js}. La Tabla \ref{tab:imp_organizacion} resume sus partes principales.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Organización del código fuente de Pymetory.}
 \label{tab:imp_organizacion}
@@ -20,12 +20,13 @@ El repositorio sigue la estructura estándar de Laravel, con el frontend en Reac
 \hline
 \textbf{Carpeta} & \textbf{Archivos} & \textbf{Contenido} \\
 \hline
-\texttt{app/Http/Controllers} & 23 & Controladores: inventario, consumo FEFO, transferencias, reportes, etiquetas, escáner, asistente, usuarios, ajustes, entre otros. \\ \hline
+\texttt{app/Http/Controllers} & 24 & Controladores: inventario, consumo FEFO, transferencias, reportes, etiquetas, escáner, asistente, usuarios, ajustes, entre otros. \\ \hline
 \texttt{app/Models} & 15 & Modelos Eloquent (\texttt{Material}, \texttt{Lote}, \texttt{Movimiento}, \texttt{Bodega}, \ldots). \\ \hline
-\texttt{app/Console/Commands} & 2 & Revisiones programadas de alertas FEFO y de stock bajo. \\ \hline
-\texttt{database/migrations} & 27 & Definición versionada del esquema de la base de datos. \\ \hline
-\texttt{resources/js/Pages} y \texttt{components} & 13 y 33 & Páginas Inertia y componentes React de la interfaz. \\ \hline
-\texttt{tests} & 33 clases & Pruebas PHPUnit y la suite Playwright (Capítulo \ref{chap:pruebas}). \\ \hline
+\texttt{app/Console/Commands} & 3 & Revisiones programadas de alertas FEFO y de stock bajo, y el evaluador del asistente (\texttt{rag:evaluar}). \\ \hline
+\texttt{app/Services} & 2 & Envío de alertas y proyección de reabastecimiento (\texttt{ProyeccionInventario}). \\ \hline
+\texttt{database/migrations} & 32 & Definición versionada del esquema de la base de datos. \\ \hline
+\texttt{resources/js/Pages} y \texttt{components} & 12 y 35 & Páginas Inertia y componentes React de la interfaz. \\ \hline
+\texttt{tests} & 39 clases y 11 archivos & Pruebas PHPUnit y la suite Playwright (Capítulo \ref{chap:pruebas}). \\ \hline
 \end{tabular}
 \end{table}
 
@@ -121,11 +122,26 @@ DB::transaction(function () use ($material, $quantityToConsume, $validated) {
 
 \textbf{Qué cambió.} Las pruebas describen solo lo que les interesa (por ejemplo, un lote que vence en 20 días) y el resto de datos se completa de forma consistente.
 
+\section{Proyección de reabastecimiento}
+\label{sec:imp_proyeccion}
+
+Los requerimientos RF-09 y RF-10 y el nivel de analítica predictiva del alcance se implementaron en el servicio \texttt{ProyeccionInventario}, que calcula todo a partir del Kardex, sin datos escritos en el código:
+
+\begin{itemize}
+    \item \textbf{Consumo diario.} Promedio móvil simple: lo que salió del insumo por producción, venta, desperdicio o escáner en los últimos 28 días, dividido entre 28. Las transferencias no cuentan porque el insumo solo cambia de bodega, y los ajustes tampoco, porque corrigen el conteo y no reflejan demanda.
+    \item \textbf{Cobertura y agotamiento.} La existencia activa dividida entre el consumo diario da los días que alcanza; sumados a la fecha de hoy, la fecha probable de agotamiento.
+    \item \textbf{Punto de reorden.} Consumo diario $\times$ días de entrega del proveedor + stock mínimo, según el modelo de punto de reorden descrito en la Sección \ref{sssec:eoq_rop}. Los días de entrega los registra el administrador por insumo; si no están, el sistema no inventa el punto de reorden y lo indica. Un insumo está por reponer cuando su existencia llega a ese punto o baja de su mínimo; si no, se muestra la última fecha para pedir a tiempo.
+    \item \textbf{Diagnóstico.} Para explicar una variación, el servicio agrupa las entradas y salidas del insumo por motivo en los últimos días y las compara con el periodo anterior de igual duración.
+\end{itemize}
+
+El promedio móvil supone que el consumo de los próximos días será como el de las últimas semanas: no anticipa temporadas ni cambios bruscos, lo que se propone como trabajo futuro. La vista Reabastecimiento muestra estos valores y grafica el consumo por día, semana o mes, y el asistente los usa en dos intenciones nuevas (\texttt{forecast} y \texttt{consumption}). Once pruebas PHPUnit verifican los cálculos con fechas fijas, la exclusión de transferencias y ajustes, y que la clasificación de las 106 preguntas de las baterías de evaluación no cambió.
+
 \section{Problemas enfrentados y cómo se resolvieron}
 \label{sec:imp_problemas}
 
 La Tabla \ref{tab:imp_problemas} reúne los problemas más significativos del desarrollo. Cada uno tiene como evidencia el commit que lo corrigió en el repositorio.
 
+{\small
 \begin{longtable}{|p{3.6cm}|p{5.6cm}|p{4.2cm}|p{1.4cm}|}
 \caption{Problemas del desarrollo y su solución.}
 \label{tab:imp_problemas}\\
@@ -156,27 +172,27 @@ El pan terminado aparecía siempre como crítico y la ocupación sumaba kilos co
 El asistente acertó 34 de 50 consultas en la primera medición. & Contextos sin costos, sin ajustes de conciliación ni totales; lotes no reconocidos por su número real. & Contextos completos y clasificador revisado; la misma batería pasó a 49 de 50. & \texttt{48f092f} \\ \hline
 Seis tipos de incumplimiento de WCAG 2.1 AA. & Contraste bajo, botones de solo ícono sin nombre y campos sin etiqueta. & Acento sólido por tema, nombres accesibles y etiquetas; cero incumplimientos automáticos en el tema por defecto. & \texttt{fb0e9bb} \\ \hline
 \end{longtable}
+}
 
 Además de los defectos de código, la operación del servidor mostró dos problemas de recursos. Dos procesos de un proyecto ajeno a la tesis, alojado en el mismo servidor, llevaban seis días ocupando dos de los cuatro núcleos, lo que hacía muy lentos los modelos de lenguaje locales; se detuvieron y ese proyecto se retiró del repositorio de la tesis. Y al evaluar modelos, cargar varios a la vez agotó la memoria y dejó la aplicación sin servicio unos seis minutos; desde entonces Ollama tiene un límite de 14~GB y un solo modelo cargado a la vez, de modo que no puede afectar a la base de datos ni a la aplicación.
 
 \section{Infraestructura}
 \label{sec:imp_infraestructura}
 
-El sistema corre en una instancia de Oracle Cloud de la capa gratuita \textit{Always Free} \cite{oci_always_free}: procesador ARM de 4 núcleos, 24~GB de memoria y 200~GB de disco. La Figura \ref{fig:imp_despliegue} (reproducida del anexo) muestra sus componentes:
+El sistema corre en una instancia de Oracle Cloud de la capa gratuita \textit{Always Free} \cite{oci_always_free}: procesador ARM de 4 núcleos, 24~GB de memoria y 200~GB de disco. La Figura \ref{fig:imp_despliegue} muestra sus componentes:
 
 \begin{itemize}
     \item \textbf{Acceso.} El dominio \texttt{app.pymetory.com} se publica mediante un túnel de Cloudflare, que establece la conexión desde el servidor hacia Cloudflare. El servidor no expone puertos de la aplicación a internet y el certificado TLS lo gestiona Cloudflare.
-    \item \textbf{Aplicación.} Laravel 13 sobre PHP 8.3, ejecutado por PHP-FPM detrás de Nginx, que además entrega directamente los archivos estáticos (JavaScript, estilos e imágenes). Al principio se usaba el servidor de desarrollo de PHP (\texttt{artisan serve}), que atiende una petición a la vez: una consulta lenta al asistente o las imágenes de la página de inicio dejaban esperando a las demás. El cambio redujo el tiempo de carga del inicio de sesión de varios segundos a unos 0,3 segundos.
-    \item \textbf{Datos.} MySQL 8.0 en el mismo servidor.
+    \item \textbf{Aplicación y datos.} Laravel 13 sobre PHP 8.3, con MySQL 8.0 en el mismo servidor, ejecutado por PHP-FPM detrás de Nginx, que además entrega directamente los archivos estáticos (JavaScript, estilos e imágenes). Al principio se usaba el servidor de desarrollo de PHP (\texttt{artisan serve}), que atiende una petición a la vez: una consulta lenta al asistente o las imágenes de la página de inicio dejaban esperando a las demás. El cambio redujo el tiempo de carga del inicio de sesión de varios segundos a unos 0,3 segundos.
     \item \textbf{Modelos de lenguaje.} El modelo principal es \texttt{gpt-oss:120b-cloud}, de la capa gratuita de Ollama Cloud. Si falla o responde vacío, contesta un modelo local de respaldo (\texttt{qwen3.5:9b}), y si ese también falla, el asistente muestra en modo texto los datos que recuperó de la base. En el servidor, el respaldo tardó 56~s con el modelo en frío y 33~s ya cargado, frente a cerca de un segundo del modelo en la nube; por eso es un respaldo y no el modelo principal. Ollama no puede usar más de 14~GB de memoria, y ante falta de memoria el sistema operativo lo detiene a él antes que a la base de datos o a la aplicación.
-    \item \textbf{Ensayo de modelos locales.} Se midió en el servidor cuánta memoria y cuánto tiempo necesitan los modelos locales que caben en ese límite (27 de septiembre de 2026). \texttt{gemma4:12b} y \texttt{qwen3.5:9b} cargaron su contexto máximo de 256\,000 tokens con unos 11,5~GB, pero leyeron a 7,5 y 13,9 tokens por segundo: unos 4\,100 tokens les tomaron 9 y 5 minutos. \texttt{qwen3:14b} no terminó de leerlos en 15 minutos. Sin GPU, entregar al modelo todo el inventario en cada pregunta no es viable; el diseño RAG, que le entrega solo unos cientos de tokens ya filtrados, es lo que permite responder en segundos.
+    \item \textbf{Ensayo de modelos locales.} En el servidor se midieron memoria y tiempo de los modelos locales que caben en ese límite (27 de septiembre de 2026). \texttt{gemma4:12b} y \texttt{qwen3.5:9b} cargaron su contexto máximo de 256\,000 tokens con unos 11,5~GB, pero leyeron a 7,5 y 13,9 tokens por segundo: unos 4\,100 tokens les tomaron 9 y 5 minutos. \texttt{qwen3:14b} no terminó de leerlos en 15 minutos. Sin GPU, entregar al modelo todo el inventario en cada pregunta no es viable; el diseño RAG, que le entrega solo unos cientos de tokens ya filtrados, es lo que permite responder en segundos.
     \item \textbf{Tareas programadas.} Un \textit{cron} ejecuta cada minuto el programador de Laravel, que revisa cada hora los lotes por vencer y el stock bajo.
-    \item \textbf{Respaldos.} Una tarea programada genera cada noche un volcado comprimido completo de la base de datos con \texttt{mysqldump}. Además, antes de cada cambio delicado en producción ---por ejemplo, la migración que hizo inmutable el Kardex el 25 de septiembre de 2026--- se generó un volcado adicional. Todas las copias se conservan en el mismo servidor (ver Trabajos Futuros).
+    \item \textbf{Respaldos.} Cada noche se genera un volcado comprimido de la base de datos con \texttt{mysqldump}, y antes de cada cambio delicado ---como la migración que hizo inmutable el Kardex el 25 de septiembre de 2026--- se generó uno adicional. Todas las copias quedan en el mismo servidor (ver Trabajos Futuros).
 \end{itemize}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{Anexos/Imagenes/DiagramaDespliegue.png}
+\includegraphics[width=0.9\textwidth]{Anexos/Imagenes/DiagramaDespliegue.png}
 \caption{Infraestructura de producción de Pymetory.}
 \label{fig:imp_despliegue}
 \end{figure}
@@ -189,7 +205,5 @@ El despliegue está automatizado con GitHub Actions (\texttt{.github/workflows/d
 \begin{enumerate}
     \item \textbf{Revisión.} Verificación de sintaxis de los archivos PHP.
     \item \textbf{Pruebas.} Instalación de dependencias, compilación del frontend y ejecución de la suite PHPUnit. Si una prueba falla, el despliegue no continúa.
-    \item \textbf{Despliegue.} Conexión por SSH al servidor, actualización del código, instalación de dependencias de producción y ejecución de migraciones.
+    \item \textbf{Despliegue.} Conexión por SSH al servidor, actualización del código, instalación de dependencias de producción, migraciones, regeneración de cachés y reinicio del servicio; el frontend compilado desde el mismo commit se sube aparte. Producción usa \texttt{APP\_DEBUG=false}, para que un error no exponga detalles internos.
 \end{enumerate}
-
-Los recursos compilados del frontend se generan en el equipo de desarrollo a partir del mismo commit y se suben al servidor; después se regeneran las cachés de configuración y rutas y se reinicia el servicio. La aplicación de producción funciona con \texttt{APP\_ENV=production} y \texttt{APP\_DEBUG=false}, de modo que un error no expone detalles internos al usuario.

@@ -16,7 +16,7 @@ Este proyecto se ejecuta como trabajo de grado universitario. La inversión prin
 
 Todas las herramientas utilizadas son de código abierto (licencia MIT, Apache o similar), lo que significa que no hay costos de licenciamiento. El computador, la conexión a internet y el software de desarrollo son propiedad de los estudiantes. En resumen: el costo monetario directo del proyecto es \$0 COP.
 
-\begin{table}[h!]
+\begin{table}[!htbp]
 \centering
 \caption{Valoración académica del esfuerzo de ingeniería.}
 \label{tab:costo_academico}
@@ -36,9 +36,9 @@ Documentación del Proyecto & 35 horas & \$15.000 COP & \$525.000 \\ \hline
 \subsection{Estimación de Costos de Despliegue y Mantenimiento Anual}
 \label{sec:costo_despliegue}
 
-Para dar una visión del ciclo de vida completo de la solución, ofrecemos una estimación de lo que costaría mantener el sistema en producción durante un año. Estos costos aplican si una PYME decidiera contratar hosting comercial; en nuestro caso, se utiliza la capa gratuita de Oracle Cloud \cite{oci_always_free}, que no tiene costo.
+La Tabla \ref{tab:costo_operativo} estima lo que costaría mantener el sistema en producción durante un año si una PYME contratara hosting comercial; en nuestro caso, se utiliza la capa gratuita de Oracle Cloud \cite{oci_always_free}, que no tiene costo, y el dominio puede omitirse accediendo por la dirección IP del servidor, lo que hace a Pymetory viable incluso para la PYME más pequeña.
 
-\begin{table}[h!]
+\begin{table}[!htbp]
 \centering
 \caption{Costos operativos anuales estimados.}
 \label{tab:costo_operativo}
@@ -51,6 +51,5 @@ Hosting Básico en la Nube & \$300.000 & Colombia Hosting \cite{colhost_hosting}
 \end{tabular}
 \end{table}
 
-En la práctica, el sistema desplegado en Oracle Cloud Infrastructure no genera costos de hosting, y el dominio puede omitirse si se accede directamente por la dirección IP del servidor. Esto hace que Pymetory sea viable incluso para la PYME más pequeña: el único costo real es la luz que consume el servidor.
 
 %========= FIN DEL CÓDIGO PARA presupuesto.tex =========

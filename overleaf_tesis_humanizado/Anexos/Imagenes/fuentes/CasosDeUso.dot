@@ -1,0 +1,29 @@
+// Diagrama de casos de uso de Pymetory. Los permisos salen de las rutas (middleware CheckRole:admin).
+// Regenerar: dot -Tpng -Gdpi=200 fuentes/CasosDeUso.dot -o CasosDeUso.png
+digraph CasosDeUso {
+    rankdir=LR; nodesep=0.28; ranksep=1.1; fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=11];
+    edge [arrowhead=none, color="#475569"];
+
+    Operario      [shape=box, style="rounded", label="Operario"];
+    Administrador [shape=box, style="rounded", label="Administrador"];
+
+    subgraph cluster_sistema {
+        label="Pymetory"; labelloc=t; fontsize=13; style="rounded"; color="#94a3b8";
+        node [shape=ellipse, style=filled, fillcolor="#e8eef8", color="#64748b"];
+        UC2 [label="UC2 Registrar lote"];
+        UC3 [label="UC3 Despachar FEFO"];
+        UC4 [label="UC4 Consultar al asistente\n(RAG)"];
+        UC5 [label="UC5 Generar reporte"];
+        UC1 [label="UC1 Registrar material"];
+        UC6 [label="UC6 Conciliar inventario"];
+        UC7 [label="UC7 Gestionar usuarios"];
+        UC8 [label="UC8 Configurar LLM"];
+        UC9 [label="UC9 Gestionar bodegas"];
+    }
+
+    Operario -> {UC2 UC3 UC4 UC5};
+    Administrador -> {UC1 UC6 UC7 UC8 UC9};
+    // Generalización UML: el Administrador puede hacer todo lo del Operario.
+    Administrador -> Operario [arrowhead=onormal, style=solid, color="#1e293b", constraint=false];
+}

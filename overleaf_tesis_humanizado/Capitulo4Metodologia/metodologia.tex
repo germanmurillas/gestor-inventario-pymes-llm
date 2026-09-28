@@ -36,7 +36,7 @@ Para la gestión del proyecto se planteó una metodología de desarrollo ágil b
 
 Aunque SCRUM define roles como Product Owner, Scrum Master y Equipo de Desarrollo, para este proyecto se adaptaron de la siguiente manera: para obtener una retroalimentación crítica y asegurar que el desarrollo se alineara con los objetivos, el Director de Trabajo de Grado (Prof. Héctor Fabio Ocampo) actuó como el principal \textit{stakeholder} y su perspectiva en las revisiones de sprint cumplió una función análoga a la del Product Owner, validando los incrementos de software y ajustando prioridades según los objetivos académicos y técnicos del proyecto.
 
-El autor (Germán David Murillas Mondragón) asumió, de manera unipersonal, las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso, eliminando impedimentos y asegurando la adherencia a las ceremonias de SCRUM.
+El autor (Germán David Murillas Mondragón) asumió, de manera unipersonal, las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso y eliminando impedimentos. Cómo se adaptaron en la práctica las ceremonias de SCRUM a un solo desarrollador se explica en el Capítulo \ref{chap:gestion}.
 
 El plan organizó el trabajo en sprints, ciclos iterativos de dos semanas, con los eventos del marco. Cómo se adaptaron en la práctica a un único desarrollador se describe en el Capítulo \ref{chap:gestion}.
 
@@ -67,7 +67,7 @@ El desarrollo del proyecto se estructuró en las siguientes fases:
 
 El anteproyecto planificó seis sprints de dos semanas, precedidos por cuatro semanas de levantamiento de requisitos y diseño. La Tabla \ref{tab:sprints} reproduce ese plan.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Planificación de sprints del anteproyecto.}
 \label{tab:sprints}
@@ -94,7 +94,7 @@ Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & Pruebas automatiz
 
 \subsection{Plan frente a ejecución}
 
-La ejecución no siguió este calendario al pie de la letra. El registro verificable de lo que se hizo y cuándo son los \textit{issues} del tablero de GitHub Projects y el historial de \textit{commits} del repositorio, que se describen en el Capítulo \ref{chap:gestion}. Las diferencias principales con el plan son:
+El anteproyecto contiene dos calendarios: esta tabla, con seis sprints de dos semanas, y el cronograma general de 36 semanas del Capítulo 5, que asigna cuatro semanas a cada etapa. La ejecución no siguió ninguno al pie de la letra. El registro verificable de lo que se hizo y cuándo son los \textit{issues} del tablero de GitHub Projects y el historial de \textit{commits} del repositorio, que se describen en el Capítulo \ref{chap:gestion}. Las diferencias principales con el plan son:
 
 \begin{itemize}
     \item \textbf{Modelo de lenguaje.} En lugar de una API de pago (el plan mencionaba GPT-4o-mini), el asistente usa Ollama en el propio servidor y proveedores compatibles con la API de OpenAI en su capa gratuita, seleccionables desde Ajustes.
@@ -108,11 +108,12 @@ La ejecución no siguió este calendario al pie de la letra. El registro verific
 
 La Tabla \ref{tab:herramientas} resume las herramientas utilizadas durante el desarrollo del proyecto.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Herramientas de desarrollo y colaboración.}
 \label{tab:herramientas}
-\begin{tabular}{|l|l|p{4cm}|}
+\small
+\begin{tabular}{|l|p{4.2cm}|p{7.2cm}|}
 \hline
 \textbf{Categoría} & \textbf{Herramienta} & \textbf{Propósito} \\
 \hline

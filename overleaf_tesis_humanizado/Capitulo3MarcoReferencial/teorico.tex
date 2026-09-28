@@ -36,7 +36,7 @@ La trazabilidad es la capacidad de seguirle el rastro a un producto desde que en
 
 Dos conceptos clásicos de la teoría de inventarios guían el diseño del sistema. La Cantidad Económica de Pedido (EOQ, por \textit{Economic Order Quantity}) responde a la pregunta ``¿cuánto debo pedir cada vez para minimizar costos?''. El Punto de Reorden (ROP, por \textit{Reorder Point}) responde a ``¿en qué momento debo hacer el pedido para no quedarme sin stock?''.
 
-Aunque Pymetory no calcula el EOQ automáticamente, sí proporciona los datos históricos necesarios para que un administrador pueda hacerlo: consumos pasados, estacionalidad y costos unitarios. La funcionalidad de alertas de stock mínimo es, de hecho, una implementación práctica del concepto de ROP: cuando el inventario baja de cierto nivel, el sistema avisa.
+Pymetory no calcula el EOQ, pero conserva en el Kardex los consumos y costos que se necesitarían para hacerlo. El ROP sí se calcula: con el consumo diario promedio de cada insumo y los días de entrega de su proveedor, el sistema indica en qué nivel de existencia conviene pedir y hasta qué fecha alcanza lo que hay (Sección \ref{sec:imp_proyeccion}).
 
 \subsubsection{Métodos de Valoración de Inventario: PEPS y UEPS}
 \label{sssec:peps_ueps}
@@ -48,7 +48,7 @@ Valorar un inventario es ponerle precio a lo que hay guardado. Los métodos más
 
 Rotar el inventario no es mover cajas. Es decidir en qué orden se despachan los productos para minimizar pérdidas. Hay tres estrategias principales. La Tabla \ref{tab:comparativa_rotacion} las compara.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Comparativa de estrategias de rotación de inventario.}
 \label{tab:comparativa_rotacion}
@@ -111,7 +111,7 @@ La arquitectura RAG, introducida por Lewis et al. (2020) \cite{rag_lewis2020}, o
 
 La Tabla \ref{tab:rag_vs_chat} contrasta implementar un chat genérico con un LLM versus implementar la arquitectura RAG.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Comparativa entre chat genérico con LLM y arquitectura RAG.}
 \label{tab:rag_vs_chat}
@@ -143,7 +143,7 @@ Para mitigar esto, se implementó un mecanismo de \textbf{degradación elegante}
 \subsection{Framework Laravel y el Patrón MVC}
 \label{sec:laravel_mvc}
 
-Laravel es un framework de código abierto para desarrollar aplicaciones web en PHP, creado por Taylor Otwell en 2011. Lo elegimos por cuatro razones: su madurez (versión 11), su licencia MIT que permite uso comercial gratuito, su ecosistema de herramientas integradas (ORM, migraciones, middleware) y su adopción del patrón MVC.
+Laravel es un framework de código abierto para desarrollar aplicaciones web en PHP, creado por Taylor Otwell en 2011. Lo elegimos por cuatro razones: su madurez, su licencia MIT que permite uso comercial gratuito, su ecosistema de herramientas integradas (ORM, migraciones, middleware) y su adopción del patrón MVC.
 
 \subsubsection{El Patrón Modelo-Vista-Controlador (MVC)}
 
@@ -158,16 +158,6 @@ El patrón MVC, formalizado por Trygve Reenskaug en 1979, propone separar el có
 \end{itemize}
 
 La separación en capas trae beneficios prácticos: puedes rediseñar la interfaz sin tocar la lógica de negocio, puedes probar cada capa por separado, y dos desarrolladores pueden trabajar simultáneamente sin pisarse.
-
-\subsubsection{Componentes Clave de Laravel Utilizados en Pymetory}
-
-\begin{itemize}
-    \item \textbf{Eloquent ORM:} Interfaz orientada a objetos para interactuar con MySQL. Las relaciones entre tablas se definen como métodos, y las consultas se construyen con una API fluida. El scope FEFO es un ejemplo de cómo encapsular una regla de negocio en un método reutilizable.
-    \item \textbf{Migraciones:} Permiten versionar los cambios del esquema de la base de datos con archivos PHP. Esto garantiza que el esquema se pueda reproducir en cualquier entorno.
-    \item \textbf{Middleware:} Capas de software que se ejecutan antes de que una solicitud llegue al controlador. Pymetory usa \texttt{Authenticate} para verificar sesión y \texttt{CheckRole} para verificar permisos según el rol.
-    \item \textbf{Seeders:} Pueblan la base de datos con datos de prueba realistas ---materiales con nombres coherentes, lotes con fechas de vencimiento variadas--- esenciales para probar el módulo RAG.
-    \item \textbf{Validación:} Sistema de validación de formularios que verifica los datos antes de que lleguen a la base de datos, con mensajes de error en español.
-\end{itemize}
 
 \subsection{React e Inertia.js: Single Page Applications sin API REST}
 \label{sec:react_inertia}
@@ -192,15 +182,11 @@ Inertia.js resuelve este problema con un principio simple: en lugar de que el fr
 
 Este enfoque ofrece la fluidez de una SPA sin los costos de una API REST: sin endpoints adicionales, sin serialización manual, sin duplicación de tipos.
 
-\subsubsection{React 19 y TypeScript}
-
-React 19 se usó con TypeScript para construir los 18 componentes que corresponden a los mockups de Figma. TypeScript agrega tipado estático a JavaScript, lo que permite detectar errores en tiempo de compilación ---pasar un string donde se esperaba un número, acceder a una propiedad que no existe--- antes de que el código llegue a ejecutarse.
-
-Cada componente recibe sus datos como props desde Laravel vía Inertia.js, gestiona su propio estado local, utiliza GSAP para animaciones y aplica los estilos del tema Midnight Luxe con Tailwind CSS v4.
+La interfaz se construyó con React 19 y TypeScript, que agrega tipado estático a JavaScript y permite detectar en compilación errores como pasar un texto donde se esperaba un número.
 
 \subsubsection{Comparativa de Enfoques de Frontend}
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Comparativa de enfoques de frontend para aplicaciones web.}
 \label{tab:comparativa_frontend}
@@ -225,13 +211,13 @@ Cada componente recibe sus datos como props desde Laravel vía Inertia.js, gesti
 
 \subsection{Marco Tecnológico}
 
-Elegimos el stack Laravel, PHP y MySQL por ser de código abierto, robusto y contar con una comunidad activa. Laravel acelera el desarrollo con su ORM Eloquent y sus componentes pre-construidos \cite{laraveldocs}. La arquitectura MVC, nativa en Laravel, es clave para mantener el código organizado y escalable \cite{fowler2002poeaa}. El diseño responsive se garantiza con Tailwind CSS \cite{mdn_responsive_design}. Para la integración del LLM se utilizan APIs de modelos pre-entrenados como los ofrecidos por OpenAI \cite{zhao2023surveyllm}.
+El stack completo ---Laravel, PHP, MySQL, React, Inertia.js y Tailwind CSS---, las alternativas consideradas y la razón de cada elección se presentan en la Sección \ref{sec:dis_herramientas}.
 
 \subsection{Estado del Arte}
 
 Al analizar las soluciones que ya existen, encontramos un patrón. Plataformas como Odoo \cite{odoo}, Zoho Inventory \cite{zoho} y Stockpile \cite{stockpile} son robustas en gestión de inventarios, pero comparten una deficiencia: ninguna permite interactuar con el sistema mediante lenguaje natural. El usuario debe aprender la lógica de la herramienta, en lugar de que la herramienta se adapte a la lógica del usuario. Nuestra propuesta cierra esa brecha incorporando una capa de inteligencia conversacional.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Tabla comparativa de soluciones de inventario.}
 \label{tab:comparativa_soluciones}
@@ -257,9 +243,4 @@ Revisamos trabajos de grado en repositorios universitarios colombianos y encontr
 \subsection{Tecnologías de Despliegue en la Nube}
 \label{sec:cloud}
 
-El sistema se desplegó en la capa gratuita de una plataforma de nube:
-
-\begin{itemize}
-    \item \textbf{Oracle Cloud Infrastructure (OCI):} Una instancia VM.Standard.A1.Flex con arquitectura ARM Ampere (4 OCPUs, 24 GB de RAM). Esta máquina, obtenida mediante un script automatizado que sondea múltiples regiones, está pensada para producción: sus 24 GB de RAM permiten ejecutar modelos de lenguaje locales (Ollama) directamente en el servidor, eliminando la dependencia de APIs externas de pago.
-    \item \textbf{Publicación con dominio propio:} La aplicación se publica en \url{https://app.pymetory.com} a través de un túnel de Cloudflare, que entrega HTTPS sin abrir puertos de entrada en el servidor (Capítulo \ref{chap:implementacion}).
-\end{itemize}
+El sistema se desplegó en la capa gratuita de Oracle Cloud Infrastructure, en una instancia ARM con 4 OCPU y 24 GB de RAM que permite ejecutar modelos de lenguaje locales con Ollama, y se publica en \url{https://app.pymetory.com} mediante un túnel de Cloudflare que entrega HTTPS sin abrir puertos de entrada (Capítulo \ref{chap:implementacion}).

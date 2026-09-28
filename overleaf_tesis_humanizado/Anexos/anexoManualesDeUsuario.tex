@@ -1,64 +1,20 @@
-% Manual de usuario de Pymetory. Capturas tomadas de app.pymetory.com con los datos de demostración y la interfaz rediseñada (25-sep-2026).
+% Manual de usuario de Pymetory. Versión resumida para respetar el límite de 80 páginas (Res. 137-2023, art. 18, parágrafo 2).
+% El manual completo, con capturas de app.pymetory.com, está publicado en https://tesis.pymetory.com/manual-de-usuario.pdf
+% y se abre desde el menú de la aplicación ("Manual de usuario").
 \section*{Manual de usuario} \label{sec:ManualesdeUsuario}
 \addcontentsline{toc}{section}{Manual de usuario}
 
-Este manual describe el uso de Pymetory en \url{https://app.pymetory.com}. Las capturas muestran los datos de demostración del caso de estudio (panadería). Las funciones marcadas como \textit{solo administrador} no están disponibles para el rol operario.
+El manual completo, con capturas de cada pantalla de \url{https://app.pymetory.com}, se entrega como anexo digital en \url{https://tesis.pymetory.com/manual-de-usuario.pdf} y se abre desde el menú de la aplicación. A continuación se resume cada módulo. Las funciones marcadas como \textit{solo administrador} no están disponibles para el rol operario.
 
-\newcommand{\capturaManual}[2]{%
-\begin{figure}[H]\centering\includegraphics[width=0.8\textwidth]{Anexos/Imagenes/manual/#1}\caption{#2}\end{figure}}
-
-\subsection*{Ingreso al sistema}
-Ingrese el correo electrónico y la contraseña asignados por el administrador y pulse \textbf{Entrar}. No existe registro abierto de administradores: las cuentas con ese rol las crea otro administrador.
-\capturaManual{01-login.png}{Pantalla de inicio de sesión.}
-
-\subsection*{Tablero}
-Resume el estado del inventario: número de insumos, lotes en bodega, lotes críticos por vencimiento y valorización. Debajo aparecen los últimos movimientos del Kardex y la ocupación de cada bodega. Los accesos rápidos permiten registrar un insumo, escanear un código, generar un reporte o hacer un consumo rápido.
-\capturaManual{02-tablero.png}{Tablero de control.}
-
-\subsection*{Inventario}
-Tiene dos pestañas. En \textbf{Insumos} cada tarjeta es un insumo con su existencia total en su unidad (kg, L, gal, und), el número de lotes y avisos de lotes por vencer o de existencia bajo el mínimo; se puede filtrar por bodega y por categoría, y al tocar un insumo se ven sus lotes en orden FEFO. Con \textbf{Ingreso} se registra un insumo nuevo con su primer lote (unidad, costo, stock mínimo y, si se quiere, un umbral de días críticos propio). Para un insumo que ya existe, su ficha tiene \textbf{Registrar ingreso de lote}: número de lote, cantidad, costo unitario, fecha de vencimiento y bodega. \textbf{Consumo FEFO} registra una salida; el sistema descuenta primero del lote que vence primero.
-\capturaManual{03-inventario.png}{Inventario por insumo.}
-
-En \textbf{Bodegas} cada tarjeta resume lo que hay en esa bodega según la base de datos: lotes, insumos, lotes por vencer, valor y ocupación. Al tocarla se abre el inventario filtrado por esa bodega. El administrador puede crear una bodega o editarla (nombre, capacidad, descripción, estado e imagen de fondo, que puede ser un archivo subido o un enlace \texttt{https}).
-\capturaManual{03b-bodegas.png}{Bodegas conectadas al inventario.}
-
-\subsection*{Búsqueda}
-Busca entre los lotes con existencias por nombre del insumo, código, número de lote, categoría o bodega. Los resultados pueden filtrarse por lotes por vencer, vigentes o en cuarentena, y por bodega.
-\capturaManual{04-buscar.png}{Búsqueda de lotes de harina.}
-
-\subsection*{Asistente de inventario}
-Escriba una pregunta en español, por ejemplo ``¿Qué lotes vencen pronto?'' o ``¿Cuánta harina de trigo hay?''. El asistente consulta la base de datos antes de responder; si el material no está registrado, lo indica. Las conversaciones quedan en el historial de la izquierda.
-\capturaManual{05-asistente.png}{Asistente con una consulta de vencimientos.}
-
-\subsection*{Reportes (solo administrador)}
-Genera reportes de inventario, movimientos, FEFO, consumo y valorización, filtrables por bodega, material y rango de fechas, en PDF o CSV.
-\capturaManual{06-reportes.png}{Módulo de reportes.}
-
-\subsection*{Log maestro (Kardex)}
-Lista todos los movimientos con tipo, material, lote, responsable, cantidad y fecha. Los movimientos no se pueden editar ni eliminar; una corrección se registra como un ajuste nuevo con su justificación.
-\capturaManual{07-kardex.png}{Log maestro de movimientos.}
-
-\subsection*{Etiquetas y escáner}
-El módulo de etiquetas genera códigos QR y de barras por lote para imprimir. El escáner lee esas etiquetas con la cámara del dispositivo; si no hay cámara, basta escribir el número de lote impreso en la etiqueta. Después registra la entrada o salida correspondiente en el Kardex.
-\capturaManual{08-etiquetas.png}{Generación de etiquetas.}
-\capturaManual{09-escaner.png}{Escáner de códigos QR.}
-
-\subsection*{Transferencias}
-Traslada cantidad de un lote entre bodegas. La operación registra la salida en la bodega de origen y la entrada en la de destino.
-\capturaManual{10-transferencias.png}{Transferencias entre bodegas.}
-
-\subsection*{Órdenes de compra}
-Registra órdenes a proveedores. Al recibir una orden se indica, por cada insumo, la cantidad recibida, el número de lote, la fecha de vencimiento y la bodega; el sistema crea el lote y su entrada en el Kardex.
-\capturaManual{11-ordenes.png}{Órdenes de compra.}
-
-\subsection*{Alertas}
-Reúne las alertas de stock bajo y de lotes próximos a vencer. Las genera una tarea programada que revisa el inventario cada hora; un aviso que sigue sin leer no se repite en las siguientes 24 horas. Al tocar una alerta se marca como leída y se abre el inventario.
-\capturaManual{12-alertas.png}{Centro de alertas.}
-
-\subsection*{Ajustes (solo administrador)}
-Configura el umbral FEFO, las notificaciones, el proveedor y modelo de lenguaje del asistente, las claves de API y los usuarios con sus roles. En \textbf{Tema visual} se elige una de seis paletas; el cambio se aplica a toda la interfaz.
-\capturaManual{13-ajustes.png}{Ajustes del sistema.}
-
-\subsection*{Uso en el celular}
-En pantallas pequeñas el menú lateral se reemplaza por una barra inferior con Tablero, Inventario, Escanear y Asistente; el botón \textbf{Más} abre el resto de módulos agrupados. Este manual se puede abrir desde el menú, en \textbf{Manual de usuario}.
-\begin{figure}[H]\centering\includegraphics[width=0.8\textwidth]{Anexos/Imagenes/manual/14-movil.png}\caption{Tablero, inventario y escáner en el celular.}\end{figure}
+\begin{itemize}
+	\item \textbf{Ingreso y celular:} correo y contraseña asignados por el administrador (las cuentas de administrador solo las crea otro administrador). En el celular, una barra inferior da acceso a Tablero, Inventario, Escanear y Asistente, y \textbf{Más} al resto.
+	\item \textbf{Tablero:} insumos, lotes, lotes críticos, valorización, últimos movimientos y ocupación de bodegas, con accesos rápidos.
+	\item \textbf{Inventario:} en \textit{Insumos} se ven la existencia, los lotes y los avisos de cada insumo, con filtros por bodega y categoría; \textit{Ingreso} crea un insumo con su primer lote, \textit{Registrar ingreso de lote} agrega lotes y \textit{Consumo FEFO} descuenta primero del lote que vence primero. En \textit{Bodegas}, cada tarjeta resume lotes, vencimientos, valor y ocupación.
+	\item \textbf{Búsqueda y asistente:} la búsqueda filtra lotes por nombre, código, lote, categoría o bodega; el asistente responde preguntas en español (``¿Cuánta harina de trigo hay?'') consultando antes la base de datos, y guarda el historial.
+	\item \textbf{Reportes:} inventario, movimientos, FEFO, consumo y valorización, filtrables por bodega, material y fechas, en PDF, CSV o Excel.
+	\item \textbf{Reabastecimiento:} consumo diario, cobertura, fecha de agotamiento y punto de reorden de cada insumo (con los días de entrega registrados en sus ajustes) y gráfico de consumo por periodo.
+	\item \textbf{Log maestro (Kardex):} todos los movimientos con tipo, material, lote, responsable, cantidad y fecha. No se pueden editar ni eliminar; una corrección se registra como un ajuste nuevo con su justificación.
+	\item \textbf{Etiquetas, escáner, transferencias y órdenes de compra:} el sistema genera códigos QR y de barras por lote, que el escáner lee con la cámara o con el número escrito; las transferencias registran la salida en la bodega de origen y la entrada en la de destino; al recibir una orden de compra se crean los lotes con su vencimiento, bodega y entrada en el Kardex.
+	\item \textbf{Alertas:} stock bajo y lotes próximos a vencer, generadas por una tarea que revisa el inventario cada hora; un aviso sin leer no se repite en 24 horas.
+	\item \textbf{Ajustes} (\textit{solo administrador}): umbral FEFO, notificaciones, proveedor y modelo del asistente, claves de API, usuarios y roles, y tema visual (seis paletas).
+\end{itemize}

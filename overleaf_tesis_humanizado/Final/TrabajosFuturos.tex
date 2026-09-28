@@ -14,108 +14,58 @@
 
 \section{Trabajos Futuros}
 
-Las propuestas se agrupan en siete frentes. El primero recoge lo que quedó pendiente del caso de estudio y es el más directamente útil para la empresa; los demás amplían el sistema en infraestructura, inteligencia artificial, funcionalidades de negocio, experiencia de usuario, seguridad e investigación. En cada caso se indica qué existe hoy, para distinguir lo que falta de lo que ya se construyó.
+Las propuestas se agrupan en cinco frentes. El primero recoge lo que quedó pendiente del caso de estudio y es el más directamente útil para la empresa; los demás amplían el sistema en infraestructura, inteligencia artificial, funcionalidades de negocio, y experiencia de usuario, seguridad e investigación. En cada caso se indica qué existe hoy, para distinguir lo que falta de lo que ya se construyó.
 
 \subsection{Requerimientos del caso de estudio pendientes}
 Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedaron por completar:
 \begin{itemize}
-    \item \textbf{Punto de reorden (RF-09)}: calcular cuándo pedir a partir del consumo promedio y del tiempo de entrega de cada proveedor, e indicar para cuántos días alcanza la existencia. Hoy el sistema alerta cuando un insumo baja de su stock mínimo, pero ese mínimo lo fija el usuario.
     \item \textbf{Desglose del consumo por destino (RF-15)}: registrar cuánto se usa en esponja, espolvoreo y cada línea de producto, que es la causa de las diferencias que la empresa detecta en el cierre.
     \item \textbf{Factura y ficha de calidad en el ingreso (RF-03)} y un \textbf{registro de no conformidades en la recepción (RF-14)}. Hoy el proveedor queda asociado a la orden de compra y un lote puede pasar a cuarentena, pero la factura, la ficha y la novedad no tienen un registro propio.
-    \item \textbf{Estadísticas de consumo por periodo (RF-10)}: agregar el consumo por día, semana o mes y exponerlo también en el asistente; hoy existe el reporte filtrable por rango de fechas.
     \item \textbf{Lectura de los códigos de barras de fábrica} de los insumos, además de las etiquetas QR propias del sistema.
     \item \textbf{Conversión automática de presentaciones} (bultos y cajas) a la unidad base en kilogramos (RNF-01); hoy la conversión la hace el usuario.
 \end{itemize}
 
-\subsection{Infraestructura y Despliegue}
-
+\subsection{Infraestructura y despliegue}
 \begin{itemize}
-    \item \textbf{Copias de seguridad fuera del servidor}: una tarea programada ya genera cada noche un volcado comprimido de la base de datos, además de los respaldos manuales antes de los cambios delicados (Capítulo \ref{chap:implementacion}); pero todas las copias quedan en el mismo servidor, de modo que una falla del disco o de la instancia las perdería junto con la base. Se propone enviarlas a otro almacenamiento (por ejemplo, OCI Object Storage dentro de la capa gratuita), incluir los archivos subidos y probar periódicamente la restauración.
-
-    \item \textbf{Pruebas de extremo a extremo y análisis estático en la integración continua}: el flujo de GitHub Actions ya revisa la sintaxis, ejecuta PHPUnit y despliega por SSH solo si las pruebas pasan. Faltan dos etapas: ejecutar la suite Playwright contra una instancia temporal de la aplicación y correr el análisis estático (PHPStan para PHP y ESLint para TypeScript) como condición para desplegar.
-
-    \item \textbf{Contenedores Docker}: el repositorio incluye un \texttt{Dockerfile} y un \texttt{docker-compose.yml}, pero no se usan en producción ni se prueban en la integración continua, y conservan valores de una etapa anterior del proyecto. Se propone actualizarlos, validarlos en el flujo de GitHub Actions y usarlos como entorno de desarrollo reproducible.
-
-    \item \textbf{Arquitectura multi-tenencia}: adaptar la base de datos y la lógica de negocio para que una sola instancia del sistema sirva a varias PYMEs, cada una con sus datos aislados mediante un identificador de inquilino (\texttt{tenant\_id}). Esto permitiría ofrecer Pymetory como servicio compartiendo la infraestructura.
-
-    \item \textbf{Modelo local afinado para el dominio}: el servidor ya ejecuta un modelo local (\texttt{qwen3.5:9b}) como respaldo del modelo en la nube, pero tarda de 30 a 60 segundos por respuesta (Capítulo \ref{chap:implementacion}). Se propone afinar un modelo más pequeño con consultas y respuestas del dominio de inventarios, para que el respaldo responda más rápido con calidad cercana a la del principal, o usar un servidor con GPU si el presupuesto lo permite.
+    \item \textbf{Copias de seguridad fuera del servidor}: el volcado nocturno de la base de datos y los respaldos manuales previos a cambios delicados (Capítulo \ref{chap:implementacion}) quedan en el mismo servidor, de modo que una falla de la instancia los perdería. Se propone enviarlos a otro almacenamiento de capa gratuita (por ejemplo, OCI Object Storage), incluir los archivos subidos y probar periódicamente la restauración.
+    \item \textbf{Integración continua más estricta}: GitHub Actions ya revisa la sintaxis, ejecuta PHPUnit y despliega solo si las pruebas pasan; faltan la suite Playwright contra una instancia temporal y el análisis estático (PHPStan y ESLint) como condición para desplegar.
+    \item \textbf{Contenedores Docker}: actualizar el \texttt{Dockerfile} y el \texttt{docker-compose.yml} del repositorio, que conservan valores de una etapa anterior, y validarlos en la integración continua.
+    \item \textbf{Multi-tenencia}: aislar los datos de varias PYMEs en una sola instancia mediante un identificador de inquilino (\texttt{tenant\_id}).
+    \item \textbf{Modelo local afinado}: el respaldo local \texttt{qwen3.5:9b} tarda de 30 a 60 segundos por respuesta (Capítulo \ref{chap:implementacion}); afinar un modelo más pequeño con consultas del dominio, o usar un servidor con GPU, lo haría más rápido.
 \end{itemize}
 
-\subsection{Inteligencia Artificial y RAG}
-
+\subsection{Inteligencia artificial y RAG}
 \begin{itemize}
-    \item \textbf{Clasificación de intenciones con NLP}: el clasificador actual se basa en expresiones regulares. Acertó la intención en las 50 consultas de la batería, pero depende de que la pregunta use palabras previstas en sus patrones: preguntas formuladas con sinónimos o expresiones coloquiales pueden caer en la categoría general (por ejemplo, las tildes no se reconocían hasta que se corrigieron las expresiones). Se propone reemplazarlo o complementarlo con un modelo de clasificación entrenado para español.
-
-    \item \textbf{Búsqueda semántica con embeddings}: indexar el catálogo de insumos con representaciones vectoriales para responder preguntas por significado y no por coincidencia de texto, como ``¿qué grasas tenemos?'' o ``insumos para decorar'', sin que el usuario conozca el nombre exacto de cada material.
-
-    \item \textbf{Memoria conversacional en la recuperación}: el modelo ya recibe los dos últimos turnos de la conversación, pero la clasificación y la consulta a la base de datos usan solo la pregunta actual. Por eso, en una secuencia como ``¿cuánta harina queda?'' seguida de ``¿y de azúcar?'', la segunda pregunta se interpreta sin saber que se refiere a existencias. Se propone heredar la intención y el material del turno anterior cuando la nueva pregunta sea incompleta.
-
-    \item \textbf{Análisis predictivo de demanda}: aplicar modelos de series temporales al historial del Kardex para estimar el consumo futuro de cada insumo, sugerir cantidades de reposición y anticipar faltantes. Complementa el punto de reorden (RF-09).
-
-    \item \textbf{Detección de anomalías en el Kardex}: analizar los movimientos para señalar comportamientos atípicos ---consumos inusualmente altos, entradas duplicadas, ajustes frecuentes sobre un mismo lote--- que podrían indicar errores operativos o usos indebidos.
-
-    \item \textbf{Evaluación continua del asistente}: la batería de 50 consultas se ejecuta hoy a mano con el comando \texttt{rag:evaluar} (Sección \ref{sec:pru_asistente}). Se propone programarla de forma periódica y generar una alerta cuando la tasa de acierto baje de un umbral, por ejemplo al cambiar de modelo o de proveedor.
+    \item \textbf{Clasificación de intenciones con NLP}: el clasificador actual usa expresiones regulares y depende de que la pregunta use palabras previstas; se propone complementarlo con un modelo de clasificación entrenado para español.
+    \item \textbf{Búsqueda semántica con embeddings}, para responder por significado (``¿qué grasas tenemos?'') sin conocer el nombre exacto de cada insumo.
+    \item \textbf{Memoria conversacional en la recuperación}: el modelo recibe los dos últimos turnos, pero la clasificación usa solo la pregunta actual, así que ``¿y de azúcar?'' tras ``¿cuánta harina queda?'' se interpreta sin contexto. Se propone heredar la intención y el material del turno anterior.
+    \item \textbf{Mejor pronóstico y detección de anomalías}: la proyección actual es un promedio móvil de cuatro semanas (Sección \ref{sec:imp_proyeccion}), que no anticipa temporadas ni tendencias; se propone probar modelos de series temporales con el historial del Kardex y señalar consumos atípicos, entradas duplicadas o ajustes frecuentes.
+    \item \textbf{Evaluación continua del asistente}: programar la batería de \texttt{rag:evaluar} (Sección \ref{sec:pru_asistente}) y alertar cuando la tasa de acierto baje de un umbral.
 \end{itemize}
 
-\subsection{Funcionalidades de Negocio}
-
+\subsection{Funcionalidades de negocio}
 \begin{itemize}
-    \item \textbf{Cotizaciones en las órdenes de compra}: el sistema ya maneja órdenes de compra con proveedor, aprobación y recepción que registra el lote real con su vencimiento y bodega. Falta la etapa previa: solicitar cotizaciones a varios proveedores, compararlas y generar la orden desde la elegida.
-
-    \item \textbf{Catálogo de categorías}: hoy la categoría es un texto del insumo; el formulario sugiere las que ya existen y el servidor reutiliza una existente escrita con otras mayúsculas, pero no se pueden renombrar ni fusionar. Se propone un catálogo propio de cada empresa, administrable desde la configuración, que acompañe la arquitectura multi-tenencia.
-
-    \item \textbf{Integración con proveedores}: conectar Pymetory con los catálogos de los proveedores para consultar precios y disponibilidad, y proponer la orden de reposición cuando un insumo cruce su punto de reorden.
-
-    \item \textbf{Módulo de producción (BOM)}: registrar las recetas o listas de materiales de cada producto, descontar automáticamente sus ingredientes por FEFO al producir y calcular el costo real de producción. Resolvería también buena parte del desglose por destino (RF-15).
-
-    \item \textbf{Contabilidad integrada}: generar los asientos contables de cada movimiento de inventario ---entradas como activos, salidas como costos--- para facilitar la conciliación con el sistema contable de la empresa.
-
-    \item \textbf{Integración con facturación electrónica DIAN}: conectar el sistema con los servicios de facturación electrónica exigidos en Colombia.
+    \item \textbf{Cotizaciones} previas a las órdenes de compra, que hoy ya cubren proveedor, aprobación y recepción con lote, vencimiento y bodega.
+    \item \textbf{Catálogo de categorías} propio de cada empresa, para renombrarlas y fusionarlas; hoy la categoría es un texto del insumo.
+    \item \textbf{Integración con proveedores} (precios, disponibilidad y orden de reposición al cruzar el punto de reorden).
+    \item \textbf{Módulo de producción (BOM)}: recetas que descuenten ingredientes por FEFO al producir y calculen el costo real; resolvería buena parte del RF-15.
+    \item \textbf{Contabilidad integrada} y \textbf{facturación electrónica DIAN}.
 \end{itemize}
 
-\subsection{Experiencia de Usuario y Accesibilidad}
-
+\subsection{Experiencia de usuario, seguridad e investigación}
 \begin{itemize}
-    \item \textbf{Registro sin conexión en la bodega}: la interfaz ya funciona en el celular (barra de navegación inferior y escáner QR con la cámara) y la aplicación tiene un \textit{Service Worker} que guarda en caché los archivos estáticos y muestra una página de aviso sin conexión. Falta registrar consumos e ingresos sin conexión y sincronizarlos al volver la red, respetando el orden FEFO y la inmutabilidad del Kardex.
-
-    \item \textbf{Notificaciones en el celular}: las alertas de vencimiento y stock bajo ya llegan dentro de la aplicación y pueden enviarse por Telegram o correo. Se propone agregar notificaciones \textit{push} del navegador para recibirlas en el celular sin tener la aplicación abierta.
-
-    \item \textbf{Identidad visual por empresa}: el usuario ya puede elegir entre seis temas visuales, todos verificados con WCAG 2.1 AA. Se propone permitir que cada empresa configure su logotipo y su color principal, conservando el contraste mínimo.
-
-    \item \textbf{Tutoriales interactivos}: guías paso a paso que acompañen al usuario la primera vez que usa cada módulo, para reducir la curva de aprendizaje sin depender del manual.
-
-    \item \textbf{Consultas por voz al asistente}: usar el reconocimiento de voz del navegador para que un operario pregunte con las manos ocupadas en la bodega.
-
-    \item \textbf{Accesibilidad nivel AAA}: avanzar de AA a AAA en las WCAG 2.1, lo que implica, entre otros, un contraste mínimo de 7:1 y explicaciones para abreviaturas y términos técnicos. También queda pendiente una revisión con lector de pantalla, que las pruebas automáticas no reemplazan.
+    \item \textbf{Registro sin conexión}: la aplicación ya funciona en el celular y su \textit{Service Worker} guarda en caché los archivos estáticos; falta registrar movimientos sin red y sincronizarlos respetando FEFO y la inmutabilidad del Kardex.
+    \item \textbf{Notificaciones \textit{push}} del navegador, además de las alertas en la aplicación, Telegram y correo; \textbf{identidad visual por empresa} conservando el contraste WCAG 2.1 AA de los seis temas; \textbf{tutoriales interactivos} y \textbf{consultas por voz}.
+    \item \textbf{Accesibilidad}: avanzar al nivel AAA y hacer la revisión con lector de pantalla, que las pruebas automáticas no reemplazan.
+    \item \textbf{Seguridad}: autenticación de dos factores para administradores; ampliar \texttt{audit\_log} a inicios de sesión, intentos fallidos, exportaciones y consultas al asistente; extender el cifrado, que hoy cubre las claves de API, a otros datos reservados.
+    \item \textbf{Investigación}: repetir la prueba con usuario (Capítulo \ref{chap:pruebas}) en al menos diez PYMEs con la escala SUS; comparar modelos de lenguaje con la misma batería de \texttt{rag:evaluar}; medir el tiempo que ahorra el asistente; y documentar el método de desarrollo con asistentes de IA y sus controles.
 \end{itemize}
 
-\subsection{Seguridad y Auditoría}
-
-\begin{itemize}
-    \item \textbf{Autenticación de dos factores}: códigos temporales (TOTP) de aplicaciones como Google Authenticator, al menos para las cuentas de administrador.
-
-    \item \textbf{Registro de auditoría ampliado}: la tabla \texttt{audit\_log} ya registra los cambios de configuración, de claves de API, de usuarios, de campos personalizados y de órdenes de compra. Se propone agregar los inicios de sesión, los intentos fallidos, las exportaciones de datos y las consultas al asistente.
-
-    \item \textbf{Cifrado de más datos sensibles}: las claves de API de los proveedores de modelos ya se guardan cifradas. Se propone extender el cifrado a nivel de campo a los datos de contacto de proveedores y a otra información que la empresa considere reservada.
-\end{itemize}
-
-\subsection{Investigación Académica}
-
-\begin{itemize}
-    \item \textbf{Estudio de usabilidad con varias PYMEs}: repetir la prueba con usuario del Capítulo \ref{chap:pruebas} en al menos diez PYMEs de distintos sectores del Valle del Cauca, midiendo la tasa de error, el tiempo por tarea y la satisfacción con la escala SUS, para validar o cuestionar las decisiones de diseño.
-
-    \item \textbf{Comparativa de modelos de lenguaje para inventarios}: aprovechar el comando \texttt{rag:evaluar}, que ya calcula la respuesta esperada desde la base de datos, para comparar con la misma batería la precisión, la latencia y el costo de modelos gratuitos en la nube, modelos locales y proveedores comerciales.
-
-    \item \textbf{Impacto del asistente en la operación}: diseñar un experimento que mida cuánto tiempo ahorra el asistente a un administrador para responder preguntas sobre su inventario, comparando con y sin él.
-
-    \item \textbf{Método de desarrollo con asistentes de IA}: documentar cómo se usaron los asistentes de inteligencia artificial durante el proyecto, qué prácticas funcionaron, cuáles generaron errores que hubo que corregir y bajo qué controles conviene usarlos.
-\end{itemize}
-
-\subsection{Hoja de Ruta Priorizada}
+\subsection{Hoja de ruta priorizada}
 
 La Tabla \ref{tab:roadmap} presenta un orden sugerido. La prioridad combina el impacto esperado para una PYME como la del caso de estudio con la factibilidad, entendida como los recursos, las dependencias técnicas y el tiempo que requiere cada mejora.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Hoja de ruta priorizada de trabajos futuros.}
 \label{tab:roadmap}
@@ -125,7 +75,7 @@ La Tabla \ref{tab:roadmap} presenta un orden sugerido. La prioridad combina el i
 \hline
 1 & Copias de seguridad fuera del servidor & Alto & Alta \\
 2 & Desglose del consumo por destino (RF-15) & Alto & Alta \\
-3 & Punto de reorden y predicción de demanda (RF-09) & Alto & Media \\
+3 & Pronóstico con series temporales y detección de anomalías & Medio & Media \\
 4 & Pruebas de extremo a extremo y análisis estático en la integración continua & Medio & Alta \\
 5 & Memoria conversacional en la recuperación & Medio & Alta \\
 6 & Registro sin conexión en la bodega & Medio & Media \\

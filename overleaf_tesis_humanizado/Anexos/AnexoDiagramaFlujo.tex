@@ -16,21 +16,11 @@ El siguiente diagrama de actividad modela el ciclo de vida completo de un lote b
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=15cm]{Anexos/Imagenes/DiagramaFlujoFEFO.png}
+	\includegraphics[width=10cm]{Anexos/Imagenes/DiagramaFlujoFEFO.png}
 	\caption{Diagrama de actividad del proceso FEFO completo: desde el registro de un lote hasta su despacho, incluyendo monitoreo de vencimientos, alertas críticas y el algoritmo de selección por fecha de expiración.}
 	\label{fig:flujoFEFO}
 \end{figure}
 
 \subsection*{Explicación del flujo FEFO}
 
-El proceso inicia cuando un operario registra un lote nuevo con su fecha de vencimiento. El sistema almacena el lote con estado \texttt{active} e inicia un monitoreo continuo: si la fecha de vencimiento está a 15 días o menos, se genera una alerta de lote crítico. Cuando un operario solicita un despacho, el sistema verifica que haya stock suficiente del material solicitado. Si la cantidad es suficiente, ejecuta el algoritmo FEFO:
-
-\begin{enumerate}
-	\item Ordena todos los lotes activos del material por \texttt{expiration\_date} en orden ascendente.
-	\item Toma del lote que vence primero la cantidad necesaria.
-	\item Si ese lote no alcanza a cubrir la cantidad solicitada, lo agota completamente (marcándolo como \texttt{consumed}) y continúa con el siguiente lote en orden FEFO.
-	\item Por cada lote afectado, registra un movimiento tipo \texttt{salida} en el Kardex inmutable, con el motivo especificado por el operario (producción, venta, desperdicio o ajuste).
-	\item Todo el proceso ocurre dentro de una transacción atómica (\texttt{DB::transaction}) que garantiza que, si ocurre algún error, no se modifique ningún lote.
-\end{enumerate}
-
-Si el stock total del material es insuficiente para cubrir la cantidad solicitada, el sistema rechaza la operación con un mensaje que indica la cantidad disponible.
+Al registrar un lote, el sistema lo guarda como activo y, si vence dentro del umbral de días críticos, genera una alerta. En un despacho verifica primero que haya existencia suficiente del material; si no la hay, rechaza la operación indicando la cantidad disponible. Si la hay, descuenta del lote que vence primero, continúa con el siguiente si ese no alcanza y registra cada salida en el Kardex dentro de una sola transacción (Sección \ref{sec:imp_patrones}, patrón \textit{Transaction Script}).

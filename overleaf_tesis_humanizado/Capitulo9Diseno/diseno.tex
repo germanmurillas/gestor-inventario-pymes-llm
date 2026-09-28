@@ -14,6 +14,7 @@ Este capítulo explica cómo se diseñó Pymetory a partir de los requerimientos
 
 Cada requerimiento funcional implementado se asignó a uno o varios componentes del sistema. La Tabla \ref{tab:dis_trazabilidad} muestra esa correspondencia; los nombres de clases y comandos son los del código fuente.
 
+{\small
 \begin{longtable}{|c|p{5.2cm}|p{7cm}|}
 \caption{Correspondencia entre requerimientos funcionales y componentes.}
 \label{tab:dis_trazabilidad}\\
@@ -30,13 +31,15 @@ RF-04 & Despacho FEFO & \texttt{ConsumptionController}, \textit{scope} \texttt{L
 RF-05 & Kardex & Modelo \texttt{Movimiento}, tabla \texttt{movimientos} \\ \hline
 RF-06, RF-18 & Roles y usuarios & \textit{Middleware} \texttt{CheckRole}, \texttt{UserController}, \texttt{AuthController} \\ \hline
 RF-07, RF-08 & Alertas de stock bajo y de vencimiento & Comandos \texttt{alerts:low-stock} y \texttt{alerts:fefo}, programados cada hora \\ \hline
-RF-10, RF-17 & Reportes & \texttt{ReportController}, \texttt{InventoryController} (exportación PDF y CSV) \\ \hline
+RF-09, RF-10 & Punto de reorden y consumo por periodo & Servicio \texttt{ProyeccionInventario}, \texttt{ProyeccionController}, vista Reabastecimiento, intenciones \texttt{forecast} y \texttt{consumption} del asistente \\ \hline
+RF-17 & Reportes & \texttt{ReportController}, \texttt{InventoryController} (exportación PDF, CSV y Excel) \\ \hline
 RF-11 & Conciliación & \texttt{InventoryController::adjust} \\ \hline
 RF-12 & Consulta en lenguaje natural & \texttt{ChatLLMController} \\ \hline
 RF-13 & Etiquetas y escaneo & \texttt{LabelController}, \texttt{QRScanController} \\ \hline
 RF-14 & Recepción de órdenes de compra & \texttt{PurchaseOrderController} \\ \hline
 RF-16 & Bodegas y transferencias & \texttt{InventoryController}, \texttt{TransferController} \\ \hline
 \end{longtable}
+}
 
 \section{Arquitectura del sistema}
 \label{sec:dis_arquitectura}
@@ -81,6 +84,7 @@ Dos decisiones de diseño se derivan directamente de las reglas de la dirección
 
 La selección de herramientas respondió a cuatro criterios propios del proyecto: (1) costo de licencia nulo, porque el sistema está pensado para PYMEs que no pueden pagar suscripciones; (2) un solo desarrollador, lo que favorece herramientas que resuelven de fábrica autenticación, migraciones y pruebas; (3) experiencia previa del autor con Laravel, GitHub y Figma; y (4) que los datos del inventario puedan permanecer en infraestructura controlada por la empresa, incluido el modelo de lenguaje. La Tabla \ref{tab:dis_herramientas} presenta cada herramienta, las alternativas comparables y la razón de la elección.
 
+{\small
 \begin{longtable}{|p{2.4cm}|p{2.9cm}|p{8.3cm}|}
 \caption{Herramientas elegidas, alternativas y justificación.}
 \label{tab:dis_herramientas}\\
@@ -103,12 +107,14 @@ Figma & Adobe XD, Penpot & Prototipado de alta fidelidad en el navegador, con pl
 Playwright 1.59 y PHPUnit & Cypress, Selenium, Pest & PHPUnit viene integrado con Laravel; Playwright automatiza el navegador real para pruebas de extremo a extremo. \\ \hline
 Oracle Cloud (capa Always Free) & AWS, Google Cloud, Azure & Instancia ARM con 4 OCPU y 24 GB de RAM sin costo recurrente \cite{oci_always_free}, suficiente para la aplicación, la base de datos y modelos de lenguaje pequeños. \\ \hline
 \end{longtable}
+}
 
 \section{Modelo de datos}
 \label{sec:dis_datos}
 
 El esquema se define mediante migraciones de Laravel, de modo que cada cambio en la base de datos queda versionado junto con el código. La Tabla \ref{tab:dis_tablas} agrupa las tablas del dominio de Pymetory.
 
+{\small
 \begin{longtable}{|p{3.2cm}|p{10.8cm}|}
 \caption{Tablas del dominio de Pymetory.}
 \label{tab:dis_tablas}\\
@@ -128,6 +134,7 @@ Seguridad y auditoría & \texttt{users} (con rol \textit{admin} u \textit{operar
 Asistente & \texttt{chat\_histories} (conversaciones por sesión), \texttt{llm\_providers} (proveedores de modelos configurados), \texttt{settings} (parámetros clave-valor, como el umbral FEFO de 15 días). \\ \hline
 Operación & \texttt{notifications} (alertas), \texttt{kanban\_items} (tablero de actividades). \\ \hline
 \end{longtable}
+}
 
 \subsection{Diseño del Kardex}
 
@@ -141,12 +148,12 @@ Por regla de la dirección, el Kardex es de solo inserción, y esa regla se gara
 El asistente sigue la arquitectura de generación aumentada por recuperación (RAG) \cite{rag_lewis2020}: antes de llamar al modelo de lenguaje, el sistema recupera de la base de datos la información pertinente y la entrega al modelo como contexto, para que la respuesta se base en el inventario real y no en conocimiento general del modelo. El diseño tiene tres etapas:
 
 \begin{enumerate}
-    \item \textbf{Clasificación de la intención} (\texttt{classifyQuery}). Mediante expresiones regulares se asigna la pregunta a una de nueve intenciones o, si ninguna coincide, a una intención general (Tabla \ref{tab:dis_intenciones}). Además, las palabras de la pregunta se comparan con los nombres y descripciones de los materiales para filtrar el contexto al material consultado.
+    \item \textbf{Clasificación de la intención} (\texttt{classifyQuery}). Mediante expresiones regulares se asigna la pregunta a una de trece intenciones o, si ninguna coincide, a una intención general (Tabla \ref{tab:dis_intenciones}). Además, las palabras de la pregunta se comparan con los nombres y descripciones de los materiales para filtrar el contexto al material consultado.
     \item \textbf{Construcción del contexto} (\texttt{buildRagContext}). Según la intención, se consulta la base de datos (lotes, movimientos, bodegas, valorización) y se arma un texto con los registros encontrados y el estado de las bodegas. Solo se consideran lotes activos con existencias, el texto empieza con la fecha del día y cada lote indica cuántos días le faltan para vencer, de modo que el modelo pueda responder preguntas como ``¿qué vence esta semana?'' sin calcular fechas por su cuenta.
     \item \textbf{Generación de la respuesta}. El contexto, la instrucción de sistema (editable desde la configuración) y la pregunta se envían al proveedor de modelo de lenguaje configurado; la respuesta se muestra al usuario y se guarda en \texttt{chat\_histories}.
 \end{enumerate}
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Intenciones reconocidas por el clasificador del asistente.}
 \label{tab:dis_intenciones}
@@ -163,6 +170,10 @@ El asistente sigue la arquitectura de generación aumentada por recuperación (R
 \texttt{batch\_info} & lote LT-\ldots & Detalle de un lote \\ \hline
 \texttt{summary} & resumen, todo, general, panorama & Resumen del inventario \\ \hline
 \texttt{conciliation} & conciliar, ajuste, diferencia, descuadre & Datos para conciliación \\ \hline
+\texttt{quarantine} & cuarentena, retenido, no conforme & Lotes en cuarentena \\ \hline
+\texttt{low\_stock} & mínimo, hace falta pedir, reponer, agotado & Insumos bajo su stock mínimo \\ \hline
+\texttt{forecast} & cuándo se acaba, para cuántos días alcanza, punto de reorden & Proyección: consumo diario, cobertura y punto de reorden \\ \hline
+\texttt{consumption} & consumo, cuánto gastamos, por qué bajó & Consumo por periodo y por motivo, comparado con el periodo anterior \\ \hline
 \texttt{general} & (ninguna de las anteriores) & Lotes en orden FEFO \\ \hline
 \end{tabular}
 \end{table}

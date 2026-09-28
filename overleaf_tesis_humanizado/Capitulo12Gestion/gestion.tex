@@ -73,7 +73,7 @@ RF-12 & \textbf{Dado} un material que no está registrado, \textbf{cuando} se pr
 \section{Definition of Ready y Definition of Done}
 \label{sec:ges_dor_dod}
 
-La \textit{Definition of Ready} (DoR) establece cuándo una tarea está lista para empezar, y la \textit{Definition of Done} (DoD) cuándo puede darse por terminada. En un equipo, la DoD suele exigir pruebas unitarias y de integración, revisión del código por otra persona y despliegue. En este proyecto había un solo desarrollador, que además era quien probaba, por lo que la revisión por pares no era posible. Los criterios que se aplicaron en la práctica se formalizan a continuación.
+La \textit{Definition of Ready} (DoR) establece cuándo una tarea está lista para empezar, y la \textit{Definition of Done} (DoD) cuándo puede darse por terminada. En un equipo, la DoD suele exigir pruebas unitarias y de integración, revisión del código por otra persona y despliegue; aquí había un solo desarrollador, que además probaba, así que no hubo revisión por pares. Los criterios aplicados en la práctica fueron:
 
 \textbf{Definition of Ready.} Una tarea pasa a \textit{Ready} cuando:
 \begin{itemize}
@@ -92,4 +92,4 @@ La \textit{Definition of Ready} (DoR) establece cuándo una tarea está lista pa
     \item el cambio está desplegado en producción (\url{https://app.pymetory.com}) y se verificó que funciona allí.
 \end{itemize}
 
-Desplegar directamente a producción sin un entorno intermedio de pruebas no es la práctica habitual en equipos de desarrollo. En este proyecto el riesgo se redujo con tres medidas: la integración continua detiene el despliegue si alguna prueba falla, antes de la migración que modificó el Kardex en producción se generó un respaldo completo de la base de datos, y cada despliegue se verifica en producción antes de cerrar la tarea.
+Desplegar directamente a producción, sin entorno intermedio, no es la práctica habitual; aquí el riesgo se redujo porque la integración continua detiene el despliegue si una prueba falla, se respaldó la base de datos antes de la migración que modificó el Kardex y cada despliegue se verifica en producción antes de cerrar la tarea.
