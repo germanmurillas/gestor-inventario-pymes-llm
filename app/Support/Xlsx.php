@@ -5,23 +5,17 @@ namespace App\Support;
 /**
  * Escritor mínimo de hojas de cálculo Excel (.xlsx, Office Open XML) sin dependencias:
  * una hoja, primera fila en negrita, números como números y textos como cadenas.
- * Necesita la extensión zip de PHP (ZipArchive), porque un .xlsx es un ZIP de archivos XML.
+ * Un .xlsx es un ZIP de archivos XML; el ZIP se arma aquí mismo (sin compresión), así que no
+ * depende de la extensión zip de PHP, que el servidor de producción no tiene.
  */
 class Xlsx
 {
-    public static function disponible(): bool
-    {
-        return class_exists(\ZipArchive::class);
-    }
-
     /** @param array<int, array<int, mixed>> $filas La primera fila es el encabezado. */
     public static function generar(string $hoja, array $filas): string
     {
-        $tmp = tempnam(sys_get_temp_dir(), 'xlsx');
-        $zip = new \ZipArchive();
-        $zip->open($tmp, \ZipArchive::OVERWRITE);
+        $zip = [];
 
-        $zip->addFromString('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        self::agregar($zip, '[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
             . '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
             . '<Default Extension="xml" ContentType="application/xml"/>'
@@ -29,19 +23,19 @@ class Xlsx
             . '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
             . '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
             . '</Types>');
-        $zip->addFromString('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        self::agregar($zip, '_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
             . '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
             . '</Relationships>');
-        $zip->addFromString('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        self::agregar($zip, 'xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
             . '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
             . '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
             . '</Relationships>');
-        $zip->addFromString('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        self::agregar($zip, 'xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
             . '<sheets><sheet name="' . self::esc(mb_substr($hoja, 0, 31)) . '" sheetId="1" r:id="rId1"/></sheets></workbook>');
-        $zip->addFromString('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        self::agregar($zip, 'xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             . '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'
             . '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>'
@@ -66,13 +60,34 @@ class Xlsx
             }
             $xml .= '</row>';
         }
-        $zip->addFromString('xl/worksheets/sheet1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        self::agregar($zip, 'xl/worksheets/sheet1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' . $xml . '</sheetData></worksheet>');
-        $zip->close();
+        return self::empaquetar($zip);
+    }
 
-        $contenido = file_get_contents($tmp);
-        @unlink($tmp);
-        return $contenido;
+    /** @param array<string, string> $zip */
+    private static function agregar(array &$zip, string $nombre, string $contenido): void
+    {
+        $zip[$nombre] = $contenido;
+    }
+
+    /**
+     * Archivo ZIP con los archivos guardados sin compresión (método 0), según la
+     * especificación APPNOTE de PKWARE: encabezado local por archivo, directorio central y fin.
+     *
+     * @param array<string, string> $archivos
+     */
+    private static function empaquetar(array $archivos): string
+    {
+        $datos = ''; $central = ''; $n = 0;
+        foreach ($archivos as $nombre => $contenido) {
+            $crc = crc32($contenido); $tam = strlen($contenido); $largoNombre = strlen($nombre);
+            $desplazamiento = strlen($datos);
+            $datos .= pack('VvvvvvVVVvv', 0x04034b50, 20, 0, 0, 0, 0x21, $crc, $tam, $tam, $largoNombre, 0) . $nombre . $contenido;
+            $central .= pack('VvvvvvvVVVvvvvvVV', 0x02014b50, 20, 20, 0, 0, 0, 0x21, $crc, $tam, $tam, $largoNombre, 0, 0, 0, 0, 0, $desplazamiento) . $nombre;
+            $n++;
+        }
+        return $datos . $central . pack('VvvvvVVv', 0x06054b50, 0, 0, $n, $n, strlen($central), strlen($datos), 0);
     }
 
     /** 0 → A, 25 → Z, 26 → AA. */

@@ -367,9 +367,6 @@ class ReportController extends Controller
      */
     private function exportXlsx(string $type, array $data)
     {
-        if (!\App\Support\Xlsx::disponible()) {
-            abort(501, 'La exportación a Excel requiere la extensión zip de PHP en el servidor. Use CSV mientras tanto.');
-        }
         $flujo = fopen('php://memory', 'w+');
         $this->escribirFilas($type, $flujo, $data);
         rewind($flujo);
