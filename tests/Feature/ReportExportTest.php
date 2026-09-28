@@ -71,6 +71,37 @@ class ReportExportTest extends TestCase
 
     // ── RBAC: usuarios autenticados pueden exportar reportes ──────────
 
+    #[DataProvider('excelTypes')]
+    public function test_export_excel_es_xlsx_valido_con_las_filas_del_csv(string $type): void
+    {
+        $this->seedInventory();
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $resp = $this->actingAs($admin)->get("/reports/export?type={$type}&format=xlsx");
+
+        $resp->assertOk();
+        $this->assertSame('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', $resp->headers->get('content-type'));
+        $this->assertStringContainsString('.xlsx', $resp->headers->get('content-disposition'));
+
+        $tmp = tempnam(sys_get_temp_dir(), 'xl');
+        file_put_contents($tmp, $resp->getContent());
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open($tmp) === true, 'El archivo debe ser un ZIP (formato .xlsx)');
+        $hoja = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+        unlink($tmp);
+
+        $csv = $this->actingAs($admin)->get("/reports/export?type={$type}&format=csv")->streamedContent();
+        $encabezado = str_getcsv(explode("\n", ltrim($csv, "\xEF\xBB\xBF"))[0], ';');
+        foreach ($encabezado as $columna) $this->assertStringContainsString(htmlspecialchars($columna, ENT_XML1), $hoja);
+        if ($type === 'inventario') $this->assertStringContainsString('LT-001', $hoja);
+    }
+
+    public static function excelTypes(): array
+    {
+        return [['inventario'], ['movimientos'], ['fefo'], ['consumo'], ['valorizacion']];
+    }
+
     public function test_operario_autenticado_puede_exportar(): void
     {
         $this->seedInventory();

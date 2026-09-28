@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
     BarChart3, TrendingUp, AlertTriangle, DollarSign, Clock, LayoutGrid,
     FileText, Table, ChevronDown, Calendar, Filter, Download, RefreshCw,
-    PackageSearch, ArrowDownToLine, ArrowUpFromLine, Warehouse, Layers
+    PackageSearch, ArrowDownToLine, ArrowUpFromLine, Warehouse, Layers, FileSpreadsheet
 } from 'lucide-react';
 
 type ReportType = 'inventario' | 'movimientos' | 'fefo' | 'consumo' | 'valorizacion' | 'historial';
-type ExportFormat = 'pdf' | 'csv';
+type ExportFormat = 'pdf' | 'csv' | 'xlsx';
 
 interface FilterState {
     type: ReportType;
@@ -227,6 +227,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
             if (filters.to) params.set('to', filters.to);
 
             const res = await fetch(`/reports/export?${params.toString()}`);
+            if (!res.ok) throw new Error(await res.text());
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -516,6 +517,14 @@ const FigmaReports = ({ stats }: { stats: any }) => {
                     >
                         <Table size={14} />
                         {exporting ? 'Exportando...' : 'Exportar CSV'}
+                    </button>
+                    <button
+                        onClick={() => handleExport('xlsx')}
+                        disabled={exporting || loading}
+                        className="flex items-center gap-2 px-5 py-3 bg-green-700 hover:bg-green-800 disabled:opacity-50 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95 shadow-sm"
+                    >
+                        <FileSpreadsheet size={14} />
+                        {exporting ? 'Exportando...' : 'Exportar Excel'}
                     </button>
                 </div>
 

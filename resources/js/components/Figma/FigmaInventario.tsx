@@ -99,7 +99,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
         const map = new Map<string, any>();
         filteredLotes.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
             if (!map.has(l.codigo)) map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg',
-                foto: l.photo_url, materialId: l.material_id, diasCriticos: l.dias_criticos ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
+                foto: l.photo_url, materialId: l.material_id, diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
             const m = map.get(l.codigo);
             m.lotes.push(l);
             if (l.estado === 'quarantined') m.cuarentena++; else m.stock += Number(l.cantidad) || 0;
@@ -385,7 +385,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
 
                         {user?.role === 'admin' && materialSel.materialId && (
                             <FigmaMaterialAjustes key={materialSel.codigo} categorias={categoriasExistentes} materialId={materialSel.materialId} unidad={materialSel.unidad}
-                                categoria={materialSel.categoria ?? null} minimo={materialSel.minimo} diasCriticos={materialSel.diasCriticos} umbral={materialSel.umbral} />
+                                categoria={materialSel.categoria ?? null} minimo={materialSel.minimo} diasCriticos={materialSel.diasCriticos} diasEntrega={materialSel.diasEntrega} umbral={materialSel.umbral} />
                         )}
 
                         <h4 className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-slate-500">Lotes · sale primero el de arriba</h4>

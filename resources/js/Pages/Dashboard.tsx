@@ -10,6 +10,7 @@ import { Boxes } from 'lucide-react';
 import FigmaTablero from '../components/Figma/FigmaTablero';
 import FigmaInventario from '../components/Figma/FigmaInventario';
 import FigmaReports from '../components/Figma/FigmaReports';
+import FigmaReabastecimiento from '../components/Figma/FigmaReabastecimiento';
 import FigmaLLM from '../components/Figma/FigmaLLM';
 import FigmaNotifications from '../components/Figma/FigmaNotifications';
 import FigmaSearch from '../components/Figma/FigmaSearch';
@@ -22,7 +23,7 @@ import FigmaPurchaseOrders from '../components/Figma/FigmaPurchaseOrders';
 import FigmaLabelPrint from '../components/Figma/FigmaLabelPrint';
 import FigmaBodegaManager from '../components/Figma/FigmaBodegaManager';
 
-type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
+type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'REABASTECIMIENTO' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
 
 export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth: any, initialLotes: any[], dashboardStats: any }) {
     const [lotes, setLotes] = useState(initialLotes || []);
@@ -110,6 +111,7 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                         {activeView === 'BUSCAR' && <FigmaSearch lotes={lotes} />}
                         {activeView === 'ETIQUETAS' && <FigmaLabels lotes={lotes} />}
                         {activeView === 'REPORTES' && <FigmaReports stats={stats} />}
+                        {activeView === 'REABASTECIMIENTO' && <FigmaReabastecimiento />}
                         {activeView === 'LLM' && <FigmaLLM />}
                         {activeView === 'NOTIFICACIONES' && <FigmaNotifications />}
                         {activeView === 'LOG_MAESTRO' && <FigmaLogMaestro onBack={() => setActiveView('TABLERO')} />}

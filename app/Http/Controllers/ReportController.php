@@ -40,13 +40,13 @@ class ReportController extends Controller
     }
 
     /**
-     * Export endpoint: returns PDF or CSV.
+     * Export endpoint: returns PDF, CSV or Excel (.xlsx).
      */
     public function export(Request $request)
     {
         $request->validate([
             'type'        => 'required|in:inventario,movimientos,fefo,consumo,valorizacion,historial',
-            'format'      => 'required|in:pdf,csv',
+            'format'      => 'required|in:pdf,csv,xlsx',
             'bodega_id'   => 'nullable|integer|exists:bodegas,id',
             'material_id' => 'nullable|integer|exists:materials,id',
             'from'        => 'nullable|date',
@@ -61,6 +61,9 @@ class ReportController extends Controller
 
         if ($format === 'csv') {
             return $this->exportCsv($type, $data);
+        }
+        if ($format === 'xlsx') {
+            return $this->exportXlsx($type, $data);
         }
 
         return $this->exportPdf($type, $data);
@@ -358,6 +361,42 @@ class ReportController extends Controller
         return $pdf->download("Pymetory_{$title}_" . now()->format('Ymd_His') . '.pdf');
     }
 
+    /**
+     * Excel (.xlsx) con exactamente las mismas columnas y filas que el CSV: se reutilizan
+     * sus escritores sobre un flujo en memoria y se vuelcan a una hoja de cálculo.
+     */
+    private function exportXlsx(string $type, array $data)
+    {
+        if (!\App\Support\Xlsx::disponible()) {
+            abort(501, 'La exportación a Excel requiere la extensión zip de PHP en el servidor. Use CSV mientras tanto.');
+        }
+        $flujo = fopen('php://memory', 'w+');
+        $this->escribirFilas($type, $flujo, $data);
+        rewind($flujo);
+        $filas = [];
+        while (($fila = fgetcsv($flujo, 0, ';')) !== false) $filas[] = $fila;
+        fclose($flujo);
+
+        $nombre = 'Pymetory_' . ucfirst($type) . '_' . now()->format('Ymd_His') . '.xlsx';
+        return response(\App\Support\Xlsx::generar(ucfirst($type), $filas), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"{$nombre}\"",
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+        ]);
+    }
+
+    private function escribirFilas(string $type, $file, array $data): void
+    {
+        match ($type) {
+            'inventario'    => $this->csvInventario($file, $data),
+            'movimientos'   => $this->csvMovimientos($file, $data),
+            'fefo'          => $this->csvFefo($file, $data),
+            'consumo'       => $this->csvConsumo($file, $data),
+            'valorizacion'  => $this->csvValorizacion($file, $data),
+            default         => null,
+        };
+    }
+
     private function exportCsv(string $type, array $data)
     {
         $headers = [
@@ -371,15 +410,7 @@ class ReportController extends Controller
         $callback = function () use ($type, $data) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-            match ($type) {
-                'inventario'    => $this->csvInventario($file, $data),
-                'movimientos'   => $this->csvMovimientos($file, $data),
-                'fefo'          => $this->csvFefo($file, $data),
-                'consumo'       => $this->csvConsumo($file, $data),
-                'valorizacion'  => $this->csvValorizacion($file, $data),
-                default         => null,
-            };
+            $this->escribirFilas($type, $file, $data);
 
             fclose($file);
         };

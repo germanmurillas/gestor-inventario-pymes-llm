@@ -17,6 +17,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\PageAccessController;
+use App\Http\Controllers\ProyeccionController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -66,6 +67,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('reports.preview');
     Route::get('/reports/export', [ReportController::class, 'export'])
         ->name('reports.export');
+});
+
+// ── Reabastecimiento: proyección de consumo y punto de reorden (RF-09, RF-10) ──
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/proyeccion', [ProyeccionController::class, 'index'])->name('proyeccion.index');
+    Route::get('/proyeccion/{material}/consumo', [ProyeccionController::class, 'consumo'])->name('proyeccion.consumo');
 });
 
 

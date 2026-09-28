@@ -35,6 +35,7 @@ class InventoryController extends Controller {
                 'stock_total' => (float) ($stockPorMaterial[$lote->material_id] ?? 0),
                 'stock_minimo' => (float) ($lote->material->stock_minimo ?? 0),
                 'dias_criticos' => $lote->material->dias_criticos,
+                'dias_entrega' => $lote->material->dias_entrega,
                 'umbral_dias' => $lote->umbralDias(),
                 'categoria' => $lote->material->categoria,
                 'estado' => $lote->status,
@@ -404,11 +405,13 @@ class InventoryController extends Controller {
             'categoria' => 'nullable|string|max:100',
             'stock_minimo' => 'nullable|numeric|min:0',
             'dias_criticos' => 'nullable|integer|min:1|max:365',
+            'dias_entrega' => 'nullable|integer|min:0|max:365',
         ]);
         $material->update([
             'categoria' => $this->categoriaExistente($validated['categoria'] ?? null),
             'stock_minimo' => $validated['stock_minimo'] ?? 0,
             'dias_criticos' => $validated['dias_criticos'] ?? null,
+            'dias_entrega' => $validated['dias_entrega'] ?? null,
         ]);
 
         return back()->with('success', 'Insumo actualizado.');

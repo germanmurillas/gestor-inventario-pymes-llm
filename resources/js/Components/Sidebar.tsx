@@ -16,7 +16,7 @@ import {
     ArrowRightLeft,
     Truck,
     Printer,
-    X, BookOpen } from 'lucide-react';
+    X, BookOpen, TrendingDown } from 'lucide-react';
 
 interface NavItem {
     icon: React.ElementType;
@@ -45,6 +45,7 @@ const DASHBOARD_SECTIONS: NavSection[] = [
         items: [
             { icon: MessageSquare, label: 'Asistente', view: 'LLM', desc: 'Consultar el inventario con IA (RAG + LLM)' },
             { icon: BarChart3, label: 'Reportes', view: 'REPORTES', desc: 'Exportar PDF y CSV del inventario' },
+            { icon: TrendingDown, label: 'Reabastecimiento', view: 'REABASTECIMIENTO', desc: 'Consumo, cobertura y punto de reorden' },
             { icon: LayoutGrid, label: 'Kardex', view: 'LOG_MAESTRO', desc: 'Kardex: historial inmutable de movimientos' },
             { icon: Tag, label: 'Etiquetas', view: 'ETIQUETAS', desc: 'Clasificar materiales con tags' },
             { icon: ScanLine, label: 'Escáner QR', view: 'ESCANER', desc: 'Check-in/out de stock por código QR' },
@@ -78,6 +79,7 @@ const KANBAN_SECTIONS: NavSection[] = [
         items: [
             { icon: MessageSquare, label: 'Asistente', href: '/dashboard?v=LLM' },
             { icon: BarChart3,     label: 'Reportes',      href: '/dashboard?v=REPORTES' },
+            { icon: TrendingDown,  label: 'Reabastecimiento', href: '/dashboard?v=REABASTECIMIENTO' },
             { icon: LayoutGrid,    label: 'Kardex',   href: '/dashboard?v=LOG_MAESTRO' },
             { icon: Tag,           label: 'Etiquetas',     href: '/dashboard?v=ETIQUETAS' },
             { icon: ScanLine,      label: 'Escáner QR',    href: '/dashboard?v=ESCANER' },

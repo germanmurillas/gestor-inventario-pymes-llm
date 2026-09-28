@@ -14,7 +14,7 @@ class Material extends Model {
     protected $fillable = [
         'code', 'name', 'unit', 'description',
         'stock_min', 'stock_max', 'photo_path',
-        'unidad_medida', 'categoria', 'stock_minimo', 'dias_criticos',
+        'unidad_medida', 'categoria', 'stock_minimo', 'dias_criticos', 'dias_entrega',
         'custom_fields',
     ];
 

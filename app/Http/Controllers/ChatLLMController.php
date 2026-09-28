@@ -72,6 +72,10 @@ class ChatLLMController extends Controller {
         if ($this->lotesMencionados($query)->isNotEmpty() || preg_match('/\blote\s+[a-z0-9]+-[a-z0-9-]+/iu', $q)) return 'batch_info';
         if (preg_match('/cuarentena|retenid|bloquead|no conform|rechazad/iu', $q)) return 'quarantine';
         if (preg_match('/concili|ajust|diferencia|descuadr/iu', $q)) return 'conciliation';
+        // Analítica predictiva: cuándo se acaba, para cuántos días alcanza, cuándo pedir (RF-09).
+        if (preg_match('/cu[aá]ndo se (me |nos |les? )?(acaba|agota|termina|va a (acabar|agotar|terminar))|(se|me|nos) (va|van) a (acabar|agotar|terminar)|para cu[aá]nt[oa]s? d[ií]as|cu[aá]nt[oa]s? d[ií]as (me |nos |le )?(alcanza|dura)|(alcanza|dura) para|(me|nos) (alcanza|dura)|punto de (re)?orden|pron[oó]stic|proyecci|predic|desabastec|cu[aá]ndo (debo|hay que|toca|tengo que|tenemos que) (pedir|comprar|reponer)/iu', $q)) return 'forecast';
+        // Analítica descriptiva y diagnóstica del consumo: cuánto se consumió y por qué cambió (RF-10).
+        if (preg_match('/consumo|consumi(mos|eron|ó)\b|se consumi[oó]|gast(amos|aron|ó)\b|cu[aá]nt[oa]s? (se |hemos )?(us[aoóé]|gast|consum)|por qu[eé] (baj|disminu|subi|aument|cambi|se redu|hay menos|hay m[aá]s)|variaci|estad[ií]stic/iu', $q)) return 'consumption';
         if (preg_match('/m[ií]nimo|hacen? falta|faltan? (por )?pedir|(toca|hay que) (pedir|comprar|reponer)|reponer|reabastec|bajo de (stock|inventario|existencias)|poco stock|(est[aá]n?|van?) (acabando|agotando)|agotad|escase/iu', $q)) return 'low_stock';
         if (preg_match('/resumen|panorama|todo el inventario|estado general|en general|c[oó]mo est[aá] el inventario/iu', $q)) return 'summary';
         if (preg_match('/valor|\bvale\b|precio|costo|cuesta|dinero|plata|invertid/iu', $q)) return 'valuation';
@@ -96,6 +100,8 @@ class ChatLLMController extends Controller {
         'summary' => 'resumen o estado general del inventario',
         'quarantine' => 'lotes en cuarentena, retenidos o apartados por calidad',
         'low_stock' => 'insumos por debajo del mínimo, que faltan o hay que pedir',
+        'forecast' => 'cuándo se acaba un insumo, para cuántos días alcanza o cuándo hay que pedirlo',
+        'consumption' => 'cuánto se consumió en un periodo o por qué cambió la existencia de un insumo',
         'general' => 'ninguna de las anteriores',
     ];
 
@@ -187,7 +193,13 @@ class ChatLLMController extends Controller {
             'algo','alguno','alguna','algún','nada','toca','usar','gastar','sacar','casi','vaya','van','echar','perder','dañar','daña','dañe','dañado',
             'bajo','baja','falta','faltan','hace','hacen','pedir','comprar','reponer','mínimo','minimo','encuentro','encontrar','encuentra','sirve',
             'nos','les','esté','estén','sea','porque','ahorita','cuarentena','retenido','retenida','calidad','bloqueado','menos','poco','poca',
-            'agotado','agotando','acabando','cortos','viejo','apartada','apartado','despachar','venza','vencerse','mercancía','mercancia','problemas'];
+            'agotado','agotando','acabando','cortos','viejo','apartada','apartado','despachar','venza','vencerse','mercancía','mercancia','problemas',
+            // Pronóstico y consumo.
+            'acaba','acabar','agota','agotar','termina','terminar','alcanza','dura','pronóstico','pronostico','proyección','proyeccion','punto','reorden',
+            'consumo','consumió','consumio','consumimos','consumieron','gastamos','gastaron','gastó','usamos','usaron','usó','bajó','bajo','subió','subio',
+            'cambió','cambio','disminuyó','disminuyo','aumentó','aumento','variación','variacion','estadística','estadistica','estadísticas','estadisticas',
+            'diario','diaria','semanal','mensual','pasada','pasado','anterior','semanas','meses','día','dia','qué','por',
+            'más','mas','mayor','mayores','menor','menores','mucho','mucha','tanto','tanta','ultimos','últimos','ultimas','últimas'];
 
         return collect(preg_split('/\s+/u', mb_strtolower($query)))
             ->map(fn($w) => preg_replace('/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/u', '', $w))
@@ -222,7 +234,7 @@ class ChatLLMController extends Controller {
         // Si la pregunta nombra un material que no existe, se dice explícitamente
         // en lugar de devolver lotes de otros materiales.
         if (!empty($keywords) && empty($materialIds)
-            && (in_array($intent, ['stock_check', 'location', 'valuation'], true) || ($intent === 'expiration' && $ventana === null))) {
+            && (in_array($intent, ['stock_check', 'location', 'valuation', 'forecast', 'consumption'], true) || ($intent === 'expiration' && $ventana === null))) {
             $catalogo = \App\Models\Material::orderBy('name')->pluck('name')->join(', ');
             return "MATERIAL NO ENCONTRADO: ningún material registrado coincide con \"" . implode(' ', $keywords) . "\".\n"
                  . "MATERIALES REGISTRADOS: {$catalogo}\n\n"
@@ -320,6 +332,41 @@ class ChatLLMController extends Controller {
                 $context = "INSUMOS POR DEBAJO DE SU STOCK MÍNIMO (hay que reponerlos). Son {$bajos->count()}:\n"
                     . ($bajos->isEmpty() ? '- Ningún insumo está por debajo de su stock mínimo.' : $bajos->map(fn ($m) =>
                         "- {$m->name}: hay {$this->num($m->stock_total)} {$m->unit} | mínimo {$this->num($m->stock_minimo)} {$m->unit} | faltan {$this->num($m->stock_minimo - $m->stock_total)} {$m->unit}")->join("\n"));
+                break;
+            case 'forecast':
+                $proyeccion = app(\App\Services\ProyeccionInventario::class);
+                $filas = $proyeccion->proyeccion($materialIds ?: null);
+                if (empty($materialIds)) $filas = $filas->where('estado', '!=', 'sin_consumo')->take(15);
+                $context = "PROYECCIÓN DE REABASTECIMIENTO (promedio móvil del consumo real de los últimos " . \App\Services\ProyeccionInventario::VENTANA_DIAS . " días en el Kardex; punto de reorden = consumo diario × días de entrega + stock mínimo):\n"
+                    . ($filas->isEmpty() ? '- No hay insumos con consumo registrado en la ventana.' : $filas->map(fn ($f) =>
+                        "- {$f['nombre']}: existencia {$this->num($f['stock'])} {$f['unidad']} | consumo promedio {$this->num($f['consumo_diario'])} {$f['unidad']}/día"
+                        . ($f['dias_cobertura'] !== null ? " | alcanza para {$this->num($f['dias_cobertura'])} días (se agotaría hacia el {$f['fecha_agotamiento']})" : ' | sin consumo en la ventana, no se puede estimar cuándo se agota')
+                        . ($f['punto_reorden'] !== null ? " | días de entrega del proveedor: {$f['dias_entrega']} | punto de reorden: {$this->num($f['punto_reorden'])} {$f['unidad']}" : ' | sin días de entrega registrados (no se calcula punto de reorden)')
+                        . ($f['estado'] === 'pedir' ? ' | HAY QUE REPONERLO YA' . ($f['bajo_minimo'] ? ' (está bajo su mínimo)' : ' (llegó a su punto de reorden)') : ($f['pedir_antes_de'] ? " | pedir a más tardar el {$f['pedir_antes_de']}" : ''))
+                    )->join("\n"))
+                    . "\nNOTA: es una estimación que supone que el consumo seguirá como en las últimas semanas.";
+                break;
+            case 'consumption':
+                $proyeccion = app(\App\Services\ProyeccionInventario::class);
+                $dias = $ventana && $ventana > 0 ? $ventana : 7;
+                if (empty($materialIds)) {
+                    $filas = $proyeccion->proyeccion(null, $dias)->where('consumo_diario', '>', 0)->sortByDesc('consumo_ventana')->take(10);
+                    $context = "CONSUMO DE LOS ÚLTIMOS {$dias} DÍAS (salidas por producción, venta, desperdicio o escáner en el Kardex), insumos con más consumo:\n"
+                        . ($filas->isEmpty() ? '- No hubo consumo en ese periodo.' : $filas->map(fn ($f) => "- {$f['nombre']}: {$this->num($f['consumo_ventana'])} {$f['unidad']} (promedio {$this->num($f['consumo_diario'])} {$f['unidad']}/día)")->join("\n"));
+                } else {
+                    $motivo = fn ($r) => \App\Services\ProyeccionInventario::MOTIVOS[$r['motivo']] ?? $r['motivo'];
+                    $context = \App\Models\Material::whereIn('id', $materialIds)->get()->map(function ($m) use ($proyeccion, $dias, $motivo) {
+                        $v = $proyeccion->variacion($m->id, $dias);
+                        $detalle = fn ($filas) => empty($filas) ? 'sin movimientos' : collect($filas)->map(fn ($r) => ($r['tipo'] === 'entrada' ? 'entró' : 'salió') . " {$this->num($r['total'])} {$m->unit} por {$motivo($r)} ({$r['movimientos']} mov.)")->join('; ');
+                        $semanas = collect($proyeccion->consumoPorPeriodo($m->id, 'semana', 4))->map(fn ($p) => "{$p['periodo']}: {$this->num($p['cantidad'])}")->join(' | ');
+                        return "INSUMO {$m->name} (unidad {$m->unit}), existencia actual {$this->num($m->stock_total)} {$m->unit}:\n"
+                            . "- Últimos {$dias} días: {$detalle($v['actual'])}. Consumo: {$this->num($v['consumo_actual'])} {$m->unit}.\n"
+                            . "- {$dias} días anteriores: {$detalle($v['anterior'])}. Consumo: {$this->num($v['consumo_anterior'])} {$m->unit}.\n"
+                            . "- Consumo por semana (últimas 4): {$semanas}";
+                    })->join("\n");
+                    $context = "CONSUMO Y VARIACIÓN SEGÚN EL KARDEX:\n" . $context
+                        . "\nINSTRUCCIÓN ADICIONAL: si preguntan por qué bajó o cambió, explica con los motivos y cantidades anteriores; no supongas causas que no estén en los datos.";
+                }
                 break;
             case 'summary':
                 $activos = Lote::activos();

@@ -3,14 +3,14 @@ import { Link, router } from '@inertiajs/react';
 import gsap from 'gsap';
 import {
     ArrowRightLeft, BarChart3, Bell, BookOpen, Box, History, LayoutGrid, LogOut, MessageSquare, MoreHorizontal,
-    Printer, ScanLine, ScrollText, Search, Settings, Tag, Truck, Columns3, X,
+    Printer, ScanLine, ScrollText, Search, Settings, Tag, TrendingDown, Truck, Columns3, X,
 } from 'lucide-react';
 
 type Item = { icon: React.ElementType; label: string; view?: string; href?: string };
 
 /** Nombres legibles de cada vista del tablero (también se usan como título en el encabezado). */
 export const VIEW_LABELS: Record<string, string> = {
-    TABLERO: 'Tablero', INVENTARIO: 'Inventario', BUSCAR: 'Buscar', LLM: 'Asistente', REPORTES: 'Reportes',
+    TABLERO: 'Tablero', INVENTARIO: 'Inventario', BUSCAR: 'Buscar', LLM: 'Asistente', REPORTES: 'Reportes', REABASTECIMIENTO: 'Reabastecimiento',
     LOG_MAESTRO: 'Kardex', ETIQUETAS: 'Etiquetas', ESCANER: 'Escáner QR', SCAN_HISTORY: 'Historial QR',
     TRANSFERENCIAS: 'Transferencias', PURCHASE_ORDERS: 'Órdenes de compra', LABELS_PRINT: 'Imprimir etiquetas',
     NOTIFICACIONES: 'Alertas',
@@ -33,6 +33,7 @@ const GRUPOS: { titulo: string; items: Item[] }[] = [
     { titulo: 'Control', items: [
         { icon: ScrollText, label: 'Kardex', view: 'LOG_MAESTRO' },
         { icon: BarChart3, label: 'Reportes', view: 'REPORTES' },
+        { icon: TrendingDown, label: 'Reabastecimiento', view: 'REABASTECIMIENTO' },
         { icon: Bell, label: 'Alertas', view: 'NOTIFICACIONES' },
         { icon: Columns3, label: 'Kanban', href: '/kanban' },
     ] },

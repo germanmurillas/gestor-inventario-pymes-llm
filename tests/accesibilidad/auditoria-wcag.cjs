@@ -11,7 +11,7 @@ const EMAIL = process.env.PW_ADMIN_EMAIL || 'admin@pymetory.com';
 const CLAVE = process.env.PW_ADMIN_PASSWORD || 'Pymetory2026';
 const TEMA = process.env.TEMA || null; // opcional: auditar con otro tema visual
 const VISTAS = ['TABLERO', 'INVENTARIO', 'BUSCAR', 'LLM', 'REPORTES', 'LOG_MAESTRO', 'ETIQUETAS', 'ESCANER', 'SCAN_HISTORY',
-    'TRANSFERENCIAS', 'PURCHASE_ORDERS', 'LABELS_PRINT', 'NOTIFICACIONES'];
+    'TRANSFERENCIAS', 'PURCHASE_ORDERS', 'LABELS_PRINT', 'NOTIFICACIONES', 'REABASTECIMIENTO'];
 
 async function auditar(page, nombre, url, dispositivo) {
     page.setDefaultTimeout(90000);
