@@ -16,7 +16,7 @@
 
     \item \textbf{Objetivo específico 3 --- Construir el sistema (cumplido).} El sistema está en producción con sus módulos operativos, y la rama principal del repositorio público tenía 178 commits el 27 de septiembre de 2026, frente a los 50 del indicador. Con la proyección de reabastecimiento, el sistema cubre también el nivel de analítica predictiva del alcance (Sección \ref{sec:imp_proyeccion}). La implementación (Capítulo \ref{chap:implementacion}) aplica cinco patrones de diseño con una alternativa descartada y justificada para cada uno.
 
-    \item \textbf{Objetivo específico 4 --- Verificar el sistema (cumplido parcialmente).} Se ejecutaron 189 pruebas automatizadas (128 PHPUnit y 61 de extremo a extremo), por encima de los 111 casos del indicador, y todas las ejecutadas aprobaron. El asistente respondió correctamente 48 de 50 consultas de la batería (34 de 50 antes de las correcciones), 9 de 10 en una prueba ciega y 7 de 8 en una prueba ciega con lenguaje coloquial; la evaluación heurística encontró 14 problemas, de los que se corrigieron 13, y la auditoría WCAG 2.1 AA no encontró incumplimientos automáticos en los seis temas visuales. Queda pendiente la prueba con usuario, cuyo protocolo está definido en el Capítulo \ref{chap:pruebas}.
+    \item \textbf{Objetivo específico 4 --- Verificar el sistema (cumplido parcialmente).} Se ejecutaron 210 pruebas automatizadas (149 PHPUnit y 61 de extremo a extremo), por encima de los 111 casos del indicador, y todas las ejecutadas aprobaron. El asistente respondió correctamente 48 de 50 consultas de la batería (34 de 50 antes de las correcciones), 9 de 10 en una prueba ciega y 7 de 8 en una prueba ciega con lenguaje coloquial; la evaluación heurística encontró 14 problemas, de los que se corrigieron 13, y la auditoría WCAG 2.1 AA no encontró incumplimientos automáticos en los seis temas visuales. Queda pendiente la prueba con usuario, cuyo protocolo está definido en el Capítulo \ref{chap:pruebas}.
 \end{itemize}
 
 \subsection{Reglas de negocio de la dirección}
@@ -24,7 +24,7 @@
 \begin{itemize}
     \item \textbf{FEFO.} El consumo descuenta siempre primero el lote activo con el vencimiento más próximo, dentro de una transacción. El umbral de criticidad es configurable y se aplica de forma coherente en tablero, inventario, alertas y reportes.
     \item \textbf{Kardex inmutable.} Cada movimiento guarda lote, usuario, tipo, cantidad, motivo y fecha. La aplicación rechaza modificar o eliminar un movimiento, y la base de datos impide borrar un lote o un usuario con historial.
-    \item \textbf{Control de acceso por roles.} El \textit{middleware} \texttt{CheckRole} protege las rutas administrativas; el registro público solo crea operarios y las pruebas verifican que un operario reciba acceso denegado.
+    \item \textbf{Control de acceso por roles.} El \textit{middleware} \texttt{CheckRole} protege las rutas administrativas; no hay registro público (las cuentas las crea un administrador) y las pruebas verifican que un operario reciba acceso denegado.
     \item \textbf{RAG dinámico.} El asistente clasifica cada pregunta, consulta la base de datos y responde a partir de ese contexto; cuando el material no existe, lo dice en lugar de mostrar datos de otros materiales.
 \end{itemize}
 
