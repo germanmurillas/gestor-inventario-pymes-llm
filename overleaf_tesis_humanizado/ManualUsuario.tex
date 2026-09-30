@@ -1,0 +1,114 @@
+% -------------------------------------------------
+% VERSION TRACKER — No modificar este bloque
+% Versión:    Tesis Humanizada
+% Archivo:    Principal.tex
+% Última mod:  2026-05-08T08:45:26
+% Git commit:  cc9c766f @ main
+% Audiencia:   general
+% Verificar antes de editar: bash check_tesis_version.sh overleaf_tesis_humanizado/Principal.tex
+% -------------------------------------------------
+
+
+\documentclass[letterpaper, 11pt, oneside]{book}
+\usepackage{pgfgantt} % Para generar Diagramas de Gantt
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc} %Para configuración de caracteres
+\usepackage[spanish]{babel} %Para configuración de idioma
+
+\usepackage{float} %Para que funcionen las tablas
+\usepackage{anysize} %Para usar márgenes
+\marginsize{2cm}{2cm}{1cm}{2cm} %{izquierda}{derecha}{arriba}{abajo}. La superior esta sobre 1, la derecha sobre -0.5 y la de abajo sobre 2 (por el número de página)
+%tablas
+\usepackage{fancyhdr}
+%tablas
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{float}
+%rotar tablas (y usar \includegraphics )
+\usepackage{rotating}
+%Dividir en diagonal
+%\usepackage{slashbox}
+%color tablas
+\usepackage{colortbl}
+%colocar tabla en lugar de cuadro
+
+
+\usepackage[numbib,notlof,notlot,nottoc]{tocbibind} %Para que la biliografía se llame así y no referencias y para que quede numerada como sección.
+%\usepackage[notlof,notlot,nottoc]{tocbibind} %Bibliografía sin numerar
+
+\bibliographystyle{ieeetr} %Estilo de bibliografía IEEE
+
+\usepackage{url} % inserción url's notas de pie.
+\usepackage[spanish,onelanguage]{algorithm2e} %for psuedo code
+
+%Para poder colocar texto en color
+\usepackage{color}
+\definecolor{naranja}{rgb}{1,0.5,0} % valores de las componentes roja, verde y azul (RGB)
+\definecolor{rojo}{rgb}{1,0,0}
+\definecolor{SteelBlue}{rgb}{0.3,0.5,0.7}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\definecolor{claregreen}{RGB}{4,180,95}
+\usepackage{listingsutf8}
+\lstset{ %
+  basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+  numberstyle=\footnotesize,          % the size of the fonts that are used for the line-numbers
+  numbersep=4pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;{}
+  extendedchars=false,
+  inputencoding=utf8, 
+}
+
+\lstdefinelanguage{XML}
+{
+  basicstyle=\tiny,           % the size of the fonts that are used for the code
+  numberstyle=\footnotesize,          % the size of the fonts that are used for the line-numbers
+  numbersep=4pt,                  % how far the line-numbers are from the code
+  morestring=[b]",
+  morestring=[s]{(}{)},
+  morecomment=[s]{<!-- }{-->},
+  stringstyle=\color{claregreen},
+  identifierstyle=\color{darkblue},
+  keywordstyle=\color{cyan}\bfseries,
+  morekeywords={xmlns,version,type, encoding, xml, DOCTYPE,SYSTEM,
+ELEMENT, ATTLIST, id, stylesheet, href},% list your attributes here
+  emph={REQUIRED},
+  emphstyle=\color{red}
+}
+
+%Para tener los bookmarks del pdf (menú al lado derecho en los visualizadores de pdf)
+% si colorlinks= true, no salen las cajas, sino el color del link!!
+% linkcolor para los indices, citecolor para las citas en texto, urlcolor para los enlaces
+\usepackage[pdftex,bookmarks=true, linkcolor=black, citecolor=black, colorlinks=true, urlcolor=black]{hyperref}
+
+%Para poder hacer subfiguras (subfloat)
+\usepackage{subfig}
+
+\usepackage{enumitem} % Para poder continuar enumerate en otras partes
+
+\usepackage{pdflscape}%Para colocar páginas horizontales en el PDF
+\usepackage{multicol}
+
+\usepackage{pgfgantt} % Para el cronograma de Gantt
+\usepackage{float}    % Para forzar la posición de tablas y figuras con [H]
+\usepackage{array}    % Para mejorar el formato de las tablas
+
+
+\hypersetup{pdftitle={Pymetory — Manual de usuario},pdfauthor={Germán David Murillas Mondragón}}
+\begin{document}
+\pagestyle{plain}
+\begin{center}
+{\LARGE\bfseries Pymetory}\\[4pt]
+Germán David Murillas Mondragón · Universidad del Valle, sede Tuluá · Anexo digital del trabajo de grado
+\end{center}
+\input{Anexos/manualUsuarioCompleto}
+\end{document}
