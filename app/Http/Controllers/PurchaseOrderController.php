@@ -102,8 +102,9 @@ class PurchaseOrderController extends Controller
 
     public function update(Request $request, PurchaseOrder $order)
     {
+        // 'received' no se asigna a mano: lo pone receive() al registrar los lotes recibidos.
         $validated = $request->validate([
-            'status'       => 'string|in:draft,ready_for_review,approved,ordered,received,closed',
+            'status'       => 'string|in:draft,ready_for_review,approved,ordered,closed',
             'vendor_id'    => 'nullable|exists:vendors,id',
             'date_expected'=> 'nullable|date',
             'submitted_by' => 'nullable|string|max:100',
@@ -112,6 +113,16 @@ class PurchaseOrderController extends Controller
             'bill_to'      => 'nullable|string|max:500',
             'notes'        => 'nullable|string|max:2000',
         ]);
+
+        // El operario prepara y envía a revisión; aprobar, ordenar, cerrar o modificar una orden
+        // ya aprobada le corresponde al administrador.
+        if ($request->user()->role !== 'admin') {
+            $avanza = in_array($validated['status'] ?? null, ['approved', 'ordered', 'closed'], true);
+            $bloqueada = !in_array($order->status, ['draft', 'ready_for_review'], true);
+            if ($avanza || $bloqueada) {
+                return response()->json(['message' => 'Solo un administrador puede aprobar, ordenar, cerrar o modificar una orden ya aprobada.'], 403);
+            }
+        }
 
         $before = $order->toArray();
         $order->update($validated);
@@ -146,7 +157,8 @@ class PurchaseOrderController extends Controller
 
         $validated = $request->validate([
             'items' => 'required|array',
-            'items.*.id'              => 'required|exists:purchase_order_items,id',
+            // Solo ítems de ESTA orden (no de otra, aunque exista).
+            'items.*.id'              => ['required', \Illuminate\Validation\Rule::exists('purchase_order_items', 'id')->where('purchase_order_id', $order->id)],
             'items.*.received'        => 'required|numeric|min:0',
             // Datos reales del lote recibido (FEFO necesita la fecha de vencimiento del proveedor).
             'items.*.batch_number'    => 'nullable|string|max:50|distinct',

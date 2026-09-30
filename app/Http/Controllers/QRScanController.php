@@ -43,9 +43,9 @@ class QRScanController extends Controller
             ]);
         }
 
-        // Validación de entrada: el lote debe estar activo
-        if ($validated['action'] === 'entrada' && $lote->status === 'consumed') {
-            $lote->status = 'active';
+        // Salida por QR: mismas reglas que cualquier despacho (activo, sin vencer y FEFO).
+        if ($validated['action'] === 'salida' && ($motivo = $lote->motivoNoDespachable('produccion'))) {
+            return back()->withErrors(['qr_data' => $motivo]);
         }
 
         DB::transaction(function () use ($lote, $validated) {
@@ -57,7 +57,10 @@ class QRScanController extends Controller
                 }
             } else {
                 $lote->quantity += $validated['quantity'];
-                $lote->status = 'active';
+                // Una entrada reactiva un lote consumido, pero no libera uno en cuarentena.
+                if ($lote->status === 'consumed') {
+                    $lote->status = 'active';
+                }
             }
             $lote->save();
 

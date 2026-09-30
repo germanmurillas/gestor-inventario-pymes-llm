@@ -26,15 +26,15 @@ Route::get('/', function () {
 // ── Índice General de Enlaces ────────────────────────────────────────────────
 Route::get('/indice', function () {
     return Inertia::render('Indice');
-})->name('indice');
+})->middleware(['auth', 'verified', 'role:admin'])->name('indice');
 
 // ── Hub de Oportunidades con IA ──────────────────────────────────────────────
 Route::get('/nicho', function () {
     return Inertia::render('Nicho');
-})->name('nicho');
+})->middleware(['auth', 'verified', 'role:admin'])->name('nicho');
 
 // ── Page Access Verification (sanitized — passwords not in client JS) ────────
-Route::post('/api/verify-page-access', [PageAccessController::class, 'verify']);
+Route::post('/api/verify-page-access', [PageAccessController::class, 'verify'])->middleware(['auth', 'verified', 'role:admin', 'throttle:10,1']);
 
 // Endpoint del Dashboard: Renderiza y escupe la lógica FEFO calculada en Base de Datos.
 Route::get('/dashboard', [InventoryController::class, 'index'])
@@ -44,10 +44,10 @@ Route::get('/dashboard', [InventoryController::class, 'index'])
 // ── Status Master — Agent Bus Monitor ──────────────────────────────────────────
 Route::get('/status-master', function () {
     return Inertia::render('StatusMaster');
-})->name('status-master');
+})->middleware(['auth', 'verified', 'role:admin'])->name('status-master');
 
 // Agent bus API (SSH proxy to DesktopTitan — may be slow, frontend handles gracefully)
-Route::get('/api/agent-bus', [\App\Http\Controllers\AgentBusController::class, 'events']);
+Route::get('/api/agent-bus', [\App\Http\Controllers\AgentBusController::class, 'events'])->middleware(['auth', 'verified', 'role:admin']);
 
 Route::get('/inventory/kardex', [InventoryController::class, 'kardex'])
     ->middleware(['auth', 'verified'])
@@ -193,9 +193,7 @@ use App\Http\Controllers\AuthController;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
-    
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    // Sin registro público: las cuentas las crea un administrador en Ajustes > Usuarios.
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
@@ -211,7 +209,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/kanban/{item}/rag-context', [KanbanController::class, 'saveRagContext']);
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     // Agent Monitor & Chat Relay
     Route::get('/api/agents/status', [AgentMonitorController::class, 'status']);
     Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);
@@ -231,7 +229,7 @@ Route::middleware(['auth', 'verified'])->prefix('api/purchase-orders')->group(fu
     Route::get('/',          [PurchaseOrderController::class, 'index']);
     Route::post('/',         [PurchaseOrderController::class, 'store']);
     Route::put('/{order}',   [PurchaseOrderController::class, 'update']);
-    Route::delete('/{order}',[PurchaseOrderController::class, 'destroy']);
+    Route::delete('/{order}',[PurchaseOrderController::class, 'destroy'])->middleware('role:admin');
     Route::post('/{order}/receive', [PurchaseOrderController::class, 'receive']);
     Route::get('/vendors',        [PurchaseOrderController::class, 'vendors']);
     Route::post('/vendors',       [PurchaseOrderController::class, 'storeVendor']);
@@ -286,9 +284,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // ── MONITOR ──
-Route::get('/monitor', [\App\Http\Controllers\MonitorController::class, 'index']);
-Route::get('/api/monitor/stats', [\App\Http\Controllers\MonitorController::class, 'stats']);
-Route::post('/api/monitor/pulse', [\App\Http\Controllers\MonitorController::class, 'pulse']);
+// Solo administradores: expone procesos, memoria y servicios del servidor.
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('/monitor', [\App\Http\Controllers\MonitorController::class, 'index']);
+    Route::get('/api/monitor/stats', [\App\Http\Controllers\MonitorController::class, 'stats']);
+    Route::post('/api/monitor/pulse', [\App\Http\Controllers\MonitorController::class, 'pulse']);
+});
 
 // Alertas del sistema (FEFO y stock bajo) por usuario
 Route::middleware(['auth', 'verified'])->prefix('api/notificaciones')->group(function () {

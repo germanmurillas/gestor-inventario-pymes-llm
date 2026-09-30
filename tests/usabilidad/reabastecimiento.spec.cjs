@@ -10,6 +10,8 @@ test.describe('Reabastecimiento @funcional', () => {
 
         const filas = page.locator('table tbody tr');
         await expect(filas.first()).toBeVisible();
+        // La tabla se llena al llegar la proyección: contar cuando ya no hay peticiones pendientes.
+        await page.waitForLoadState('networkidle');
         const total = await filas.count();
         expect(total).toBeGreaterThan(0);
 

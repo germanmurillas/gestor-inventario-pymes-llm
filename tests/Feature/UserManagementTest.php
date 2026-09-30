@@ -51,7 +51,7 @@ class UserManagementTest extends TestCase
         $this->actingAs($operario)->postJson('/api/llm-providers', ['key' => 'x'])->assertStatus(403);
     }
 
-    public function test_registro_publico_siempre_crea_operario(): void
+    public function test_no_hay_registro_publico_ni_por_el_rol_enviado(): void
     {
         $this->post('/register', [
             'name' => 'Externo', 'email' => 'externo@p.com',
@@ -59,6 +59,6 @@ class UserManagementTest extends TestCase
             'role' => 'admin',
         ]);
 
-        $this->assertDatabaseHas('users', ['email' => 'externo@p.com', 'role' => 'operario']);
+        $this->assertDatabaseMissing('users', ['email' => 'externo@p.com']);
     }
 }

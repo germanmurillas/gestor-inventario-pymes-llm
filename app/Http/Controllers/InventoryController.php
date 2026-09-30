@@ -287,8 +287,8 @@ class InventoryController extends Controller {
             $lote->quantity = $validated['new_quantity'];
             if ($lote->quantity <= 0) {
                 $lote->status = 'consumed';
-            } else {
-                $lote->status = 'active'; // Reactivar si estaba consumido y le sumamos stock
+            } elseif ($lote->status === 'consumed') {
+                $lote->status = 'active'; // Reactivar si estaba consumido y le sumamos stock; la cuarentena se conserva
             }
             $lote->save();
 
@@ -507,6 +507,11 @@ class InventoryController extends Controller {
             'quantity.max' => 'No puedes despachar más de lo que hay disponible (' . $lote->quantity . ' kg).',
             'quantity.min' => 'La cantidad a despachar debe ser al menos 0.01 kg.'
         ]);
+
+        // Cuarentena, vencimiento y FEFO (salvo desperdicio, que da de baja el lote que sea).
+        if ($motivo = $lote->motivoNoDespachable($validated['reason'])) {
+            return back()->withErrors(['quantity' => $motivo]);
+        }
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($lote, $validated) {
             // 1. Actualizar la cantidad del lote

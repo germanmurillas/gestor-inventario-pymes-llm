@@ -27,17 +27,17 @@ class ConsumptionController extends Controller
 
         // Verificar stock total disponible
         $totalAvailable = Lote::where('material_id', $material->id)
-            ->where('status', 'active')
+            ->despachables()
             ->sum('quantity');
 
         if ($totalAvailable < $quantityToConsume) {
-            return back()->withErrors(['quantity' => 'Stock insuficiente. Solo hay ' . $totalAvailable . ' kg disponibles.']);
+            return back()->withErrors(['quantity' => 'Stock insuficiente. Solo hay ' . $totalAvailable . ' kg disponibles sin vencer ni en cuarentena.']);
         }
 
         DB::transaction(function () use ($material, $quantityToConsume, $validated) {
             // Obtener lotes activos ordenados por FEFO
             $lotes = Lote::where('material_id', $material->id)
-                ->where('status', 'active')
+                ->despachables()
                 ->orderBy('expiration_date', 'asc')
                 ->get();
 
@@ -79,7 +79,7 @@ class ConsumptionController extends Controller
     public function fefoSuggest(Request $request, $materialId)
     {
         $material = Material::with(['lotes' => function ($q) {
-            $q->where('status', 'active')->orderBy('expiration_date', 'asc');
+            $q->despachables()->orderBy('expiration_date', 'asc');
         }])->findOrFail($materialId);
 
         $quantity = (float) $request->query('quantity', 0);
@@ -159,12 +159,12 @@ class ConsumptionController extends Controller
         $quantityToConsume = (float) $validated['quantity'];
 
         $totalAvailable = Lote::where('material_id', $material->id)
-            ->where('status', 'active')
+            ->despachables()
             ->sum('quantity');
 
         if ($totalAvailable < $quantityToConsume) {
             return response()->json([
-                'error' => "Stock insuficiente. Solo hay {$totalAvailable} kg disponibles.",
+                'error' => "Stock insuficiente. Solo hay {$totalAvailable} kg disponibles sin vencer ni en cuarentena.",
             ], 422);
         }
 
@@ -173,7 +173,7 @@ class ConsumptionController extends Controller
 
         DB::transaction(function () use ($material, $quantityToConsume, $validated, &$consumedLotes, &$movimientos) {
             $lotes = Lote::where('material_id', $material->id)
-                ->where('status', 'active')
+                ->despachables()
                 ->orderBy('expiration_date', 'asc')
                 ->get();
 
@@ -253,17 +253,17 @@ class ConsumptionController extends Controller
                 $quantityToConsume = (float) $item['quantity'];
 
                 $totalAvailable = Lote::where('material_id', $material->id)
-                    ->where('status', 'active')
+                    ->despachables()
                     ->sum('quantity');
 
                 if ($totalAvailable < $quantityToConsume) {
                     throw new \RuntimeException(
-                        "Stock insuficiente para {$material->name}: necesita {$quantityToConsume}, disponible {$totalAvailable}"
+                        "Stock insuficiente para {$material->name}: necesita {$quantityToConsume}, disponible sin vencer {$totalAvailable}"
                     );
                 }
 
                 $lotes = Lote::where('material_id', $material->id)
-                    ->where('status', 'active')
+                    ->despachables()
                     ->orderBy('expiration_date', 'asc')
                     ->get();
 

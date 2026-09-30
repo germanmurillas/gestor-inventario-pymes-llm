@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AuthController extends Controller
@@ -15,34 +15,6 @@ class AuthController extends Controller
         return Inertia::render('Auth/Login');
     }
 
-    public function showRegister()
-    {
-        return Inertia::render('Auth/Register');
-    }
-
-    public function register(Request $request)
-    {
-        // Validación con soporte de Roles Pymetory
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            // El registro público nunca otorga privilegios: los administradores
-            // se crean desde Ajustes > Usuarios por otro administrador.
-            'role' => 'operario',
-        ]);
-
-        Auth::login($user);
-
-        return redirect()->intended('/dashboard');
-    }
-
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -50,14 +22,27 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
+        // Máximo 5 intentos fallidos por correo e IP; después, bloqueo temporal.
+        $clave = Str::transliterate(Str::lower($credentials['email']) . '|' . $request->ip());
+        if (RateLimiter::tooManyAttempts($clave, 5)) {
+            $segundos = RateLimiter::availableIn($clave);
+
+            return back()->withErrors([
+                'email' => "Demasiados intentos. Intente de nuevo en {$segundos} segundos.",
+            ])->onlyInput('email');
+        }
+
         if (Auth::attempt($credentials)) {
+            RateLimiter::clear($clave);
             $request->session()->regenerate();
             return redirect()->intended('/dashboard');
         }
 
+        RateLimiter::hit($clave, 60);
+
         return back()->withErrors([
             'email' => 'El correo o la contraseña son incorrectos.',
-        ]);
+        ])->onlyInput('email');
     }
 
     public function logout(Request $request)

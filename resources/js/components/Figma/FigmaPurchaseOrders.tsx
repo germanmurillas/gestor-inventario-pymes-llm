@@ -28,7 +28,9 @@ export default function FigmaPurchaseOrders() {
     type Recibo = { received: string; batch_number: string; expiration_date: string; bodega_id: string };
     const [recibos, setRecibos] = useState<Record<number, Recibo>>({});
     const [erroresRecibo, setErroresRecibo] = useState<Record<string, string>>({});
-    const bodegas: { id: number; name: string }[] = (usePage().props as any)?.dashboardStats?.bodegas ?? [];
+    const pageProps = usePage().props as any;
+    const bodegas: { id: number; name: string }[] = pageProps?.dashboardStats?.bodegas ?? [];
+    const esAdmin = pageProps?.auth?.user?.role === 'admin';
     const abrirRecepcion = (po: PO) => {
         setErroresRecibo({});
         setRecibos(Object.fromEntries(po.items.map((i) => [i.id!, { received: String(Math.max(0, i.quantity - (i.received_qty || 0))), batch_number: '', expiration_date: '', bodega_id: '' }])));
@@ -64,7 +66,6 @@ export default function FigmaPurchaseOrders() {
     useEffect(() => { fetchOrders(); }, [fetchOrders]);
     useEffect(() => {
         fetch('/api/purchase-orders/vendors').then(r => r.json()).then(d => setVendors(d.vendors || []));
-        fetch('/api/agent-bus').catch(() => {}); // fallback: use dashboard data for materials
             // We'll load materials from the dashboard endpoint
     }, []);
 
@@ -87,10 +88,12 @@ export default function FigmaPurchaseOrders() {
     };
 
     const handleStatusChange = async (order: PO, newStatus: string) => {
-        await fetch(`/api/purchase-orders/${order.id}`, {
+        if (newStatus === 'received') { alert('La orden queda recibida al registrar la recepción con el botón Recibir.'); return; }
+        const res = await fetch(`/api/purchase-orders/${order.id}`, {
             method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-XSRF-TOKEN': csrf() },
             body: JSON.stringify({ status: newStatus }),
         });
+        if (!res.ok) alert((await res.json().catch(() => ({})))?.message ?? 'No se pudo cambiar el estado de la orden.');
         fetchOrders();
     };
 
@@ -216,11 +219,11 @@ export default function FigmaPurchaseOrders() {
                                     className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 disabled:opacity-30 text-[9px] font-black uppercase rounded-lg transition-all">
                                     Recibir
                                 </button>
-                                <button aria-label={`Eliminar la orden ${po.po_number}`}
+                                {esAdmin && <button aria-label={`Eliminar la orden ${po.po_number}`}
                                     onClick={async () => { if (!confirm(`¿Eliminar la orden ${po.po_number}? Esta acción no se puede deshacer.`)) return; await fetch(`/api/purchase-orders/${po.id}`, { method: 'DELETE', headers: {'X-XSRF-TOKEN': csrf()} }); fetchOrders(); }}
                                     className="p-1.5 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-400 transition-colors">
                                     <Trash2 size={14} />
-                                </button>
+                                </button>}
                             </div>
                         </div>
                         {/* Items preview */}

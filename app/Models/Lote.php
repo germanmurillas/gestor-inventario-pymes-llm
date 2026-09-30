@@ -116,6 +116,40 @@ class Lote extends Model {
         return $query->where('status', 'active');
     }
 
+    /** Lotes que pueden salir a producción o venta: activos y sin vencer (FEFO no despacha vencidos). */
+    public function scopeDespachables($query) {
+        return $query->where('status', 'active')
+                     ->whereDate('expiration_date', '>=', Carbon::today());
+    }
+
+    /**
+     * Motivo por el que este lote no puede despacharse con la razón dada, o null si puede.
+     * Reglas: solo lotes activos (no en cuarentena ni consumidos); un lote vencido solo se da de
+     * baja como desperdicio; y, salvo desperdicio, FEFO exige despachar antes el lote que vence primero.
+     */
+    public function motivoNoDespachable(string $reason): ?string {
+        if ($this->status !== 'active') {
+            $estado = $this->status === 'quarantined' ? 'en cuarentena' : 'consumido';
+            return "El lote {$this->batch_number} está {$estado} y no se puede despachar.";
+        }
+        if ($reason === 'desperdicio') {
+            return null;
+        }
+        if ($this->expiration_date && $this->expiration_date->lt(Carbon::today())) {
+            return "El lote {$this->batch_number} venció el {$this->expiration_date->format('Y-m-d')}; solo puede darse de baja como desperdicio.";
+        }
+        $anterior = static::despachables()
+            ->where('material_id', $this->material_id)
+            ->where('id', '!=', $this->id)
+            ->whereDate('expiration_date', '<', $this->expiration_date)
+            ->orderBy('expiration_date')
+            ->first();
+        if ($anterior) {
+            return "FEFO: primero debe despacharse el lote {$anterior->batch_number}, que vence el {$anterior->expiration_date->format('Y-m-d')}.";
+        }
+        return null;
+    }
+
     /** Lotes que vencen dentro de N días */
     public function scopeVenceEn($query, int $dias = 15) {
         return $query->where('status', 'active')
