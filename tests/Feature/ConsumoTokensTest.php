@@ -98,6 +98,18 @@ class ConsumoTokensTest extends TestCase
         Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), 'api.openai.com') && !isset($p['max_tokens']));
     }
 
+    public function test_evaluador_puede_cambiar_el_modelo_sin_tocar_los_ajustes(): void
+    {
+        $user = $this->configurar('local', 'gpt-oss:120b-cloud');
+        config(['pymetory.evaluacion_llm' => ['llm_source' => 'external', 'llm_modelo' => 'modelo-de-prueba']]);
+        Http::fake(['api.openai.com/*' => Http::response(['choices' => [['message' => ['content' => 'Hay 120 kg.']]]])]);
+
+        $this->actingAs($user)->postJson('/chat-rag', ['prompt' => '¿Cuánta harina hay?'])->assertOk()->assertJsonPath('model', 'modelo-de-prueba');
+
+        $this->assertSame('local', DB::table('settings')->where('clave', 'llm_source')->value('valor'));
+        Http::assertSent(fn (PeticionHttp $p) => $p['model'] === 'modelo-de-prueba');
+    }
+
     public function test_opencode_go_se_identifica_como_pymetory_y_no_como_agente_de_codigo(): void
     {
         $user = $this->configurar('opencode-go', 'glm-prueba');

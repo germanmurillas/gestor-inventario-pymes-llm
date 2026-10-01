@@ -539,6 +539,10 @@ class ChatLLMController extends Controller {
             'llm_activo', 'llm_modelo', 'llm_temperatura', 'llm_max_tokens',
             'llm_source', 'llm_external_key', 'llm_opencode_key', 'llm_num_ctx', 'llm_num_gpu', 'llm_prompt'
         ])->pluck('valor', 'clave');
+        // rag:evaluar --fuente/--modelo: cambia el modelo solo dentro de ese comando (nunca en peticiones web).
+        if (app()->runningInConsole()) {
+            $settings = $settings->merge(config('pymetory.evaluacion_llm', []));
+        }
 
         if (($settings['llm_activo'] ?? 'true') === 'false') {
             return response()->json([

@@ -31,12 +31,18 @@ class EvaluarAsistente extends Command
         {--conjunto=bateria : bateria | validacion | ciega | operario | operario-ciega}
         {--etiqueta=medicion : Nombre de la ejecución}
         {--solo= : Ejecutar solo las N primeras preguntas}
+        {--fuente= : Proveedor solo para esta ejecución (local, opencode-go, opencode, openai), sin cambiar los ajustes}
+        {--modelo= : Modelo solo para esta ejecución, sin cambiar los ajustes}
         {--recalificar= : Volver a calificar un archivo de resultados guardado (sin consultar al asistente)}';
     protected $description = 'Mide la precisión del asistente contra la base de datos';
 
     public function handle(): int
     {
         if ($archivo = $this->option('recalificar')) return $this->recalificar($archivo);
+
+        config(['pymetory.evaluacion_llm' => array_filter([
+            'llm_source' => $this->option('fuente'), 'llm_modelo' => $this->option('modelo'),
+        ])]);
 
         $admin = User::where('email', 'admin@pymetory.com')->first() ?? User::where('role', 'admin')->first();
         Auth::login($admin);
