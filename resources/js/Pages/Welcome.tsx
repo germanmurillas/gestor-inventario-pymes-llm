@@ -13,6 +13,9 @@ gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
 /* Secuencia generada con Seedance 2.0 (1080p, 8 s) y reducida a 97 fotogramas WebP. */
 const FRAMES = 97;
+
+/* Versión del comercial (public/video/, fuera de git): cambiarla al reemplazar el video para que Cloudflare no sirva el anterior. */
+const VIDEO_VERSION = '?v=4';
 const frameUrl = (dir: string, i: number) => `/images/hero-seq/${dir}/f${String(i).padStart(3, '0')}.webp`;
 
 const PASOS = [
@@ -421,8 +424,8 @@ export default function Welcome() {
                             Cerrar <X size={18} />
                         </button>
                         <video className="aspect-video w-full rounded-2xl bg-black shadow-2xl" controls autoPlay playsInline preload="metadata"
-                            poster="/video/pymetory-comercial-poster.jpg"
-                            src={typeof window !== 'undefined' && window.innerWidth < 900 ? '/video/pymetory-comercial-720.mp4' : '/video/pymetory-comercial-1080.mp4'}>
+                            poster={'/video/pymetory-comercial-poster.jpg' + VIDEO_VERSION}
+                            src={(typeof window !== 'undefined' && window.innerWidth < 900 ? '/video/pymetory-comercial-720.mp4' : '/video/pymetory-comercial-1080.mp4') + VIDEO_VERSION}>
                             Tu navegador no puede reproducir el video.
                         </video>
                     </div>
