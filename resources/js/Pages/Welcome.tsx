@@ -15,7 +15,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 const FRAMES = 97;
 
 /* Versión del comercial (public/video/, fuera de git): cambiarla al reemplazar el video para que Cloudflare no sirva el anterior. */
-const VIDEO_VERSION = '?v=5';
+const VIDEO_VERSION = '?v=6';
 const frameUrl = (dir: string, i: number) => `/images/hero-seq/${dir}/f${String(i).padStart(3, '0')}.webp`;
 
 const PASOS = [
@@ -429,14 +429,15 @@ export default function Welcome() {
             </div>
 
             {/* Siempre montado (oculto) para que el toque del botón pueda iniciar la reproducción en iOS. */}
-            <div role="dialog" aria-modal="true" aria-label="Comercial de Pymetory" aria-hidden={!videoAbierto} onClick={cerrarVideo}
-                className={`fixed inset-0 z-[100] items-center justify-center bg-black/85 p-4 backdrop-blur-sm sm:p-10 ${videoAbierto ? 'flex' : 'hidden'}`}>
+            {/* Oculta con opacidad (no display:none): iOS necesita que el video tenga tamaño cuando se llama play(). */}
+            <div role="dialog" aria-modal="true" aria-label="Comercial de Pymetory" aria-hidden={!videoAbierto} inert={!videoAbierto} onClick={cerrarVideo}
+                className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm transition-opacity duration-200 sm:p-10 ${videoAbierto ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
                 <div className="relative w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
                     <button ref={cerrarVideoRef} type="button" onClick={cerrarVideo} aria-label="Cerrar el video"
                         className="absolute -top-12 right-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
                         Cerrar <X size={18} />
                     </button>
-                    <video ref={videoRef} className="aspect-video w-full rounded-2xl bg-black shadow-2xl" controls playsInline preload="none"
+                    <video ref={videoRef} className="aspect-video w-full rounded-2xl bg-black shadow-2xl" controls playsInline preload="metadata"
                         poster={'/video/pymetory-comercial-poster.jpg' + VIDEO_VERSION}>
                         Tu navegador no puede reproducir el video.
                     </video>
