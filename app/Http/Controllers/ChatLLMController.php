@@ -121,39 +121,43 @@ class ChatLLMController extends Controller {
     ];
 
     /**
-     * Intención de la pregunta: primero el clasificador por patrones; si no la reconoce, el modelo de
-     * lenguaje elige entre las categorías (lenguaje coloquial que los patrones no prevén).
+     * Intención de la pregunta. Un número de lote se reconoce siempre de forma exacta; para lo demás decide primero
+     * el modelo clasificador (setting llm_clasificador_modelo) y los patrones quedan como red de seguridad cuando el
+     * modelo no responde, responde algo fuera de las categorías o no reconoce la pregunta.
      */
     private function intencion(string $query): string
     {
-        $intent = $this->classifyQuery($query);
-        return $intent === 'general' ? ($this->clasificarConModelo($query) ?? 'general') : $intent;
+        if ($this->lotesMencionados($query)->isNotEmpty() || preg_match('/\blote\s+[a-z0-9]+-[a-z0-9-]+/iu', mb_strtolower($query))) {
+            return 'batch_info';
+        }
+        $modelo = $this->clasificarConModelo($query);
+        return ($modelo !== null && $modelo !== 'general') ? $modelo : $this->classifyQuery($query);
     }
 
     private function clasificarConModelo(string $query): ?string
     {
-        $s = DB::table('settings')->whereIn('clave', ['llm_modelo', 'llm_source'])->pluck('valor', 'clave');
-        if (($s['llm_source'] ?? 'local') !== 'local' || empty($s['llm_modelo'])) return null;
+        $modelo = DB::table('settings')->where('clave', 'llm_clasificador_modelo')->value('valor');
+        if (empty($modelo)) return null;
         $lista = collect(self::CATEGORIAS)->map(fn ($d, $k) => "- {$k}: {$d}")->join("\n");
         try {
-            $r = Http::timeout(20)->post(config('services.ollama.url') . '/api/chat', [
-                'model' => $s['llm_modelo'], 'stream' => false, 'options' => ['temperature' => 0],
+            $r = Http::timeout(15)->post(config('services.ollama.url') . '/api/chat', [
+                'model' => $modelo, 'stream' => false, 'options' => ['temperature' => 0],
                 'messages' => [
                     ['role' => 'system', 'content' => "Clasifica la pregunta de un usuario de un sistema de inventario de una panadería en UNA categoría. Responde solo con el nombre de la categoría.\n{$lista}"],
                     ['role' => 'user', 'content' => $query],
                 ],
             ]);
-            $texto = mb_strtolower((string) $r->json('message.content'));
-            foreach (array_keys(self::CATEGORIAS) as $k) {
-                if (str_contains($texto, $k)) return $k;
-            }
+            if (!$r->successful()) return null;
+            $this->sumarTokens($r);
+            // Se acepta solo una respuesta que sea exactamente el nombre de una categoría.
+            $texto = trim(mb_strtolower($this->stripThinking((string) $r->json('message.content'))), " \t\n\r.`*\"'");
+            return array_key_exists($texto, self::CATEGORIAS) ? $texto : null;
         } catch (\Exception $e) {
             \Log::warning('Clasificación con el modelo falló: ' . $e->getMessage());
+            return null;
         }
-        return null;
     }
 
-    /** Lotes cuyo número aparece en la pregunta (se buscan en la base, sin suponer un formato). */
     private function lotesMencionados(string $query)
     {
         preg_match_all('/[A-Za-z0-9]+(?:[-‑][A-Za-z0-9]+)+/u', $query, $m);
@@ -728,8 +732,8 @@ class ChatLLMController extends Controller {
                     }
                 }
 
-                if ($text === '' && ($alt = $this->respaldoLocal($payload['messages'], $llmModelo, $inicio)) !== null) {
-                    [$text, $llmModelo, $llmSource] = [$alt, config('services.ollama.respaldo') . ' (respaldo local)', 'local'];
+                if ($text === '' && ($alt = $this->respaldo($payload['messages'], $llmSource, $llmModelo, $inicio)) !== null) {
+                    [$text, $llmModelo, $llmSource] = $alt;
                 }
 
                 if ($text === '') {
@@ -757,11 +761,12 @@ class ChatLLMController extends Controller {
         }
 
         // El modelo principal no respondió: se intenta el modelo local antes de pasar a modo texto.
-        if (isset($payload['messages']) && ($alt = $this->respaldoLocal($payload['messages'], $llmModelo, $inicio ?? microtime(true))) !== null) {
-            $this->recordChat($query, $alt, 'local', $sessionId, $sessionTitle, config('services.ollama.respaldo') . ' (respaldo local)');
+        if (isset($payload['messages']) && ($alt = $this->respaldo($payload['messages'], $llmSource, $llmModelo, $inicio ?? microtime(true))) !== null) {
+            [$texto, $modeloAlt, $fuenteAlt] = $alt;
+            $this->recordChat($query, $texto, $fuenteAlt, $sessionId, $sessionTitle, $modeloAlt);
             return response()->json([
-                'response' => $alt, 'tokens' => $this->tokens, 'intent' => $intent, 'session_id' => $sessionId, 'session_title' => $sessionTitle,
-                'model' => config('services.ollama.respaldo') . ' (respaldo local)', 'source' => 'local', 'key_name' => 'Ollama Local',
+                'response' => $texto, 'tokens' => $this->tokens, 'intent' => $intent, 'session_id' => $sessionId, 'session_title' => $sessionTitle,
+                'model' => $modeloAlt, 'source' => $fuenteAlt, 'key_name' => $fuenteAlt === 'local' ? 'Ollama Local' : 'Respaldo en la nube',
             ]);
         }
 
@@ -774,6 +779,41 @@ class ChatLLMController extends Controller {
             'source' => 'fallback',
             'key_name' => '—',
         ], 200);
+    }
+
+    /**
+     * Cadena de respaldo cuando el modelo principal no responde: primero un modelo rápido en la nube
+     * (settings llm_respaldo_fuente / llm_respaldo_modelo, unos segundos) y después el modelo local (CPU, 30 a 60 s).
+     * Devuelve [texto, modelo, fuente] o null.
+     */
+    private function respaldo(array $mensajes, string $fuentePrincipal, string $modeloPrincipal, float $inicio): ?array
+    {
+        if (($nube = $this->respaldoNube($mensajes, $fuentePrincipal, $modeloPrincipal)) !== null) return $nube;
+        $local = $this->respaldoLocal($mensajes, $modeloPrincipal, $inicio);
+        return $local === null ? null : [$local, config('services.ollama.respaldo') . ' (respaldo local)', 'local'];
+    }
+
+    private function respaldoNube(array $mensajes, string $fuentePrincipal, string $modeloPrincipal): ?array
+    {
+        $cfg = DB::table('settings')->whereIn('clave', ['llm_respaldo_fuente', 'llm_respaldo_modelo'])->pluck('valor', 'clave');
+        $fuente = $cfg['llm_respaldo_fuente'] ?? null;
+        $modelo = $cfg['llm_respaldo_modelo'] ?? null;
+        if (!$fuente || !$modelo || ($fuente === $fuentePrincipal && $modelo === $modeloPrincipal)) return null;
+        $clave = \App\Models\ApiKey::where('tipo', $fuente)->where('activo', true)->first();
+        $url = $clave?->base_url ?: (config("llm_providers.{$fuente}.base_url") ?? null);
+        if (!$clave || !$url) return null;
+        try {
+            $r = Http::timeout(30)->withToken($clave->key)
+                ->withHeaders($fuente === 'opencode-go' ? ['User-Agent' => 'pymetory/1.0 (asistente de inventarios; trabajo de grado Univalle)'] : [])
+                ->post($url, ['model' => $modelo, 'messages' => $mensajes, 'temperature' => 0.3]);
+            if (!$r->successful()) return null;
+            $this->sumarTokens($r);
+            $texto = trim($this->stripThinking((string) $r->json('choices.0.message.content')));
+            return $texto === '' ? null : [$texto, "{$modelo} (respaldo en la nube)", $fuente];
+        } catch (\Exception $e) {
+            \Log::warning("Respaldo en la nube ({$modelo}) falló: " . $e->getMessage());
+            return null;
+        }
     }
 
     /**

@@ -26,6 +26,18 @@ class LlmPreciosSeeder extends Seeder
             ]);
         }
 
+        // Clasificador de intención y respaldo en la nube (ver ChatLLMController::intencion y ::respaldo).
+        foreach ([
+            ['llm_clasificador_modelo', 'gpt-oss:120b-cloud', 'Modelo (Ollama) que clasifica la intención antes de los patrones; vacío = solo patrones'],
+            ['llm_respaldo_fuente', 'opencode-go', 'Origen del modelo de respaldo en la nube; vacío = sin respaldo en la nube'],
+            ['llm_respaldo_modelo', 'glm-5.3-flash', 'Modelo de respaldo en la nube, antes del modelo local'],
+        ] as [$clave, $valor, $desc]) {
+            DB::table('settings')->insertOrIgnore([
+                'clave' => $clave, 'valor' => $valor, 'tipo' => 'string', 'grupo' => 'llm', 'es_publica' => false,
+                'descripcion' => $desc, 'created_at' => now(), 'updated_at' => now(),
+            ]);
+        }
+
         DB::table('settings')->insertOrIgnore([
             'clave' => 'llm_modelo_recomendado', 'valor' => $datos['recomendado'], 'tipo' => 'string', 'grupo' => 'llm',
             'es_publica' => false, 'descripcion' => 'Modelo recomendado (verde) en la palanca de modelos',
