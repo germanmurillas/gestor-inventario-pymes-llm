@@ -50,7 +50,7 @@ Los precios se publican en dólares por millón de tokens. Hay dos formas de pag
 
 Cada proveedor informa en su respuesta cuántos tokens procesó (campo \texttt{usage} en las API compatibles con OpenAI y \texttt{prompt\_eval\_count}/\texttt{eval\_count} en Ollama). Desde el commit \texttt{6ddad01} Pymetory guarda esos dos valores y el nombre del modelo en cada registro de \texttt{chat\_histories}, y el comando de evaluación \texttt{php artisan rag:evaluar} los resume.
 
-El 1 de octubre de 2026 se ejecutaron en producción las cinco baterías de preguntas usadas en el Capítulo~11 (106 preguntas: batería de 50, validación de 20, ciega de 10, operario coloquial de 18 y operario ciega de 8), con el modelo que usa el sistema, \texttt{gpt-oss:120b} en Ollama Cloud. Las 106 respuestas reportaron su consumo. Los conteos dependen del tokenizador de cada modelo, así que con otro modelo las cifras pueden variar algo; el orden de magnitud se mantiene.
+El 1 de octubre de 2026 se ejecutaron en producción las cinco baterías de preguntas usadas en el Capítulo~11 (106 preguntas: batería de 50, validación de 20, ciega de 10, operario coloquial de 18 y operario ciega de 8), con el modelo que usa el sistema, \texttt{gpt-oss:120b} en Ollama Cloud. Las mediciones de este documento son las de la segunda ejecución de ese día, con la configuración vigente (sin tope de salida para los modelos en la nube, ver más abajo); las 106 respuestas reportaron su consumo y todas las dio \texttt{gpt-oss:120b}. Los conteos dependen del tokenizador de cada modelo, así que con otro modelo las cifras pueden variar algo; el orden de magnitud se mantiene.
 
 \section{Consumo medido}
 
@@ -61,7 +61,7 @@ El 1 de octubre de 2026 se ejecutaron en producción las cinco baterías de preg
  & Promedio & Mediana & Percentil 95 & Mínimo & Máximo \\
 \midrule
 Tokens de entrada & 687 & 525 & 1\,248 & 464 & 1\,259 \\
-Tokens de salida  & 321 & 189 & 1\,024 & 47 & 1\,024 \\
+Tokens de salida  & 333 & 179 & 1\,270 & 49 & 1\,410 \\
 \bottomrule
 \end{tabular}
 \caption{Tokens por consulta en las 106 preguntas (1-oct-2026, \texttt{gpt-oss:120b}).}
@@ -76,19 +76,19 @@ El consumo depende del tipo de pregunta. Las consultas puntuales (existencias, u
 \toprule
 Tipo de pregunta & Preguntas & Entrada (prom.) & Salida (prom.) \\
 \midrule
-Vencimiento por periodo (``¿qué vence esta semana?'') & 2 & 1\,230 & 1\,008 \\
-Lotes críticos (``¿qué está por vencer?'') & 14 & 1\,196 & 982 \\
-Movimientos del Kardex & 8 & 964 & 279 \\
-Resumen general & 4 & 941 & 426 \\
-Stock bajo el mínimo & 5 & 769 & 402 \\
-Información de un lote & 7 & 691 & 422 \\
-Valorización & 9 & 536 & 111 \\
-Insumo que no existe & 11 & 531 & 183 \\
-Existencias & 19 & 511 & 83 \\
-Conciliación & 4 & 503 & 240 \\
-Vencimiento de un insumo & 8 & 488 & 167 \\
-Ubicación & 9 & 484 & 115 \\
-Cuarentena & 6 & 468 & 237 \\
+Vencimiento por periodo (``¿qué vence esta semana?'') & 2 & 1\,230 & 928 \\
+Lotes críticos (``¿qué está por vencer?'') & 14 & 1\,196 & 1\,110 \\
+Movimientos del Kardex & 8 & 964 & 284 \\
+Resumen general & 4 & 941 & 428 \\
+Stock bajo el mínimo & 5 & 769 & 422 \\
+Información de un lote & 7 & 691 & 372 \\
+Valorización & 9 & 536 & 101 \\
+Insumo que no existe & 11 & 531 & 208 \\
+Existencias & 19 & 511 & 84 \\
+Conciliación & 4 & 503 & 247 \\
+Vencimiento de un insumo & 8 & 488 & 168 \\
+Ubicación & 9 & 484 & 122 \\
+Cuarentena & 6 & 468 & 165 \\
 \bottomrule
 \end{tabular}
 \caption{Consumo promedio por tipo de pregunta.}
@@ -96,7 +96,7 @@ Cuarentena & 6 & 468 & 237 \\
 
 \paragraph{Lo que ahorra el RAG.} Para comparar, se midió con el mismo tokenizador cuánto ocuparía enviar al modelo \emph{todo} el inventario en cada consulta (los 58 lotes con existencias de los 45 insumos, en el mismo formato que usa el RAG): \textbf{3\,467 tokens de entrada}, frente a una mediana de 525 con el RAG, es decir, unas 6,6 veces más. Esa cifra todavía no incluye los 2\,069 movimientos del Kardex, y crecería con cada lote nuevo, mientras que el contexto del RAG depende de la pregunta y no del tamaño del inventario. Por eso el RAG no solo mejora la precisión: también es lo que mantiene bajo el costo cuando la empresa crece.
 
-\paragraph{Un hallazgo de la medición.} La salida máxima fue exactamente 1\,024 tokens, que es el límite configurado en Ajustes (\emph{Max Tokens}). Las respuestas que llegan a ese tope son las listas largas de lotes por vencer, y el modelo las corta a mitad de la lista. Esto explica la mayoría de los errores de las baterías en esa categoría. Subir el límite corrige el corte a cambio de un costo algo mayor en esas consultas.
+\paragraph{Un hallazgo de la medición.} En la primera ejecución del 1 de octubre la salida máxima fue exactamente 1\,024 tokens, el límite que estaba configurado en Ajustes (\emph{Max Tokens}). Las respuestas que llegaban a ese tope eran las listas largas de lotes por vencer, y el modelo las cortaba a mitad de la lista: la batería de 50 preguntas bajó a 45/50 y la de operario a 11/18. Desde el commit \texttt{47cf3c6} el límite solo se aplica a los modelos que corren en el propio servidor, donde una respuesta larga puede tardar minutos o saturar la memoria; los modelos en la nube responden completo. En la segunda ejecución la batería volvió a 49/50 y la de operario a 18/18, con una salida máxima de 1\,410 tokens. Quitar el tope sube el costo de las consultas de listas, pero muy poco (tabla siguiente).
 
 \section{Costo por consulta}
 
@@ -114,19 +114,19 @@ La tabla aplica el consumo medido a los precios oficiales de cada proveedor~\cit
 Modelo (proveedor) & \multicolumn{2}{c}{USD por millón} & COP por consulta promedio & COP por consulta (p95) \\
  & Entrada & Salida & & \\
 \midrule
-\texttt{gpt-oss:120b} (Ollama Cloud) — \textbf{el actual} & 0,15 & 0,60 & 0,98 & 2,66 \\
-DeepSeek V4.1 Flash, horario valle (DeepSeek) & 0,15 & 0,60 & 0,98 & 2,66 \\
-DeepSeek V4.1 Flash, hora pico (DeepSeek) & 0,30 & 1,20 & 1,96 & 5,31 \\
-Gemini 2.5 Flash-Lite, nivel pago (Google) & 0,10 & 0,40 & 0,65 & 1,77 \\
-Gemini 3.1 Flash-Lite, nivel pago (Google) & 0,25 & 1,50 & 2,16 & 6,12 \\
-GLM-5.3-Flash (OpenCode Zen) & 0,15 & 0,50 & 0,87 & 2,32 \\
-Qwen3.8 Flash (OpenCode Zen) & 0,15 & 0,47 & 0,84 & 2,21 \\
-GPT 5 Nano (OpenCode Zen) & 0,05 & 0,40 & 0,54 & 1,56 \\
-Claude Haiku 4.5 (OpenCode Zen) & 1,00 & 5,00 & 7,59 & 21,10 \\
-Kimi K3 (OpenCode Zen) & 3,00 & 15,00 & 22,78 & 63,29 \\
+\texttt{gpt-oss:120b} (Ollama Cloud) — \textbf{el actual} & 0,15 & 0,60 & 1,00 & 3,14 \\
+DeepSeek V4.1 Flash, horario valle (DeepSeek) & 0,15 & 0,60 & 1,00 & 3,14 \\
+DeepSeek V4.1 Flash, hora pico (DeepSeek) & 0,30 & 1,20 & 2,01 & 6,29 \\
+Gemini 2.5 Flash-Lite, nivel pago (Google) & 0,10 & 0,40 & 0,67 & 2,10 \\
+Gemini 3.1 Flash-Lite, nivel pago (Google) & 0,25 & 1,50 & 2,22 & 7,34 \\
+GLM-5.3-Flash (OpenCode Zen) & 0,15 & 0,50 & 0,89 & 2,72 \\
+Qwen3.8 Flash (OpenCode Zen) & 0,15 & 0,47 & 0,86 & 2,60 \\
+GPT 5 Nano (OpenCode Zen) & 0,05 & 0,40 & 0,56 & 1,89 \\
+Claude Haiku 4.5 (OpenCode Zen) & 1,00 & 5,00 & 7,79 & 25,17 \\
+Kimi K3 (OpenCode Zen) & 3,00 & 15,00 & 23,38 & 75,51 \\
 \bottomrule
 \end{tabularx}
-\caption{Costo por consulta con el consumo medido (promedio: 687 de entrada y 321 de salida; p95: 1\,248 y 1\,024).}
+\caption{Costo por consulta con el consumo medido (promedio: 687 de entrada y 333 de salida; p95: 1\,248 y 1\,270).}
 \end{table}
 
 Con los modelos económicos una consulta cuesta alrededor de \textbf{un peso colombiano}. Los modelos de gama alta (Claude Haiku, Kimi K3) cuestan entre 8 y 23 veces más sin que la tarea lo exija: el modelo no calcula ni busca datos, solo redacta a partir de lo que el sistema ya consultó en la base de datos.
@@ -142,10 +142,10 @@ Todavía no se sabe cuántas consultas hace la panificadora al día; ese es el o
 \toprule
 Modelo & 20 consultas/día & 50 consultas/día & 100 consultas/día \\
 \midrule
-\texttt{gpt-oss:120b} (actual) & \$588 & \$1\,469 & \$2\,938 \\
-GPT 5 Nano & \$323 & \$809 & \$1\,617 \\
-Gemini 2.5 Flash-Lite (pago) & \$392 & \$979 & \$1\,959 \\
-Claude Haiku 4.5 & \$4\,556 & \$11\,390 & \$22\,779 \\
+\texttt{gpt-oss:120b} (actual) & \$602 & \$1\,505 & \$3\,010 \\
+GPT 5 Nano & \$333 & \$833 & \$1\,665 \\
+Gemini 2.5 Flash-Lite (pago) & \$401 & \$1\,003 & \$2\,007 \\
+Claude Haiku 4.5 & \$4\,675 & \$11\,688 & \$23\,375 \\
 \bottomrule
 \end{tabular}
 \caption{Costo mensual en pesos colombianos según el número de consultas (escenarios, no mediciones).}
@@ -155,7 +155,7 @@ Aun en el escenario alto, el modelo actual cuesta menos de un dólar al mes. El 
 
 \section{Suscripción o pago por uso}
 
-\paragraph{OpenCode Go.} Cuesta US\$10 al mes (Go Plus, US\$40). El uso se mide en dólares por modelo: cada modelo tiene un tope mensual (por ejemplo, US\$60 para GLM-5.3-Flash en Go), del que se puede gastar el 20~\% en cinco horas y el 50~\% en una semana~\cite{opencodego}. Con el consumo medido, los US\$10 equivalen a unas 38\,000 consultas con GLM-5.3-Flash, alrededor de 1\,265 al día: mucho más de lo que necesita una panadería. Pagar por uso sale más barato a esta escala.
+\paragraph{OpenCode Go.} Cuesta US\$10 al mes (Go Plus, US\$40). El uso se mide en dólares por modelo: cada modelo tiene un tope mensual (por ejemplo, US\$60 para GLM-5.3-Flash en Go), del que se puede gastar el 20~\% en cinco horas y el 50~\% en una semana~\cite{opencodego}. Con el consumo medido, los US\$10 equivalen a unas 37\,000 consultas con GLM-5.3-Flash, alrededor de 1\,240 al día: mucho más de lo que necesita una panadería. Pagar por uso sale más barato a esta escala.
 
 Hay además una restricción de uso. La documentación dice: \emph{``OpenCode Go is designed for OpenCode and other coding agents that produce similar types of requests''} y pide a los clientes \emph{``send typical coding agent traffic''}~\cite{opencodego}. Un asistente de inventarios no es un agente de programación, así que OpenCode Go solo se usó para pruebas durante el desarrollo y \textbf{no se recomienda para operar el sistema con clientes}. Pymetory se identifica ante ese servicio con su propio nombre (\texttt{pymetory/1.0}).
 
@@ -181,7 +181,7 @@ Solo el administrador puede hacerlo.
 \item En Pymetory, abrir \textbf{Ajustes → API Keys}. Escribir un nombre, elegir el proveedor (OpenCode, Ollama u OpenAI), pegar la clave y elegir el modelo. La dirección del servicio se completa sola según el tipo.
 \item Guardar con \textbf{Nueva Key}. La clave se guarda cifrada en la base de datos y en la lista solo se ven sus primeros y últimos cuatro caracteres. Solo puede haber una clave activa por tipo.
 \item Pulsar \textbf{Probar conexión} junto a la clave: el sistema envía un mensaje corto al proveedor e informa si respondió.
-\item En \textbf{Ajustes → Motor RAG}, elegir el \emph{Origen} y el \emph{Modelo}, y guardar. \emph{Max Tokens} fija el largo máximo de la respuesta y, por lo tanto, el costo máximo por consulta.
+\item En \textbf{Ajustes → Motor RAG}, elegir el \emph{Origen} y el \emph{Modelo}, y guardar. \emph{Max Tokens} solo limita los modelos que corren en el propio servidor; los modelos en la nube responden sin tope.
 \end{enumerate}
 
 \section{Prueba piloto propuesta}\label{sec:piloto}
