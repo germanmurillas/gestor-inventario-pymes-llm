@@ -305,7 +305,7 @@ export default function Settings() {
                         {/* ── Parametros ── */}
                         <div className="grid md:grid-cols-3 gap-3 mb-4">
                             <div><label className={label}>Temperatura</label><input aria-label="Temperatura" type="number" step="0.1" min="0" max="2" className={field} value={settings.llm_temperatura ?? '0.3'} onChange={e => setVal('llm_temperatura', e.target.value)} /></div>
-                            <div><label className={label}>Max Tokens</label><input aria-label="Max Tokens" type="number" className={field} value={settings.llm_max_tokens ?? '1024'} onChange={e => setVal('llm_max_tokens', e.target.value)} /></div>
+                            <div><label className={label}>Max Tokens (solo modelos locales)</label><input aria-label="Max Tokens (solo modelos locales)" aria-describedby="ayuda-max-tokens" type="number" className={field} value={settings.llm_max_tokens ?? '1024'} onChange={e => setVal('llm_max_tokens', e.target.value)} /><p id="ayuda-max-tokens" className="mt-1 text-[11px] pm-text-muted">Evita que un modelo en este servidor se demore o se cuelgue. Los modelos en la nube responden completo, sin tope.</p></div>
                             <div><label className={label}>Contexto Lotes</label><input aria-label="Contexto Lotes" type="number" className={field} value={settings.llm_contexto_lotes ?? '20'} onChange={e => setVal('llm_contexto_lotes', e.target.value)} /></div>
                         </div>
 

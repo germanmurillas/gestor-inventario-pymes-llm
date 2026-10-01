@@ -643,8 +643,15 @@ class ChatLLMController extends Controller {
                     [['role' => 'user', 'content' => $query]]
                 ),
                 'temperature' => $temperature,
-                'max_tokens'  => $llmSource === 'opencode' ? max($maxTokens, 2048) : $maxTokens,
             ];
+
+            // Max Tokens solo limita los modelos que corren en el propio servidor (CPU, memoria acotada):
+            // ahí una respuesta larga puede tardar minutos o tumbar el servicio. En la nube (API externa u
+            // Ollama Cloud, modelos "-cloud") no se corta la respuesta: un tope corto dejaba listas a medias.
+            $limitarSalida = $this->esModeloLocal($llmSource, $llmModelo);
+            if ($limitarSalida) {
+                $payload['max_tokens'] = $maxTokens;
+            }
 
             // FIX-RAG(v2.1): los modelos Qwen3/Qwen3.5 vengono con un "thinking mode"
             // activo por defecto → el campo content llega vacío y saltaba el mensaje
@@ -671,7 +678,7 @@ class ChatLLMController extends Controller {
                 $payload['stream'] = false;       // /api/chat nativo exige stream=false
                 $payload['options'] = [
                     'temperature' => $temperature,
-                    'num_predict' => $maxTokens,
+                    'num_predict' => $limitarSalida ? $maxTokens : -1, // -1: sin tope en Ollama
                 ];
                 unset($payload['temperature'], $payload['max_tokens']);
             }
@@ -703,7 +710,7 @@ class ChatLLMController extends Controller {
                     if ($text === '' && ($response->json('choices.0.finish_reason') === 'length'
                                        || str_contains((string) $response->body(), 'reasoning'))) {
                         $retry = $payload;
-                        $retry['max_tokens'] = max($maxTokens, 1500);
+                        if ($limitarSalida) $retry['max_tokens'] = max($maxTokens, 1500);
                         $retryResp = Http::timeout(90)->withToken($cfg['key'] ?: null)
                             ->withHeaders($withHeaders)->post($cfg['url'], $retry);
                         if ($retryResp->successful()) {
@@ -785,6 +792,12 @@ class ChatLLMController extends Controller {
             \Log::warning("Respaldo local ({$modelo}) falló: " . $e->getMessage());
             return null;
         }
+    }
+
+    /** Modelo que corre en el hardware propio (Ollama sin sufijo cloud). Los "-cloud"/":cloud" de Ollama corren en la nube. */
+    private function esModeloLocal(string $fuente, string $modelo): bool
+    {
+        return $fuente === 'local' && !preg_match('/[-:]cloud\b/i', $modelo);
     }
 
     /** FIX-RAG(v2.2): quita bloques de razonamiento (&lt;think&gt;...&lt;/think&gt;) del texto */

@@ -65,6 +65,39 @@ class ConsumoTokensTest extends TestCase
         $this->assertSame(['entrada' => null, 'salida' => null], $r->json('tokens'));
     }
 
+    public function test_modelo_local_respeta_max_tokens(): void
+    {
+        $user = $this->configurar('local', 'qwen3.5:9b');
+        DB::table('settings')->insert(['clave' => 'llm_max_tokens', 'valor' => '700']);
+        Http::fake(['*/api/chat' => Http::response(['message' => ['content' => 'Hay 120 kg.'], 'prompt_eval_count' => 600, 'eval_count' => 10])]);
+
+        $this->actingAs($user)->postJson('/chat-rag', ['prompt' => '¿Cuánta harina hay?'])->assertOk();
+
+        Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), '/api/chat') && $p['options']['num_predict'] === 700);
+    }
+
+    public function test_modelo_cloud_por_ollama_no_tiene_tope_de_salida(): void
+    {
+        $user = $this->configurar('local', 'gpt-oss:120b-cloud');
+        DB::table('settings')->insert(['clave' => 'llm_max_tokens', 'valor' => '700']);
+        Http::fake(['*/api/chat' => Http::response(['message' => ['content' => 'Hay 120 kg.'], 'prompt_eval_count' => 600, 'eval_count' => 10])]);
+
+        $this->actingAs($user)->postJson('/chat-rag', ['prompt' => '¿Cuánta harina hay?'])->assertOk();
+
+        Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), '/api/chat') && $p['options']['num_predict'] === -1);
+    }
+
+    public function test_api_externa_no_envia_max_tokens(): void
+    {
+        $user = $this->configurar('external', 'gpt-prueba');
+        DB::table('settings')->insert(['clave' => 'llm_max_tokens', 'valor' => '700']);
+        Http::fake(['api.openai.com/*' => Http::response(['choices' => [['message' => ['content' => 'Hay 120 kg.']]]])]);
+
+        $this->actingAs($user)->postJson('/chat-rag', ['prompt' => '¿Cuánta harina hay?'])->assertOk();
+
+        Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), 'api.openai.com') && !isset($p['max_tokens']));
+    }
+
     public function test_opencode_go_se_identifica_como_pymetory_y_no_como_agente_de_codigo(): void
     {
         $user = $this->configurar('opencode-go', 'glm-prueba');
