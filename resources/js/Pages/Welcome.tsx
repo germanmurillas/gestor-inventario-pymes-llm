@@ -15,7 +15,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 const FRAMES = 97;
 
 /* Versión del comercial (public/video/, fuera de git): cambiarla al reemplazar el video para que Cloudflare no sirva el anterior. */
-const VIDEO_VERSION = '?v=4';
+const VIDEO_VERSION = '?v=5';
 const frameUrl = (dir: string, i: number) => `/images/hero-seq/${dir}/f${String(i).padStart(3, '0')}.webp`;
 
 const PASOS = [
@@ -67,13 +67,26 @@ export default function Welcome() {
     const smootherRef = useRef<ScrollSmoother | null>(null);
     const [videoAbierto, setVideoAbierto] = useState(false);
     const cerrarVideoRef = useRef<HTMLButtonElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    // iOS solo permite reproducir con sonido si play() se llama dentro del mismo toque del usuario.
+    const abrirVideo = () => {
+        setVideoAbierto(true);
+        const v = videoRef.current;
+        if (!v) return;
+        const src = (window.innerWidth < 900 ? '/video/pymetory-comercial-720.mp4' : '/video/pymetory-comercial-1080.mp4') + VIDEO_VERSION;
+        if (!v.src.endsWith(src)) v.src = src;
+        v.currentTime = 0;
+        v.play().catch(() => { /* si el navegador lo bloquea, quedan los controles para darle play */ });
+    };
+    const cerrarVideo = () => { videoRef.current?.pause(); setVideoAbierto(false); };
 
     // Comercial en ventana: pausa el scroll suave mientras está abierto y se cierra con Escape.
     useEffect(() => {
         if (!videoAbierto) return;
         smootherRef.current?.paused(true);
         cerrarVideoRef.current?.focus();
-        const alTeclear = (e: KeyboardEvent) => { if (e.key === 'Escape') setVideoAbierto(false); };
+        const alTeclear = (e: KeyboardEvent) => { if (e.key === 'Escape') cerrarVideo(); };
         window.addEventListener('keydown', alTeclear);
         return () => { window.removeEventListener('keydown', alTeclear); smootherRef.current?.paused(false); };
     }, [videoAbierto]);
@@ -271,7 +284,7 @@ export default function Welcome() {
                                 </p>
                                 <div className="mt-9 flex flex-wrap gap-3">
                                     {estatico && <a href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></a>}
-                                    <button type="button" onClick={() => setVideoAbierto(true)} className="lx-btn lx-btn-ghost"><Play size={16} /> Ver el video (45 s)</button>
+                                    <button type="button" onClick={abrirVideo} className="lx-btn lx-btn-ghost"><Play size={16} /> Ver el video (45 s)</button>
                                 </div>
                             </div>
                             {!estatico && (
@@ -296,7 +309,7 @@ export default function Welcome() {
                                         <div className="mt-9 flex flex-wrap gap-3">
                                             <a href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></a>
                                             <a href="#como" onClick={irA('#como')} className="lx-btn lx-btn-ghost">Cómo funciona</a>
-                                            <button type="button" onClick={() => setVideoAbierto(true)} className="lx-btn lx-btn-ghost"><Play size={16} /> Ver el video (45 s)</button>
+                                            <button type="button" onClick={abrirVideo} className="lx-btn lx-btn-ghost"><Play size={16} /> Ver el video (45 s)</button>
                                         </div>
                                     </div>
                                     <div data-cue className="lx-dim absolute bottom-12 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 text-xs font-semibold tracking-widest">
@@ -415,22 +428,20 @@ export default function Welcome() {
                 </div>
             </div>
 
-            {videoAbierto && (
-                <div role="dialog" aria-modal="true" aria-label="Comercial de Pymetory" onClick={() => setVideoAbierto(false)}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm sm:p-10">
-                    <div className="relative w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
-                        <button ref={cerrarVideoRef} type="button" onClick={() => setVideoAbierto(false)} aria-label="Cerrar el video"
-                            className="absolute -top-12 right-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
-                            Cerrar <X size={18} />
-                        </button>
-                        <video className="aspect-video w-full rounded-2xl bg-black shadow-2xl" controls autoPlay playsInline preload="metadata"
-                            poster={'/video/pymetory-comercial-poster.jpg' + VIDEO_VERSION}
-                            src={(typeof window !== 'undefined' && window.innerWidth < 900 ? '/video/pymetory-comercial-720.mp4' : '/video/pymetory-comercial-1080.mp4') + VIDEO_VERSION}>
-                            Tu navegador no puede reproducir el video.
-                        </video>
-                    </div>
+            {/* Siempre montado (oculto) para que el toque del botón pueda iniciar la reproducción en iOS. */}
+            <div role="dialog" aria-modal="true" aria-label="Comercial de Pymetory" aria-hidden={!videoAbierto} onClick={cerrarVideo}
+                className={`fixed inset-0 z-[100] items-center justify-center bg-black/85 p-4 backdrop-blur-sm sm:p-10 ${videoAbierto ? 'flex' : 'hidden'}`}>
+                <div className="relative w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+                    <button ref={cerrarVideoRef} type="button" onClick={cerrarVideo} aria-label="Cerrar el video"
+                        className="absolute -top-12 right-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+                        Cerrar <X size={18} />
+                    </button>
+                    <video ref={videoRef} className="aspect-video w-full rounded-2xl bg-black shadow-2xl" controls playsInline preload="none"
+                        poster={'/video/pymetory-comercial-poster.jpg' + VIDEO_VERSION}>
+                        Tu navegador no puede reproducir el video.
+                    </video>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
