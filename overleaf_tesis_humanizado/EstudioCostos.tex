@@ -1,0 +1,220 @@
+% Anexo digital: estudio de costos de operación del asistente de Pymetory.
+% Se compila aparte (pdflatex EstudioCostos.tex) y se publica en tesis.pymetory.com/estudio-de-costos.pdf.
+% Cifras medidas el 1-oct-2026 en producción (commit 6ddad01, rag:evaluar, 106 preguntas); precios consultados ese día.
+\documentclass[letterpaper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands,es-tabla]{babel}
+\usepackage{float}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue!50!black]{hyperref}
+\hypersetup{pdftitle={Pymetory — Estudio de costos de operación del asistente},pdfauthor={Germán David Murillas Mondragón}}
+\setlength{\parskip}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Pymetory}\\[4pt]
+{\large Estudio de costos de operación del asistente}\\[4pt]
+Germán David Murillas Mondragón · Universidad del Valle, sede Tuluá · Anexo digital del trabajo de grado\\
+{\small Mediciones y precios del 1 de octubre de 2026}
+\end{center}
+
+\section{Propósito}
+
+Pymetory se puede instalar sin licencias pagas: el servidor usa la capa gratuita de Oracle Cloud y el código es propio. El único costo que crece con el uso es el del modelo de lenguaje del asistente, porque los proveedores cobran por cada consulta según la cantidad de texto que reciben y que generan. Antes de ofrecer el sistema a otra PYME hay que saber cuánto cuesta ese uso y de qué depende.
+
+Este estudio responde tres preguntas con datos medidos y no con supuestos: cuánto texto procesa el modelo en una consulta típica, cuánto cuesta esa consulta con distintos proveedores, y qué opción conviene para una empresa del tamaño de la panificadora del caso de estudio. Al final se propone una prueba piloto para medir cuántas consultas hace la empresa en un mes real, que es el dato que todavía falta para fijar una tarifa.
+
+\section{Cómo cobran los proveedores}
+
+Los modelos de lenguaje no leen palabras sino \emph{tokens}: fragmentos de texto de unos cuatro caracteres en promedio. Cada consulta tiene dos partes que se cobran por separado:
+
+\begin{itemize}[nosep]
+\item \textbf{Tokens de entrada:} las instrucciones del sistema, los datos del inventario que el RAG adjunta y la pregunta del usuario.
+\item \textbf{Tokens de salida:} la respuesta que redacta el modelo. Suelen costar entre cuatro y cinco veces más que los de entrada.
+\end{itemize}
+
+Los precios se publican en dólares por millón de tokens. Hay dos formas de pagar: \textbf{por uso} (se descuenta de un saldo prepagado según lo consumido) o por \textbf{suscripción} mensual con un límite de uso. Más adelante se comparan ambas.
+
+\section{Cómo se midió}
+
+Cada proveedor informa en su respuesta cuántos tokens procesó (campo \texttt{usage} en las API compatibles con OpenAI y \texttt{prompt\_eval\_count}/\texttt{eval\_count} en Ollama). Desde el commit \texttt{6ddad01} Pymetory guarda esos dos valores y el nombre del modelo en cada registro de \texttt{chat\_histories}, y el comando de evaluación \texttt{php artisan rag:evaluar} los resume.
+
+El 1 de octubre de 2026 se ejecutaron en producción las cinco baterías de preguntas usadas en el Capítulo~11 (106 preguntas: batería de 50, validación de 20, ciega de 10, operario coloquial de 18 y operario ciega de 8), con el modelo que usa el sistema, \texttt{gpt-oss:120b} en Ollama Cloud. Las 106 respuestas reportaron su consumo. Los conteos dependen del tokenizador de cada modelo, así que con otro modelo las cifras pueden variar algo; el orden de magnitud se mantiene.
+
+\section{Consumo medido}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrrrr}
+\toprule
+ & Promedio & Mediana & Percentil 95 & Mínimo & Máximo \\
+\midrule
+Tokens de entrada & 687 & 525 & 1\,248 & 464 & 1\,259 \\
+Tokens de salida  & 321 & 189 & 1\,024 & 47 & 1\,024 \\
+\bottomrule
+\end{tabular}
+\caption{Tokens por consulta en las 106 preguntas (1-oct-2026, \texttt{gpt-oss:120b}).}
+\end{table}
+
+El consumo depende del tipo de pregunta. Las consultas puntuales (existencias, ubicación, valor de un insumo) usan poco, porque el RAG solo adjunta los lotes del insumo nombrado. Las que piden listas (lotes por vencer, alertas) usan más, porque la respuesta enumera muchos lotes:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Tipo de pregunta & Preguntas & Entrada (prom.) & Salida (prom.) \\
+\midrule
+Vencimiento por periodo (``¿qué vence esta semana?'') & 2 & 1\,230 & 1\,008 \\
+Lotes críticos (``¿qué está por vencer?'') & 14 & 1\,196 & 982 \\
+Movimientos del Kardex & 8 & 964 & 279 \\
+Resumen general & 4 & 941 & 426 \\
+Stock bajo el mínimo & 5 & 769 & 402 \\
+Información de un lote & 7 & 691 & 422 \\
+Valorización & 9 & 536 & 111 \\
+Insumo que no existe & 11 & 531 & 183 \\
+Existencias & 19 & 511 & 83 \\
+Conciliación & 4 & 503 & 240 \\
+Vencimiento de un insumo & 8 & 488 & 167 \\
+Ubicación & 9 & 484 & 115 \\
+Cuarentena & 6 & 468 & 237 \\
+\bottomrule
+\end{tabular}
+\caption{Consumo promedio por tipo de pregunta.}
+\end{table}
+
+\paragraph{Lo que ahorra el RAG.} Para comparar, se midió con el mismo tokenizador cuánto ocuparía enviar al modelo \emph{todo} el inventario en cada consulta (los 58 lotes con existencias de los 45 insumos, en el mismo formato que usa el RAG): \textbf{3\,467 tokens de entrada}, frente a una mediana de 525 con el RAG, es decir, unas 6,6 veces más. Esa cifra todavía no incluye los 2\,069 movimientos del Kardex, y crecería con cada lote nuevo, mientras que el contexto del RAG depende de la pregunta y no del tamaño del inventario. Por eso el RAG no solo mejora la precisión: también es lo que mantiene bajo el costo cuando la empresa crece.
+
+\paragraph{Un hallazgo de la medición.} La salida máxima fue exactamente 1\,024 tokens, que es el límite configurado en Ajustes (\emph{Max Tokens}). Las respuestas que llegan a ese tope son las listas largas de lotes por vencer, y el modelo las corta a mitad de la lista. Esto explica la mayoría de los errores de las baterías en esa categoría. Subir el límite corrige el corte a cambio de un costo algo mayor en esas consultas.
+
+\section{Costo por consulta}
+
+El costo de una consulta es
+\[
+\text{costo} = \frac{\text{tokens de entrada} \times \text{precio de entrada} + \text{tokens de salida} \times \text{precio de salida}}{1\,000\,000}.
+\]
+La tabla aplica el consumo medido a los precios oficiales de cada proveedor~\cite{ollama,deepseek,gemini,zen}, convertidos con la TRM del 1 de octubre de 2026, \$3\,312,84 por dólar~\cite{trm}. Solo \texttt{gpt-oss:120b} fue evaluado en precisión con Pymetory; los demás se incluyen como referencia de precio.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{6.2cm}rrRR}
+\toprule
+Modelo (proveedor) & \multicolumn{2}{c}{USD por millón} & COP por consulta promedio & COP por consulta (p95) \\
+ & Entrada & Salida & & \\
+\midrule
+\texttt{gpt-oss:120b} (Ollama Cloud) — \textbf{el actual} & 0,15 & 0,60 & 0,98 & 2,66 \\
+DeepSeek V4.1 Flash, horario valle (DeepSeek) & 0,15 & 0,60 & 0,98 & 2,66 \\
+DeepSeek V4.1 Flash, hora pico (DeepSeek) & 0,30 & 1,20 & 1,96 & 5,31 \\
+Gemini 2.5 Flash-Lite, nivel pago (Google) & 0,10 & 0,40 & 0,65 & 1,77 \\
+Gemini 3.1 Flash-Lite, nivel pago (Google) & 0,25 & 1,50 & 2,16 & 6,12 \\
+GLM-5.3-Flash (OpenCode Zen) & 0,15 & 0,50 & 0,87 & 2,32 \\
+Qwen3.8 Flash (OpenCode Zen) & 0,15 & 0,47 & 0,84 & 2,21 \\
+GPT 5 Nano (OpenCode Zen) & 0,05 & 0,40 & 0,54 & 1,56 \\
+Claude Haiku 4.5 (OpenCode Zen) & 1,00 & 5,00 & 7,59 & 21,10 \\
+Kimi K3 (OpenCode Zen) & 3,00 & 15,00 & 22,78 & 63,29 \\
+\bottomrule
+\end{tabularx}
+\caption{Costo por consulta con el consumo medido (promedio: 687 de entrada y 321 de salida; p95: 1\,248 y 1\,024).}
+\end{table}
+
+Con los modelos económicos una consulta cuesta alrededor de \textbf{un peso colombiano}. Los modelos de gama alta (Claude Haiku, Kimi K3) cuestan entre 8 y 23 veces más sin que la tarea lo exija: el modelo no calcula ni busca datos, solo redacta a partir de lo que el sistema ya consultó en la base de datos.
+
+\section{Proyección mensual}
+
+Todavía no se sabe cuántas consultas hace la panificadora al día; ese es el objetivo de la prueba piloto (sección~\ref{sec:piloto}). Mientras tanto, la tabla muestra tres escenarios \emph{hipotéticos} de 30 días, con el costo promedio por consulta:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Modelo & 20 consultas/día & 50 consultas/día & 100 consultas/día \\
+\midrule
+\texttt{gpt-oss:120b} (actual) & \$588 & \$1\,469 & \$2\,938 \\
+GPT 5 Nano & \$323 & \$809 & \$1\,617 \\
+Gemini 2.5 Flash-Lite (pago) & \$392 & \$979 & \$1\,959 \\
+Claude Haiku 4.5 & \$4\,556 & \$11\,390 & \$22\,779 \\
+\bottomrule
+\end{tabular}
+\caption{Costo mensual en pesos colombianos según el número de consultas (escenarios, no mediciones).}
+\end{table}
+
+Aun en el escenario alto, el modelo actual cuesta menos de un dólar al mes. El costo del asistente no es una barrera para una PYME; pesan más el soporte y el tiempo de capacitación, que este estudio no cuantifica.
+
+\section{Suscripción o pago por uso}
+
+\paragraph{OpenCode Go.} Cuesta US\$10 al mes (Go Plus, US\$40). El uso se mide en dólares por modelo: cada modelo tiene un tope mensual (por ejemplo, US\$60 para GLM-5.3-Flash en Go), del que se puede gastar el 20~\% en cinco horas y el 50~\% en una semana~\cite{opencodego}. Con el consumo medido, los US\$10 equivalen a unas 38\,000 consultas con GLM-5.3-Flash, alrededor de 1\,265 al día: mucho más de lo que necesita una panadería. Pagar por uso sale más barato a esta escala.
+
+Hay además una restricción de uso. La documentación dice: \emph{``OpenCode Go is designed for OpenCode and other coding agents that produce similar types of requests''} y pide a los clientes \emph{``send typical coding agent traffic''}~\cite{opencodego}. Un asistente de inventarios no es un agente de programación, así que OpenCode Go solo se usó para pruebas durante el desarrollo y \textbf{no se recomienda para operar el sistema con clientes}. Pymetory se identifica ante ese servicio con su propio nombre (\texttt{pymetory/1.0}).
+
+\paragraph{Ollama Cloud.} Es lo que usa hoy el sistema. El plan gratuito incluye un monto inicial de uso para un grupo de modelos y atiende una petición a la vez; Ollama no publica de cuánto es ese monto~\cite{ollama}. El plan Pro cuesta US\$20 al mes con US\$60 de crédito y tres peticiones simultáneas. Para la escala de una panadería, comprar créditos y pagar por uso es suficiente; el plan Pro solo se justificaría con varios usuarios consultando a la vez.
+
+\paragraph{Capas gratuitas.} Gemini 2.5 Flash-Lite tiene capa gratuita, pero Google indica que en ella los datos \emph{se usan para mejorar sus productos} (en el nivel pago, no)~\cite{gemini}. Sirve para un piloto con datos de demostración, no para los datos reales de una empresa.
+
+\section{Recomendación}
+
+\begin{enumerate}[nosep]
+\item \textbf{Mantener \texttt{gpt-oss:120b} con pago por uso.} Es el único modelo evaluado en precisión con Pymetory (Capítulo~11), cuesta alrededor de un peso por consulta y tiene respaldo local si el servicio falla.
+\item \textbf{Alternativas de costo similar o menor:} GPT 5 Nano, Gemini 2.5 Flash-Lite (nivel pago), GLM-5.3-Flash, Qwen3.8 Flash o DeepSeek V4.1 Flash en horario valle. Antes de cambiar de modelo hay que repetir las baterías con \texttt{rag:evaluar}, porque el costo bajo no garantiza la misma precisión en español.
+\item \textbf{No usar modelos de gama alta} para esta tarea: multiplican el costo sin una mejora necesaria.
+\item \textbf{No operar con OpenCode Go} ni con capas gratuitas que usan los datos para entrenar.
+\end{enumerate}
+
+\section{Cómo configurar una API key en Pymetory}
+
+Solo el administrador puede hacerlo.
+
+\begin{enumerate}[nosep]
+\item Crear la clave en el sitio del proveedor y cargar saldo si el proveedor lo exige.
+\item En Pymetory, abrir \textbf{Ajustes → API Keys}. Escribir un nombre, elegir el proveedor (OpenCode, Ollama u OpenAI), pegar la clave y elegir el modelo. La dirección del servicio se completa sola según el tipo.
+\item Guardar con \textbf{Nueva Key}. La clave se guarda cifrada en la base de datos y en la lista solo se ven sus primeros y últimos cuatro caracteres. Solo puede haber una clave activa por tipo.
+\item Pulsar \textbf{Probar conexión} junto a la clave: el sistema envía un mensaje corto al proveedor e informa si respondió.
+\item En \textbf{Ajustes → Motor RAG}, elegir el \emph{Origen} y el \emph{Modelo}, y guardar. \emph{Max Tokens} fija el largo máximo de la respuesta y, por lo tanto, el costo máximo por consulta.
+\end{enumerate}
+
+\section{Prueba piloto propuesta}\label{sec:piloto}
+
+El costo mensual real depende de cuántas consultas hace la empresa, y eso solo se sabe usando el sistema en su operación diaria. La propuesta es dejar el asistente en uso normal en la panificadora durante cuatro semanas y luego consultar el consumo, excluyendo las consultas de prueba hechas por el desarrollador:
+
+\begin{verbatim}
+SELECT DATE(created_at) AS dia, COUNT(*) AS consultas,
+       SUM(tokens_entrada) AS entrada, SUM(tokens_salida) AS salida
+FROM chat_histories
+WHERE tokens_entrada IS NOT NULL AND user_id <> <id del administrador de pruebas>
+  AND created_at >= '<fecha de inicio del piloto>'
+GROUP BY dia ORDER BY dia;
+\end{verbatim}
+
+Con esos totales y los precios de este documento se obtiene el costo real por día y por mes, y con varias empresas de distinto tamaño se puede fijar una tarifa con un margen sobre ese costo. La sesión de prueba con la usuaria (Capítulo~11) es el primer punto de medición.
+
+\section{Limitaciones}
+
+\begin{itemize}[nosep]
+\item Los precios cambian con frecuencia; los de este documento son los publicados el 1 de octubre de 2026. DeepSeek cobra el doble en hora pico (01:00–04:00 y 06:00–10:00 UTC, de lunes a viernes) y Google anunció que Gemini 3.x Flash sube de precio en 2027.
+\item Las 106 preguntas son de prueba, no de uso real; por eso la proyección mensual se presenta como escenarios.
+\item La precisión con modelos distintos de \texttt{gpt-oss:120b} no se midió.
+\item No se incluyen costos de servidor (capa gratuita de Oracle Cloud), dominio ni soporte.
+\end{itemize}
+
+\begin{thebibliography}{9}
+\bibitem{ollama} Ollama, ``Pricing,'' 2026. [En línea]. Disponible: \url{https://ollama.com/pricing}. [Accedido: 1-oct-2026].
+\bibitem{deepseek} DeepSeek, ``Models \& Pricing,'' 2026. [En línea]. Disponible: \url{https://api-docs.deepseek.com/quick_start/pricing}. [Accedido: 1-oct-2026].
+\bibitem{gemini} Google, ``Gemini Developer API pricing,'' 2026. [En línea]. Disponible: \url{https://ai.google.dev/gemini-api/docs/pricing}. [Accedido: 1-oct-2026].
+\bibitem{zen} OpenCode, ``Zen,'' 2026. [En línea]. Disponible: \url{https://opencode.ai/docs/zen/}. [Accedido: 1-oct-2026].
+\bibitem{opencodego} OpenCode, ``Go,'' 2026. [En línea]. Disponible: \url{https://opencode.ai/docs/go/}. [Accedido: 1-oct-2026].
+\bibitem{trm} Superintendencia Financiera de Colombia, ``Tasa de Cambio Representativa del Mercado (TRM),'' Datos Abiertos Colombia, 2026. [En línea]. Disponible: \url{https://www.datos.gov.co/resource/32sa-8pi3}. [Accedido: 1-oct-2026].
+\end{thebibliography}
+
+\end{document}
