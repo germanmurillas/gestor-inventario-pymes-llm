@@ -163,11 +163,59 @@ Hay además una restricción de uso. La documentación dice: \emph{``OpenCode Go
 
 \paragraph{Capas gratuitas.} Gemini 2.5 Flash-Lite tiene capa gratuita, pero Google indica que en ella los datos \emph{se usan para mejorar sus productos} (en el nivel pago, no)~\cite{gemini}. Sirve para un piloto con datos de demostración, no para los datos reales de una empresa.
 
+\section{Precisión por modelo}
+
+Para saber si un modelo más barato o más costoso cambia la calidad de las respuestas, el 1 de octubre de 2026 se repitieron las 106 preguntas con nueve modelos más, todos con el mismo RAG y los mismos datos de producción. Se usó la opción \texttt{rag:evaluar --fuente --modelo}, que cambia el modelo solo durante la medición. Los modelos de OpenCode Go se llamaron con la suscripción del autor, como prueba de desarrollo. Las respuestas que no dio el modelo evaluado (por ejemplo, del respaldo local) no se le contaron como aciertos.
+
+El criterio automático marca como error cualquier respuesta a un insumo inexistente que incluya una cantidad. Varios modelos respondieron bien (``no hay chocolate blanco registrado'') y añadieron la cantidad de un producto parecido (``solo figura pan tajado blanco: 811 und''). Por eso la tabla trae también la cifra con revisión manual de esas respuestas. El criterio automático no se modificó después de ver los resultados.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Modelo & Automático & Revisión manual & Tiempo mediano & COP por consulta \\
+\midrule
+\texttt{gpt-oss:120b} (actual)$^{a}$ & 101 & 102 & \textbf{0,70 s} & 1,00 \\
+DeepSeek V4 Pro & \textbf{105} & \textbf{105} & 4,70 s & 4,28 (8,56) \\
+GLM-5.3 & 101 & 104 & 4,01 s & 8,32 \\
+Kimi K3 & 100 & 103 & 6,79 s & 27,22 \\
+DeepSeek V4.1 Flash & 100 & 103 & 2,24 s & 0,88 (1,76) \\
+GLM-5.3-Flash & 102 & 104 & 3,08 s & 0,84 \\
+Qwen3.8 Flash & 102 & 102 & 4,28 s & 1,06 \\
+MiMo-V2.6-Flash & 100 & 103 & 4,51 s & 0,57 \\
+Space Bunny Free$^{b}$ & 102 & 102 & 2,62 s & 0 \\
+LongCat 2.5 Preview Free$^{b}$ & 100 & 101 & 5,30 s & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Aciertos sobre 106 preguntas por modelo, con el mismo RAG (1-oct-2026, una ejecución por modelo). (a) En Ollama Cloud; los demás, en OpenCode Go. (b) Gratis por tiempo limitado. Entre paréntesis, el costo en hora pico de DeepSeek.}
+\end{table}
+
+Todos los modelos quedan entre 100 y 105 aciertos. Con un RAG que entrega los datos ya filtrados, la precisión casi no depende del modelo: un modelo económico o gratuito responde tan bien como uno de gama alta, que cuesta hasta 27 veces más y tarda hasta diez veces más. Las diferencias de una a tres preguntas no son concluyentes con una sola ejecución por modelo, porque las respuestas varían algo entre ejecuciones. Solo DeepSeek V4 Pro se distingue: no omitió datos que los demás sí omitieron, a cambio de unos 5 segundos por respuesta y cuatro a ocho veces el costo. Dos modelos (Muse Spark y GPT 6 Luna) no se pudieron probar porque usan otro formato de API.
+
+Todos los modelos fallaron la misma pregunta: ``¿Qué se está poniendo viejo y hay que sacar ya?''. El error no era del modelo sino del clasificador de intención, que la tomó como una pregunta de existencias.
+
+\section{Clasificador y respaldo en la nube}
+
+Con ese resultado se hicieron dos cambios (commits \texttt{0afef8a} y \texttt{0d8f5eb}):
+
+\begin{itemize}[nosep]
+\item \textbf{El modelo clasifica primero.} Antes decidían los patrones y el modelo solo intervenía si no reconocían la pregunta. Ahora un número de lote se reconoce siempre de forma exacta; para lo demás decide el modelo (\texttt{gpt-oss:120b}), y los patrones quedan como red de seguridad cuando el modelo no responde o contesta algo fuera de las categorías. La descripción de las categorías no se cambió, para no ajustarla a las preguntas de las baterías ciegas.
+\item \textbf{Respaldo en la nube.} Si el modelo principal falla, responde primero un modelo rápido en la nube (en las pruebas, GLM-5.3-Flash por OpenCode Go) y solo después el modelo local. En una prueba con el modelo principal caído, la respuesta llegó en 2,0 segundos, frente a 56,4 segundos del modelo local.
+\end{itemize}
+
+Con el clasificador nuevo, \texttt{gpt-oss:120b} pasó de 101 a 103 aciertos (50/50, 20/20, 8/10, 18/18 y 7/8) y la pregunta del clasificador quedó bien resuelta. Los tres errores que quedan son omisiones del modelo con los datos a la vista. El costo es una llamada más por consulta: la entrada promedio sube de 687 a 997 tokens, la salida de 333 a 406, el tiempo mediano de 0,72 a 1,17 segundos y el costo de unos 1,00 a unos 1,30 pesos por consulta.
+
+\section{Palanca de modelos en Pymetory}
+
+En \textbf{Ajustes → Motor RAG}, el administrador elige el modelo con una palanca que ordena los modelos de menor a mayor costo por consulta, con un degradado de azul (económico) a rojo (costoso), y con verde en el modelo recomendado. En cada posición se ven el nombre del modelo, la precisión medida, el tiempo de respuesta, los tokens por consulta y el costo frente al recomendado en porcentaje. Los datos salen de la base de datos: cada ejecución de \texttt{rag:evaluar} se guarda en la tabla \texttt{llm\_evaluaciones}, y los precios de esta sección están en \texttt{llm\_precios}, con su fuente y fecha de consulta. Así el usuario sabe cuánto consume cada opción antes de elegirla.
+
 \section{Recomendación}
 
 \begin{enumerate}[nosep]
-\item \textbf{Mantener \texttt{gpt-oss:120b} con pago por uso.} Es el único modelo evaluado en precisión con Pymetory (Capítulo~11), cuesta alrededor de un peso por consulta y tiene respaldo local si el servicio falla.
-\item \textbf{Alternativas de costo similar o menor:} GPT 5 Nano, Gemini 2.5 Flash-Lite (nivel pago), GLM-5.3-Flash, Qwen3.8 Flash o DeepSeek V4.1 Flash en horario valle. Antes de cambiar de modelo hay que repetir las baterías con \texttt{rag:evaluar}, porque el costo bajo no garantiza la misma precisión en español.
+\item \textbf{Mantener \texttt{gpt-oss:120b} con pago por uso.} Es el más rápido de los diez medidos (menos de un segundo), su precisión está en el mismo rango que los demás y cuesta alrededor de un peso por consulta.
+\item \textbf{Alternativas de costo similar o menor:} GLM-5.3-Flash, DeepSeek V4.1 Flash, MiMo-V2.6-Flash o Qwen3.8 Flash (medidos en la tabla de precisión), o GPT 5 Nano y Gemini 2.5 Flash-Lite de pago (no medidos). Antes de cambiar a un modelo no medido hay que repetir las baterías con \texttt{rag:evaluar}.
+\item \textbf{Usar un modelo rápido en la nube como respaldo}, antes del modelo local. En estas pruebas se configuró GLM-5.3-Flash por OpenCode Go; para operar con clientes, el mismo respaldo se configura con un proveedor de pago por uso (ajustes \texttt{llm\_respaldo\_fuente} y \texttt{llm\_respaldo\_modelo}).
 \item \textbf{No usar modelos de gama alta} para esta tarea: multiplican el costo sin una mejora necesaria.
 \item \textbf{No operar con OpenCode Go} ni con capas gratuitas que usan los datos para entrenar.
 \end{enumerate}
@@ -178,7 +226,7 @@ Solo el administrador puede hacerlo.
 
 \begin{enumerate}[nosep]
 \item Crear la clave en el sitio del proveedor y cargar saldo si el proveedor lo exige.
-\item En Pymetory, abrir \textbf{Ajustes → API Keys}. Escribir un nombre, elegir el proveedor (OpenCode, Ollama u OpenAI), pegar la clave y elegir el modelo. La dirección del servicio se completa sola según el tipo.
+\item En Pymetory, abrir \textbf{Ajustes → API Keys}. Escribir un nombre, elegir el proveedor (OpenCode, OpenCode Go, Ollama u OpenAI), pegar la clave y elegir el modelo. La dirección del servicio se completa sola según el tipo.
 \item Guardar con \textbf{Nueva Key}. La clave se guarda cifrada en la base de datos y en la lista solo se ven sus primeros y últimos cuatro caracteres. Solo puede haber una clave activa por tipo.
 \item Pulsar \textbf{Probar conexión} junto a la clave: el sistema envía un mensaje corto al proveedor e informa si respondió.
 \item En \textbf{Ajustes → Motor RAG}, elegir el \emph{Origen} y el \emph{Modelo}, y guardar. \emph{Max Tokens} solo limita los modelos que corren en el propio servidor; los modelos en la nube responden sin tope.
@@ -204,7 +252,7 @@ Con esos totales y los precios de este documento se obtiene el costo real por d�
 \begin{itemize}[nosep]
 \item Los precios cambian con frecuencia; los de este documento son los publicados el 1 de octubre de 2026. DeepSeek cobra el doble en hora pico (01:00–04:00 y 06:00–10:00 UTC, de lunes a viernes) y Google anunció que Gemini 3.x Flash sube de precio en 2027.
 \item Las 106 preguntas son de prueba, no de uso real; por eso la proyección mensual se presenta como escenarios.
-\item La precisión con modelos distintos de \texttt{gpt-oss:120b} no se midió.
+\item Cada modelo se midió una sola vez; las diferencias de una a tres preguntas pueden deberse a la variación entre ejecuciones. La comparación entre modelos se hizo con el clasificador anterior (por patrones). GPT 5 Nano y los modelos de Gemini no se midieron.
 \item No se incluyen costos de servidor (capa gratuita de Oracle Cloud), dominio ni soporte.
 \end{itemize}
 
