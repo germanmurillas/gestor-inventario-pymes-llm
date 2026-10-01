@@ -678,8 +678,9 @@ class ChatLLMController extends Controller {
                 $payload['stream'] = false;       // /api/chat nativo exige stream=false
                 $payload['options'] = [
                     'temperature' => $temperature,
-                    'num_predict' => $limitarSalida ? $maxTokens : -1, // -1: sin tope en Ollama
                 ];
+                // Sin tope: no se envía num_predict (Ollama Cloud rechaza -1 con "max_tokens must be positive").
+                if ($limitarSalida) $payload['options']['num_predict'] = $maxTokens;
                 unset($payload['temperature'], $payload['max_tokens']);
             }
             $inicio = microtime(true);

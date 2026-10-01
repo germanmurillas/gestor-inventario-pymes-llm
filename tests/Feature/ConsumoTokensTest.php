@@ -84,7 +84,7 @@ class ConsumoTokensTest extends TestCase
 
         $this->actingAs($user)->postJson('/chat-rag', ['prompt' => '¿Cuánta harina hay?'])->assertOk();
 
-        Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), '/api/chat') && $p['options']['num_predict'] === -1);
+        Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), '/api/chat') && !isset($p['options']['num_predict']));
     }
 
     public function test_api_externa_no_envia_max_tokens(): void
