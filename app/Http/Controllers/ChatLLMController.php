@@ -25,15 +25,28 @@ class ChatLLMController extends Controller {
         return response()->json(['models' => ['pymetory-8b:latest', 'llama3.1:latest']]);
     }
 
-    public function getSessions() {
+    /**
+     * Sesiones del usuario, de la más reciente a la más antigua, de a 30 (?pagina=0,1,...) y con búsqueda por título
+     * (?buscar=). Las consultas de rag:evaluar (session_id "rag-evaluar:...") no aparecen en el historial.
+     */
+    public function getSessions(Request $request) {
+        $porPagina = 30;
+        $pagina = max(0, (int) $request->query('pagina', 0));
+        $buscar = trim((string) $request->query('buscar', ''));
         $sessions = ChatHistory::where('user_id', Auth::id())
-            ->select('session_id', 'session_title', DB::raw('MAX(created_at) as last_activity'))
+            ->select('session_id', DB::raw('MAX(session_title) as session_title'), DB::raw('MAX(created_at) as last_activity'))
             ->whereNotNull('session_id')
-            ->groupBy('session_id', 'session_title')
+            ->where('session_id', 'not like', self::PREFIJO_EVALUACION . '%')
+            ->when($buscar !== '', fn ($q) => $q->where('session_title', 'like', '%' . $buscar . '%'))
+            ->groupBy('session_id')
             ->orderBy('last_activity', 'desc')
+            ->skip($pagina * $porPagina)->take($porPagina + 1)
             ->get();
-        return response()->json(['sessions' => $sessions]);
+        return response()->json(['sessions' => $sessions->take($porPagina)->values(), 'hay_mas' => $sessions->count() > $porPagina]);
     }
+
+    /** Prefijo de las sesiones creadas por rag:evaluar (ver EvaluarAsistente). */
+    public const PREFIJO_EVALUACION = 'rag-evaluar:';
 
     public function getSessionMessages($sessionId) {
         $messages = ChatHistory::where('user_id', Auth::id())

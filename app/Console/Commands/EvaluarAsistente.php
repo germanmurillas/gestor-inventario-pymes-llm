@@ -66,7 +66,9 @@ class EvaluarAsistente extends Command
             $esperado = ($c['verdad'])();
             $intencion = $this->privado($ctrl, 'intencion', $c['pregunta']);
             $t0 = microtime(true);
-            $resp = $ctrl->ask(Request::create('/chat-rag', 'POST', ['prompt' => $c['pregunta']]));
+            // Cada pregunta en su propia sesión (sin turnos previos como contexto) y fuera del historial del usuario.
+            $sesion = ChatLLMController::PREFIJO_EVALUACION . $this->option('etiqueta') . ':' . ($i + 1) . ':' . uniqid();
+            $resp = $ctrl->ask(Request::create('/chat-rag', 'POST', ['prompt' => $c['pregunta'], 'session_id' => $sesion, 'session_title' => 'Evaluación: ' . $this->option('etiqueta')]));
             $seg = round(microtime(true) - $t0, 2);
             $datos = json_decode($resp->getContent(), true) ?? [];
             $texto = (string) ($datos['response'] ?? '');

@@ -76,19 +76,41 @@ const FigmaLLM = () => {
         }
     };
 
-    const fetchSessions = async () => {
+    // Historial por páginas de 30: se piden más al acercarse al final de la lista (carga progresiva).
+    const [paginaSesiones, setPaginaSesiones] = useState(0);
+    const [hayMasSesiones, setHayMasSesiones] = useState(false);
+    const [cargandoSesiones, setCargandoSesiones] = useState(false);
+
+    const fetchSessions = async (pagina = 0, buscar = searchQuery) => {
+        setCargandoSesiones(true);
         try {
-            const res = await axios.get('/chat-sessions');
+            const res = await axios.get('/chat-sessions', { params: { pagina, buscar: buscar || undefined } });
             if (res.data.sessions) {
-                setSessions(res.data.sessions);
+                setSessions(prev => pagina === 0 ? res.data.sessions : [...prev, ...res.data.sessions]);
+                setPaginaSesiones(pagina);
+                setHayMasSesiones(!!res.data.hay_mas);
             }
         } catch (err) {
             // Silence fallback
+        } finally {
+            setCargandoSesiones(false);
         }
     };
 
+    const alDesplazarSesiones = (e: React.UIEvent<HTMLDivElement>) => {
+        const el = e.currentTarget;
+        if (hayMasSesiones && !cargandoSesiones && el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
+            fetchSessions(paginaSesiones + 1);
+        }
+    };
+
+    // La búsqueda se hace en el servidor (no solo sobre las sesiones ya cargadas).
     useEffect(() => {
-        fetchSessions();
+        const t = setTimeout(() => fetchSessions(0, searchQuery), 300);
+        return () => clearTimeout(t);
+    }, [searchQuery]);
+
+    useEffect(() => {
         axios.get('/api/llm-models').then(r => {
             setModels(r.data);
             // FIX-UI: antes se pintaba local[0] (p.ej. qwen3:30b) como modelo activo,
@@ -193,9 +215,7 @@ const FigmaLLM = () => {
         }
     };
 
-    const filteredSessions = sessions.filter(s => 
-        (s.session_title || '').toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredSessions = sessions;
 
     return (
         <div className="flex h-[calc(100dvh-11rem)] lg:h-full gap-8 animate-in fade-in duration-500">
@@ -219,7 +239,7 @@ const FigmaLLM = () => {
                      />
                  </div>
 
-                 <div className="space-y-2 flex-1 overflow-y-auto">
+                 <div className="space-y-2 flex-1 overflow-y-auto" onScroll={alDesplazarSesiones}>
                      {filteredSessions.map((s) => (
                          <div 
                             key={s.session_id} 
@@ -236,7 +256,8 @@ const FigmaLLM = () => {
                              </div>
                          </div>
                      ))}
-                     {filteredSessions.length === 0 && (
+                     {cargandoSesiones && <div className="text-center p-2 text-[10px] text-slate-400 uppercase tracking-widest">Cargando…</div>}
+                     {!cargandoSesiones && filteredSessions.length === 0 && (
                          <div className="text-center p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">No hay chats previos</div>
                      )}
                  </div>
