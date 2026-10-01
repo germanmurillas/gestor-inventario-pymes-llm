@@ -5,7 +5,7 @@ return [
         'label'    => 'OpenCode',
         'base_url' => 'https://opencode.ai/zen/go/v1/chat/completions',
         'enabled'  => true,
-        'models'   => ['deepseek-v4-pro', 'deepseek-v4-flash', 'qwen3.7-plus', 'glm-5.1', 'minimax-m3', 'kimi-k2.6', 'hy3-preview'],
+        'models'   => ['deepseek-v4.1-flash', 'deepseek-v4-pro', 'deepseek-v4-flash', 'glm-5.3-flash', 'glm-5.1', 'kimi-k3', 'kimi-k2.6', 'qwen3.7-plus', 'minimax-m3', 'hy3-preview'],
     ],
     'ollama' => [
         'label'    => 'Ollama (local)',

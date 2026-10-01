@@ -60,6 +60,7 @@ class EvaluarAsistente extends Command
                 'intencion_esperada' => $c['intencion'], 'intencion_obtenida' => $intencion,
                 'esperado' => $esperado, 'respuesta' => $texto, 'correcta' => $ok, 'motivo' => $motivo,
                 'segundos' => $seg, 'modelo' => $datos['model'] ?? null, 'fuente' => $datos['source'] ?? null,
+                'tokens_entrada' => $datos['tokens']['entrada'] ?? null, 'tokens_salida' => $datos['tokens']['salida'] ?? null,
             ];
             $this->line(sprintf('%2d %s %-55s %s', $i + 1, $ok ? '✓' : '✗', mb_substr($c['pregunta'], 0, 55), $ok ? '' : $motivo));
         }
@@ -94,6 +95,7 @@ class EvaluarAsistente extends Command
             'intenciones_correctas' => $intenciones, 'precision_clasificador' => $total ? round($intenciones / $total * 100, 1) : 0,
             'tiempo_mediano_s' => $r->pluck('segundos')->median(),
             'modelo' => $r->pluck('modelo')->filter()->unique()->values()->all(),
+            'tokens' => $this->resumenTokens($r),
             'por_grupo' => $r->groupBy('grupo')->map(fn ($g) => ['total' => $g->count(), 'correctas' => $g->where('correcta', true)->count()]),
         ];
         $dir = storage_path('app/rag');
@@ -104,6 +106,18 @@ class EvaluarAsistente extends Command
         $this->info("Precisión: {$correctas}/{$total} ({$resumen['precision']} %). Clasificador: {$intenciones}/{$total}. Tiempo mediano: {$resumen['tiempo_mediano_s']} s.");
         $this->line("Detalle: {$archivo}");
         return 0;
+    }
+
+    /** Promedio, mediana, percentil 95 y máximo de tokens por consulta (solo las respuestas que reportaron consumo). */
+    private function resumenTokens($r): array
+    {
+        $stats = function ($valores) {
+            $v = $valores->filter(fn ($x) => is_numeric($x))->sort()->values();
+            if ($v->isEmpty()) return null;
+            return ['n' => $v->count(), 'promedio' => round($v->avg(), 1), 'mediana' => $v->median(),
+                    'p95' => $v[(int) ceil(0.95 * $v->count()) - 1], 'maximo' => $v->max(), 'suma' => $v->sum()];
+        };
+        return ['entrada' => $stats($r->pluck('tokens_entrada')), 'salida' => $stats($r->pluck('tokens_salida'))];
     }
 
     // ── Conjuntos ─────────────────────────────────────────────────────────────

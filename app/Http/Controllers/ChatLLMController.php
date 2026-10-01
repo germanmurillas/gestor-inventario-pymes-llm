@@ -51,7 +51,19 @@ class ChatLLMController extends Controller {
         return response()->json(['history' => $history]);
     }
 
-    private function recordChat($prompt, $response, $source, $sessionId = null, $sessionTitle = null) {
+    /** Tokens consumidos en la consulta actual (suma de todas las llamadas al modelo). */
+    private array $tokens = ['entrada' => null, 'salida' => null];
+
+    /** Suma el consumo que reporta el proveedor: usage.* (API compatible con OpenAI) o *_eval_count (Ollama nativo). */
+    private function sumarTokens($respuesta): void
+    {
+        $entrada = $respuesta->json('usage.prompt_tokens') ?? $respuesta->json('prompt_eval_count');
+        $salida = $respuesta->json('usage.completion_tokens') ?? $respuesta->json('eval_count');
+        if (is_numeric($entrada)) $this->tokens['entrada'] = ($this->tokens['entrada'] ?? 0) + (int) $entrada;
+        if (is_numeric($salida)) $this->tokens['salida'] = ($this->tokens['salida'] ?? 0) + (int) $salida;
+    }
+
+    private function recordChat($prompt, $response, $source, $sessionId = null, $sessionTitle = null, ?string $modelo = null) {
         try {
             ChatHistory::create([
                 'user_id' => Auth::id(),
@@ -59,7 +71,10 @@ class ChatLLMController extends Controller {
                 'session_title' => $sessionTitle ?: (mb_substr($prompt, 0, 30) ?: 'Nueva Consulta'),
                 'prompt' => $prompt,
                 'response' => $response,
-                'source' => $source
+                'source' => $source,
+                'modelo' => $modelo,
+                'tokens_entrada' => $this->tokens['entrada'],
+                'tokens_salida' => $this->tokens['salida'],
             ]);
         } catch (\Exception $e) {
             // Silence
@@ -510,6 +525,7 @@ class ChatLLMController extends Controller {
             'session_title' => 'nullable|string'
         ]);
 
+        $this->tokens = ['entrada' => null, 'salida' => null];
         $query = $request->input('prompt');
         $sessionId = $request->input('session_id');
         $sessionTitle = $request->input('session_title');
@@ -583,10 +599,11 @@ class ChatLLMController extends Controller {
         $sourceCfg = $endpoints[$llmSource] ?? [];
         $cfg = $sourceCfg ?: $endpoints['external'];
 
-        // OpenCode Go exige header de sesión estable + UA de agente (docs Go 2026)
+        // OpenCode Go: sesión estable y User-Agent propio. Sus términos lo reservan para agentes de
+        // programación (opencode.ai/docs/go), así que aquí solo se usa para pruebas de desarrollo.
         $withHeaders = !empty($sourceCfg['go'])
             ? ['x-opencode-session' => 'sess-pymetory-' . substr(md5((string) ($sessionId ?? $query)), 0, 16),
-               'User-Agent' => 'pymetory/1.0 (codig agent; tesis UNA)']
+               'User-Agent' => 'pymetory/1.0 (asistente de inventarios; trabajo de grado Univalle)']
             : [];
 
         // FIX-UI: api_keys.model_name pisaba SIEMPRE la selección del usuario,
@@ -665,6 +682,7 @@ class ChatLLMController extends Controller {
                 ->post($cfg['url'], $payload);
 
             if ($response->successful()) {
+                $this->sumarTokens($response);
                 if ($isNativeLocal) {
                     // FIX-RAG(v2.1): /api/chat nativo devuelve {message:{content}}
                     $resp = $response->json('message.content') ?? '';
@@ -689,6 +707,7 @@ class ChatLLMController extends Controller {
                         $retryResp = Http::timeout(90)->withToken($cfg['key'] ?: null)
                             ->withHeaders($withHeaders)->post($cfg['url'], $retry);
                         if ($retryResp->successful()) {
+                            $this->sumarTokens($retryResp);
                             $text = trim((string) $retryResp->json('choices.0.message.content'));
                             $text = $this->stripThinking($text);
                             $text = trim($text);
@@ -706,9 +725,10 @@ class ChatLLMController extends Controller {
                           . 'Prueba con otro modelo desde el selector de arriba.';
                 }
 
-                $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle);
+                $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle, $llmModelo);
                 return response()->json([
                     'response'    => $text,
+                    'tokens'      => $this->tokens,
                     'intent'      => $intent,
                     'session_id'  => $sessionId,
                     'session_title' => $sessionTitle,
@@ -726,9 +746,9 @@ class ChatLLMController extends Controller {
 
         // El modelo principal no respondió: se intenta el modelo local antes de pasar a modo texto.
         if (isset($payload['messages']) && ($alt = $this->respaldoLocal($payload['messages'], $llmModelo, $inicio ?? microtime(true))) !== null) {
-            $this->recordChat($query, $alt, 'local', $sessionId, $sessionTitle);
+            $this->recordChat($query, $alt, 'local', $sessionId, $sessionTitle, config('services.ollama.respaldo') . ' (respaldo local)');
             return response()->json([
-                'response' => $alt, 'intent' => $intent, 'session_id' => $sessionId, 'session_title' => $sessionTitle,
+                'response' => $alt, 'tokens' => $this->tokens, 'intent' => $intent, 'session_id' => $sessionId, 'session_title' => $sessionTitle,
                 'model' => config('services.ollama.respaldo') . ' (respaldo local)', 'source' => 'local', 'key_name' => 'Ollama Local',
             ]);
         }
@@ -759,6 +779,7 @@ class ChatLLMController extends Controller {
                 'options' => ['temperature' => 0.3, 'num_predict' => 400],
             ]);
             $texto = trim($this->stripThinking((string) $r->json('message.content')));
+            if ($r->successful()) $this->sumarTokens($r);
             return $r->successful() && $texto !== '' ? $texto : null;
         } catch (\Exception $e) {
             \Log::warning("Respaldo local ({$modelo}) falló: " . $e->getMessage());

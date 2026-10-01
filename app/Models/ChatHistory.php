@@ -16,6 +16,9 @@ class ChatHistory extends Model
         'prompt',
         'response',
         'source',
+        'modelo',
+        'tokens_entrada',
+        'tokens_salida',
     ];
 
     public function user(): BelongsTo
