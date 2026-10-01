@@ -42,7 +42,7 @@ class ApiKeyController extends Controller
             'key'        => 'required|string|max:500',
             'base_url'   => 'nullable|url|max:255',
             'model_name' => 'nullable|string|max:100',
-            'tipo'       => 'required|in:opencode,openai,ollama',
+            'tipo'       => 'required|in:opencode,opencode-go,openai,ollama',
             'activo'     => 'boolean',
         ]);
 
@@ -63,7 +63,7 @@ class ApiKeyController extends Controller
             'key'        => 'nullable|string|max:500',
             'base_url'   => 'nullable|url|max:255',
             'model_name' => 'nullable|string|max:100',
-            'tipo'       => 'sometimes|in:opencode,openai,ollama',
+            'tipo'       => 'sometimes|in:opencode,opencode-go,openai,ollama',
             'activo'     => 'sometimes|boolean',
         ]);
 

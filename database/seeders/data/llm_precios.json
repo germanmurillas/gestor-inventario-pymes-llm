@@ -1,0 +1,16 @@
+{
+  "_fuente": "Precios oficiales consultados el 2026-10-01 (ver fuente_url de cada modelo). USD por millón de tokens. El precio 'pico' aplica en DeepSeek de 01:00 a 04:00 y de 06:00 a 10:00 UTC, de lunes a viernes.",
+  "recomendado": "gpt-oss:120b-cloud",
+  "modelos": [
+    {"modelo": "gpt-oss:120b-cloud", "fuente": "local", "proveedor": "Ollama Cloud", "entrada": 0.15, "salida": 0.60, "fuente_url": "https://ollama.com/pricing", "nota": "Modelo principal del asistente"},
+    {"modelo": "space-bunny-free", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 0, "salida": 0, "fuente_url": "https://opencode.ai/docs/go/", "nota": "Gratis por tiempo limitado"},
+    {"modelo": "longcat-2.5-preview-free", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 0, "salida": 0, "fuente_url": "https://opencode.ai/docs/go/", "nota": "Gratis por tiempo limitado"},
+    {"modelo": "mimo-v2.6-flash", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 0.14, "salida": 0.28, "fuente_url": "https://opencode.ai/docs/go/"},
+    {"modelo": "glm-5.3-flash", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 0.15, "salida": 0.50, "fuente_url": "https://opencode.ai/docs/go/"},
+    {"modelo": "qwen3.8-flash", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 0.15, "salida": 0.47, "fuente_url": "https://opencode.ai/docs/go/"},
+    {"modelo": "deepseek-v4.1-flash", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 0.15, "salida": 0.60, "entrada_pico": 0.30, "salida_pico": 1.20, "fuente_url": "https://opencode.ai/docs/go/"},
+    {"modelo": "deepseek-v4-pro", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 0.66, "salida": 1.98, "entrada_pico": 1.32, "salida_pico": 3.96, "fuente_url": "https://opencode.ai/docs/go/"},
+    {"modelo": "glm-5.3", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 1.40, "salida": 4.40, "fuente_url": "https://opencode.ai/docs/go/"},
+    {"modelo": "kimi-k3", "fuente": "opencode-go", "proveedor": "OpenCode Go", "entrada": 3.00, "salida": 15.00, "fuente_url": "https://opencode.ai/docs/go/"}
+  ]
+}

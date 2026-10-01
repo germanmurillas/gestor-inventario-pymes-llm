@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -33,12 +34,21 @@ class EvaluarAsistente extends Command
         {--solo= : Ejecutar solo las N primeras preguntas}
         {--fuente= : Proveedor solo para esta ejecución (local, opencode-go, opencode, openai), sin cambiar los ajustes}
         {--modelo= : Modelo solo para esta ejecución, sin cambiar los ajustes}
-        {--recalificar= : Volver a calificar un archivo de resultados guardado (sin consultar al asistente)}';
+        {--recalificar= : Volver a calificar un archivo de resultados guardado (sin consultar al asistente)}
+        {--importar=* : Registrar en llm_evaluaciones archivos de resultados ya guardados (sin consultar al asistente)}';
     protected $description = 'Mide la precisión del asistente contra la base de datos';
 
     public function handle(): int
     {
         if ($archivo = $this->option('recalificar')) return $this->recalificar($archivo);
+        if ($archivos = $this->option('importar')) {
+            foreach ($archivos as $a) {
+                $d = json_decode(file_get_contents($a), true);
+                $this->registrar($d['resultados'], $d['resumen']['conjunto'], $d['resumen']['etiqueta'], $d['resumen']['fecha']);
+                $this->line("Importado: {$a}");
+            }
+            return 0;
+        }
 
         config(['pymetory.evaluacion_llm' => array_filter([
             'llm_source' => $this->option('fuente'), 'llm_modelo' => $this->option('modelo'),
@@ -108,10 +118,32 @@ class EvaluarAsistente extends Command
         if (!is_dir($dir)) mkdir($dir, 0775, true);
         $archivo = "{$dir}/{$etiqueta}-" . now()->format('Ymd-His') . '.json';
         file_put_contents($archivo, json_encode(['resumen' => $resumen, 'resultados' => $resultados], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        if (!$this->option('recalificar')) $this->registrar($resultados, $resumen['conjunto'], $etiqueta, $resumen['fecha']);
         $this->newLine();
         $this->info("Precisión: {$correctas}/{$total} ({$resumen['precision']} %). Clasificador: {$intenciones}/{$total}. Tiempo mediano: {$resumen['tiempo_mediano_s']} s.");
         $this->line("Detalle: {$archivo}");
         return 0;
+    }
+
+    /**
+     * Guarda el resumen de la ejecución en llm_evaluaciones (datos de la palanca de modelos). El modelo evaluado es
+     * el que más respuestas dio; las que vinieron del respaldo local no cuentan como aciertos de ese modelo.
+     */
+    private function registrar(array $resultados, string $conjunto, string $etiqueta, string $fecha): void
+    {
+        $r = collect($resultados);
+        $modelo = $r->pluck('modelo')->filter(fn ($m) => !str_contains((string) $m, 'respaldo') && $m !== 'text-mode')->countBy()->sortDesc()->keys()->first();
+        if (!$modelo) return;
+        $propias = $r->where('modelo', $modelo);
+        $fuente = $propias->pluck('fuente')->filter()->first() ?? 'local';
+        $prom = fn ($campo) => ($v = $propias->pluck($campo)->filter(fn ($x) => is_numeric($x)))->isEmpty() ? null : round($v->avg(), 1);
+        DB::table('llm_evaluaciones')->insert([
+            'fuente' => $fuente, 'modelo' => $modelo, 'conjunto' => $conjunto, 'etiqueta' => $etiqueta,
+            'total' => $r->count(), 'correctas' => $propias->where('correcta', true)->count(), 'respuestas_propias' => $propias->count(),
+            'tiempo_mediano_s' => $propias->pluck('segundos')->median(),
+            'tokens_entrada_prom' => $prom('tokens_entrada'), 'tokens_salida_prom' => $prom('tokens_salida'),
+            'medido_el' => $fecha, 'created_at' => now(), 'updated_at' => now(),
+        ]);
     }
 
     /** Promedio, mediana, percentil 95 y máximo de tokens por consulta (solo las respuestas que reportaron consumo). */

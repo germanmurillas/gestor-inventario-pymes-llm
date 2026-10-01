@@ -856,3 +856,9 @@
   background-size: 200% 200%;
   animation: gradient-x 3s ease infinite;
 }
+
+/* Palanca de modelos (Ajustes → Motor RAG): degradado azul → verde (recomendado) → rojo. */
+.pm-espectro { -webkit-appearance: none; appearance: none; height: 10px; border-radius: 9999px; background: var(--pm-espectro-fondo); cursor: pointer; }
+.pm-espectro:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.pm-espectro::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 9999px; background: var(--pm-espectro-pulgar); border: 3px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .45); transition: background .2s; }
+.pm-espectro::-moz-range-thumb { width: 18px; height: 18px; border-radius: 9999px; background: var(--pm-espectro-pulgar); border: 3px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .45); }

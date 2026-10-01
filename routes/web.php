@@ -165,6 +165,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('api/llm-providers
     Route::delete('/{key}', [ChatLLMController::class, 'destroyProvider'])->where('key', '[a-zA-Z0-9_-]+');
 });
 
+Route::get('/api/llm/espectro', [\App\Http\Controllers\EspectroModelosController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:admin']);
+
 Route::get('/ollama-models', [ChatLLMController::class, 'getLocalOllamaModels'])
     ->middleware(['auth', 'verified']);
 

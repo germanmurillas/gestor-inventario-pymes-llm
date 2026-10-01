@@ -7,6 +7,7 @@ import {
     Bell, Pencil, Shield, QrCode, Printer,
 } from 'lucide-react';
 import Sidebar from '../Components/Sidebar';
+import EspectroModelos from '../Components/EspectroModelos';
 import MobileNav from '../Components/MobileNav';
 import { Palette as PaletteIcon } from 'lucide-react';
 import { THEMES, DEFAULT_THEME, applyTheme, currentTheme } from '../lib/theme';
@@ -16,7 +17,7 @@ axios.defaults.headers.common['X-CSRF-TOKEN'] = CSRF;
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 interface UserRow { id: number; name: string; email: string; role: 'admin'|'operario'; created_at: string|null; }
-interface ApiKey { id: number; nombre: string; key_masked: string; base_url: string|null; model_name: string|null; tipo: 'opencode'|'openai'|'ollama'; activo: boolean; updated_at: string|null; }
+interface ApiKey { id: number; nombre: string; key_masked: string; base_url: string|null; model_name: string|null; tipo: 'opencode'|'opencode-go'|'openai'|'ollama'; activo: boolean; updated_at: string|null; }
 type SettingsMap = Record<string, string>;
 
 const field = 'w-full px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-950/60 text-sm pm-text focus:outline-none focus:border-indigo-500';
@@ -266,6 +267,10 @@ export default function Settings() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* ── Palanca de modelos: precisión y costo medidos ── */}
+                        <EspectroModelos modeloActual={settings.llm_modelo ?? ''}
+                            onElegir={(fuente, modelo) => { setVal('llm_source', fuente); setVal('llm_modelo', modelo); }} />
 
                         {/* ── Modelo ── */}
                         <div className="mb-4">

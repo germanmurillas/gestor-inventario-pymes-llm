@@ -7,6 +7,12 @@ return [
         'enabled'  => true,
         'models'   => ['deepseek-v4.1-flash', 'deepseek-v4-pro', 'deepseek-v4-flash', 'glm-5.3-flash', 'glm-5.1', 'kimi-k3', 'kimi-k2.6', 'qwen3.7-plus', 'minimax-m3', 'hy3-preview'],
     ],
+    'opencode-go' => [
+        'label'    => 'OpenCode Go',
+        'base_url' => 'https://opencode.ai/zen/go/v1/chat/completions',
+        'enabled'  => true,
+        'models'   => ['space-bunny-free', 'longcat-2.5-preview-free', 'mimo-v2.6-flash', 'glm-5.3-flash', 'qwen3.8-flash', 'deepseek-v4.1-flash', 'deepseek-v4-pro', 'glm-5.3', 'kimi-k3'],
+    ],
     'ollama' => [
         'label'    => 'Ollama (local)',
         'base_url' => 'http://localhost:11434/v1/chat/completions',
