@@ -804,7 +804,11 @@ class ChatLLMController extends Controller {
         if (!$clave || !$url) return null;
         try {
             $r = Http::timeout(30)->withToken($clave->key)
-                ->withHeaders($fuente === 'opencode-go' ? ['User-Agent' => 'pymetory/1.0 (asistente de inventarios; trabajo de grado Univalle)'] : [])
+                // OpenCode Go rechaza las peticiones sin x-opencode-session (MissingSessionID).
+                ->withHeaders($fuente === 'opencode-go' ? [
+                    'x-opencode-session' => 'sess-pymetory-' . substr(md5(json_encode(end($mensajes))), 0, 16),
+                    'User-Agent' => 'pymetory/1.0 (asistente de inventarios; trabajo de grado Univalle)',
+                ] : [])
                 ->post($url, ['model' => $modelo, 'messages' => $mensajes, 'temperature' => 0.3]);
             if (!$r->successful()) return null;
             $this->sumarTokens($r);

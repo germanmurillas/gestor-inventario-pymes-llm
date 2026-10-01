@@ -83,6 +83,7 @@ class ClasificadorYRespaldoTest extends TestCase
             ->assertJsonPath('model', 'glm-5.3-flash (respaldo en la nube)')
             ->assertJsonPath('source', 'opencode-go')
             ->assertJsonPath('tokens.entrada', 500);
-        Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), 'opencode.ai') && $p['model'] === 'glm-5.3-flash');
+        Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), 'opencode.ai') && $p['model'] === 'glm-5.3-flash'
+            && str_starts_with($p->header('x-opencode-session')[0] ?? '', 'sess-pymetory-'));
     }
 }
