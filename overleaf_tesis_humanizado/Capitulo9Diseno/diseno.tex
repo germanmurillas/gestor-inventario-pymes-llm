@@ -62,10 +62,10 @@ La Figura \ref{fig:dis_arquitectura} resume las capas y el recorrido de una soli
         |       Transfer, Report, Label...)     Movimiento, Bodega...)
         |
         +--> ChatLLMController (RAG)
-               1. classifyQuery()    intención de la pregunta
+               1. intencion()        intención (modelo; patrones de reserva)
                2. buildRagContext()  lectura de MySQL
                3. llamada al proveedor de modelo de lenguaje
-                  (Ollama local | OpenCode | API compatible OpenAI)
+                  (Ollama | OpenCode | API compatible OpenAI; respaldos)
                4. respuesta + registro en chat_histories
 \end{verbatim}
 \caption{Arquitectura en capas de Pymetory y flujo de una solicitud.}
@@ -148,7 +148,7 @@ Por regla de la dirección, el Kardex es de solo inserción, y esa regla se gara
 El asistente sigue la arquitectura de generación aumentada por recuperación (RAG) \cite{rag_lewis2020}: antes de llamar al modelo de lenguaje, el sistema recupera de la base de datos la información pertinente y la entrega al modelo como contexto, para que la respuesta se base en el inventario real y no en conocimiento general del modelo. El diseño tiene tres etapas:
 
 \begin{enumerate}
-    \item \textbf{Clasificación de la intención} (\texttt{classifyQuery}). Mediante expresiones regulares se asigna la pregunta a una de trece intenciones o, si ninguna coincide, a una intención general (Tabla \ref{tab:dis_intenciones}). Además, las palabras de la pregunta se comparan con los nombres y descripciones de los materiales para filtrar el contexto al material consultado.
+    \item \textbf{Clasificación de la intención} (\texttt{intencion}). Un modelo de lenguaje asigna la pregunta a una de trece intenciones o a una general (Tabla \ref{tab:dis_intenciones}); las expresiones regulares de \texttt{classifyQuery} quedan como reserva cuando el modelo no responde o contesta algo fuera de las categorías, y un número de lote se reconoce siempre de forma exacta. Además, las palabras de la pregunta se comparan con los nombres y descripciones de los materiales para filtrar el contexto al material consultado.
     \item \textbf{Construcción del contexto} (\texttt{buildRagContext}). Según la intención, se consulta la base de datos (lotes, movimientos, bodegas, valorización) y se arma un texto con los registros encontrados y el estado de las bodegas. Solo se consideran lotes activos con existencias, el texto empieza con la fecha del día y cada lote indica cuántos días le faltan para vencer, de modo que el modelo pueda responder preguntas como ``¿qué vence esta semana?'' sin calcular fechas por su cuenta.
     \item \textbf{Generación de la respuesta}. El contexto, la instrucción de sistema (editable desde la configuración) y la pregunta se envían al proveedor de modelo de lenguaje configurado; la respuesta se muestra al usuario y se guarda en \texttt{chat\_histories}.
 \end{enumerate}
@@ -159,7 +159,7 @@ El asistente sigue la arquitectura de generación aumentada por recuperación (R
 \label{tab:dis_intenciones}
 \begin{tabular}{|l|p{5.3cm}|p{5.5cm}|}
 \hline
-\textbf{Intención} & \textbf{Ejemplos de palabras que la activan} & \textbf{Contexto que se recupera} \\
+\textbf{Intención} & \textbf{Palabras que la activan en los patrones de reserva} & \textbf{Contexto que se recupera} \\
 \hline
 \texttt{stock\_check} & cuántos hay, stock, cantidad, existencias & Lotes del material, por cantidad \\ \hline
 \texttt{critical\_alerts} & crítico, por vencer, alerta, urgente & Lotes dentro del umbral FEFO \\ \hline
@@ -180,7 +180,7 @@ El asistente sigue la arquitectura de generación aumentada por recuperación (R
 
 \subsection{Proveedores de modelo de lenguaje}
 
-El controlador define un mapa de proveedores intercambiables ---Ollama en el propio servidor, OpenCode y cualquier API compatible con la de OpenAI--- y el administrador elige el proveedor, el modelo y los parámetros desde la pantalla de configuración, con claves de API almacenadas cifradas. Este diseño evita depender de un único proveedor: si el servicio externo no está disponible se puede cambiar a un modelo local, si el proveedor elegido falla se intenta un modelo local de respaldo, y si ningún modelo responde el sistema devuelve en texto plano un listado de lotes en orden FEFO en lugar de un error. La justificación de esta estructura desde el punto de vista de los patrones de diseño se presenta en el capítulo de Implementación.
+El controlador define un mapa de proveedores intercambiables ---Ollama en el propio servidor, OpenCode y cualquier API compatible con la de OpenAI--- y el administrador elige el proveedor y el modelo desde la configuración, con una palanca que muestra la precisión medida y el costo de cada modelo, y con claves de API almacenadas cifradas. Este diseño evita depender de un único proveedor: si el servicio externo no está disponible se puede cambiar a un modelo local, si el proveedor elegido falla responde un modelo rápido en la nube y, después, uno local, y si ningún modelo responde el sistema devuelve en texto plano un listado de lotes en orden FEFO en lugar de un error. La justificación de esta estructura desde el punto de vista de los patrones de diseño se presenta en el capítulo de Implementación.
 
 \section{Diseño de la interfaz de usuario}
 \label{sec:dis_ui}

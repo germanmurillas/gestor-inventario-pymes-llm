@@ -36,7 +36,7 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
 
 \subsection{Inteligencia artificial y RAG}
 \begin{itemize}
-    \item \textbf{Clasificación de intenciones con NLP}: el clasificador actual usa expresiones regulares y depende de que la pregunta use palabras previstas; se propone complementarlo con un modelo de clasificación entrenado para español.
+    \item \textbf{Consultas con herramientas}: que el modelo pida los datos que necesita mediante funciones de solo lectura sobre la base de datos, con el sistema como filtro de seguridad y una verificación automática de que cada cifra de la respuesta aparezca en los datos consultados.
     \item \textbf{Búsqueda semántica con embeddings}, para responder por significado (``¿qué grasas tenemos?'') sin conocer el nombre exacto de cada insumo.
     \item \textbf{Memoria conversacional en la recuperación}: el modelo recibe los dos últimos turnos, pero la clasificación usa solo la pregunta actual, así que ``¿y de azúcar?'' tras ``¿cuánta harina queda?'' se interpreta sin contexto. Se propone heredar la intención y el material del turno anterior.
     \item \textbf{Mejor pronóstico y detección de anomalías}: la proyección actual es un promedio móvil de cuatro semanas (Sección \ref{sec:imp_proyeccion}), que no anticipa temporadas ni tendencias; se propone probar modelos de series temporales con el historial del Kardex y señalar consumos atípicos, entradas duplicadas o ajustes frecuentes.

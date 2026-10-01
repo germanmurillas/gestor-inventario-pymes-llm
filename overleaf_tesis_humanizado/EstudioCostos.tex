@@ -165,9 +165,11 @@ Hay además una restricción de uso. La documentación dice: \emph{``OpenCode Go
 
 \section{Precisión por modelo}
 
-Para saber si un modelo más barato o más costoso cambia la calidad de las respuestas, el 1 de octubre de 2026 se repitieron las 106 preguntas con nueve modelos más, todos con el mismo RAG y los mismos datos de producción. Se usó la opción \texttt{rag:evaluar --fuente --modelo}, que cambia el modelo solo durante la medición. Los modelos de OpenCode Go se llamaron con la suscripción del autor, como prueba de desarrollo. Las respuestas que no dio el modelo evaluado (por ejemplo, del respaldo local) no se le contaron como aciertos.
+Para saber si un modelo más barato o más costoso cambia la calidad de las respuestas, el 1 de octubre de 2026 se repitieron las 106 preguntas con nueve modelos más, todos con el mismo RAG y los mismos datos de producción. Se usó la opción \texttt{rag:evaluar --fuente --modelo}, que cambia el modelo solo durante la medición. Los modelos de OpenCode Go se llamaron con la suscripción del autor, como prueba de desarrollo. Las respuestas que no dio el modelo evaluado (por ejemplo, del respaldo) no se le contaron como aciertos.
 
-El criterio automático marca como error cualquier respuesta a un insumo inexistente que incluya una cantidad. Varios modelos respondieron bien (``no hay chocolate blanco registrado'') y añadieron la cantidad de un producto parecido (``solo figura pan tajado blanco: 811 und''). Por eso la tabla trae también la cifra con revisión manual de esas respuestas. El criterio automático no se modificó después de ver los resultados.
+Los seis modelos económicos o gratuitos y \texttt{gpt-oss:120b} se midieron con el clasificador actual (sección siguiente). Los tres de gama alta se midieron antes, con el clasificador por patrones, y no se repitieron porque no se recomiendan para esta tarea; su costo por consulta no incluye la llamada del clasificador.
+
+El criterio automático marca como error cualquier respuesta a un insumo inexistente que incluya una cantidad. Varios modelos respondieron bien (``no hay chocolate blanco registrado'') y añadieron la cantidad de un producto distinto (``solo figura pan tajado blanco: 811 und''). Por eso la tabla trae también la cifra con revisión manual de esas respuestas, en la que solo se aceptó una respuesta que dijera claramente que el insumo no está registrado. El criterio automático no se modificó después de ver los resultados.
 
 \begin{table}[H]
 \centering
@@ -176,24 +178,27 @@ El criterio automático marca como error cualquier respuesta a un insumo inexist
 \toprule
 Modelo & Automático & Revisión manual & Tiempo mediano & COP por consulta \\
 \midrule
-\texttt{gpt-oss:120b} (actual)$^{a}$ & 101 & 102 & \textbf{0,70 s} & 1,00 \\
-DeepSeek V4 Pro & \textbf{105} & \textbf{105} & 4,70 s & 4,28 (8,56) \\
+\multicolumn{5}{l}{\emph{Clasificador actual}} \\
+\texttt{gpt-oss:120b} (actual)$^{a}$ & 103 & 103 & \textbf{1,17 s} & 1,30 \\
+DeepSeek V4.1 Flash & 101 & \textbf{106} & 2,76 s & 1,14 (2,27) \\
+GLM-5.3-Flash & 101 & 103 & 1,76 s & 1,08 \\
+Qwen3.8 Flash & \textbf{104} & 104 & 5,08 s & 1,36 \\
+MiMo-V2.6-Flash & 101 & 105 & 4,42 s & 0,77 \\
+Space Bunny Free$^{b}$ & \textbf{104} & 104 & 2,94 s & 0 \\
+LongCat 2.5 Preview Free$^{b}$ & 101 & 101 & 5,66 s & 0 \\
+\midrule
+\multicolumn{5}{l}{\emph{Gama alta, clasificador anterior}} \\
+DeepSeek V4 Pro & 105 & 105 & 4,70 s & 4,28 (8,56) \\
 GLM-5.3 & 101 & 104 & 4,01 s & 8,32 \\
 Kimi K3 & 100 & 103 & 6,79 s & 27,22 \\
-DeepSeek V4.1 Flash & 100 & 103 & 2,24 s & 0,88 (1,76) \\
-GLM-5.3-Flash & 102 & 104 & 3,08 s & 0,84 \\
-Qwen3.8 Flash & 102 & 102 & 4,28 s & 1,06 \\
-MiMo-V2.6-Flash & 100 & 103 & 4,51 s & 0,57 \\
-Space Bunny Free$^{b}$ & 102 & 102 & 2,62 s & 0 \\
-LongCat 2.5 Preview Free$^{b}$ & 100 & 101 & 5,30 s & 0 \\
 \bottomrule
 \end{tabular}
 \caption{Aciertos sobre 106 preguntas por modelo, con el mismo RAG (1-oct-2026, una ejecución por modelo). (a) En Ollama Cloud; los demás, en OpenCode Go. (b) Gratis por tiempo limitado. Entre paréntesis, el costo en hora pico de DeepSeek.}
 \end{table}
 
-Todos los modelos quedan entre 100 y 105 aciertos. Con un RAG que entrega los datos ya filtrados, la precisión casi no depende del modelo: un modelo económico o gratuito responde tan bien como uno de gama alta, que cuesta hasta 27 veces más y tarda hasta diez veces más. Las diferencias de una a tres preguntas no son concluyentes con una sola ejecución por modelo, porque las respuestas varían algo entre ejecuciones. Solo DeepSeek V4 Pro se distingue: no omitió datos que los demás sí omitieron, a cambio de unos 5 segundos por respuesta y cuatro a ocho veces el costo. Dos modelos (Muse Spark y GPT 6 Luna) no se pudieron probar porque usan otro formato de API.
+Todos los modelos quedan entre 100 y 106 aciertos. Con un RAG que entrega los datos ya filtrados, la precisión casi no depende del modelo: un modelo económico o gratuito responde tan bien como uno de gama alta, que cuesta hasta 27 veces más y tarda varias veces más. Con revisión manual, DeepSeek V4.1 Flash respondió bien las 106 preguntas. Las diferencias de una a tres preguntas no son concluyentes con una sola ejecución por modelo, porque las respuestas varían algo entre ejecuciones. Dos modelos (Muse Spark y GPT 6 Luna) no se pudieron probar porque usan otro formato de API.
 
-Todos los modelos fallaron la misma pregunta: ``¿Qué se está poniendo viejo y hay que sacar ya?''. El error no era del modelo sino del clasificador de intención, que la tomó como una pregunta de existencias.
+En la primera ronda, con el clasificador por patrones, todos los modelos fallaron la misma pregunta: ``¿Qué se está poniendo viejo y hay que sacar ya?''. El error no era del modelo sino del clasificador de intención, que la tomó como una pregunta de existencias.
 
 \section{Clasificador y respaldo en la nube}
 
@@ -213,8 +218,8 @@ En \textbf{Ajustes → Motor RAG}, el administrador elige el modelo con una pala
 \section{Recomendación}
 
 \begin{enumerate}[nosep]
-\item \textbf{Mantener \texttt{gpt-oss:120b} con pago por uso.} Es el más rápido de los diez medidos (menos de un segundo), su precisión está en el mismo rango que los demás y cuesta alrededor de un peso por consulta.
-\item \textbf{Alternativas de costo similar o menor:} GLM-5.3-Flash, DeepSeek V4.1 Flash, MiMo-V2.6-Flash o Qwen3.8 Flash (medidos en la tabla de precisión), o GPT 5 Nano y Gemini 2.5 Flash-Lite de pago (no medidos). Antes de cambiar a un modelo no medido hay que repetir las baterías con \texttt{rag:evaluar}.
+\item \textbf{Mantener \texttt{gpt-oss:120b} con pago por uso.} Es el más rápido de los diez medidos, su precisión está en el mismo rango que los demás y cuesta alrededor de un peso por consulta.
+\item \textbf{Alternativas de costo similar o menor:} DeepSeek V4.1 Flash (106 de 106 con revisión manual), GLM-5.3-Flash, MiMo-V2.6-Flash o Qwen3.8 Flash (medidos en la tabla de precisión), o GPT 5 Nano y Gemini 2.5 Flash-Lite de pago (no medidos). Antes de cambiar a un modelo no medido hay que repetir las baterías con \texttt{rag:evaluar}.
 \item \textbf{Usar un modelo rápido en la nube como respaldo}, antes del modelo local. En estas pruebas se configuró GLM-5.3-Flash por OpenCode Go; para operar con clientes, el mismo respaldo se configura con un proveedor de pago por uso (ajustes \texttt{llm\_respaldo\_fuente} y \texttt{llm\_respaldo\_modelo}).
 \item \textbf{No usar modelos de gama alta} para esta tarea: multiplican el costo sin una mejora necesaria.
 \item \textbf{No operar con OpenCode Go} ni con capas gratuitas que usan los datos para entrenar.
@@ -252,7 +257,7 @@ Con esos totales y los precios de este documento se obtiene el costo real por d�
 \begin{itemize}[nosep]
 \item Los precios cambian con frecuencia; los de este documento son los publicados el 1 de octubre de 2026. DeepSeek cobra el doble en hora pico (01:00–04:00 y 06:00–10:00 UTC, de lunes a viernes) y Google anunció que Gemini 3.x Flash sube de precio en 2027.
 \item Las 106 preguntas son de prueba, no de uso real; por eso la proyección mensual se presenta como escenarios.
-\item Cada modelo se midió una sola vez; las diferencias de una a tres preguntas pueden deberse a la variación entre ejecuciones. La comparación entre modelos se hizo con el clasificador anterior (por patrones). GPT 5 Nano y los modelos de Gemini no se midieron.
+\item Cada modelo se midió una sola vez con el clasificador actual (los de gama alta, con el anterior); las diferencias de una a tres preguntas pueden deberse a la variación entre ejecuciones. GPT 5 Nano y los modelos de Gemini no se midieron.
 \item No se incluyen costos de servidor (capa gratuita de Oracle Cloud), dominio ni soporte.
 \end{itemize}
 

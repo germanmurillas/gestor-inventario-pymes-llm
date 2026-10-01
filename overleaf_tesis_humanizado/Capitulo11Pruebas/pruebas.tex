@@ -2,7 +2,7 @@
 % Capítulo: Pruebas
 % Orden del director (19-sep-2026): pruebas unitarias, de integración, con usuario y
 % algún reporte. Cifras de las ejecuciones del 27-sep-2026:
-%   php artisan test  -> 149 pruebas (148 aprobadas, 1 omitida), 553 aserciones (30-sep-2026)
+%   php artisan test  -> 166 pruebas (165 aprobadas, 1 omitida), 598 aserciones, 44 clases (1-oct-2026)
 %   npx playwright test -> 61 de 61 aprobadas
 %   rag:evaluar (producción, gpt-oss:120b-cloud) -> docs/evaluaciones/*-corregido-20260927-*.json
 % -------------------------------------------------
@@ -28,7 +28,7 @@ Las pruebas PHPUnit se ejecutan automáticamente en cada cambio que llega a la r
 \section{Pruebas unitarias y de integración}
 \label{sec:pru_phpunit}
 
-La suite PHPUnit tiene \textbf{149 pruebas en 41 clases}: 148 aprobadas y 1 omitida, con \textbf{553 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
+La suite PHPUnit tiene \textbf{166 pruebas en 44 clases}: 165 aprobadas y 1 omitida, con \textbf{598 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
 
 En Laravel, la mayoría de estas pruebas son de integración: envían una petición HTTP y recorren rutas, \textit{middleware}, controladores y base de datos. Algunas prueban un componente aislado, como el modelo \texttt{Movimiento} (inmutabilidad), el umbral del modelo \texttt{Lote} o el clasificador del asistente, y cumplen el papel de pruebas unitarias. La Tabla \ref{tab:pru_phpunit} las agrupa por área.
 
@@ -46,7 +46,7 @@ En Laravel, la mayoría de estas pruebas son de integración: envían una petici
 FEFO & 10 & \texttt{FefoTest}, \texttt{ConsumptionFefoTest}, \texttt{FefoUmbralTest}, \texttt{ExpiredLoteRegressionTest}, \texttt{DashboardCriticosConsistencyTest}: orden de despacho por vencimiento, consumo que atraviesa varios lotes, lotes vencidos, umbral general y umbral propio de cada insumo. \\ \hline
 Kardex & 11 & \texttt{KardexTest}, \texttt{KardexInmutableTest}, \texttt{KardexPaginadoTest}: registro de movimientos, rechazo de edición y borrado, protección en la base de datos, entrada al recibir órdenes de compra y paginación. \\ \hline
 Seguridad y roles & 13 & \texttt{UserManagementTest}, \texttt{ApiKeyTest}, \texttt{Auth\textbackslash AuthenticationTest}, \texttt{SettingsTest}: acceso por rol, ausencia de registro público y claves cifradas. \\ \hline
-Asistente & 22 & \texttt{ChatLLMTest}, \texttt{ChatRagContextTest}, \texttt{RespaldoLocalTest}, \texttt{ChatLLMLiveTest} (omitida): respaldo con el modelo local, clasificación con tildes, material inexistente, filtrado del contexto y vencimientos de la semana calculados solo sobre lotes con existencias, valorización con costos, conciliación, lotes por su número real y elección del insumo correcto. \\ \hline
+Asistente & 39 & \texttt{ChatLLMTest}, \texttt{ChatRagContextTest}, \texttt{RespaldoLocalTest}, \texttt{ConsumoTokensTest}, \texttt{ClasificadorYRespaldoTest}, \texttt{EspectroModelosTest}, \texttt{ChatLLMLiveTest} (omitida): clasificación con el modelo y con patrones de reserva, respaldos, tokens por consulta, tope de salida, palanca de modelos, material inexistente, contexto filtrado, vencimientos de la semana, valorización, conciliación y lotes por su número. \\ \hline
 Operación de inventario & 27 & \texttt{InventoryTest}, \texttt{InventoryStoreTest}, \texttt{TransferTest}, \texttt{PurchaseOrderTest}, \texttt{QRScanTest}, \texttt{LabelTest}, \texttt{TagTest}, \texttt{BodegaGestionTest}, \texttt{CategoriasTest}: categorías sin duplicados; bodegas con imagen (solo administrador) y ocupación sin mezclar unidades; recepción de órdenes con lote, vencimiento y bodega reales, e ingreso de lotes de insumos existentes. \\ \hline
 Reabastecimiento & 11 & \texttt{ProyeccionInventarioTest}: consumo diario, cobertura, fecha de agotamiento y punto de reorden con fechas fijas; exclusión de transferencias y ajustes; consumo por semana; comparación por motivo; y clasificación de las preguntas nuevas sin cambiar la de las baterías. \\ \hline
 Reportes & 14 & \texttt{ReportExportTest}: los tipos de reporte en PDF, CSV y Excel (archivo .xlsx válido con las mismas columnas que el CSV) y sus filtros. \\ \hline
@@ -54,7 +54,7 @@ Kanban & 7 & \texttt{KanbanTest}, \texttt{KanbanReorderTest}, \texttt{KanbanProy
 Flujos completos & 5 & \texttt{Flujos\textbackslash *}: autenticación, inventario, exportación, escaneo QR y consulta al asistente de principio a fin. \\ \hline
 Alertas, esquema y servicios & 8 & \texttt{NotificacionesTest}, \texttt{AlertServiceTest}, \texttt{MigrationsSchemaSanityTest} y pruebas base del framework: bandeja de alertas por usuario, marcado como leída y no repetición de avisos. \\ \hline
 Reglas de despacho y acceso & 21 & \texttt{ReglasDespachoYSeguridadTest}: lotes en cuarentena o vencidos no se despachan (salvo baja por desperdicio), FEFO también en el despacho por lote y por QR, órdenes de compra por rol, límite de intentos de inicio de sesión y monitor del servidor solo para administradores. \\ \hline
-\textbf{Total} & \textbf{149} & 148 aprobadas, 1 omitida, 553 aserciones. \\ \hline
+\textbf{Total} & \textbf{166} & 165 aprobadas, 1 omitida, 598 aserciones. \\ \hline
 \end{longtable}
 
 \section{Pruebas de extremo a extremo}
@@ -62,7 +62,7 @@ Reglas de despacho y acceso & 21 & \texttt{ReglasDespachoYSeguridadTest}: lotes 
 
 La suite Playwright tiene \textbf{61 pruebas} y las \textbf{61 aprobaron}. Se ejecutan en Chromium con una ventana de escritorio de 1366$\times$768 y, para las pruebas móviles, con una pantalla de 390$\times$844.
 
-\begin{table}[!htbp]
+\begin{table}[H]
 \centering
 \caption{Pruebas de extremo a extremo.}
 \label{tab:pru_e2e}
@@ -94,7 +94,7 @@ Las pruebas y la verificación en producción encontraron defectos que se corrig
 
 Sobre la versión desplegada se verificó que el operario recibe acceso denegado (HTTP 403) en la gestión de usuarios y de claves de API, que el administrador sí accede, y que la aplicación no muestra información interna ante un error. Con el modelo \texttt{gpt-oss:120b-cloud} se hicieron las consultas de la Tabla \ref{tab:pru_rag} sobre los datos de demostración. Las cantidades se contrastaron con una consulta directa a la base de datos (harina: 5\,810,85 kg panificable más 589,98 kg integral). La pregunta por los vencimientos de la semana se agregó después de corregir el defecto descrito en la sección anterior.
 
-\begin{table}[!htbp]
+\begin{table}[H]
 \centering
 \caption{Consultas al asistente en producción (25 de septiembre de 2026).}
 \label{tab:pru_rag}
@@ -103,7 +103,6 @@ Sobre la versión desplegada se verificó que el operario recibe acceso denegado
 \textbf{Pregunta} & \textbf{Respuesta (extracto)} & \textbf{Tiempo} \\
 \hline
 ¿Cuánta harina de trigo hay? & Hay 6\,400,83 kg de harina de trigo (suma de los lotes panificable e integral). & 0,7 s \\ \hline
-¿Cuánto ajonjolí queda? & Ajonjolí descortezado: 221,27 kg. & 0,8 s \\ \hline
 ¿Qué lotes vencen esta semana? & Mogolla integral x 6, lote MOG-01-260924, vence 2026-09-29 (en 4 días); pan hamburguesa x 8, lote HAM-01-260924, vence 2026-09-30 (en 5 días); \ldots{} hasta 2026-10-02. & 1,3 s \\ \hline
 ¿Cuánto queso hay? & El material queso no está registrado en el inventario. Materiales registrados que podrían coincidir: mantequilla sin sal, margarina de hojaldre, \ldots & 1,1 s \\ \hline
 \end{tabular}
@@ -121,7 +120,7 @@ Durante la primera medición se encontraron dos fallos del evaluador, no del asi
 
 \subsection{Resultados}
 
-\begin{table}[!htbp]
+\begin{table}[H]
 \centering
 \caption{Precisión del asistente antes y después de las correcciones.}
 \label{tab:pru_asistente}
@@ -129,24 +128,24 @@ Durante la primera medición se encontraron dos fallos del evaluador, no del asi
 \hline
 \textbf{Conjunto} & \textbf{Línea base} & \textbf{Final} & \textbf{Observación} \\
 \hline
-Batería (50 consultas) & 34/50 (68\,\%) & 48/50 (96\,\%) & Clasificador de intención: 43/50 $\rightarrow$ 50/50. \\ \hline
+Batería (50 consultas) & 34/50 (68\,\%) & 50/50 (100\,\%) & Clasificador de intención: 43/50 $\rightarrow$ 48/50; las dos diferencias no cambian la respuesta. \\ \hline
 Validación (20 consultas) & 11/20 (55\,\%) & 20/20 (100\,\%) & Sus fallos de la línea base se revisaron al corregir. \\ \hline
-Prueba ciega (10 consultas) & --- & 9/10 (90\,\%) & Estimación más honesta de la precisión con preguntas nuevas. \\ \hline
+Prueba ciega (10 consultas) & --- & 8/10 (80\,\%) & Estimación más honesta de la precisión con preguntas nuevas. \\ \hline
 Operario coloquial (18) & 6/18 (33\,\%) & 18/18 & Conjunto usado para corregir; no mide precisión. \\ \hline
 Operario, prueba ciega (8) & --- & 7/8 (88\,\%) & Lenguaje coloquial nuevo, escrito antes de corregir. \\ \hline
 \end{tabular}
 \end{table}
 
-Por grupo, la línea base fallaba por completo en valorización (0 de 5), información de lote (0 de 4), conciliación (0 de 3) y resumen (0 de 2): el contexto no incluía costos, no reconocía los lotes por su número real ni traía los ajustes del Kardex ni los totales. Tras corregirlo (Capítulo \ref{chap:implementacion}), esos grupos pasaron a 4 de 5, 4 de 4, 3 de 3 y 2 de 2. La mediana del tiempo de respuesta fue de 0,6 segundos.
+Por grupo, la línea base fallaba por completo en valorización (0 de 5), información de lote (0 de 4), conciliación (0 de 3) y resumen (0 de 2): el contexto no incluía costos, no reconocía los lotes por su número real ni traía los ajustes del Kardex ni los totales. Tras corregirlo (Capítulo \ref{chap:implementacion}), esos grupos pasaron a 4 de 5, 4 de 4, 3 de 3 y 2 de 2.
 
-La medición final se hizo el 27 de septiembre, después de ampliar el clasificador con el lenguaje coloquial de un operario (cuarentena, stock bajo y formas de decir ``por vencer''). Para ese trabajo se escribieron dos conjuntos: 18 preguntas coloquiales que sirvieron para corregir, por lo que su 18/18 no mide precisión, y 8 preguntas nuevas escritas antes de corregir y ejecutadas una sola vez, cuyo 7/8 es la estimación honesta para ese lenguaje. Los fallos que quedan son cuatro. En la batería, ante ``¿cuál es el costo del aceite de soya en bodega?'' el asistente dio el costo unitario y no el valor total que pedía el criterio, y ante ``¿qué lotes vencen en la próxima quincena?'' omitió seis de los lotes de la lista: con listas largas el modelo resume en lugar de enumerar. El mismo problema explica el fallo de la prueba ciega de operario. En la prueba ciega original, ante ``hazme un panorama de la bodega'' entendió ``la bodega'' como las bodegas físicas y solo dio sus ocupaciones. Se mantienen como fallos porque así lo dicta el criterio fijado de antemano.
+La medición final se hizo el 1 de octubre, después de dos cambios: el tope de salida dejó de aplicarse a los modelos en la nube, porque cortaba las listas largas (con él, la batería bajó a 45 de 50), y el modelo pasó a clasificar primero, con los patrones de reserva (Capítulo \ref{chap:implementacion}). Antes se había ampliado el clasificador con el lenguaje coloquial de un operario: 18 preguntas que sirvieron para corregir, por lo que su 18/18 no mide precisión, y 8 nuevas escritas antes de corregir. El cambio del clasificador se hizo tras ver que la pregunta ``¿qué se está poniendo viejo y hay que sacar ya?'', de ese conjunto ciego, fallaba con todos los modelos; esa frase no se agregó al sistema, pero desde entonces su 7/8 ya no es una medición ciega pura. Los tres fallos que quedan son omisiones del modelo con los datos a la vista ---la cantidad del último movimiento del huevo, el total de lotes y el valor en el panorama, y lotes de la lista de despacho--- y se mantienen como fallos según el criterio fijado de antemano. Las respuestas varían entre ejecuciones (el 27 de septiembre, 48 de 50 y 9 de 10). Con el mismo RAG, otros nueve modelos acertaron entre 100 y 105 de 106, incluidos tres hasta 27 veces más costosos: la precisión depende poco del modelo. La comparación, con tiempos y costos, está en el estudio de costos, anexo digital en \url{https://tesis.pymetory.com/estudio-de-costos.pdf}. El tiempo mediano de respuesta fue de 1,2 segundos.
 
 \section{Evaluación heurística}
 \label{sec:pru_nielsen}
 
 Se recorrieron las 17 pantallas de la aplicación, en escritorio y en celular, contra las 10 heurísticas de Nielsen \cite{nielsen1994heuristics}, y cada hallazgo se verificó en la interfaz y en el código. La severidad se calificó con la escala de Nielsen, de 0 (no es problema) a 4 (catastrófico). La evaluación la hizo un solo evaluador; Nielsen recomienda de tres a cinco para encontrar la mayoría de los problemas, de modo que no reemplaza la prueba con usuario. El informe completo, con la pantalla y el elemento de cada hallazgo, está en \texttt{docs/evaluaciones/evaluacion-heuristica-nielsen.md}. La vista Reabastecimiento (Sección \ref{sec:imp_proyeccion}) se construyó después de esta evaluación y no forma parte de ella.
 
-\begin{table}[!htbp]
+\begin{table}[H]
 \centering
 \caption{Hallazgos de la evaluación heurística por severidad.}
 \label{tab:pru_nielsen}
@@ -203,11 +202,11 @@ El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La
 \textbf{Componente del indicador} & \textbf{Evidencia} & \textbf{Estado} \\
 \hline
 \endhead
-111 casos de prueba ejecutados & 210 pruebas automatizadas (149 PHPUnit y 61 de extremo a extremo). & Cumplido \\ \hline
-Tasa de éxito global $\geq$ 95\% & 209 de 209 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
+111 casos de prueba ejecutados & 227 pruebas automatizadas (166 PHPUnit y 61 de extremo a extremo). & Cumplido \\ \hline
+Tasa de éxito global $\geq$ 95\% & 226 de 226 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
 Casos de uso automatizados con Playwright & 34 casos del plan que recorren los casos de uso. & Cumplido \\ \hline
 7 escenarios de despacho FEFO & 7 pruebas sobre la regla FEFO (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
-50 consultas en español para medir la precisión del asistente & Batería de 50: 48 correctas (96\,\%); prueba ciega: 9 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
+50 consultas en español para medir la precisión del asistente & Batería de 50: 50 correctas (100\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
 Evaluación heurística de Nielsen & 14 hallazgos, 13 corregidos (Tabla \ref{tab:pru_nielsen}). & Cumplido \\ \hline
 Auditoría de accesibilidad WCAG AA & Sin incumplimientos automáticos en las 34 vistas y en la vista Reabastecimiento; cinco criterios manuales cumplidos (Sección \ref{sec:pru_wcag}). & Cumplido \\ \hline
 Prueba con usuario & Protocolo listo (Sección \ref{sec:pru_usuario}). & Pendiente \\ \hline
