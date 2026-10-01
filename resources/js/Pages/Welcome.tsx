@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import {
     ArrowRight, BellRing, Boxes, CalendarClock, ChevronDown, FileSpreadsheet, GraduationCap, MessageSquareText,
-    PackageCheck, QrCode, ScrollText, ShieldCheck, Warehouse,
+    PackageCheck, Play, QrCode, ScrollText, ShieldCheck, Warehouse, X,
 } from 'lucide-react';
 import '../../css/landing.css';
 
@@ -62,6 +62,18 @@ export default function Welcome() {
     const [chatPaso, setChatPaso] = useState(0);
     const [estatico] = useState(prefiereMenosMovimiento);
     const smootherRef = useRef<ScrollSmoother | null>(null);
+    const [videoAbierto, setVideoAbierto] = useState(false);
+    const cerrarVideoRef = useRef<HTMLButtonElement>(null);
+
+    // Comercial en ventana: pausa el scroll suave mientras está abierto y se cierra con Escape.
+    useEffect(() => {
+        if (!videoAbierto) return;
+        smootherRef.current?.paused(true);
+        cerrarVideoRef.current?.focus();
+        const alTeclear = (e: KeyboardEvent) => { if (e.key === 'Escape') setVideoAbierto(false); };
+        window.addEventListener('keydown', alTeclear);
+        return () => { window.removeEventListener('keydown', alTeclear); smootherRef.current?.paused(false); };
+    }, [videoAbierto]);
 
     // ── Secuencia de fotogramas en canvas ─────────────────────────────────
     useEffect(() => {
@@ -254,11 +266,10 @@ export default function Welcome() {
                                 <p className="lx-muted mt-6 max-w-md text-lg leading-relaxed">
                                     Harina en bultos, levadura en cajas, semillas en bolsas. Pymetory lo lleva todo en kilos y por lote.
                                 </p>
-                                {estatico && (
-                                    <div className="mt-9 flex flex-wrap gap-3">
-                                        <a href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></a>
-                                    </div>
-                                )}
+                                <div className="mt-9 flex flex-wrap gap-3">
+                                    {estatico && <a href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></a>}
+                                    <button type="button" onClick={() => setVideoAbierto(true)} className="lx-btn lx-btn-ghost"><Play size={16} /> Ver el video (45 s)</button>
+                                </div>
                             </div>
                             {!estatico && (
                                 <>
@@ -282,6 +293,7 @@ export default function Welcome() {
                                         <div className="mt-9 flex flex-wrap gap-3">
                                             <a href="/login" className="lx-btn lx-btn-primary">Entrar a la demo <ArrowRight size={16} /></a>
                                             <a href="#como" onClick={irA('#como')} className="lx-btn lx-btn-ghost">Cómo funciona</a>
+                                            <button type="button" onClick={() => setVideoAbierto(true)} className="lx-btn lx-btn-ghost"><Play size={16} /> Ver el video (45 s)</button>
                                         </div>
                                     </div>
                                     <div data-cue className="lx-dim absolute bottom-12 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 text-xs font-semibold tracking-widest">
@@ -399,6 +411,23 @@ export default function Welcome() {
                     </footer>
                 </div>
             </div>
+
+            {videoAbierto && (
+                <div role="dialog" aria-modal="true" aria-label="Comercial de Pymetory" onClick={() => setVideoAbierto(false)}
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm sm:p-10">
+                    <div className="relative w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+                        <button ref={cerrarVideoRef} type="button" onClick={() => setVideoAbierto(false)} aria-label="Cerrar el video"
+                            className="absolute -top-12 right-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+                            Cerrar <X size={18} />
+                        </button>
+                        <video className="aspect-video w-full rounded-2xl bg-black shadow-2xl" controls autoPlay playsInline preload="metadata"
+                            poster="/video/pymetory-comercial-poster.jpg"
+                            src={typeof window !== 'undefined' && window.innerWidth < 900 ? '/video/pymetory-comercial-720.mp4' : '/video/pymetory-comercial-1080.mp4'}>
+                            Tu navegador no puede reproducir el video.
+                        </video>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

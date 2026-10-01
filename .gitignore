@@ -177,3 +177,6 @@ sitios/tesis/pymetory-tesis.pdf
 /overleaf_tesis_humanizado/Imagenes/*
 !/overleaf_tesis_humanizado/Imagenes/github_project_board.png
 /tests/screenshots/
+
+# Video del comercial (se sube aparte al servidor, como public/build)
+/public/video/
