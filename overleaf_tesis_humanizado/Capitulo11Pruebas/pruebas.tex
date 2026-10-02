@@ -2,7 +2,7 @@
 % Capítulo: Pruebas
 % Orden del director (19-sep-2026): pruebas unitarias, de integración, con usuario y
 % algún reporte. Cifras de las ejecuciones del 27-sep-2026:
-%   php artisan test  -> 166 pruebas (165 aprobadas, 1 omitida), 598 aserciones, 44 clases (1-oct-2026)
+%   php artisan test  -> 178 pruebas (177 aprobadas, 1 omitida), 638 aserciones, 46 clases (2-oct-2026)
 %   npx playwright test -> 61 de 61 aprobadas
 %   rag:evaluar (producción, gpt-oss:120b-cloud) -> docs/evaluaciones/*-corregido-20260927-*.json
 % -------------------------------------------------
@@ -28,7 +28,7 @@ Las pruebas PHPUnit se ejecutan automáticamente en cada cambio que llega a la r
 \section{Pruebas unitarias y de integración}
 \label{sec:pru_phpunit}
 
-La suite PHPUnit tiene \textbf{166 pruebas en 44 clases}: 165 aprobadas y 1 omitida, con \textbf{598 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
+La suite PHPUnit tiene \textbf{178 pruebas en 46 clases}: 177 aprobadas y 1 omitida, con \textbf{638 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
 
 En Laravel, la mayoría de estas pruebas son de integración: envían una petición HTTP y recorren rutas, \textit{middleware}, controladores y base de datos. Algunas prueban un componente aislado, como el modelo \texttt{Movimiento} (inmutabilidad), el umbral del modelo \texttt{Lote} o el clasificador del asistente, y cumplen el papel de pruebas unitarias. La Tabla \ref{tab:pru_phpunit} las agrupa por área.
 
@@ -45,8 +45,8 @@ En Laravel, la mayoría de estas pruebas son de integración: envían una petici
 \endhead
 FEFO & 10 & \texttt{FefoTest}, \texttt{ConsumptionFefoTest}, \texttt{FefoUmbralTest}, \texttt{ExpiredLoteRegressionTest}, \texttt{DashboardCriticosConsistencyTest}: orden de despacho por vencimiento, consumo que atraviesa varios lotes, lotes vencidos, umbral general y umbral propio de cada insumo. \\ \hline
 Kardex & 11 & \texttt{KardexTest}, \texttt{KardexInmutableTest}, \texttt{KardexPaginadoTest}: registro de movimientos, rechazo de edición y borrado, protección en la base de datos, entrada al recibir órdenes de compra y paginación. \\ \hline
-Seguridad y roles & 13 & \texttt{UserManagementTest}, \texttt{ApiKeyTest}, \texttt{Auth\textbackslash AuthenticationTest}, \texttt{SettingsTest}: acceso por rol, ausencia de registro público y claves cifradas. \\ \hline
-Asistente & 39 & \texttt{ChatLLMTest}, \texttt{ChatRagContextTest}, \texttt{RespaldoLocalTest}, \texttt{ConsumoTokensTest}, \texttt{ClasificadorYRespaldoTest}, \texttt{EspectroModelosTest}, \texttt{ChatLLMLiveTest} (omitida): clasificación con el modelo y con patrones de reserva, respaldos, tokens por consulta, tope de salida, palanca de modelos, material inexistente, contexto filtrado, vencimientos de la semana, valorización, conciliación y lotes por su número. \\ \hline
+Seguridad y roles & 20 & \texttt{UserManagementTest}, \texttt{ApiKeyTest}, \texttt{ApiKeySeguridadTest}, \texttt{Auth\textbackslash AuthenticationTest}, \texttt{SettingsTest}: acceso por rol, ausencia de registro público, claves cifradas que solo se envían al servidor oficial de cada proveedor y prueba de conexión sin gastar tokens. \\ \hline
+Asistente & 44 & \texttt{ChatLLMTest}, \texttt{ChatRagContextTest}, \texttt{RespaldoLocalTest}, \texttt{HistorialChatTest}, \texttt{ConsumoTokensTest}, \texttt{ClasificadorYRespaldoTest}, \texttt{EspectroModelosTest}, \texttt{ChatLLMLiveTest} (omitida): clasificación con el modelo y con patrones de reserva, respaldos, tokens por consulta, tope de salida, palanca de modelos, material inexistente, contexto filtrado, vencimientos de la semana, valorización, conciliación y lotes por su número. \\ \hline
 Operación de inventario & 27 & \texttt{InventoryTest}, \texttt{InventoryStoreTest}, \texttt{TransferTest}, \texttt{PurchaseOrderTest}, \texttt{QRScanTest}, \texttt{LabelTest}, \texttt{TagTest}, \texttt{BodegaGestionTest}, \texttt{CategoriasTest}: categorías sin duplicados; bodegas con imagen (solo administrador) y ocupación sin mezclar unidades; recepción de órdenes con lote, vencimiento y bodega reales, e ingreso de lotes de insumos existentes. \\ \hline
 Reabastecimiento & 11 & \texttt{ProyeccionInventarioTest}: consumo diario, cobertura, fecha de agotamiento y punto de reorden con fechas fijas; exclusión de transferencias y ajustes; consumo por semana; comparación por motivo; y clasificación de las preguntas nuevas sin cambiar la de las baterías. \\ \hline
 Reportes & 14 & \texttt{ReportExportTest}: los tipos de reporte en PDF, CSV y Excel (archivo .xlsx válido con las mismas columnas que el CSV) y sus filtros. \\ \hline
@@ -54,7 +54,7 @@ Kanban & 7 & \texttt{KanbanTest}, \texttt{KanbanReorderTest}, \texttt{KanbanProy
 Flujos completos & 5 & \texttt{Flujos\textbackslash *}: autenticación, inventario, exportación, escaneo QR y consulta al asistente de principio a fin. \\ \hline
 Alertas, esquema y servicios & 8 & \texttt{NotificacionesTest}, \texttt{AlertServiceTest}, \texttt{MigrationsSchemaSanityTest} y pruebas base del framework: bandeja de alertas por usuario, marcado como leída y no repetición de avisos. \\ \hline
 Reglas de despacho y acceso & 21 & \texttt{ReglasDespachoYSeguridadTest}: lotes en cuarentena o vencidos no se despachan (salvo baja por desperdicio), FEFO también en el despacho por lote y por QR, órdenes de compra por rol, límite de intentos de inicio de sesión y monitor del servidor solo para administradores. \\ \hline
-\textbf{Total} & \textbf{166} & 165 aprobadas, 1 omitida, 598 aserciones. \\ \hline
+\textbf{Total} & \textbf{178} & 177 aprobadas, 1 omitida, 638 aserciones. \\ \hline
 \end{longtable}
 
 \section{Pruebas de extremo a extremo}
@@ -202,8 +202,8 @@ El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La
 \textbf{Componente del indicador} & \textbf{Evidencia} & \textbf{Estado} \\
 \hline
 \endhead
-111 casos de prueba ejecutados & 227 pruebas automatizadas (166 PHPUnit y 61 de extremo a extremo). & Cumplido \\ \hline
-Tasa de éxito global $\geq$ 95\% & 226 de 226 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
+111 casos de prueba ejecutados & 239 pruebas automatizadas (178 PHPUnit y 61 de extremo a extremo). & Cumplido \\ \hline
+Tasa de éxito global $\geq$ 95\% & 238 de 238 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
 Casos de uso automatizados con Playwright & 34 casos del plan que recorren los casos de uso. & Cumplido \\ \hline
 7 escenarios de despacho FEFO & 7 pruebas sobre la regla FEFO (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
 50 consultas en español para medir la precisión del asistente & Batería de 50: 50 correctas (100\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
