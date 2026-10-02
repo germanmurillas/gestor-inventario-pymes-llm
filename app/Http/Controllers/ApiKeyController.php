@@ -50,6 +50,7 @@ class ApiKeyController extends Controller
             ApiKey::where('tipo', $validated['tipo'])->update(['activo' => false]);
         }
 
+        $this->validarBaseUrl($validated['tipo'], $validated['base_url'] ?? null);
         $apiKey = ApiKey::create($validated);
         $this->audit('crear', $apiKey->id);
 
@@ -76,6 +77,9 @@ class ApiKeyController extends Controller
             ApiKey::where('tipo', $apiKey->tipo)->where('id', '!=', $apiKey->id)->update(['activo' => false]);
         }
 
+        if (array_key_exists('base_url', $validated) || array_key_exists('tipo', $validated)) {
+            $this->validarBaseUrl($validated['tipo'] ?? $apiKey->tipo, $validated['base_url'] ?? $apiKey->base_url);
+        }
         $apiKey->update($validated);
         $this->audit('editar', $apiKey->id);
 
@@ -90,26 +94,79 @@ class ApiKeyController extends Controller
         return response()->json(['message' => 'API Key eliminada']);
     }
 
-    /** POST /api/api-keys/{id}/test — verifica que la key funcione contra su provider */
-    public function test(ApiKey $apiKey)
+    /**
+     * Servidores permitidos por tipo de proveedor. La clave solo se envía a estos destinos (evita que una base_url
+     * manipulada filtre la clave o sirva para explorar la red interna del servidor).
+     */
+    private function destinosPermitidos(string $tipo): array
     {
-        $providers = config('llm_providers', []);
-        $cfg = $providers[$apiKey->tipo] ?? [];
-        $url = $apiKey->base_url ?: ($cfg['base_url'] ?? '');
-        if (!$url) return response()->json(['ok' => false, 'error' => 'Sin base URL configurada'], 422);
+        $ollama = parse_url((string) config('services.ollama.url'));
+        return match ($tipo) {
+            'opencode', 'opencode-go' => [['https', 'opencode.ai']],
+            'openai'                  => [['https', 'api.openai.com']],
+            'ollama'                  => [[$ollama['scheme'] ?? 'http', $ollama['host'] ?? 'localhost'], ['http', '127.0.0.1'], ['http', 'localhost']],
+            default                   => [],
+        };
+    }
 
-        try {
-            $payload = ['model' => $apiKey->model_name ?: ($cfg['models'][0] ?? 'gpt-4o-mini'), 'messages' => [['role' => 'user', 'content' => 'hi']], 'max_tokens' => 5];
-            $resp = \Illuminate\Support\Facades\Http::timeout(10)->withToken($apiKey->key)->post($url, $payload);
-            $status = $resp->status();
-            $ok = $status >= 200 && $status < 300;
-            return response()->json(['ok' => $ok, 'status' => $status, 'detail' => $ok ? 'Conexión exitosa' : "HTTP $status"]);
-        } catch (\Exception $e) {
-            return response()->json(['ok' => false, 'error' => $e->getMessage()]);
+    private function urlPermitida(string $tipo, ?string $url): bool
+    {
+        $u = parse_url((string) $url);
+        if (!$u || empty($u['host']) || empty($u['scheme'])) return false;
+        foreach ($this->destinosPermitidos($tipo) as [$esquema, $host]) {
+            if (strtolower($u['scheme']) === $esquema && strtolower($u['host']) === $host && empty($u['user']) && empty($u['pass'])) return true;
+        }
+        return false;
+    }
+
+    private function validarBaseUrl(string $tipo, ?string $url): void
+    {
+        if ($url !== null && $url !== '' && !$this->urlPermitida($tipo, $url)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['base_url' => 'La dirección no corresponde al servidor oficial de este proveedor.']);
         }
     }
 
-    /** Enmascara la clave dejando visibles los primeros y últimos 4 caracteres. */
+    /**
+     * POST /api/api-keys/{id}/test — verifica la clave sin gastar tokens: consulta la lista de modelos del proveedor
+     * (responde 401 si la clave no es válida). Solo contra servidores permitidos y con mensajes genéricos.
+     */
+    public function test(ApiKey $apiKey)
+    {
+        $cfg = config("llm_providers.{$apiKey->tipo}", []);
+        $base = $apiKey->base_url ?: ($cfg['base_url'] ?? '');
+        $this->audit('probar', $apiKey->id);
+
+        if (!$this->urlPermitida($apiKey->tipo, $base)) {
+            return response()->json(['ok' => false, 'detail' => 'La dirección configurada no es la del servidor oficial del proveedor.'], 422);
+        }
+        try {
+            $clave = $apiKey->key;
+        } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+            return response()->json(['ok' => false, 'detail' => 'La clave guardada es ilegible: vuelve a ingresarla.'], 422);
+        }
+
+        // .../v1/chat/completions → .../v1/models (Ollama también lo expone en su API compatible con OpenAI).
+        $url = preg_replace('#/chat/completions/?$#', '/models', $base);
+        if ($url === $base) $url = rtrim($base, '/') . '/models';
+
+        try {
+            $resp = \Illuminate\Support\Facades\Http::timeout(8)->connectTimeout(5)->withoutRedirecting()
+                ->withToken($clave)->withHeaders(['User-Agent' => 'pymetory/1.0'])->get($url);
+            $estado = $resp->status();
+            [$ok, $detalle] = match (true) {
+                $resp->successful()             => [true, 'Conexión correcta: el proveedor aceptó la clave.'],
+                in_array($estado, [401, 403])   => [false, 'El proveedor rechazó la clave (revocada o incorrecta).'],
+                $estado === 429                 => [false, 'El proveedor indica límite de uso alcanzado; la clave existe.'],
+                default                         => [false, "El proveedor respondió con un error (HTTP {$estado})."],
+            };
+            return response()->json(['ok' => $ok, 'status' => $estado, 'detail' => $detalle]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Prueba de API key {$apiKey->id} sin conexión: " . class_basename($e));
+            return response()->json(['ok' => false, 'detail' => 'No se pudo conectar con el proveedor. Intenta de nuevo en un momento.']);
+        }
+    }
+
+    /** Enmascara la clave: solo se ven los últimos 4 caracteres. */
     private function mask(?string $key): string
     {
         if (!$key) {
@@ -119,7 +176,7 @@ class ApiKeyController extends Controller
         if ($len <= 8) {
             return str_repeat('•', $len);
         }
-        return substr($key, 0, 4) . str_repeat('•', max(4, $len - 8)) . substr($key, -4);
+        return str_repeat('•', 8) . substr($key, -4);
     }
 
     private function audit(string $accion, int $id): void

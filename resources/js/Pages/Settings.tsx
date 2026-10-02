@@ -104,7 +104,7 @@ export default function Settings() {
             setNk({ nombre: '', key: '', base_url: '', model_name: '', tipo: 'opencode', activo: true });
             await loadKeys();
         } catch (e: any) {
-            notify(e?.response?.data?.message || e?.message || 'Error al guardar. Refresca la página (F5).');
+            notify(e?.response?.data?.errors?.base_url?.[0] || e?.response?.data?.message || e?.message || 'Error al guardar. Refresca la página (F5).');
         }
     };
     const editKey = (k: ApiKey) => { setEditingId(k.id); setNk({ nombre: k.nombre, key: '', base_url: k.base_url || '', model_name: k.model_name || '', tipo: k.tipo, activo: k.activo }); };
@@ -115,9 +115,10 @@ export default function Settings() {
         notify('Probando...');
         try {
             const { data } = await axios.post(`/api/api-keys/${id}/test`);
-            notify(data.ok ? '✅ Conexión OK' : `❌ ${data.detail || data.error || 'Falló'}`);
+            notify((data.ok ? '✅ ' : '❌ ') + (data.detail || 'Sin respuesta del proveedor'));
         } catch (e: any) {
-            notify('❌ ' + (e?.response?.data?.error || e?.message || 'Error de conexión'));
+            const st = e?.response?.status;
+            notify('❌ ' + (st === 429 ? 'Demasiadas pruebas seguidas: espera un minuto.' : (e?.response?.data?.detail || 'No se pudo probar la conexión.')));
         }
     };
 
@@ -351,7 +352,7 @@ export default function Settings() {
                     {/* ── 4. API KEYS ── */}
                     <Section icon={KeyRound} title="API Keys" subtitle="Credenciales de proveedores LLM (cifradas en reposo)" open={openSec === 'keys'} onToggle={() => toggle('keys')}>
                         {apiKeys.length === 0 && <p className="text-xs pm-text-muted mb-4">Sin API Keys registradas.</p>}
-                        {(['opencode','openai','ollama','anthropic','google'] as const).filter(t => apiKeys.some(k => k.tipo === t)).map(tipo => {
+                        {[...new Set([...Object.keys(providers), ...apiKeys.map(k => k.tipo)])].filter(t => apiKeys.some(k => k.tipo === t)).map(tipo => {
                           const provider = providers[tipo];
                           const keys = apiKeys.filter(k => k.tipo === tipo);
                           return (
@@ -372,10 +373,10 @@ export default function Settings() {
                                       </div>
                                       <p className="text-[11px] pm-text-muted truncate">{k.key_masked} · {k.model_name || 'sin modelo'} · {k.base_url || 'sin url'}</p>
                                     </div>
-                                    <button onClick={() => toggleKey(k)} title={k.activo ? 'Desactivar' : 'Activar'} className={`p-2 rounded-lg ${k.activo ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-500 pm-bg'}`}><Power size={15} /></button>
-                                    <button onClick={() => testKey(k.id)} className="p-2 rounded-lg pm-accent-text hover:opacity-70" title="Probar conexión"><RefreshCw size={15} /></button>
-                                    <button onClick={() => editKey(k)} className="p-2 rounded-lg pm-text-muted hover:bg-slate-800" title="Editar"><Pencil size={15} /></button>
-                                    <button onClick={() => deleteKey(k.id)} className="p-2 rounded-lg pm-accent-text hover:opacity-70" title="Eliminar"><Trash2 size={15} /></button>
+                                    <button onClick={() => toggleKey(k)} title={k.activo ? 'Desactivar' : 'Activar'} aria-label={`${k.activo ? 'Desactivar' : 'Activar'} ${k.nombre}`} className={`p-2 rounded-lg ${k.activo ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-500 pm-bg'}`}><Power size={15} /></button>
+                                    <button onClick={() => testKey(k.id)} className="p-2 rounded-lg pm-accent-text hover:opacity-70" title="Probar conexión (sin gastar tokens)" aria-label={`Probar conexión de ${k.nombre}`}><RefreshCw size={15} /></button>
+                                    <button onClick={() => editKey(k)} className="p-2 rounded-lg pm-text-muted hover:bg-slate-800" title="Editar" aria-label={`Editar ${k.nombre}`}><Pencil size={15} /></button>
+                                    <button onClick={() => deleteKey(k.id)} className="p-2 rounded-lg pm-accent-text hover:opacity-70" title="Eliminar" aria-label={`Eliminar ${k.nombre}`}><Trash2 size={15} /></button>
                                   </div>
                                 ))}
                               </div>
@@ -383,8 +384,8 @@ export default function Settings() {
                           );
                         })}
                         <div className="grid md:grid-cols-3 gap-3 p-4 rounded-lg bg-slate-950/50 border border-slate-700/60">
-                            <input className={field} placeholder="Nombre *" value={nk.nombre} onChange={e => setNk({...nk, nombre: e.target.value})} />
-                            <select className={field} value={nk.tipo} onChange={e => {
+                            <input className={field} aria-label="Nombre de la clave" placeholder="Nombre *" value={nk.nombre} onChange={e => setNk({...nk, nombre: e.target.value})} />
+                            <select className={field} aria-label="Proveedor" value={nk.tipo} onChange={e => {
                               const t = e.target.value;
                               const p = providers[t] || {};
                               setNk(prev => ({...prev, tipo: t, base_url: p.base_url || '', model_name: (p.models || [])[0] || ''}));
@@ -392,14 +393,14 @@ export default function Settings() {
                                 {Object.entries(providers).filter(([,p]:[string,any]) => p.enabled !== false).map(([k,v]:[string,any]) => <option key={k} value={k}>{v.label || k}</option>)}
                                 {Object.keys(providers).length === 0 && <option value="opencode">OpenCode</option>}
                             </select>
-                            <select className={field} value={nk.model_name} onChange={e => setNk({...nk, model_name: e.target.value})}>
+                            <select className={field} aria-label="Modelo de la clave" value={nk.model_name} onChange={e => setNk({...nk, model_name: e.target.value})}>
                                 <option value="">— Modelo —</option>
                                 {(providers[nk.tipo]?.models || []).map((m:string) => <option key={m} value={m}>{m}</option>)}
                                 {nk.tipo === 'ollama' && ollamaModels.map((m:string) => <option key={m} value={m}>{m}</option>)}
                                 {((providers[nk.tipo]?.models || []).length === 0 && nk.tipo !== 'ollama') && <option value="">Sin modelos</option>}
                             </select>
-                            <input className={field} placeholder={editingId ? 'API Key (dejar vacio = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
-                            <input className={`${field} bg-slate-950/60 cursor-not-allowed`} placeholder="Base URL" value={nk.base_url} readOnly />
+                            <input className={field} type="password" autoComplete="off" spellCheck={false} aria-label="API Key" placeholder={editingId ? 'API Key (dejar vacío = no cambiar)' : 'API Key * (secreta)'} value={nk.key} onChange={e => setNk({...nk, key: e.target.value})} />
+                            <input className={`${field} bg-slate-950/60 cursor-not-allowed`} aria-label="Base URL (la define el proveedor)" placeholder="Base URL" value={nk.base_url} readOnly />
                             <button className={`${btn} pm-accent text-white justify-center`} onClick={saveKey}>
                                 {editingId ? <><Save size={15} /> Actualizar Key</> : <><Plus size={15} /> Nueva Key</>}
                             </button>

@@ -566,7 +566,7 @@ class ChatLLMController extends Controller {
 
         $settings = DB::table('settings')->whereIn('clave', [
             'llm_activo', 'llm_modelo', 'llm_temperatura', 'llm_max_tokens',
-            'llm_source', 'llm_external_key', 'llm_opencode_key', 'llm_num_ctx', 'llm_num_gpu', 'llm_prompt'
+            'llm_source', 'llm_num_ctx', 'llm_num_gpu', 'llm_prompt'
         ])->pluck('valor', 'clave');
         // rag:evaluar --fuente/--modelo: cambia el modelo solo dentro de ese comando (nunca en peticiones web).
         if (app()->runningInConsole()) {
@@ -585,8 +585,16 @@ class ChatLLMController extends Controller {
         $llmSource = $settings['llm_source'] ?? 'local';
 
         // ── Obtener API key desde tabla api_keys (fuente unica de verdad) ──
-        $apiKeyRecord = \App\Models\ApiKey::where('tipo', $llmSource)->where('activo', true)->first();
-        $apiKey = $apiKeyRecord?->key ?? $settings['llm_external_key'] ?? env('OPENAI_API_KEY');
+        // El origen "external" (API compatible con OpenAI) usa las claves de tipo "openai".
+        $apiKeyRecord = \App\Models\ApiKey::where('tipo', $llmSource === 'external' ? 'openai' : $llmSource)->where('activo', true)->first();
+        // Las claves solo viven cifradas en api_keys. Si una no se puede descifrar (APP_KEY rotada), se sigue sin
+        // clave y responde la cadena de respaldo en lugar de un error 500.
+        try {
+            $apiKey = $apiKeyRecord?->key ?? (string) config('services.openai.key', '');
+        } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+            \Log::warning("API key {$apiKeyRecord?->id} ilegible: vuelve a ingresarla en Ajustes.");
+            $apiKey = '';
+        }
         $apiBaseUrl = $apiKeyRecord?->base_url;
         $apiModel = $apiKeyRecord?->model_name;
 

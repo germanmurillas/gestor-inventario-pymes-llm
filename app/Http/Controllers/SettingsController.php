@@ -15,6 +15,7 @@ class SettingsController extends Controller
     {
         $settings = DB::table('settings')
             ->get()
+            ->reject(fn ($s) => self::esSecreto($s->clave))
             ->groupBy('grupo')
             ->map(fn($group) => $group->mapWithKeys(fn($s) => [$s->clave => [
                 'valor'       => $s->valor,
@@ -31,12 +32,22 @@ class SettingsController extends Controller
      * Persiste uno o más settings enviados desde el panel de configuración.
      * Body: { settings: { clave: valor, ... } }
      */
+    /** Las credenciales se gestionan solo en API Keys (cifradas); nunca pasan por los ajustes generales. */
+    private static function esSecreto(string $clave): bool
+    {
+        return (bool) preg_match('/(_key|_token|_secret|password|clave_api)$/i', $clave);
+    }
+
     public function update(Request $request)
     {
         $validated = $request->validate([
             'settings'   => 'required|array',
             'settings.*' => 'nullable|string|max:500',
         ]);
+
+        if ($secretos = array_values(array_filter(array_keys($validated['settings']), [self::class, 'esSecreto']))) {
+            return response()->json(['success' => false, 'message' => 'Las claves se gestionan en API Keys: ' . implode(', ', $secretos)], 422);
+        }
 
         DB::beginTransaction();
         try {
@@ -96,7 +107,7 @@ class SettingsController extends Controller
      */
     public function get(string $clave)
     {
-        $setting = DB::table('settings')->where('clave', $clave)->first();
+        $setting = self::esSecreto($clave) ? null : DB::table('settings')->where('clave', $clave)->first();
         if (!$setting) {
             return response()->json(['error' => 'Clave no encontrada'], 404);
         }
