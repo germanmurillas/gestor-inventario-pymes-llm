@@ -434,7 +434,7 @@ class ChatLLMController extends Controller {
         $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó, usando exactamente las cifras del contexto (si hay una línea TOTAL, da ese total con su unidad). Si pregunta por un material, habla solo de ese material. Si pregunta por vencimientos, indica material, lote y fecha, del más próximo al más lejano, e incluye todos los lotes listados. Si pregunta por cuarentena o por insumos bajo el mínimo, menciona todos los del contexto. NO repitas todo el inventario a menos que te lo pidan.";
         // El asistente responde en texto: si piden un gráfico o un archivo, se dice dónde está en la aplicación.
         if (preg_match('/gr[aá]fic|diagrama|descarg|export|excel|\bpdf\b/iu', $query)) {
-            $context .= " El asistente no genera gráficos ni archivos: responde con los datos en texto y menciona que los gráficos de consumo por periodo están en la vista Reabastecimiento y que el reporte de consumo se descarga en PDF, CSV o Excel desde Reportes.";
+            $context .= " El asistente no genera gráficos ni archivos. PRIMERO responde con los datos del contexto (cada insumo con su cifra y unidad), como lo harías sin el pedido del gráfico; AL FINAL, en una sola línea, indica que los gráficos de consumo por periodo están en la vista Reabastecimiento y que el reporte de consumo se descarga en PDF, CSV o Excel desde Reportes.";
         }
 
         return $context;
