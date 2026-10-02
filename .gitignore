@@ -180,3 +180,7 @@ sitios/tesis/pymetory-tesis.pdf
 
 # Video del comercial (se sube aparte al servidor, como public/build)
 /public/video/
+
+# Capturas del navegador (Playwright MCP) que no deben subirse
+/*.yml
+!/docker-compose.yml
