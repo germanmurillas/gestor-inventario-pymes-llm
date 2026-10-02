@@ -231,7 +231,11 @@ class ChatLLMController extends Controller {
             'consumo','consumió','consumio','consumimos','consumieron','gastamos','gastaron','gastó','usamos','usaron','usó','bajó','bajo','subió','subio',
             'cambió','cambio','disminuyó','disminuyo','aumentó','aumento','variación','variacion','estadística','estadistica','estadísticas','estadisticas',
             'diario','diaria','semanal','mensual','pasada','pasado','anterior','semanas','meses','día','dia','qué','por',
-            'más','mas','mayor','mayores','menor','menores','mucho','mucha','tanto','tanta','ultimos','últimos','ultimas','últimas'];
+            'más','mas','mayor','mayores','menor','menores','mucho','mucha','tanto','tanta','ultimos','últimos','ultimas','últimas',
+            // Pedidos de formato (gráficos, archivos): no nombran insumos.
+            'gráfico','grafico','gráficos','graficos','gráfica','grafica','gráficas','graficas','diagrama','descargar','descarga','descargable',
+            'exportar','genera','generar','generame','genérame','hazme','haz','crea','crear','hacer','imprimir','reporte','informe','archivo',
+            'pdf','excel','imagen','tabla','lista','porfavor','plis','gracias'];
 
         return collect(preg_split('/\s+/u', mb_strtolower($query)))
             ->map(fn($w) => preg_replace('/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/u', '', $w))
@@ -265,7 +269,10 @@ class ChatLLMController extends Controller {
 
         // Si la pregunta nombra un material que no existe, se dice explícitamente
         // en lugar de devolver lotes de otros materiales.
-        if (!empty($keywords) && empty($materialIds)
+        // Consumo de un periodo ("esta semana") sin insumo reconocido: se responde con el consumo total, no con "no registrado"
+        // (las palabras sueltas suelen ser relleno o errores de tipeo).
+        $consumoGeneral = $intent === 'consumption' && $ventana !== null;
+        if (!empty($keywords) && empty($materialIds) && !$consumoGeneral
             && (in_array($intent, ['stock_check', 'location', 'valuation', 'forecast', 'consumption'], true) || ($intent === 'expiration' && $ventana === null))) {
             $catalogo = \App\Models\Material::orderBy('name')->pluck('name')->join(', ');
             return "MATERIAL NO ENCONTRADO: ningún material registrado coincide con \"" . implode(' ', $keywords) . "\".\n"
@@ -383,7 +390,8 @@ class ChatLLMController extends Controller {
                 $dias = $ventana && $ventana > 0 ? $ventana : 7;
                 if (empty($materialIds)) {
                     $filas = $proyeccion->proyeccion(null, $dias)->where('consumo_diario', '>', 0)->sortByDesc('consumo_ventana')->take(10);
-                    $context = "CONSUMO DE LOS ÚLTIMOS {$dias} DÍAS (salidas por producción, venta, desperdicio o escáner en el Kardex), insumos con más consumo:\n"
+                    $context = (!empty($keywords) ? "NOTA: la pregunta no nombra un insumo registrado (palabras no reconocidas: " . implode(', ', $keywords) . "); se muestra el consumo total.\n" : '')
+                        . "CONSUMO DE LOS ÚLTIMOS {$dias} DÍAS (salidas por producción, venta, desperdicio o escáner en el Kardex), insumos con más consumo:\n"
                         . ($filas->isEmpty() ? '- No hubo consumo en ese periodo.' : $filas->map(fn ($f) => "- {$f['nombre']}: {$this->num($f['consumo_ventana'])} {$f['unidad']} (promedio {$this->num($f['consumo_diario'])} {$f['unidad']}/día)")->join("\n"));
                 } else {
                     $motivo = fn ($r) => \App\Services\ProyeccionInventario::MOTIVOS[$r['motivo']] ?? $r['motivo'];
@@ -424,6 +432,10 @@ class ChatLLMController extends Controller {
         $bodegas = \App\Models\Bodega::all()->map(fn ($b) => "{$b->name}: {$b->occupancy_percentage}% de " . $this->num($b->capacity) . " {$b->capacity_unit}")->join(' | ');
         $context .= "\n\nESTADO DE BODEGAS: {$bodegas}";
         $context .= "\n\nINSTRUCCIÓN: Responde ÚNICAMENTE lo que el usuario preguntó, usando exactamente las cifras del contexto (si hay una línea TOTAL, da ese total con su unidad). Si pregunta por un material, habla solo de ese material. Si pregunta por vencimientos, indica material, lote y fecha, del más próximo al más lejano, e incluye todos los lotes listados. Si pregunta por cuarentena o por insumos bajo el mínimo, menciona todos los del contexto. NO repitas todo el inventario a menos que te lo pidan.";
+        // El asistente responde en texto: si piden un gráfico o un archivo, se dice dónde está en la aplicación.
+        if (preg_match('/gr[aá]fic|diagrama|descarg|export|excel|\bpdf\b/iu', $query)) {
+            $context .= " El asistente no genera gráficos ni archivos: responde con los datos en texto y menciona que los gráficos de consumo por periodo están en la vista Reabastecimiento y que el reporte de consumo se descarga en PDF, CSV o Excel desde Reportes.";
+        }
 
         return $context;
     }

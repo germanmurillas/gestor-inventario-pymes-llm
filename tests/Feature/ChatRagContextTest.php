@@ -47,6 +47,28 @@ class ChatRagContextTest extends TestCase
         $this->assertStringNotContainsString('LT-AZU-1', $ctx);
     }
 
+    public function test_consumo_de_la_semana_con_palabras_de_relleno_da_el_consumo_total(): void
+    {
+        Material::factory()->create(['name' => 'Harina de trigo']);
+        $q = 'genermare un grafico para descargar sobre el consumo de esta semana porfavor';
+
+        $ctx = $this->invokePrivate('buildRagContext', $q, 'consumption');
+
+        $this->assertStringNotContainsString('MATERIAL NO ENCONTRADO', $ctx);
+        $this->assertStringContainsString('CONSUMO DE LOS ÚLTIMOS 7 DÍAS', $ctx);
+        $this->assertStringContainsString('palabras no reconocidas: genermare', $ctx);
+        $this->assertStringContainsString('no genera gráficos', $ctx);
+    }
+
+    public function test_consumo_de_un_insumo_inexistente_sin_periodo_sigue_diciendo_no_registrado(): void
+    {
+        Material::factory()->create(['name' => 'Harina de trigo']);
+
+        $ctx = $this->invokePrivate('buildRagContext', '¿Cuánto ajonjolí consumimos?', 'consumption');
+
+        $this->assertStringContainsString('MATERIAL NO ENCONTRADO', $ctx);
+    }
+
     public function test_material_existente_filtra_su_contexto(): void
     {
         $harina = Material::factory()->create(['name' => 'Harina de trigo']);
