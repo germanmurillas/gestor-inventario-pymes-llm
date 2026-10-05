@@ -1,13 +1,13 @@
 % -------------------------------------------------
 % Capítulo: Pruebas
 % Orden del director (19-sep-2026): pruebas unitarias, de integración, con usuario y
-% algún reporte. Cifras de las ejecuciones del 27-sep-2026:
+% algún reporte. Cifras (PHPUnit y Playwright del 2-oct-2026; PHPUnit confirmado el 4-oct):
 %   php artisan test  -> 178 pruebas (177 aprobadas, 1 omitida), 638 aserciones, 46 clases (2-oct-2026)
-%   npx playwright test -> 61 de 61 aprobadas
-%   rag:evaluar (producción, gpt-oss:120b-cloud) -> docs/evaluaciones/*-corregido-20260927-*.json
+%   npx playwright test -> 61 de 61 aprobadas (2-oct-2026)
+%   rag:evaluar (producción, gpt-oss:120b-cloud) -> docs/evaluaciones/*-final-20261001-*.json (medición final del 1-oct)
 % -------------------------------------------------
 
-Este capítulo presenta las pruebas con que se verificó Pymetory: pruebas unitarias y de integración sobre el backend, pruebas de extremo a extremo sobre la interfaz, verificaciones en producción y el protocolo de pruebas con usuario. Las cifras corresponden a ejecuciones del 27 de septiembre de 2026; las consultas al asistente de la Tabla \ref{tab:pru_rag} son del 25 de septiembre.
+Este capítulo presenta las pruebas con que se verificó Pymetory: pruebas unitarias y de integración sobre el backend, pruebas de extremo a extremo sobre la interfaz, verificaciones en producción y el protocolo de pruebas con usuario. Las pruebas automatizadas corresponden a las ejecuciones del 2 de octubre de 2026; la medición final del asistente, al 1 de octubre, y las consultas de la Tabla \ref{tab:pru_rag}, al 25 de septiembre.
 
 \section{Estrategia}
 \label{sec:pru_estrategia}

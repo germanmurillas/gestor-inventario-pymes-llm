@@ -1,0 +1,252 @@
+{
+    "resumen": {
+        "conjunto": "operario-ciega",
+        "etiqueta": "clasif-operario-ciega",
+        "fecha": "2026-10-01 22:07:28",
+        "total": 8,
+        "correctas": 7,
+        "precision": 87.5,
+        "intenciones_correctas": 8,
+        "precision_clasificador": 100,
+        "tiempo_mediano_s": 1.645,
+        "modelo": [
+            "gpt-oss:120b-cloud"
+        ],
+        "tokens": {
+            "entrada": {
+                "n": 8,
+                "promedio": 1073.3,
+                "mediana": 971,
+                "p95": 1580,
+                "maximo": 1580,
+                "suma": 8586
+            },
+            "salida": {
+                "n": 8,
+                "promedio": 547.8,
+                "mediana": 403,
+                "p95": 1363,
+                "maximo": 1363,
+                "suma": 4382
+            }
+        },
+        "por_grupo": {
+            "Cuarentena": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Críticos": {
+                "total": 2,
+                "correctas": 1
+            },
+            "Stock bajo el mínimo": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Existencias": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Insumo inexistente": {
+                "total": 1,
+                "correctas": 1
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Cuarentena",
+            "pregunta": "¿Qué mercancía está apartada por problemas de calidad?",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "quarantine",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "Harina de trigo panificable – Lote HAR‑NOV‑01 – 150 kg (en cuarentena).",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.16,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 796,
+            "tokens_salida": 250
+        },
+        {
+            "n": 2,
+            "grupo": "Cuarentena",
+            "pregunta": "¿Tenemos algo en cuarentena ahorita?",
+            "intencion_esperada": "quarantine",
+            "intencion_obtenida": "quarantine",
+            "esperado": [
+                "HAR-NOV-01"
+            ],
+            "respuesta": "Sí. En cuarentena está:\n\n- Harina de trigo panificable | Lote: HAR‑NOV‑01 | Stock: 150 kg | Vence: 2027‑03‑15.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.12,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 794,
+            "tokens_salida": 242
+        },
+        {
+            "n": 3,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué se está poniendo viejo y hay que sacar ya?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1",
+                "TAJ-01-260924",
+                "TAJ-01-260925",
+                "TAJ-01-260926",
+                "TAJ-02-260924",
+                "TAJ-02-260925",
+                "TAJ-02-260926",
+                "HAM-01-260925",
+                "HAM-01-260926",
+                "PER-01-260924",
+                "PER-01-260925",
+                "PER-01-260926",
+                "MOG-01-260925",
+                "MOG-01-260926"
+            ],
+            "respuesta": "- Pan perro x 8 – Lote PER-01-260924 – Vence 2026-09-30 (vencido 1 día)  \n- Mogolla integral x 6 – Lote MOG-01-260925 – Vence 2026-09-30 (vencido 1 día)  \n- Pan tajado blanco 500 g – Lote TAJ-01-260924 – Vence 2026-10-01 (hoy)  \n- Pan tajado integral 500 g – Lote TAJ-02-260924 – Vence 2026-10-01 (hoy)  \n- Pan hamburguesa x 8 con ajonjolí – Lote HAM-01-260925 – Vence 2026-10-01 (hoy)  \n- Pan perro x 8 – Lote PER-01-260925 – Vence 2026-10-01 (hoy)  \n- Mogolla integral x 6 – Lote MOG-01-260926 – Vence 2026-10-01 (hoy)  \n- Pan tajado blanco 500 g – Lote TAJ-01-260925 – Vence 2026-10-02 (en 1 día)  \n- Pan tajado integral 500 g – Lote TAJ-02-260925 – Vence 2026-10-02 (en 1 día)  \n- Pan hamburguesa x 8 con ajonjolí – Lote HAM-01-260926 – Vence 2026-10-02 (en 1 día)  \n- Pan perro x 8 – Lote PER-01-260926 – Vence 2026-10-02 (en 1 día)  \n- Pan tajado blanco 500 g – Lote TAJ-01-260926 – Vence 2026-10-03 (en 2 días)  \n- Pan tajado integral 500 g – Lote TAJ-02-260926 – Vence 2026-10-03 (en 2 días)  \n- Huevo líquido pasteurizado – Lote HUE-01-260914-1 – Vence 2026-10-05 (en 4 días)  \n- Crema pastelera base – Lote CRE-01-260908-1 – Vence 2026-10-08 (en 7 días)  \n- Levadura fresca prensada – Lote LEV-01-260905-1 – Vence 2026-10-10 (en 9 días)",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 3.91,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 1576,
+            "tokens_salida": 1363
+        },
+        {
+            "n": 4,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué hay que despachar ya antes de que se venza?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1",
+                "TAJ-01-260924",
+                "TAJ-01-260925",
+                "TAJ-01-260926",
+                "TAJ-02-260924",
+                "TAJ-02-260925",
+                "TAJ-02-260926",
+                "HAM-01-260925",
+                "HAM-01-260926",
+                "PER-01-260924",
+                "PER-01-260925",
+                "PER-01-260926",
+                "MOG-01-260925",
+                "MOG-01-260926"
+            ],
+            "respuesta": "- Pan perro x 8 – Lote **PER-01-260924** – Vence **2026‑09‑30** (VENCIDO)  \n- Mogolla integral x 6 – Lote **MOG-01-260925** – Vence **2026‑09‑30** (VENCIDO)  \n- Pan tajado blanco 500 g – Lote **TAJ-01-260924** – Vence **2026‑10‑01** (vence HOY)  \n- Pan tajado integral 500 g – Lote **TAJ-02-260924** – Vence **2026‑10‑01** (vence HOY)  \n- Pan hamburguesa x 8 con ajonjolí – Lote **HAM-01-260925** – Vence **2026‑10‑01** (vence HOY)  \n- Pan perro x 8 – Lote **PER-01-260925** – Vence **2026‑10‑01** (vence HOY)  \n- Mogolla integral x 6 – Lote **MOG-01-260926** – Vence **2026‑10‑01** (vence HOY)",
+            "correcta": false,
+            "motivo": "faltan: LEV-01-260905-1, HUE-01-260914-1, CRE-01-260908-1, TAJ-01-260925, TAJ-01-260926, TAJ-02-260925, TAJ-02-260926, HAM-01-260926, PER-01-260926",
+            "segundos": 3.51,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 1580,
+            "tokens_salida": 1043
+        },
+        {
+            "n": 5,
+            "grupo": "Stock bajo el mínimo",
+            "pregunta": "¿De qué estamos cortos?",
+            "intencion_esperada": "low_stock",
+            "intencion_obtenida": "low_stock",
+            "esperado": [
+                "Harina de trigo integral",
+                "Azúcar blanca",
+                "Sal refinada",
+                "Ajonjolí descortezado",
+                "Mantequilla sin sal",
+                "Manteca vegetal panadera",
+                "Aceite de soya",
+                "Arequipe para relleno",
+                "Bocadillo de guayaba",
+                "Crema pastelera base",
+                "Salsa de tomate para pizza",
+                "Bolsa para pan tajado",
+                "Etiqueta adhesiva de lote"
+            ],
+            "respuesta": "- Aceite de soya: faltan 21.16 L  \n- Ajonjolí descortezado: faltan 37.75 kg  \n- Arequipe para relleno: faltan 52.28 kg  \n- Azúcar blanca: faltan 592.76 kg  \n- Bocadillo de guayaba: faltan 24.74 kg  \n- Bolsa para pan tajado: faltan 542 und  \n- Crema pastelera base: faltan 1.1 kg  \n- Etiqueta adhesiva de lote: faltan 2 472 und  \n- Harina de trigo integral: faltan 23.16 kg  \n- Manteca vegetal panadera: faltan 64.64 kg  \n- Mantequilla sin sal: faltan 8.9 kg  \n- Sal refinada: faltan 78.9 kg  \n- Salsa de tomate para pizza: faltan 16.29 kg",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.5,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 1091,
+            "tokens_salida": 364
+        },
+        {
+            "n": 6,
+            "grupo": "Stock bajo el mínimo",
+            "pregunta": "¿Qué insumos hay que reponer?",
+            "intencion_esperada": "low_stock",
+            "intencion_obtenida": "low_stock",
+            "esperado": [
+                "Harina de trigo integral",
+                "Azúcar blanca",
+                "Sal refinada",
+                "Ajonjolí descortezado",
+                "Mantequilla sin sal",
+                "Manteca vegetal panadera",
+                "Aceite de soya",
+                "Arequipe para relleno",
+                "Bocadillo de guayaba",
+                "Crema pastelera base",
+                "Salsa de tomate para pizza",
+                "Bolsa para pan tajado",
+                "Etiqueta adhesiva de lote"
+            ],
+            "respuesta": "- Aceite de soya: hay 58.84 L | mínimo 80 L | faltan 21.16 L  \n- Ajonjolí descortezado: hay 212.25 kg | mínimo 250 kg | faltan 37.75 kg  \n- Arequipe para relleno: hay 7.72 kg | mínimo 60 kg | faltan 52.28 kg  \n- Azúcar blanca: hay 207.24 kg | mínimo 800 kg | faltan 592.76 kg  \n- Bocadillo de guayaba: hay 15.26 kg | mínimo 40 kg | faltan 24.74 kg  \n- Bolsa para pan tajado: hay 7 458 und | mínimo 8 000 und | faltan 542 und  \n- Crema pastelera base: hay 28.9 kg | mínimo 30 kg | faltan 1.1 kg  \n- Etiqueta adhesiva de lote: hay 528 und | mínimo 3 000 und | faltan 2 472 und  \n- Harina de trigo integral: hay 576.84 kg | mínimo 600 kg | faltan 23.16 kg  \n- Manteca vegetal panadera: hay 135.36 kg | mínimo 200 kg | faltan 64.64 kg  \n- Mantequilla sin sal: hay 31.1 kg | mínimo 40 kg | faltan 8.9 kg  \n- Sal refinada: hay 71.1 kg | mínimo 150 kg | faltan 78.9 kg  \n- Salsa de tomate para pizza: hay 13.71 kg | mínimo 30 kg | faltan 16.29 kg",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.79,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 1093,
+            "tokens_salida": 572
+        },
+        {
+            "n": 7,
+            "grupo": "Existencias",
+            "pregunta": "¿Cuánta sal refinada nos queda en bodega?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 71.1,
+            "respuesta": "71.1 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.74,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 805,
+            "tokens_salida": 106
+        },
+        {
+            "n": 8,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Tenemos almendras fileteadas?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No, el material **almendras fileteadas** no está registrado en el inventario.  \nLos materiales registrados que podrían corresponder a lo que busca son:\n\n- Ajonjolí descortezado  \n- Aceite de soya  \n- Manteca vegetal panadera  \n- Margarina de hojaldre  \n\nSi necesita alguno de estos o desea registrar las almendras, indíquelo.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.81,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 851,
+            "tokens_salida": 442
+        }
+    ]
+}
