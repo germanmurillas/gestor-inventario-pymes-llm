@@ -79,7 +79,7 @@ La clase \texttt{ConciliacionConteo} detecta las columnas: la del insumo es la q
 
 \subsection{Emparejamiento con los insumos}
 
-Cada fila se busca, en este orden, por código igual, por nombre igual (sin presentación, tildes ni mayúsculas) o por un nombre contenido en el otro, siempre que haya un único mejor candidato. Solo los dos primeros casos quedan marcados para aplicar; el tercero se muestra con el aviso ``por parecido del nombre: verifíquelo'' y sin marcar. Si hay empate (``HARINA'' con las dos harinas de la demostración) no se elige ninguno: se ofrecen sugerencias y el administrador decide. Un mismo insumo no puede quedar en dos filas.
+Cada fila se busca, en este orden, por código igual, por nombre igual (sin presentación, tildes ni mayúsculas) o por un nombre contenido en el otro, siempre que haya un único mejor candidato. Si los nombres tienen números distintos (``DE PAN PERRO X 12'' frente a ``Pan perro x 8'') no se empareja solo. Solo los dos primeros casos quedan marcados para aplicar; el tercero se muestra con el aviso ``por parecido del nombre: verifíquelo'' y sin marcar. Si hay empate (``HARINA'' con las dos harinas de la demostración) no se elige ninguno: se ofrecen sugerencias y el administrador decide. Un mismo insumo no puede quedar en dos filas.
 
 Si la unidad de la hoja y la del insumo son distintas pero convertibles (kg y g, L y mL) se convierte; si no lo son (kilos contra unidades) la fila no se aplica.
 
@@ -119,19 +119,23 @@ Medidas el 7 de octubre de 2026 en el entorno local.
 \toprule
 \textbf{Prueba} & \textbf{Qué verifica} \\
 \midrule
-PHPUnit (12 pruebas, 63 aserciones) & Lectura de un libro comprimido con textos compartidos y varias pestañas; lectura del .xlsx que exporta la propia aplicación; rechazo de archivos que no son .xlsx; números con separadores; detección de columnas, secciones, presentaciones y cantidades no numéricas; emparejamiento por código, nombre y parecido, y empates; conversión de kg a g; faltantes por FEFO y sobrantes en el lote más reciente; insumo sin lotes; la vista previa no modifica el inventario; CSV con punto y coma; un operario recibe 403; un insumo repetido se rechaza. \\
+PHPUnit (13 pruebas, 65 aserciones) & Lectura de un libro comprimido con textos compartidos y varias pestañas; lectura del .xlsx que exporta la propia aplicación; rechazo de archivos que no son .xlsx; números con separadores; detección de columnas, secciones, presentaciones y cantidades no numéricas; emparejamiento por código, nombre y parecido, empates y nombres con números distintos; conversión de kg a g; faltantes por FEFO y sobrantes en el lote más reciente; insumo sin lotes; la vista previa no modifica el inventario; CSV con punto y coma; un operario recibe 403; un insumo repetido se rechaza. \\
 Playwright (2 pruebas) & Con el archivo de ejemplo: pestaña activa, estados de cada fila, asignación manual de un insumo y botón de registro habilitado; el módulo aparece en el menú del administrador. \\
 axe-core, WCAG 2.1 AA & Vista con la comparación cargada en los seis temas, en escritorio y en celular: 0 incumplimientos. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Con estas, la suite PHPUnit completa pasa de las 178 reportadas en el Capítulo~11 del documento (medidas el 2 de octubre) a 190: 189 pasan y 1 se omite, con 701 aserciones.
+Con estas, la suite PHPUnit completa pasa de las 178 reportadas en el Capítulo~11 del documento (medidas el 2 de octubre) a 191: 190 pasan y 1 se omite, con 703 aserciones.
+
+\section{Prueba con la estructura de la hoja real}
+
+Como todavía no se tiene el archivo, el 7 de octubre se transcribió la foto de la hoja a un .xlsx de trabajo (seis pestañas mensuales y la de septiembre activa, una columna adicional a la derecha, secciones, una fila suelta antes de ``MATERIA PRIMA'' y filas de bolsas sin cantidad) y se corrió la vista previa en local, sin registrar nada; ese archivo no se publica. Resultado: se abrió la pestaña correcta, se detectaron las columnas A, B y C sin confundirse con la adicional, las dos secciones, las presentaciones y ``9TARROS'' como cantidad para revisar. Contra el catálogo de demostración solo se emparejaron por parecido el azúcar y el ajonjolí; los demás nombres no existen allí o son ambiguos (``SAL'' coincide con ``Sal refinada'' y con ``Mantequilla sin sal''), lo que se espera con un catálogo distinto al de la empresa. La prueba mostró que ``DE PAN PERRO X 12'', una bolsa, se emparejaba con el producto ``Pan perro x 8''; se corrigió con la regla de los números. ``DE PAN HAMBURGUESA X 8'' todavía se sugiere para el producto ``Pan hamburguesa x 8'': queda sin marcar y con el aviso de verificar.
 
 \section{Limitaciones}
 
 \begin{itemize}[nosep]
-\item \textbf{Aún no se ha probado con el archivo real de la empresa}, solo con su foto y con hojas de ejemplo que imitan el formato. La prueba con el archivo real queda pendiente.
+\item \textbf{Aún no se ha probado con el archivo real de la empresa}, solo con la transcripción de su foto y con hojas de ejemplo. La prueba con el archivo real queda pendiente.
 \item No crea insumos nuevos: las filas sin insumo en Pymetory se listan para registrarlos a mano con su categoría, bodega y lote.
 \item Compara solo el stock activo; los lotes en cuarentena no se cuentan.
 \item No lee el formato .xls antiguo (se debe guardar como .xlsx) ni fórmulas sin valor calculado.

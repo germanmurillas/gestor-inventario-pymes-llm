@@ -179,6 +179,19 @@ class ConciliacionConteoTest extends TestCase
         $this->assertSame('sin_coincidencia', $filas[3]['estado']);
     }
 
+    public function test_no_empareja_por_parecido_si_los_numeros_del_nombre_difieren(): void
+    {
+        Material::factory()->create(['code' => 'PT-PER-01', 'name' => 'Pan perro x 8', 'unit' => 'und']);
+        $servicio = app(ConciliacionConteo::class);
+
+        $filas = $servicio->comparar($servicio->interpretar([
+            1 => [0 => '52', 1 => 'DE PAN PERRO X 12', 2 => 10.0],
+        ], ['codigo' => 0, 'nombre' => 1, 'cantidad' => 2]), 'und');
+
+        $this->assertNull($filas[0]['material_id']);
+        $this->assertSame('Pan perro x 8', $filas[0]['sugerencias'][0]['nombre'], 'Queda como sugerencia');
+    }
+
     public function test_aplicar_registra_faltantes_por_fefo_y_sobrantes_en_el_lote_mas_reciente(): void
     {
         $admin = $this->admin();

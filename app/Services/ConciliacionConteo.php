@@ -266,7 +266,11 @@ class ConciliacionConteo
 
         $primero = $candidatos[0] ?? null;
         $unico = $primero && (!isset($candidatos[1]) || $candidatos[1]['puntos'] < $primero['puntos']);
-        return $primero && $primero['contenido'] && $unico ? [$primero['m'], 'parecido', $sugerencias] : [null, null, $sugerencias];
+        // Números distintos en los nombres ("PAN PERRO X 12" frente a "Pan perro x 8"): no es el mismo artículo.
+        $numeros = fn (string $n) => preg_match_all('/\d+/', preg_replace('/\([^)]*\)/u', '', $n), $x) ? $x[0] : [];
+        $mismosNumeros = $primero && (!$numeros($fila['nombre']) || !$numeros($primero['m']['nombre'])
+            || $numeros($fila['nombre']) == $numeros($primero['m']['nombre']));
+        return $primero && $primero['contenido'] && $unico && $mismosNumeros ? [$primero['m'], 'parecido', $sugerencias] : [null, null, $sugerencias];
     }
 
     /** @return array<int, float> Stock activo por insumo. */
