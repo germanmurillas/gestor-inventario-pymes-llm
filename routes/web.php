@@ -18,6 +18,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\PageAccessController;
 use App\Http\Controllers\ProyeccionController;
+use App\Http\Controllers\ConciliacionController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -96,6 +97,14 @@ Route::post('/inventory/consume-bulk', [ConsumptionController::class, 'consumeBu
 Route::patch('/inventory/adjust/{id}', [InventoryController::class, 'adjust'])
     ->middleware(['auth', 'verified', 'role:admin'])
     ->name('inventory.adjust');
+
+// ── Conciliación con el conteo físico de la hoja de cálculo de la empresa (solo administrador) ──
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::post('/conciliacion/vista-previa', [ConciliacionController::class, 'vistaPrevia'])
+        ->middleware('throttle:30,1')->name('conciliacion.vista-previa');
+    Route::post('/conciliacion/aplicar', [ConciliacionController::class, 'aplicar'])
+        ->middleware('throttle:10,1')->name('conciliacion.aplicar');
+});
 
 Route::post('/bodegas', [InventoryController::class, 'storeBodega'])
     ->middleware(['auth', 'verified', 'role:admin'])

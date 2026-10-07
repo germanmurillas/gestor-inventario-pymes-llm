@@ -16,7 +16,7 @@ import {
     ArrowRightLeft,
     Truck,
     Printer,
-    X, BookOpen, TrendingDown } from 'lucide-react';
+    X, BookOpen, TrendingDown, ClipboardCheck } from 'lucide-react';
 
 interface NavItem {
     icon: React.ElementType;
@@ -24,6 +24,8 @@ interface NavItem {
     view: string;
     href?: string;
     desc?: string;
+    /** Solo se muestra al administrador. */
+    admin?: boolean;
 }
 
 interface NavSection {
@@ -57,6 +59,7 @@ const DASHBOARD_SECTIONS: NavSection[] = [
             { icon: History, label: 'Historial QR', view: 'SCAN_HISTORY', desc: 'Registro de todos los escaneos QR' },
             { icon: ArrowRightLeft, label: 'Transferencias', view: 'TRANSFERENCIAS', desc: 'Mover stock entre bodegas' },
             { icon: Truck, label: 'Órdenes de compra', view: 'PURCHASE_ORDERS', desc: 'Crear y recibir órdenes de compra' },
+            { icon: ClipboardCheck, label: 'Conteo físico', view: 'CONCILIACION', desc: 'Importar la hoja de conteo y ajustar el Kardex', admin: true },
             { icon: Printer, label: 'Imprimir etiquetas', view: 'LABELS_PRINT', desc: 'Generar etiquetas con QR para lotes' },
             { icon: Bell, label: 'Alertas', view: 'NOTIFICACIONES', desc: 'Notificaciones de stock bajo y vencimientos' },
             { icon: Settings, label: 'Ajustes', href: '/settings-page', desc: 'Configuración: API Keys, usuarios, LLM' },
@@ -91,6 +94,7 @@ const KANBAN_SECTIONS: NavSection[] = [
             { icon: History,        label: 'Historial QR',    href: '/dashboard?v=SCAN_HISTORY' },
             { icon: ArrowRightLeft, label: 'Transferencias',  href: '/dashboard?v=TRANSFERENCIAS' },
             { icon: Truck,          label: 'Órdenes de compra',  href: '/dashboard?v=PURCHASE_ORDERS' },
+            { icon: ClipboardCheck, label: 'Conteo físico',   href: '/dashboard?v=CONCILIACION', admin: true },
             { icon: Printer,        label: 'Imprimir etiquetas', href: '/dashboard?v=LABELS_PRINT' },
             { icon: Bell,           label: 'Alertas',         href: '/dashboard?v=NOTIFICACIONES' },
             { icon: Settings,       label: 'Ajustes',         href: '/settings-page' },
@@ -160,7 +164,7 @@ export default function Sidebar({
                         >
                             {section.title}
                         </div>
-                        {section.items.map((item) => {
+                        {section.items.filter((item) => !item.admin || user?.role === 'admin').map((item) => {
                             const isActive = activeView === item.view;
                             // FIX-UI: py-3 -> py-2.5 y transition-all -> transition-colors.
                             // 'transition-all' animaba también width/padding, lo que producía

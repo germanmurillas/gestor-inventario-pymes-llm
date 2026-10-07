@@ -3,17 +3,17 @@ import { Link, router } from '@inertiajs/react';
 import gsap from 'gsap';
 import {
     ArrowRightLeft, BarChart3, Bell, BookOpen, Box, History, LayoutGrid, LogOut, MessageSquare, MoreHorizontal,
-    Printer, ScanLine, ScrollText, Search, Settings, Tag, TrendingDown, Truck, Columns3, X,
+    ClipboardCheck, Printer, ScanLine, ScrollText, Search, Settings, Tag, TrendingDown, Truck, Columns3, X,
 } from 'lucide-react';
 
-type Item = { icon: React.ElementType; label: string; view?: string; href?: string };
+type Item = { icon: React.ElementType; label: string; view?: string; href?: string; admin?: boolean };
 
 /** Nombres legibles de cada vista del tablero (también se usan como título en el encabezado). */
 export const VIEW_LABELS: Record<string, string> = {
     TABLERO: 'Tablero', INVENTARIO: 'Inventario', BUSCAR: 'Buscar', LLM: 'Asistente', REPORTES: 'Reportes', REABASTECIMIENTO: 'Reabastecimiento',
     LOG_MAESTRO: 'Kardex', ETIQUETAS: 'Etiquetas', ESCANER: 'Escáner QR', SCAN_HISTORY: 'Historial QR',
     TRANSFERENCIAS: 'Transferencias', PURCHASE_ORDERS: 'Órdenes de compra', LABELS_PRINT: 'Imprimir etiquetas',
-    NOTIFICACIONES: 'Alertas',
+    NOTIFICACIONES: 'Alertas', CONCILIACION: 'Conteo físico',
 };
 
 const PRINCIPALES: Item[] = [
@@ -28,6 +28,7 @@ const GRUPOS: { titulo: string; items: Item[] }[] = [
         { icon: Search, label: 'Buscar', view: 'BUSCAR' },
         { icon: ArrowRightLeft, label: 'Transferencias', view: 'TRANSFERENCIAS' },
         { icon: Truck, label: 'Órdenes de compra', view: 'PURCHASE_ORDERS' },
+        { icon: ClipboardCheck, label: 'Conteo físico', view: 'CONCILIACION', admin: true },
         { icon: History, label: 'Historial QR', view: 'SCAN_HISTORY' },
     ] },
     { titulo: 'Control', items: [
@@ -134,7 +135,7 @@ export default function MobileNav({ activeView, onNavigate, user }: Props) {
                             <section key={g.titulo} className="mb-5">
                                 <h2 className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">{g.titulo}</h2>
                                 <div className="grid grid-cols-4 gap-2">
-                                    {g.items.map((item) => {
+                                    {g.items.filter((item) => !item.admin || user?.role === 'admin').map((item) => {
                                         const Icon = item.icon;
                                         const activo = activeView === item.view;
                                         return (

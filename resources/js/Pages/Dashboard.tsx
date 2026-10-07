@@ -22,8 +22,9 @@ import FigmaTransferForm from '../components/Figma/FigmaTransferForm';
 import FigmaPurchaseOrders from '../components/Figma/FigmaPurchaseOrders';
 import FigmaLabelPrint from '../components/Figma/FigmaLabelPrint';
 import FigmaBodegaManager from '../components/Figma/FigmaBodegaManager';
+import FigmaConciliacion from '../components/Figma/FigmaConciliacion';
 
-type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'REABASTECIMIENTO' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT';
+type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'REABASTECIMIENTO' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT' | 'CONCILIACION';
 
 export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth: any, initialLotes: any[], dashboardStats: any }) {
     const [lotes, setLotes] = useState(initialLotes || []);
@@ -120,6 +121,7 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                         {activeView === 'TRANSFERENCIAS' && <FigmaTransferForm bodegas={stats?.bodegas || []} lotes={lotes} onBack={() => setActiveView('TABLERO')} />}
                         {activeView === 'PURCHASE_ORDERS' && <FigmaPurchaseOrders />}
                         {activeView === 'LABELS_PRINT' && <FigmaLabelPrint initialLotes={lotes} />}
+                        {activeView === 'CONCILIACION' && user.role === 'admin' && <FigmaConciliacion onNavigate={(v) => setActiveView(v as ViewMode)} />}
 
                     </div>
                 </div>
