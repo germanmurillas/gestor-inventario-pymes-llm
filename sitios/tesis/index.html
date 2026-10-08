@@ -73,6 +73,19 @@ section{padding:56px 0;border-top:1px solid var(--line)}
 @media(max-width:820px){.shots{grid-template-columns:1fr}.shots .big{grid-row:auto}.shots .big img{height:auto;aspect-ratio:1400/840}}
 
 /* capítulos */
+.guias{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.guia{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 16px}
+.guia summary{cursor:pointer;list-style:none;display:block}
+.guia summary::-webkit-details-marker{display:none}
+.guia .gt::before{content:"▸";color:var(--accent-2);margin-right:8px}
+.guia[open] .gt::before{content:"▾"}
+.guia .chip{color:var(--accent-2);margin-left:6px;vertical-align:1px}
+.guia .gt{font-weight:700}
+.guia summary small{display:block;color:var(--muted);font-size:13px;margin:2px 0 0 18px}
+.guia ol{margin:10px 0 0 38px;color:var(--muted);font-size:14.5px}
+.guia li{margin:3px 0}
+.guia .tip{margin:8px 0 0 18px;font-size:13px;color:var(--warn)}
+@media(max-width:760px){.guias{grid-template-columns:1fr}}
 .toc{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 @media(max-width:720px){.toc{grid-template-columns:1fr}}
 .toc li{list-style:none;display:flex;gap:14px;align-items:baseline;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 16px}
@@ -106,6 +119,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <a class="brand" href="#"><span class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg></span>Pymetory</a>
     <nav class="nav">
       <a class="opt" href="#sistema">Sistema</a>
+      <a class="opt" href="#guia">Guía</a>
       <a class="opt" href="#documento">Documento</a>
       <a href="#estado">Estado</a>
       <a href="https://reuniones.pymetory.com">Reuniones</a>
@@ -158,6 +172,44 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <figure class="reveal"><img src="img/bodegas.webp" alt="Tarjetas de bodegas con lotes, insumos, por vencer y valor" loading="lazy"><figcaption>Bodegas conectadas al inventario.</figcaption></figure>
         <figure class="reveal"><img src="img/inventario.webp" alt="Inventario por insumo con foto, existencia y lotes" loading="lazy"><figcaption>Inventario por insumo, en su unidad real.</figcaption></figure>
         <figure class="reveal"><img src="img/movil.webp" alt="Tres pantallas del celular: tablero, inventario y escáner" loading="lazy"><figcaption>En el celular: barra inferior y escáner QR.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="guia">
+    <div class="wrap">
+      <div class="sec-h reveal">
+        <h2>Guía rápida de uso</h2>
+        <p>Las tareas de todos los días, paso a paso, con los nombres de los botones de <a href="https://app.pymetory.com">app.pymetory.com</a>. Es la misma guía que aparece en el Tablero de la aplicación; cada pantalla tiene además un botón «Ayuda». El detalle está en el <a href="manual-de-usuario.pdf">manual de usuario</a>.</p>
+      </div>
+      <div class="guias">
+        <details class="guia reveal"><summary><span class="gt">Registrar mercancía que llegó</span><small>Llegó un pedido del proveedor (por ejemplo, bultos de azúcar).</small></summary>
+          <ol><li>Abra Inventario y toque el insumo (use el buscador si no lo ve).</li><li>Pulse «Registrar ingreso de lote».</li><li>Escriba el número de lote (el de la factura o la etiqueta), la cantidad, el costo por unidad, la fecha de vencimiento y la bodega.</li><li>Pulse «Registrar lote».</li></ol>
+          <p class="tip">Si el insumo no existe todavía, use el botón «Ingreso» de Inventario: crea el insumo con su primer lote.</p>
+        </details>
+        <details class="guia reveal"><summary><span class="gt">Sacar insumo para producción</span><small>Se va a usar harina, levadura u otro insumo.</small></summary>
+          <ol><li>Abra Inventario y pulse «Consumo FEFO».</li><li>Elija el insumo y pulse «Siguiente: Cantidad».</li><li>Escriba la cantidad y el motivo (producción, venta, desperdicio…) y pulse «Revisar y Confirmar».</li><li>Revise qué lotes se van a usar y pulse «Confirmar Despacho FEFO».</li></ol>
+          <p class="tip">No tiene que escoger el lote: el sistema saca primero del que vence antes.</p>
+        </details>
+        <details class="guia reveal"><summary><span class="gt">Preguntarle al asistente</span><small>Quiere saber cuánto hay, qué vence o qué se ha gastado, sin buscar en tablas.</small></summary>
+          <ol><li>Abra Asistente.</li><li>Escriba la pregunta como la diría en voz alta, por ejemplo «¿cuánta levadura hay?» o «¿qué vence esta semana?».</li><li>Pulse el botón de enviar y espere la respuesta.</li></ol>
+          <p class="tip">Nombre el insumo en cada pregunta. Si pregunta «¿y cuánto vale eso?», el asistente no sabe a qué se refiere «eso».</p>
+        </details>
+        <details class="guia reveal"><summary><span class="gt">Corregir una cantidad que no cuadra <span class="chip">administrador</span></span><small>Lo que hay en la bodega no coincide con el sistema (por ejemplo, la sal).</small></summary>
+          <ol><li>Abra Inventario y toque el insumo.</li><li>En el lote que no cuadra, pulse «Conciliar».</li><li>Escriba la cantidad real y el motivo del ajuste, y guarde.</li></ol>
+          <p class="tip">Nada se borra: la corrección queda en el Kardex como un ajuste con su motivo. Si se equivoca, haga otro ajuste.</p>
+        </details>
+        <details class="guia reveal"><summary><span class="gt">Sacar un reporte</span><small>Necesita el informe de la semana o del mes en PDF o Excel.</small></summary>
+          <ol><li>Abra Reportes y elija el tipo (por ejemplo, «Historial de Movimientos» o «Inventario Actual»).</li><li>Ponga las fechas en «Desde» y «Hasta» y, si quiere, la bodega o el insumo.</li><li>Pulse «Exportar PDF» o «Exportar Excel».</li></ol>
+        </details>
+        <details class="guia reveal"><summary><span class="gt">Saber qué hay que pedir</span><small>Va a hacer el pedido al proveedor.</small></summary>
+          <ol><li>Abra Reabastecimiento.</li><li>Pulse «Por reponer» para ver solo lo que está bajo el mínimo o en su punto de pedido.</li><li>Toque un insumo para ver cuánto se gasta por día, semana o mes.</li></ol>
+          <p class="tip">Para que el sistema diga «pedir antes de…», registre los días que tarda el proveedor en los ajustes del insumo.</p>
+        </details>
+        <details class="guia reveal"><summary><span class="gt">Cuadrar el conteo de fin de mes <span class="chip">administrador</span></span><small>Terminó el conteo físico de la bodega en la hoja de Excel.</small></summary>
+          <ol><li>Abra Conteo físico y pulse «Elegir archivo» para subir la hoja (.xlsx).</li><li>Pulse «Ver comparación»: aparece lo contado, lo del sistema y la diferencia.</li><li>Revise las filas marcadas y asigne a mano las que digan «Sin insumo».</li><li>Pulse «Registrar ajustes en el Kardex».</li></ol>
+          <p class="tip">Hasta el último paso no cambia nada: puede revisar con calma.</p>
+        </details>
       </div>
     </div>
   </section>

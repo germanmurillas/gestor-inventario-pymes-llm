@@ -23,6 +23,8 @@ import FigmaPurchaseOrders from '../components/Figma/FigmaPurchaseOrders';
 import FigmaLabelPrint from '../components/Figma/FigmaLabelPrint';
 import FigmaBodegaManager from '../components/Figma/FigmaBodegaManager';
 import FigmaConciliacion from '../components/Figma/FigmaConciliacion';
+import GuiaRapida from '../components/Ayuda/GuiaRapida';
+import AyudaPantalla from '../components/Ayuda/AyudaPantalla';
 
 type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'REABASTECIMIENTO' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT' | 'CONCILIACION';
 
@@ -103,10 +105,12 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                              <h1 className="text-sm lg:text-xs font-black lg:uppercase tracking-tight lg:tracking-widest text-white">{VIEW_LABELS[activeView] ?? activeView}</h1>
                         </nav>
                     </div>
+                    <AyudaPantalla key={activeView} vista={activeView} />
                 </header>
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     <div ref={viewRef} className="px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:p-8 min-h-full">
+                        {activeView === 'TABLERO' && <GuiaRapida rol={user.role} onIr={(v) => setActiveView(v as ViewMode)} />}
                         {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} onViewChange={setActiveView} onOpenBodega={abrirBodega} onManageBodegas={setGestorBodegas} />}
                         {activeView === 'INVENTARIO' && <FigmaInventario key={bodegaFiltro ?? 'todas'} lotes={lotes} bodegas={stats?.bodegas || []} categoriasExistentes={stats?.categorias || []} user={user} onNavigate={setActiveView} initialBodegaCode={bodegaFiltro} onManageBodegas={setGestorBodegas} />}
                         {activeView === 'BUSCAR' && <FigmaSearch lotes={lotes} />}
