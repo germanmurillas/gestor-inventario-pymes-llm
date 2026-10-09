@@ -6,7 +6,7 @@ import {
     PartyPopper, AlertTriangle, Truck, Camera, Loader2, Search,
     Box, Layers, ChevronRight, Clock, ShieldCheck, Sparkles, X
 } from 'lucide-react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import FigmaFefoBadge from './FigmaFefoBadge';
 
 interface LotePlan {
@@ -66,12 +66,14 @@ const REASONS = [
     { value: 'produccion', label: 'Consumo para Producción', icon: '⚙️' },
     { value: 'venta', label: 'Despacho por Venta', icon: '📦' },
     { value: 'desperdicio', label: 'Baja / Desperdicio', icon: '🗑️' },
-    { value: 'ajuste', label: 'Ajuste Manual de Salida', icon: '🔄' },
+    { value: 'ajuste', label: 'Ajuste Manual de Salida', icon: '🔄', soloAdmin: true },
 ];
 
 const FigmaConsumeWizard = ({ onBack, initialMaterials = [], materialInicial = null }: FigmaConsumeWizardProps) => {
     const preelegido = materialInicial ? initialMaterials.find((m) => m.id === materialInicial) ?? null : null;
     const [step, setStep] = useState(preelegido ? 2 : 1);
+    // El ajuste de salida es solo del administrador (RF-11); el servidor también lo exige.
+    const esAdmin = (usePage().props as any)?.auth?.user?.role === 'admin';
     const [materials, setMaterials] = useState<MaterialOption[]>(initialMaterials);
     const [materialsLoading, setMaterialsLoading] = useState(!initialMaterials.length);
     const [searchTerm, setSearchTerm] = useState('');
@@ -413,7 +415,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [], materialInicial = n
                                     onChange={e => setReason(e.target.value)}
                                     className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
                                 >
-                                    {REASONS.map(r => (
+                                    {REASONS.filter(r => esAdmin || !r.soloAdmin).map(r => (
                                         <option key={r.value} value={r.value}>{r.icon} {r.label}</option>
                                     ))}
                                 </select>

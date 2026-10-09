@@ -1,7 +1,7 @@
 import React from 'react';
 import CantidadConPresentacion from './CantidadConPresentacion';
 import { ArrowLeft, MinusCircle, Info, Tag, Loader2, AlertTriangle, Truck, Camera, Lightbulb } from 'lucide-react';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import FigmaFefoBadge from './FigmaFefoBadge';
 
 interface FigmaConsumeFormProps {
@@ -10,6 +10,8 @@ interface FigmaConsumeFormProps {
 }
 
 const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
+    // El ajuste de salida es solo del administrador (RF-11); el servidor también lo exige.
+    const esAdmin = (usePage().props as any)?.auth?.user?.role === 'admin';
     const { data, setData, post, processing, errors, reset } = useForm({
         quantity: 0,
         reason: 'produccion',
@@ -197,7 +199,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                                         <option value="produccion">⚙️ Consumo para Producción</option>
                                         <option value="venta">📦 Despacho por Venta</option>
                                         <option value="desperdicio">🗑️ Baja / Desperdicio</option>
-                                        <option value="ajuste">🔄 Ajuste Manual de Salida</option>
+                                        {esAdmin && <option value="ajuste">🔄 Ajuste Manual de Salida</option>}
                                     </select>
                                     {errors.reason && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.reason}</p>}
                                 </div>

@@ -50,4 +50,13 @@ class Movimiento extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Motivos válidos para una salida. El ajuste solo lo registra el administrador (RF-11): un operario
+     * corrige diferencias pidiendo una conciliación, no con salidas de ajuste.
+     */
+    public static function reglaMotivoSalida(?User $usuario): string
+    {
+        return 'in:produccion,venta,desperdicio' . ($usuario?->role === 'admin' ? ',ajuste' : '');
+    }
 }

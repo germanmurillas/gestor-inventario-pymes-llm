@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ConsumptionController extends Controller
 {
+    private const SOLO_ADMIN_AJUSTA = 'Los ajustes de salida solo los registra el administrador.';
+
     /**
      * Registra un consumo de materia prima aplicando la lógica FEFO automática.
      */
@@ -19,8 +21,8 @@ class ConsumptionController extends Controller
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'quantity' => 'required|numeric|min:0.001',
-            'reason' => 'nullable|string',
-        ]);
+            'reason' => 'nullable|string|' . Movimiento::reglaMotivoSalida($request->user()),
+        ], ['reason.in' => self::SOLO_ADMIN_AJUSTA]);
 
         $material = Material::findOrFail($validated['material_id']);
         $quantityToConsume = $validated['quantity'];
@@ -151,9 +153,9 @@ class ConsumptionController extends Controller
         $validated = $request->validate([
             'material_id' => 'required|exists:materials,id',
             'quantity' => 'required|numeric|min:0.001',
-            'reason' => 'required|string|in:produccion,venta,desperdicio,ajuste',
+            'reason' => 'required|string|' . Movimiento::reglaMotivoSalida($request->user()),
             'description' => 'nullable|string|max:255',
-        ]);
+        ], ['reason.in' => self::SOLO_ADMIN_AJUSTA]);
 
         $material = Material::findOrFail($validated['material_id']);
         $quantityToConsume = (float) $validated['quantity'];
@@ -241,9 +243,9 @@ class ConsumptionController extends Controller
             'items' => 'required|array|min:1',
             'items.*.material_id' => 'required|exists:materials,id',
             'items.*.quantity' => 'required|numeric|min:0.001',
-            'items.*.reason' => 'required|string|in:produccion,venta,desperdicio,ajuste',
+            'items.*.reason' => 'required|string|' . Movimiento::reglaMotivoSalida($request->user()),
             'description' => 'nullable|string|max:255',
-        ]);
+        ], ['items.*.reason.in' => self::SOLO_ADMIN_AJUSTA]);
 
         $results = [];
 

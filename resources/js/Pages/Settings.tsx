@@ -297,17 +297,6 @@ export default function Settings() {
                             </p>
                         </div>
 
-                        {/* ── Privacy Mode (anonimizar datos antes de API externa) ── */}
-                        {settings.llm_source !== 'local' && (
-                            <label className="flex items-center gap-2 mb-4 cursor-pointer bg-indigo-600/10 border border-indigo-500/30 rounded-lg p-3">
-                                <input type="checkbox" checked={!!settings.llm_privacy} onChange={e => setVal('llm_privacy', e.target.checked ? '1' : '0')} />
-                                <div>
-                                    <span className="font-bold text-xs">🔒 Modo Privacidad</span>
-                                    <p className="text-[10px] text-slate-500">Ollama local anonimiza los datos en un grafo antes de enviarlos a la API externa. Los nombres reales nunca salen de Titan.</p>
-                                </div>
-                            </label>
-                        )}
-
                         {/* ── Parametros ── */}
                         <div className="grid md:grid-cols-3 gap-3 mb-4">
                             <div><label className={label}>Temperatura</label><input aria-label="Temperatura" type="number" step="0.1" min="0" max="2" className={field} value={settings.llm_temperatura ?? '0.3'} onChange={e => setVal('llm_temperatura', e.target.value)} /></div>
@@ -334,7 +323,7 @@ export default function Settings() {
                             <div id="ragTestResult" className="text-xs pm-text-muted mt-2 max-h-32 overflow-y-auto"></div>
                         </div>
 
-                        <button className={`${btn} pm-panel2-plain pm-accent-fg`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes','llm_prompt','llm_privacy'])}><Save size={15} /> Guardar Motor RAG</button>
+                        <button className={`${btn} pm-panel2-plain pm-accent-fg`} onClick={() => saveSettings(['llm_source','llm_activo','llm_modelo','llm_temperatura','llm_max_tokens','llm_contexto_lotes','llm_prompt'])}><Save size={15} /> Guardar Motor RAG</button>
                     </Section>
 
                     {/* ── 3. ALERTAS ── */}

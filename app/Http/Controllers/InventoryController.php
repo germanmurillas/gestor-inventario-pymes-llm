@@ -580,9 +580,10 @@ class InventoryController extends Controller {
 
         $validated = $request->validate([
             'quantity' => 'required|numeric|min:0.01|max:' . $lote->quantity,
-            'reason' => 'required|string|in:produccion,venta,desperdicio,ajuste',
+            'reason' => 'required|string|' . \App\Models\Movimiento::reglaMotivoSalida($request->user()),
             'description' => 'nullable|string|max:255'
         ], [
+            'reason.in' => 'Los ajustes de salida solo los registra el administrador.',
             'quantity.max' => 'No puedes despachar más de lo que hay disponible (' . $lote->quantity . ' kg).',
             'quantity.min' => 'La cantidad a despachar debe ser al menos 0.01 kg.'
         ]);
