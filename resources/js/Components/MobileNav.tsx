@@ -10,8 +10,8 @@ type Item = { icon: React.ElementType; label: string; view?: string; href?: stri
 
 /** Nombres legibles de cada vista del tablero (también se usan como título en el encabezado). */
 export const VIEW_LABELS: Record<string, string> = {
-    TABLERO: 'Tablero', INVENTARIO: 'Inventario', BUSCAR: 'Buscar', LLM: 'Asistente', REPORTES: 'Reportes', REABASTECIMIENTO: 'Reabastecimiento',
-    LOG_MAESTRO: 'Kardex', ETIQUETAS: 'Etiquetas', ESCANER: 'Escáner QR', SCAN_HISTORY: 'Historial QR',
+    TABLERO: 'Tablero', INVENTARIO: 'Inventario', BUSCAR: 'Buscar', LLM: 'Asistente (IA)', REPORTES: 'Reportes', REABASTECIMIENTO: 'Reabastecimiento',
+    LOG_MAESTRO: 'Kardex', ETIQUETAS: 'Etiquetas', ESCANER: 'Escanear código', SCAN_HISTORY: 'Historial QR',
     TRANSFERENCIAS: 'Transferencias', PURCHASE_ORDERS: 'Órdenes de compra', LABELS_PRINT: 'Imprimir etiquetas',
     NOTIFICACIONES: 'Alertas', CONCILIACION: 'Conteo físico',
 };
@@ -20,7 +20,7 @@ const PRINCIPALES: Item[] = [
     { icon: LayoutGrid, label: 'Tablero', view: 'TABLERO' },
     { icon: Box, label: 'Inventario', view: 'INVENTARIO' },
     { icon: ScanLine, label: 'Escanear', view: 'ESCANER' },
-    { icon: MessageSquare, label: 'Asistente', view: 'LLM' },
+    { icon: MessageSquare, label: 'Asistente IA', view: 'LLM' },
 ];
 
 const GRUPOS: { titulo: string; items: Item[] }[] = [

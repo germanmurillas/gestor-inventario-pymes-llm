@@ -155,4 +155,27 @@ class PedidosEmpresaTest extends TestCase
 
         $this->assertEquals(0, Lote::where('batch_number', '500-261009-1500')->value('unit_cost'));
     }
+
+    public function test_el_escaner_encuentra_el_producto_por_su_codigo_de_barras(): void
+    {
+        $pt = Bodega::factory()->create(['grupo' => 'producto_terminado']);
+        $pan = Material::factory()->create(['code' => '502', 'name' => 'Pan perro x 10', 'unit' => 'und', 'bodega_id' => $pt->id, 'vida_util_dias' => 7, 'custom_fields' => ['codigo_barras' => '7709526716725']]);
+        Lote::factory()->create(['material_id' => $pan->id, 'quantity' => 30, 'status' => 'active', 'expiration_date' => now()->addDays(5)]);
+
+        $this->actingAs(User::factory()->create(['role' => 'operario']))->getJson('/inventory/codigo-barras/7709526716725')
+            ->assertOk()->assertJsonPath('codigo', '502')->assertJsonPath('grupo', 'producto_terminado')->assertJsonPath('disponible', 30);
+        $this->actingAs($this->admin())->getJson('/inventory/codigo-barras/7700000000000')->assertNotFound();
+    }
+
+    public function test_el_codigo_de_barras_se_guarda_en_los_ajustes_y_no_se_repite(): void
+    {
+        $a = Material::factory()->create();
+        $b = Material::factory()->create(['custom_fields' => ['codigo_barras' => '7709869863117']]);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->put("/inventory/material/{$a->id}", ['codigo_barras' => '7709526716725'])->assertSessionHasNoErrors();
+        $this->assertSame('7709526716725', $a->fresh()->custom_fields['codigo_barras']);
+        $this->actingAs($admin)->put("/inventory/material/{$a->id}", ['codigo_barras' => '7709869863117'])->assertSessionHasErrors('codigo_barras');
+        $this->actingAs($admin)->put("/inventory/material/{$a->id}", ['codigo_barras' => '77ABC'])->assertSessionHasErrors('codigo_barras');
+    }
 }

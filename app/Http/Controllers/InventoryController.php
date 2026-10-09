@@ -27,6 +27,7 @@ class InventoryController extends Controller {
                 'presentacion_cantidad' => $lote->material->presentacion_cantidad ?? null,
                 'vida_util_dias' => $lote->material->vida_util_dias ?? null,
                 'descripcion' => $lote->material->description,
+                'codigo_barras' => $lote->material->custom_fields['codigo_barras'] ?? null,
                 'lote' => $lote->batch_number,
                 'cantidad' => $lote->quantity,
                 'vencimiento' => $lote->expiration_date->format('Y-m-d'),
@@ -55,6 +56,7 @@ class InventoryController extends Controller {
                 'unit' => $m->unit ?? 'kg', 'presentacion_nombre' => $m->presentacion_nombre, 'presentacion_cantidad' => $m->presentacion_cantidad,
                 'vida_util_dias' => $m->vida_util_dias, 'dias_criticos' => $m->dias_criticos, 'dias_entrega' => $m->dias_entrega,
                 'descripcion' => $m->description,
+                'codigo_barras' => $m->custom_fields['codigo_barras'] ?? null,
                 'umbral_dias' => (int) ($m->dias_criticos ?: Lote::diasCriticos()),
                 'stock_minimo' => (float) ($m->stock_minimo ?? 0), 'photo_url' => $m->photo_url,
                 'bodega' => $m->bodega?->name, 'bodega_id' => $m->bodega_id, 'sin_existencia' => true,
@@ -474,7 +476,12 @@ class InventoryController extends Controller {
             'presentacion_nombre' => 'nullable|string|max:30|required_with:presentacion_cantidad',
             'presentacion_cantidad' => 'nullable|numeric|gt:0|required_with:presentacion_nombre',
             'vida_util_dias' => 'nullable|integer|min:1|max:3650',
+            'codigo_barras' => ['nullable', 'regex:/^\d{8,14}$/'],
         ]);
+        if (!empty($validated['codigo_barras']) && Material::where('id', '!=', $material->id)->where('custom_fields->codigo_barras', $validated['codigo_barras'])->exists()) {
+            return back()->withErrors(['codigo_barras' => 'Ese código de barras ya está asignado a otro producto.']);
+        }
+        $material->custom_fields = array_merge((array) ($material->custom_fields ?? []), ['codigo_barras' => $validated['codigo_barras'] ?? null]);
         $material->update([
             'presentacion_nombre' => isset($validated['presentacion_nombre']) ? mb_strtolower(trim($validated['presentacion_nombre'])) : null,
             'presentacion_cantidad' => $validated['presentacion_cantidad'] ?? null,

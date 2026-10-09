@@ -14,7 +14,7 @@ async function sinTextoTecnico(page) {
 
 async function abrirInsumo(page, nombre) {
     await page.goto('/dashboard?v=INVENTARIO');
-    await page.getByPlaceholder('Buscar insumo, código o lote').fill(nombre);
+    await page.getByPlaceholder('Buscar en la lista: nombre, código o lote').fill(nombre);
     await page.getByRole('button', { name: new RegExp(nombre) }).first().click();
     await expect(page.getByRole('dialog', { name: nombre })).toBeVisible();
 }

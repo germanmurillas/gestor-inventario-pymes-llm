@@ -17,9 +17,9 @@ interface Props {
 }
 
 /** Ajustes de control del insumo (solo administrador): categoría, stock mínimo, umbral FEFO propio y días de entrega. */
-export default function FigmaMaterialAjustes({ materialId, unidad, categoria, minimo, diasCriticos, diasEntrega = null, umbral, categorias = [], presentacion = null, factor = null, vidaUtil = null }: Props & { presentacion?: string | null; factor?: number | null; vidaUtil?: number | null }) {
+export default function FigmaMaterialAjustes({ materialId, unidad, categoria, minimo, diasCriticos, diasEntrega = null, umbral, categorias = [], presentacion = null, factor = null, vidaUtil = null, codigoBarras = null }: Props & { presentacion?: string | null; factor?: number | null; vidaUtil?: number | null; codigoBarras?: string | null }) {
     const [abierto, setAbierto] = useState(false);
-    const [form, setForm] = useState({ categoria: categoria ?? '', stock_minimo: minimo ? String(minimo) : '', dias_criticos: diasCriticos ? String(diasCriticos) : '', dias_entrega: diasEntrega !== null && diasEntrega !== undefined ? String(diasEntrega) : '', presentacion_nombre: presentacion ?? '', presentacion_cantidad: factor ? String(factor) : '', vida_util_dias: vidaUtil ? String(vidaUtil) : '' });
+    const [form, setForm] = useState({ categoria: categoria ?? '', stock_minimo: minimo ? String(minimo) : '', dias_criticos: diasCriticos ? String(diasCriticos) : '', dias_entrega: diasEntrega !== null && diasEntrega !== undefined ? String(diasEntrega) : '', presentacion_nombre: presentacion ?? '', presentacion_cantidad: factor ? String(factor) : '', vida_util_dias: vidaUtil ? String(vidaUtil) : '', codigo_barras: codigoBarras ?? '' });
     const [errores, setErrores] = useState<Record<string, string>>({});
     const [guardando, setGuardando] = useState(false);
 
@@ -73,6 +73,10 @@ export default function FigmaMaterialAjustes({ materialId, unidad, categoria, mi
                     <label className="block text-xs font-semibold text-slate-400">Vida útil (días)
                         <input className={`${campo} mt-1`} type="number" min={1} max={3650} step={1} placeholder="Sin dato" value={form.vida_util_dias} onChange={(e) => setForm({ ...form, vida_util_dias: e.target.value })} />
                         {errores.vida_util_dias && <span className="mt-1 block text-rose-300">{errores.vida_util_dias}</span>}
+                    </label>
+                    <label className="block text-xs font-semibold text-slate-400 sm:col-span-3">Código de barras de la bolsa (los números debajo de las barras)
+                        <input className={`${campo} mt-1`} inputMode="numeric" maxLength={14} placeholder="Ej: 7709869863117" value={form.codigo_barras} onChange={(e) => setForm({ ...form, codigo_barras: e.target.value.replace(/\D/g, '') })} />
+                        {errores.codigo_barras && <span className="mt-1 block text-rose-300">{errores.codigo_barras}</span>}
                     </label>
                     <p className="text-[11px] text-slate-400 sm:col-span-3">Presentación: si llega en bultos de 50 kg, escriba «bulto» y 50; así se puede registrar en bultos y el sistema lo guarda en {unidad}. Días críticos: cuántos días antes de vencer un lote de este insumo pasa a crítico (vacío = umbral general). Días de entrega: lo que tarda el proveedor desde el pedido; con ellos se calcula el punto de reorden en Reabastecimiento.</p>
                     <button type="submit" disabled={guardando} className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50">

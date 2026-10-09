@@ -92,6 +92,28 @@ class QRScanController extends Controller
         return $lote ? $this->lookup($lote->id) : response()->json(['error' => 'Lote no encontrado'], 404);
     }
 
+    /**
+     * Producto por su código de barras de fábrica (EAN de la bolsa), para registrar entradas y
+     * salidas escaneando el empaque (pedido de la empresa, 9-oct-2026).
+     */
+    public function porCodigoDeBarras(string $codigo)
+    {
+        $codigo = preg_replace('/\D/', '', $codigo);
+        $material = $codigo === '' ? null : \App\Models\Material::with('bodega')->where('custom_fields->codigo_barras', $codigo)->first();
+        if (!$material) {
+            return response()->json(['error' => "No hay ningún producto con el código de barras {$codigo}. Puede registrarlo en los ajustes del producto."], 404);
+        }
+        return response()->json([
+            'id' => $material->id, 'codigo' => $material->code, 'nombre' => $material->name, 'unidad' => $material->unit,
+            'foto' => $material->photo_url, 'codigo_barras' => $codigo,
+            'presentacion' => $material->presentacion_nombre, 'factor' => $material->presentacion_cantidad,
+            'vida_util_dias' => $material->vida_util_dias, 'bodega_id' => $material->bodega_id,
+            'grupo' => $material->bodega?->grupo,
+            'disponible' => (float) Lote::where('material_id', $material->id)->despachables()->sum('quantity'),
+            'bodegas' => \App\Models\Bodega::orderBy('name')->get(['id', 'name']),
+        ]);
+    }
+
     public function lookup($id)
     {
         $lote = Lote::with('material')->find($id);

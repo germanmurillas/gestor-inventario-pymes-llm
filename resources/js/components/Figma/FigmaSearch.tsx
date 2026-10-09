@@ -72,7 +72,7 @@ const FigmaSearch = ({ lotes = [] }: { lotes: LoteBusqueda[] }) => {
             <div className="relative">
                 <Search size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input ref={inputRef} type="search" id="search-input" autoComplete="off" value={query} onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Insumo, código, lote, categoría o bodega…"
+                    placeholder="Buscar en la lista: insumo, código, lote o bodega"
                     className="w-full rounded-2xl border border-slate-700 bg-slate-900 py-4 pl-12 pr-12 text-base text-white placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none" />
                 {hayFiltros && (
                     <button onClick={limpiar} aria-label="Limpiar búsqueda" className="absolute right-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">

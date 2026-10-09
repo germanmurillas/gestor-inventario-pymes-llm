@@ -147,6 +147,10 @@ Route::post('/inventory/qr-scan', [QRScanController::class, 'scan'])
     ->middleware(['auth', 'verified'])
     ->name('inventory.qr-scan');
 
+Route::get('/inventory/codigo-barras/{codigo}', [QRScanController::class, 'porCodigoDeBarras'])
+    ->middleware(['auth', 'verified'])
+    ->name('inventory.codigo-barras');
+
 Route::get('/inventory/qr-lookup-lote/{batch}', [QRScanController::class, 'lookupPorLote'])
     ->middleware(['auth', 'verified'])
     ->name('inventory.qr-lookup-lote');

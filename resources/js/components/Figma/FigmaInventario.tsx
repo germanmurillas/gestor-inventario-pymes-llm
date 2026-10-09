@@ -112,7 +112,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
         const map = new Map<string, any>();
         filteredLotes.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
             if (!map.has(l.codigo)) map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg',
-                foto: l.photo_url, materialId: l.material_id, presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, descripcion: l.descripcion ?? null, diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
+                foto: l.photo_url, materialId: l.material_id, presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, descripcion: l.descripcion ?? null, codigoBarras: l.codigo_barras ?? null, diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
             const m = map.get(l.codigo);
             m.lotes.push(l);
             if (l.estado === 'quarantined') m.cuarentena++; else m.stock += Number(l.cantidad) || 0;
@@ -122,7 +122,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
         sinExistenciaFiltrados.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
             if (map.has(l.codigo)) return;
             map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg', foto: l.photo_url, materialId: l.material_id,
-                presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, descripcion: l.descripcion ?? null,
+                presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, descripcion: l.descripcion ?? null, codigoBarras: l.codigo_barras ?? null,
                 diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: 0,
                 stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null, sinExistencia: true, bodegaId: l.bodega_id });
         });
@@ -300,7 +300,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
             <div className="space-y-3 lg:flex lg:items-center lg:justify-between lg:gap-4 lg:space-y-0">
                 <label className="relative block flex-1 lg:max-w-md">
                     <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Buscar insumo, código o lote"
+                    <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Buscar en la lista: nombre, código o lote"
                         className="w-full rounded-2xl border border-slate-700/40 bg-slate-800/50 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none" />
                 </label>
                 <div className="grid grid-cols-3 gap-2 lg:flex">
@@ -311,7 +311,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
                         <Sparkles size={16} /> Consumo FEFO
                     </button>
                     <button onClick={() => onNavigate?.('ESCANER')} className="flex items-center justify-center gap-2 rounded-2xl border border-slate-700/40 bg-slate-800/60 px-4 py-3 text-xs font-bold text-white active:scale-95">
-                        <ScanLine size={16} /> Escanear
+                        <ScanLine size={16} /> Escanear código
                     </button>
                 </div>
             </div>
@@ -435,7 +435,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
 
                         {user?.role === 'admin' && materialSel.materialId && (
                             <FigmaMaterialAjustes key={materialSel.codigo} categorias={categoriasExistentes} materialId={materialSel.materialId} unidad={materialSel.unidad}
-                                categoria={materialSel.categoria ?? null} minimo={materialSel.minimo} diasCriticos={materialSel.diasCriticos} diasEntrega={materialSel.diasEntrega} umbral={materialSel.umbral} presentacion={materialSel.presentacion} factor={materialSel.factor} vidaUtil={materialSel.vidaUtil} />
+                                categoria={materialSel.categoria ?? null} minimo={materialSel.minimo} diasCriticos={materialSel.diasCriticos} diasEntrega={materialSel.diasEntrega} umbral={materialSel.umbral} presentacion={materialSel.presentacion} factor={materialSel.factor} vidaUtil={materialSel.vidaUtil} codigoBarras={materialSel.codigoBarras} />
                         )}
 
                         <h4 className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-slate-500">Lotes · sale primero el de arriba</h4>

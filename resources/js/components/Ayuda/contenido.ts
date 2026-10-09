@@ -26,6 +26,15 @@ export const TAREAS: Tarea[] = [
         consejo: 'Si el insumo no existe todavía, use el botón «Ingreso» de Inventario: crea el insumo con su primer lote.',
     },
     {
+        id: 'escanear', titulo: 'Escanear un producto', cuando: 'Tiene la bolsa o el paquete en la mano.', vista: 'ESCANER',
+        pasos: [
+            'Pulse «Escanear» (abajo en el celular) y apunte la cámara al código de barras de la bolsa.',
+            'Aparece el producto con su foto: pulse «Entró» o «Salió».',
+            'Escriba la cantidad y pulse «Registrar». El lote y el vencimiento ya vienen llenos.',
+        ],
+        consejo: 'Si la cámara no lee, escriba los números que están debajo de las barras. Un código nuevo se registra en los ajustes del producto.',
+    },
+    {
         id: 'consumo', titulo: 'Sacar insumo para producción', cuando: 'Se va a usar harina, levadura u otro insumo.', vista: 'INVENTARIO',
         pasos: [
             'Abra Inventario y pulse «Consumo FEFO».',
@@ -47,7 +56,7 @@ export const TAREAS: Tarea[] = [
     {
         id: 'asistente', titulo: 'Preguntarle al asistente', cuando: 'Quiere saber cuánto hay, qué vence o qué se ha gastado, sin buscar en tablas.', vista: 'LLM',
         pasos: [
-            'Abra Asistente.',
+            'Abra «Asistente (IA)»: es la inteligencia artificial; los recuadros con lupa de las otras pantallas solo buscan en la lista.',
             'Escriba la pregunta como la diría en voz alta, por ejemplo «¿cuánta levadura hay?» o «¿qué vence esta semana?».',
             'Pulse el botón de enviar y espere la respuesta.',
         ],
@@ -137,8 +146,8 @@ export const AYUDA_PANTALLAS: Record<string, AyudaPantalla> = {
         pasos: ['Pulse «Nuevo Tag», póngale nombre y color.', 'Asígnela a los insumos que quiera agrupar (por ejemplo, «Perecedero»).'],
     },
     ESCANER: {
-        titulo: 'Escáner QR', para: 'Registrar entradas o salidas leyendo la etiqueta de un lote.',
-        pasos: ['En «Camara», permita el uso de la cámara y apunte al código QR de la etiqueta.', 'Si no hay cámara, use «Manual» y escriba el número de lote impreso.', 'Elija «Entrada» o «Salida», la cantidad y una nota.'],
+        titulo: 'Escanear código', para: 'Registrar entradas o salidas leyendo el código de barras de la bolsa o la etiqueta QR de un lote.',
+        pasos: ['Permita el uso de la cámara y apunte al código de barras de la bolsa (o al QR de la etiqueta del lote).', 'Si no hay cámara, use «Manual» y escriba los números del código o el número de lote.', 'Con un producto: pulse «Entró» o «Salió» y escriba la cantidad.'],
     },
     SCAN_HISTORY: {
         titulo: 'Historial QR', para: 'Ver los escaneos hechos con el escáner.',

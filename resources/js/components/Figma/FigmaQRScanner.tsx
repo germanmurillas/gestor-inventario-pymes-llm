@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from '@inertiajs/react';
 import { ArrowLeft, ScanLine, Package, AlertTriangle, Loader2, CheckCircle, Camera, Keyboard, QrCode, ArrowDown, ArrowUp } from 'lucide-react';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import FigmaProductoEscaneado, { ProductoEscaneado } from './FigmaProductoEscaneado';
+import { pedir } from '../../lib/http';
 
 interface FigmaQRScannerProps {
     onBack: () => void;
@@ -9,8 +11,9 @@ interface FigmaQRScannerProps {
 }
 
 const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
-    const [step, setStep] = useState<'SCAN' | 'ACTION' | 'DONE'>('SCAN');
-    const [inputMode, setInputMode] = useState<'manual' | 'camera'>('manual');
+    const [step, setStep] = useState<'SCAN' | 'ACTION' | 'DONE' | 'PRODUCTO'>('SCAN');
+    const [producto, setProducto] = useState<ProductoEscaneado | null>(null);
+    const [inputMode, setInputMode] = useState<'manual' | 'camera'>(() => (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches ? 'camera' : 'manual'));
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const [qrInput, setQrInput] = useState('');
     const [decodedLote, setDecodedLote] = useState<any>(prefillLote || null);
@@ -28,7 +31,11 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
         if (inputMode !== 'camera' || step !== 'SCAN') return;
 
         let cancelled = false;
-        const scanner = new Html5Qrcode('qr-reader');
+        const scanner = new Html5Qrcode('qr-reader', {
+            verbose: false,
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.CODE_128],
+        });
         scannerRef.current = scanner;
 
         const safeStop = () => {
@@ -47,12 +54,14 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                 setDecodedLote(parsed);
                 setData('qr_data', decodedText);
                 setStep('ACTION');
-            } catch { setScanError('No se pudo leer el codigo.'); }
+            } catch {
+                buscarCodigoDeBarras(decodedText.trim()).then((era) => { if (!era) setScanError('No se pudo leer el código.'); });
+            }
         };
 
         scanner
             .start({ facingMode: 'environment' },
-                   { fps: 10, qrbox: { width: 250, height: 250 } },
+                   { fps: 10, qrbox: { width: 300, height: 170 } },
                    onScan, undefined)
             .then(() => { if (cancelled) safeStop(); })
             .catch(async () => {
@@ -61,22 +70,35 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                     const cams = await Html5Qrcode.getCameras();
                     if (cams.length && !cancelled) {
                         await scanner.start(cams[0].id,
-                            { fps: 10, qrbox: { width: 250, height: 250 } },
+                            { fps: 10, qrbox: { width: 300, height: 170 } },
                             onScan, undefined);
                     } else {
-                        setScanError('No se detecto ninguna camara.');
+                        setScanError('No se encontró una cámara en este equipo. Use «Manual» y escriba los números del código de barras.');
                     }
                 } catch (e: any) {
-                    setScanError('Camara no disponible: ' + (e?.message || e));
+                    setScanError('No se pudo abrir la cámara. Revise que la página tenga permiso para usarla, o use «Manual» y escriba los números del código.');
                 }
             });
 
         return () => { cancelled = true; safeStop(); };
     }, [inputMode, step]);
 
+    /** Código de barras de fábrica (solo números): busca el producto. Devuelve true si lo encontró. */
+    const buscarCodigoDeBarras = async (texto: string): Promise<boolean> => {
+        if (!/^\d{8,14}$/.test(texto)) return false;
+        try {
+            setProducto(await pedir<ProductoEscaneado>(`/inventory/codigo-barras/${texto}`));
+            setStep('PRODUCTO');
+        } catch (e: any) {
+            setScanError(e.message);
+        }
+        return true;
+    };
+
     const handleDecode = async () => {
         setScanError('');
         const texto = qrInput.trim();
+        if (await buscarCodigoDeBarras(texto)) return;
         // Ingreso manual: se acepta el número de lote impreso en la etiqueta, además del contenido del QR.
         if (texto && !texto.startsWith('{')) {
             try {
@@ -160,10 +182,11 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                     </button>
                     <div>
                         <h2 className="text-xl font-bold uppercase tracking-tight">
-                            {step === 'DONE' ? 'Operación Completada' : 'Escáner QR'}
+                            {step === 'DONE' ? 'Operación Completada' : 'Escanear código'}
                         </h2>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">
-                            {step === 'SCAN' && 'Escanee o ingrese el código QR del lote'}
+                            {step === 'SCAN' && 'Apunte la cámara al código de barras de la bolsa o a la etiqueta del lote'}
+                            {step === 'PRODUCTO' && 'Diga si entró o salió y cuánto'}
                             {step === 'ACTION' && 'Seleccione el tipo de operación'}
                             {step === 'DONE' && 'Movimiento registrado en el Kardex'}
                         </p>
@@ -198,7 +221,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                     }`}
                                 >
                                     <Camera size={16} />
-                                    <span>Camara</span>
+                                    <span>Cámara</span>
                                 </button>
                             </div>
 
@@ -229,16 +252,16 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                             {/* Manual Input */}
                             <div className="space-y-4">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">
-                                    Número de lote o código QR
+                                    Código de barras o número de lote
                                 </label>
                                 <div className="flex gap-4">
-                                    <textarea aria-label="Número de lote o código QR"
+                                    <textarea aria-label="Código de barras o número de lote"
                                         value={qrInput}
                                         onChange={e => {
                                             setQrInput(e.target.value);
                                             setScanError('');
                                         }}
-                                        placeholder='Número de lote (ej. HAR-01-260917-1) o contenido del código QR'
+                                        placeholder='Escriba los números del código de barras o el número de lote'
                                         className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-4 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24 transition-all"
                                     />
                                     <button
@@ -260,6 +283,10 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                 )}
                             </div>
                         </div>
+                    )}
+
+                    {step === 'PRODUCTO' && producto && (
+                        <FigmaProductoEscaneado producto={producto} onOtro={() => { setProducto(null); setQrInput(''); setScanError(''); setStep('SCAN'); }} />
                     )}
 
                     {step === 'ACTION' && decodedLote && (
@@ -417,27 +444,6 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
 
                 {/* Right Panel: Info / Recent */}
                 <div className="space-y-6">
-                    <div className="bg-obsidiana text-white rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
-                        <div className="absolute -bottom-10 -right-10 opacity-5">
-                            <QrCode size={200} />
-                        </div>
-                        <div className="relative z-10 space-y-6">
-                            <div>
-                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Formato QR</div>
-                                <div className="text-xs font-mono text-indigo-400 mt-2 bg-slate-900/80 backdrop-blur-xl/5 p-3 rounded-xl break-all">
-                                    {'{"id":1,"sku":"MAT-001","batch":"L-001","v":"1.0"}'}
-                                </div>
-                            </div>
-                            <div className="pt-4 border-t border-white/10">
-                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Compatibilidad</div>
-                                <p className="text-[10px] text-white/60 mt-2 leading-relaxed">
-                                    Escanee etiquetas generadas desde <span className="text-indigo-400 font-bold">Etiquetas & QR</span>.
-                                    Cada escaneo queda registrado en el Kardex con usuario, timestamp y razón "qr_scan".
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="bg-indigo-500/10 p-6 rounded-3xl border border-indigo-500/25 space-y-3">
                         <div className="flex items-center gap-2">
                             <Camera size={14} className="text-indigo-500" />

@@ -102,6 +102,7 @@ return [
         'name' => 'el nombre',
         'new_quantity' => 'la cantidad real',
         'nombre' => 'el nombre',
+        'codigo_barras' => 'el código de barras (8 a 14 números)',
         'presentacion_nombre' => 'el nombre de la presentación',
         'presentacion_cantidad' => 'la cantidad por presentación',
         'vida_util_dias' => 'la vida útil',
