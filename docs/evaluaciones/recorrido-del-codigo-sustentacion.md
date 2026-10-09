@@ -30,6 +30,19 @@ Orden de lectura de `app/Http/Controllers/ChatLLMController.php`:
 
 Evidencia: auditoría manual de las 106 respuestas (`docs/evaluaciones/auditoria-manual-20261009.md`) y `php artisan rag:evaluar --conjunto=…`.
 
+### Preguntas de diseño que suelen venir aquí
+
+**"¿Por qué no dejó que el modelo escribiera el SQL (text-to-SQL) o llamara funciones (function calling)?"**
+El modelo nunca escribe consultas: `buildRagContext()` tiene una consulta fija por intención, escrita y probada en PHP. Razones:
+- Seguridad: el modelo no puede generar una consulta que borre, modifique o lea datos que no debe (el Kardex y los roles no dependen de lo que el modelo escriba).
+- Cifras deterministas: el mismo dato da siempre el mismo total, y las pruebas automáticas lo verifican; un SQL generado puede cambiar entre respuestas.
+- Modelos pequeños y gratuitos: clasificar una pregunta entre 13 intenciones (más la general) es mucho más fácil que escribir SQL correcto para una base de 36 tablas; por eso el respaldo local de 9B sigue sirviendo.
+- Costo: un solo llamado por pregunta (más el del clasificador), sin idas y vueltas de herramientas.
+Lo que se pierde: preguntas que no encajan en ninguna intención caen en "general". Es la limitación que se reconoce y un trabajo futuro.
+
+**"¿Y si la conversación tiene varios turnos?"**
+Respuesta honesta: el modelo recibe solo la pregunta actual, no el historial. Lo único que se hereda es el insumo: si la pregunta dice "eso", "esos" o "lo mismo" y no nombra ningún insumo, `conInsumosDelTurnoAnterior()` (`:213`) toma los de la pregunta anterior de la misma sesión ("¿cuánta harina hay?" → "¿y eso para cuánto alcanza?"). Tiene pruebas automáticas (`PreguntasDeSeguimientoTest`), pero **las baterías de evaluación son de un solo turno: el desempeño en conversaciones largas no está medido**.
+
 ## 4. Pronóstico: "¿de dónde sale 'se acaba el 18 de octubre'?"
 
 - `app/Services/ProyeccionInventario.php:44`, `proyeccion()`: promedio móvil de 28 días `[hoy-28, hoy)`, existencia sin lotes vencidos, días de cobertura y punto de reorden.
