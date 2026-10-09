@@ -14,19 +14,19 @@ El repositorio sigue la estructura estándar de Laravel, con el frontend en Reac
 
 \begin{table}[!htbp]
 \centering
-\caption{Organización del código fuente de Pymetory.}
+\caption[Organización del código fuente de Pymetory.]{Organización del código fuente de Pymetory (archivos al 2 de octubre de 2026, el mismo corte de las pruebas; incluye subcarpetas).}
 \label{tab:imp_organizacion}
 \begin{tabular}{|p{4.4cm}|c|p{8cm}|}
 \hline
 \textbf{Carpeta} & \textbf{Archivos} & \textbf{Contenido} \\
 \hline
-\texttt{app/Http/Controllers} & 24 & Controladores: inventario, consumo FEFO, transferencias, reportes, etiquetas, escáner, asistente, usuarios, ajustes, entre otros. \\ \hline
+\texttt{app/Http/Controllers} & 35 & Controladores: inventario, consumo FEFO, transferencias, reportes, etiquetas, escáner, asistente, usuarios, ajustes, entre otros. \\ \hline
 \texttt{app/Models} & 15 & Modelos Eloquent (\texttt{Material}, \texttt{Lote}, \texttt{Movimiento}, \texttt{Bodega}, \ldots). \\ \hline
 \texttt{app/Console/Commands} & 3 & Revisiones programadas de alertas FEFO y de stock bajo, y el evaluador del asistente (\texttt{rag:evaluar}). \\ \hline
 \texttt{app/Services} & 2 & Envío de alertas y proyección de reabastecimiento (\texttt{ProyeccionInventario}). \\ \hline
-\texttt{database/migrations} & 32 & Definición versionada del esquema de la base de datos. \\ \hline
-\texttt{resources/js/Pages} y \texttt{components} & 12 y 35 & Páginas Inertia y componentes React de la interfaz. \\ \hline
-\texttt{tests} & 39 clases y 11 archivos & Pruebas PHPUnit y la suite Playwright (Capítulo \ref{chap:pruebas}). \\ \hline
+\texttt{database/migrations} & 36 & Definición versionada del esquema de la base de datos. \\ \hline
+\texttt{resources/js/Pages} y \texttt{components} & 19 y 48 & Páginas Inertia y componentes React de la interfaz. \\ \hline
+\texttt{tests} & 46 clases y 11 archivos & Pruebas PHPUnit y la suite Playwright (Capítulo \ref{chap:pruebas}). \\ \hline
 \end{tabular}
 \end{table}
 
@@ -126,7 +126,7 @@ Los requerimientos RF-09 y RF-10 y el nivel de analítica predictiva del alcance
     \item \textbf{Diagnóstico.} Para explicar una variación, el servicio agrupa las entradas y salidas del insumo por motivo en los últimos días y las compara con el periodo anterior de igual duración.
 \end{itemize}
 
-El promedio móvil supone que el consumo de los próximos días será como el de las últimas semanas: no anticipa temporadas ni cambios bruscos, lo que se propone como trabajo futuro. La vista Reabastecimiento muestra estos valores y grafica el consumo por día, semana o mes, y el asistente los usa en dos intenciones nuevas (\texttt{forecast} y \texttt{consumption}). Once pruebas PHPUnit verifican los cálculos con fechas fijas, la exclusión de transferencias y ajustes, y que la clasificación de las 106 preguntas de las baterías de evaluación no cambió.
+El promedio móvil supone que el consumo de los próximos días será como el de las últimas semanas: no anticipa temporadas ni cambios bruscos, lo que se propone como trabajo futuro. La vista Reabastecimiento muestra estos valores y grafica el consumo por día, semana o mes, y el asistente los usa en dos intenciones nuevas (\texttt{forecast} y \texttt{consumption}). Once pruebas PHPUnit verifican los cálculos con fechas fijas, la exclusión de transferencias y ajustes, y que tres preguntas de las baterías se siguen clasificando igual; la clasificación de las 106 se comprobó una vez al agregar las intenciones.
 
 \section{Problemas enfrentados y cómo se resolvieron}
 \label{sec:imp_problemas}
@@ -145,7 +145,7 @@ La Tabla \ref{tab:imp_problemas} reúne los problemas más significativos del de
 \textbf{Problema} & \textbf{Causa} & \textbf{Solución} & \textbf{Commit} \\
 \hline
 \endhead
-El despliegue automático fallaba al actualizar el código en el servidor. & El repositorio del servidor usaba HTTPS sin credenciales y \texttt{git pull} pedía usuario. & El flujo de despliegue se autentica con un token efímero de cada ejecución. & \texttt{91732b6} \\ \hline
+El despliegue automático fallaba al actualizar el código en el servidor. & El repositorio del servidor usaba HTTPS sin credenciales y \texttt{git pull} pedía usuario. & Se usó un token efímero por ejecución; desde que el repositorio es público, el servidor actualiza sin credenciales. & \texttt{91732b6} \\ \hline
 La compilación del frontend fallaba en integración continua. & Un archivo importado por la aplicación (\texttt{theme.ts}) no estaba versionado. & Se agregó el archivo al repositorio. & \texttt{90da6f5} \\ \hline
 El asistente devolvía respuestas vacías con modelos que razonan antes de responder. & El razonamiento consumía todo el límite de tokens y dejaba vacío el contenido. & Se filtra el razonamiento y se reintenta con un límite mayor. & \texttt{1c9e162} \\ \hline
 El asistente respondía con ``la lista completa'' del inventario. & Las expresiones regulares no soportaban tildes (UTF-8) y un material inexistente devolvía lotes de otros materiales. & Clasificación compatible con UTF-8 y respuesta explícita de ``material no registrado''. & \texttt{5c7c2ef} \\ \hline
@@ -162,7 +162,7 @@ El formulario de transferencias no listaba lotes. & Los datos enviados a la vist
 El asistente respondió que ningún lote vencía en la semana cuando sí había. & El contexto incluía lotes ya consumidos, con fechas pasadas, y no indicaba la fecha del día. & Solo lotes con existencias, ventana de días según la pregunta y fecha de hoy en el contexto; prueba de regresión. & \texttt{ec76a78} \\ \hline
 Recibir una orden de compra creaba el lote con vencimiento de ``hoy más un año''. & La recepción no pedía los datos del lote: fecha, número y bodega se fijaban en el código. & La recepción exige número de lote, vencimiento y bodega por ítem; se agregó el ingreso de lotes para insumos ya registrados. & \texttt{2987679} \\ \hline
 El pan terminado aparecía siempre como crítico y la ocupación sumaba kilos con unidades. & Un único umbral de 15 días para productos que duran de 5 a 7 días; capacidad sin unidad. & Umbral FEFO por insumo y unidad de capacidad por bodega; ocupación global como promedio. & \texttt{de53e61} \\ \hline
-El asistente acertó 34 de 50 consultas en la primera medición. & Contextos sin costos, sin ajustes de conciliación ni totales; lotes no reconocidos por su número real. & Contextos completos y clasificador revisado; la misma batería pasó a 49 de 50. & \texttt{48f092f} \\ \hline
+El asistente acertó 34 de 50 consultas en la primera medición. & Contextos sin costos, sin ajustes de conciliación ni totales; lotes no reconocidos por su número real. & Contextos completos y clasificador revisado; la misma batería pasó a 49 de 50 (26-sep; 50 de 50 en la medición final). & \texttt{48f092f} \\ \hline
 Las listas largas de lotes por vencer salían cortadas. & El tope de 1\,024 tokens de salida se aplicaba también a los modelos en la nube. & El tope solo rige para modelos que corren en el servidor. & \texttt{717677d} \\ \hline
 ``¿Qué se está poniendo viejo?'' se respondía como una pregunta de existencias. & Decidían los patrones, que tomaron ``hay que sacar'' por una consulta de cantidad. & Clasifica primero el modelo; los patrones quedan de reserva. & \texttt{0afef8a} \\ \hline
 Seis tipos de incumplimiento de WCAG 2.1 AA. & Contraste bajo, botones de solo ícono sin nombre y campos sin etiqueta. & Acento sólido por tema, nombres accesibles y etiquetas; cero incumplimientos automáticos en el tema por defecto. & \texttt{fb0e9bb} \\ \hline

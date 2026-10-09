@@ -57,7 +57,7 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
     \item \textbf{Registro sin conexión}: la aplicación ya funciona en el celular y su \textit{Service Worker} guarda en caché los archivos estáticos; falta registrar movimientos sin red y sincronizarlos respetando FEFO y la inmutabilidad del Kardex.
     \item \textbf{Notificaciones \textit{push}} del navegador, además de las alertas en la aplicación, Telegram y correo; \textbf{identidad visual por empresa} conservando el contraste WCAG 2.1 AA de los seis temas; \textbf{tutoriales interactivos} y \textbf{consultas por voz}.
     \item \textbf{Accesibilidad}: avanzar al nivel AAA y hacer la revisión con lector de pantalla, que las pruebas automáticas no reemplazan.
-    \item \textbf{Seguridad}: autenticación de dos factores para administradores; ampliar \texttt{audit\_log} a inicios de sesión, intentos fallidos, exportaciones y consultas al asistente; extender el cifrado, que hoy cubre las claves de API, a otros datos reservados.
+    \item \textbf{Seguridad}: autenticación de dos factores para administradores; ampliar \texttt{audit\_log} a inicios de sesión, intentos fallidos y consultas al asistente; extender el cifrado, que hoy cubre las claves de API, a otros datos reservados.
     \item \textbf{Investigación}: repetir la prueba con usuario (Capítulo \ref{chap:pruebas}) en al menos diez PYMEs con la escala SUS; comparar modelos de lenguaje con la misma batería de \texttt{rag:evaluar}; medir el tiempo que ahorra el asistente; y documentar el método de desarrollo con asistentes de IA y sus controles.
 \end{itemize}
 
@@ -80,7 +80,7 @@ La Tabla \ref{tab:roadmap} presenta un orden sugerido. La prioridad combina el i
 5 & Memoria conversacional en la recuperación & Medio & Alta \\
 6 & Registro sin conexión en la bodega & Medio & Media \\
 7 & Módulo de producción (BOM) & Medio & Media \\
-8 & Clasificación de intenciones con NLP & Medio & Media \\
+8 & Verificación automática de las cifras de cada respuesta & Medio & Media \\
 9 & Arquitectura multi-tenencia & Alto & Baja \\
 10 & Integración con facturación electrónica DIAN & Alto & Baja \\
 \hline
