@@ -27,7 +27,7 @@ Cada requerimiento funcional implementado se asignó a uno o varios componentes 
 \hline
 \endhead
 RF-01, RF-02 & Catálogo de materiales e ingreso de lotes & \texttt{InventoryController}, modelos \texttt{Material} y \texttt{Lote} \\ \hline
-RF-04 & Despacho FEFO & \texttt{ConsumptionController}, \textit{scope} \texttt{Lote::fefoOrder} \\ \hline
+RF-04 & Despacho FEFO & \texttt{ConsumptionController}, \textit{scope} \texttt{Lote::despachables} \\ \hline
 RF-05 & Kardex & Modelo \texttt{Movimiento}, tabla \texttt{movimientos} \\ \hline
 RF-06, RF-18 & Roles y usuarios & \textit{Middleware} \texttt{CheckRole}, \texttt{UserController}, \texttt{AuthController} \\ \hline
 RF-07, RF-08 & Alertas de stock bajo y de vencimiento & Comandos \texttt{alerts:low-stock} y \texttt{alerts:fefo}, programados cada hora \\ \hline

@@ -34,7 +34,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{PYME (Pequeña y Mediana Empresa):} Empresas que por su facturación, empleados y activos se sitúan entre las microempresas y las grandes corporaciones; en Colombia las clasifica la Ley 590 de 2000 \cite{ley590}. Las PYMEs representan el 99,5\% de las empresas formales del país \cite{bbva2024mipymes}. La empresa del caso de estudio es una panificadora de tamaño pequeño a mediano.
     
-    \item \textbf{FEFO (First Expired, First Out):} Estrategia de rotación que establece que los productos con fecha de vencimiento más próxima deben despacharse primero. A diferencia de FIFO (First In, First Out), que ordena por fecha de llegada, FEFO ordena por fecha de caducidad. En Pymetory, FEFO es una regla inmutable: se implementó como un scope de Eloquent que se aplica automáticamente en cada operación de despacho.
+    \item \textbf{FEFO (First Expired, First Out):} Estrategia de rotación que establece que los productos con fecha de vencimiento más próxima deben despacharse primero. A diferencia de FIFO (First In, First Out), que ordena por fecha de llegada, FEFO ordena por fecha de caducidad. En Pymetory, FEFO es una regla inmutable: se implementó como un \textit{scope} local de Eloquent que se aplica en cada operación de despacho.
 \end{itemize}
 
 \subsection*{Área de Computación e Ingeniería de Software}
@@ -44,7 +44,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{MVC (Modelo-Vista-Controlador):} Patrón de arquitectura que separa el código en tres capas: los datos (Modelo), lo que ve el usuario (Vista) y la lógica que conecta ambas (Controlador) \cite{fowler2002poeaa}. En Pymetory, los modelos son clases de Eloquent como \texttt{Lote} y \texttt{Movimiento}; las vistas son componentes React como \texttt{Dashboard.tsx}; los controladores como \texttt{InventoryController} orquestan el flujo.
     
-    \item \textbf{Responsive (Diseño Adaptativo):} Capacidad de una interfaz para adaptarse a distintos tamaños de pantalla \cite{mdn_responsive_design}. Pymetory se diseñó con enfoque mobile-first usando Tailwind CSS v4, funcionando desde monitores de escritorio (1920px) hasta celulares (375px).
+    \item \textbf{Responsive (Diseño Adaptativo):} Capacidad de una interfaz para adaptarse a distintos tamaños de pantalla \cite{mdn_responsive_design}. Pymetory se diseñó con enfoque mobile-first usando Tailwind CSS v4, y se probó en pantallas de escritorio (1366 px) y de celular (390 px).
     
     \item \textbf{SCRUM:} Metodología ágil para gestionar proyectos de software en ciclos iterativos llamados Sprints \cite{schwaber2020scrumguide}. Pymetory adoptó SCRUM con sprints de dos semanas, revisiones al final de cada ciclo y un backlog gestionado en GitHub Projects.
     
