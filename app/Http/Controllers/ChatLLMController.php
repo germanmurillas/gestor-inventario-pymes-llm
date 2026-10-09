@@ -314,6 +314,10 @@ class ChatLLMController extends Controller {
                 . ($costo ? " | Costo unitario: {$this->cop($l->unit_cost)} por {$u} | Valor: {$this->cop($l->quantity * $l->unit_cost)}" : '');
         };
         $porMaterial = fn ($q) => $q->when(!empty($materialIds), fn ($x) => $x->whereIn('material_id', $materialIds));
+        // El nombre de quien registró un movimiento solo viaja al modelo si la pregunta lo pide: el contexto
+        // sale a un proveedor externo y los nombres son datos personales (Ley 1581 de 2012).
+        $pideUsuario = (bool) preg_match('/qui[eé]n|usuario|responsable|operari[oa]|empleado|persona/iu', $query);
+        $usuario = fn ($m) => $pideUsuario ? ' | Usuario: ' . ($m->user->name ?? 'Sistema') : '';
 
         switch ($intent) {
             case 'stock_check':
@@ -379,7 +383,7 @@ class ChatLLMController extends Controller {
                     ->when(!empty($materialIds), fn ($q) => $q->whereHas('lote', fn ($l) => $l->whereIn('material_id', $materialIds)))
                     ->latest('created_at')->latest('id')->take(10)->get();
                 $context = "KARDEX DE MOVIMIENTOS (historial inmutable, del más reciente al más antiguo):\n" . $movimientos->map(fn ($m) =>
-                    "- [{$m->created_at->format('Y-m-d H:i')}] " . ($m->type === 'entrada' ? 'ENTRADA' : 'SALIDA') . ": {$this->num($m->quantity)} {$m->lote->material->unit} de {$m->lote->material->name} (lote {$m->lote->batch_number}) | Motivo: {$m->reason} | Usuario: " . ($m->user->name ?? 'Sistema')
+                    "- [{$m->created_at->format('Y-m-d H:i')}] " . ($m->type === 'entrada' ? 'ENTRADA' : 'SALIDA') . ": {$this->num($m->quantity)} {$m->lote->material->unit} de {$m->lote->material->name} (lote {$m->lote->batch_number}) | Motivo: {$m->reason}" . $usuario($m)
                 )->join("\n");
                 break;
             case 'batch_info':
@@ -389,7 +393,7 @@ class ChatLLMController extends Controller {
                 }
                 $context = "FICHA DEL LOTE:\n" . $lotes->map(function ($l) use ($linea) {
                     $movs = $l->movimientos()->with('user')->latest('created_at')->take(5)->get()->map(fn ($m) =>
-                        "    · [{$m->created_at->format('Y-m-d H:i')}] {$m->type} de {$this->num($m->quantity)} {$l->material->unit} | Motivo: {$m->reason} | Usuario: " . ($m->user->name ?? 'Sistema'))->join("\n");
+                        "    · [{$m->created_at->format('Y-m-d H:i')}] {$m->type} de {$this->num($m->quantity)} {$l->material->unit} | Motivo: {$m->reason}" . $usuario($m))->join("\n");
                     $estado = ['active' => 'activo', 'quarantined' => 'en cuarentena', 'consumed' => 'consumido'][$l->status] ?? $l->status;
                     return $linea($l, true) . " | Estado: {$estado}\n  Últimos movimientos del lote:\n{$movs}";
                 })->join("\n");
@@ -399,7 +403,7 @@ class ChatLLMController extends Controller {
                 $context = "AJUSTES DE CONCILIACIÓN REGISTRADOS EN EL KARDEX (diferencias entre el conteo físico y el sistema):\n"
                     . ($ajustes->isEmpty() ? '- No hay ajustes de conciliación registrados.' : $ajustes->map(fn ($m) =>
                         "- [{$m->created_at->format('Y-m-d H:i')}] {$m->lote->material->name} (lote {$m->lote->batch_number}): " . ($m->type === 'salida' ? 'se descontaron ' : 'se sumaron ')
-                        . "{$this->num($m->quantity)} {$m->lote->material->unit} | Justificación: {$m->description} | Usuario: " . ($m->user->name ?? 'Sistema'))->join("\n"));
+                        . "{$this->num($m->quantity)} {$m->lote->material->unit} | Justificación: {$m->description}" . $usuario($m))->join("\n"));
                 break;
             case 'quarantine':
                 $lotes = $porMaterial(Lote::with(['material', 'bodega'])->where('status', 'quarantined'))->orderBy('expiration_date')->get();

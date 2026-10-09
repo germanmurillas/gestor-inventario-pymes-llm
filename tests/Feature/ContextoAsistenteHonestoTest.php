@@ -76,4 +76,15 @@ class ContextoAsistenteHonestoTest extends TestCase
 
         $this->assertContains('throttle:20,1', $ruta->gatherMiddleware());
     }
+
+    public function test_los_nombres_de_usuarios_solo_van_al_modelo_si_la_pregunta_los_pide(): void
+    {
+        $m = Material::factory()->create(['name' => 'Sal refinada', 'unit' => 'kg']);
+        $lote = Lote::factory()->create(['material_id' => $m->id, 'quantity' => 10]);
+        $u = User::factory()->create(['name' => 'Claudia Pérez']);
+        \App\Models\Movimiento::create(['lote_id' => $lote->id, 'user_id' => $u->id, 'type' => 'salida', 'quantity' => 2, 'reason' => 'produccion']);
+
+        $this->assertStringNotContainsString('Claudia', $this->contexto('¿Cuál fue el último movimiento de la sal refinada?', 'movements'));
+        $this->assertStringContainsString('Claudia Pérez', $this->contexto('¿Quién hizo el último movimiento de la sal refinada?', 'movements'));
+    }
 }
