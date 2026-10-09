@@ -206,7 +206,7 @@ El stack completo ---Laravel, PHP, MySQL, React, Inertia.js y Tailwind CSS---, l
 
 \subsection{Estado del Arte}
 
-Al analizar las soluciones existentes se observa un patrón. Plataformas como Odoo \cite{odoo}, Zoho Inventory \cite{zoho} y Stockpile \cite{stockpile} son robustas en gestión de inventarios, pero, en las versiones revisadas (julio de 2025), ninguna permitía interactuar con el sistema mediante lenguaje natural. El usuario debe aprender la lógica de la herramienta, en lugar de que la herramienta se adapte a la lógica del usuario. La propuesta de este trabajo cierra esa brecha incorporando una capa de inteligencia conversacional.
+Al analizar las soluciones existentes se observa un patrón. Plataformas como Odoo \cite{odoo}, Zoho Inventory \cite{zoho} y Stockpile \cite{stockpile} son robustas en gestión de inventarios, pero, en las versiones revisadas (julio de 2025), ninguna permitía interactuar con el sistema mediante lenguaje natural. El usuario debe aprender la lógica de la herramienta, en lugar de que la herramienta se adapte a la lógica del usuario. Desde entonces, Zoho Inventory incorporó un asistente (Zia) que consulta existencias y órdenes en lenguaje natural \cite{zoho_zia_inventario}, de modo que la diferencia de este trabajo no es la conversación en sí, sino su costo y su foco en FEFO y trazabilidad por lote para una PYME pequeña. La propuesta de este trabajo cierra esa brecha incorporando una capa de inteligencia conversacional.
 
 \begin{table}[!htbp]
 \centering
@@ -216,9 +216,9 @@ Al analizar las soluciones existentes se observa un patrón. Plataformas como Od
 \hline
 \textbf{Plataforma} & \textbf{Ventajas} & \textbf{Desventajas para PYMEs} \\
 \hline
-Odoo \cite{odoo} & Escalable, personalizable, comunidad activa. & Configuración compleja, curva de aprendizaje alta, carencia de módulo LLM nativo. \\
+Odoo \cite{odoo} & Escalable, personalizable, comunidad activa. & Configuración compleja, curva de aprendizaje alta. \\
 \hline
-Zoho Inventory \cite{zoho} & Interfaz amigable, integración con otras apps. & Plan gratuito muy limitado, costos recurrentes, no conversacional. \\
+Zoho Inventory \cite{zoho} & Interfaz amigable, integración con otras apps. & Plan gratuito muy limitado, costos recurrentes. \\
 \hline
 Stockpile \cite{stockpile} & Gratuito, sencillo de usar. & Funcionalidades muy básicas, sin reportes avanzados, sin consulta inteligente. \\
 \hline
