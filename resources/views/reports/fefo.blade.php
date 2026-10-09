@@ -35,6 +35,9 @@
             <div class="summary-item"><div class="val">{{ $summary['criticos7dias'] }}</div><div class="lbl">&le; 7 D&iacute;as</div></div>
             <div class="summary-item"><div class="val">{{ $summary['criticos15dias'] }}</div><div class="lbl">&le; 15 D&iacute;as</div></div>
         </div>
+        @if(!empty($recorte))
+        <p style="font-size:9px;color:#555;margin:4px 0 8px">El resumen incluye los {{ $recorte['total'] }} registros. El detalle muestra los {{ $recorte['mostradas'] }} más recientes; el detalle completo está en el reporte en Excel o CSV.</p>
+        @endif
         <table>
             <thead><tr><th>Material</th><th>Lote</th><th>Cantidad</th><th>Vencimiento</th><th>D&iacute;as Rest.</th><th>Bodega</th><th>Nivel</th><th>Valor</th></tr></thead>
             <tbody>

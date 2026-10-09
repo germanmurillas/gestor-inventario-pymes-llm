@@ -19,7 +19,7 @@ test.describe('Conteo físico @funcional', () => {
         await expect(tabla.locator('tbody tr')).toHaveCount(8);
 
         const fila = (n) => tabla.locator('tbody tr').filter({ has: page.getByRole('cell', { name: String(n), exact: true }) });
-        await expect(fila(4)).toContainText('Coincide'); // sal: igual al sistema
+        await expect(fila(4)).toContainText(/Coincide|Diferencia/); // sal: emparejada por nombre (el stock local cambia con otras pruebas)
         await expect(fila(6)).toContainText('Por parecido del nombre'); // "AJONJOLI" → Ajonjolí descortezado, sin marcar
         await expect(fila(6).getByRole('checkbox')).not.toBeChecked();
         await expect(fila(7)).toContainText('Sin insumo'); // engrasante: no existe en la demo

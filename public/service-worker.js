@@ -1,10 +1,9 @@
-const CACHE_NAME = 'pymetory-v1';
+// v2: ya no se guardan respuestas de datos ni páginas (antes, sin internet, la app mostraba stock
+// viejo como si fuera actual). Al activarse borra la caché v1, que podía tener datos guardados.
+const CACHE_NAME = 'pymetory-v2';
 
 const STATIC_ASSETS = [
-  '/',
   '/offline.html',
-  '/dashboard',
-  '/login',
 ];
 
 const CACHE_EXTENSIONS = ['css', 'js', 'png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'ico', 'woff', 'woff2', 'ttf', 'eot'];
@@ -51,42 +50,19 @@ self.addEventListener('fetch', (event) => {
     }
   }
 
-  event.respondWith(networkFirst(request));
+  // Datos y páginas: siempre del servidor. Sin conexión, una página avisa en vez de mostrar datos viejos.
+  if (request.mode === 'navigate') {
+    event.respondWith(fetch(request).catch(() => caches.match('/offline.html')));
+  }
 });
 
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
-
-  try {
-    const response = await fetch(request);
-    if (response.ok || response.type === 'basic') {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch (err) {
-    if (request.destination === 'document') {
-      return caches.match('/offline.html');
-    }
-    throw err;
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, response.clone());
   }
-}
-
-async function networkFirst(request) {
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch (err) {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    if (request.destination === 'document') {
-      return caches.match('/offline.html');
-    }
-    throw err;
-  }
+  return response;
 }

@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Tag, Plus, X, Search, Package, Trash2, Check, Pencil, Palette, Layers } from 'lucide-react';
+import { avisar } from '../../Components/Avisos';
+import { mensajeDeError } from '../../lib/http';
+
+/** Aviso en español cuando el servidor rechaza la acción (antes se ignoraba en silencio). */
+async function avisarSiFalla(res: Response): Promise<boolean> {
+    if (res.ok) return true;
+    let cuerpo = null; try { cuerpo = await res.json(); } catch { /* no era JSON */ }
+    avisar('error', mensajeDeError(res.status, cuerpo));
+    return false;
+}
 
 const PRESET_COLORS = [
     '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
@@ -129,11 +139,11 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
                 setFormName('');
                 setFormColor('#6366f1');
             } else {
-                const d = await res.json();
-                setError(d.errors?.nombre?.[0] || d.message || 'Error al crear tag');
+                let d: any = null; try { d = await res.json(); } catch { /* no era JSON */ }
+                setError(mensajeDeError(res.status, d));
             }
         } catch {
-            setError('Error de conexion');
+            setError(mensajeDeError(0, null));
         }
     };
 
@@ -151,19 +161,19 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
                 headers: headers(),
                 body: JSON.stringify({ nombre: editName.trim(), color: editColor }),
             });
-            if (res.ok) {
+            if (await avisarSiFalla(res)) {
                 await fetchTags();
                 setEditingId(null);
             }
-        } catch { /* ignore */ }
+        } catch { avisar('error', mensajeDeError(0, null)); }
     };
 
     const handleDelete = async (tagId: number) => {
         try {
-            await fetch(`/api/tags/${tagId}`, { method: 'DELETE', headers: headers() });
-            await fetchTags();
+            const res = await fetch(`/api/tags/${tagId}`, { method: 'DELETE', headers: headers() });
+            if (await avisarSiFalla(res)) await fetchTags();
             setDeletingId(null);
-        } catch { /* ignore */ }
+        } catch { avisar('error', mensajeDeError(0, null)); }
     };
 
     const toggleTagOnMaterial = async (materialId: number, tagId: number) => {
@@ -177,10 +187,10 @@ const FigmaLabels = ({ lotes = [] }: { lotes: any[] }) => {
                 headers: headers(),
                 body: JSON.stringify({ tag_ids: newTags }),
             });
-            if (res.ok) {
+            if (await avisarSiFalla(res)) {
                 setMaterialTags(prev => ({ ...prev, [materialId]: newTags }));
             }
-        } catch { /* ignore */ }
+        } catch { avisar('error', mensajeDeError(0, null)); }
     };
 
     const filteredLotItems = useMemo(() => {

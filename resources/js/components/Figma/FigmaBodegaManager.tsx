@@ -112,12 +112,12 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <div className="sm:col-span-2">
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Nombre</label>
-                                <input aria-label="Nombre" className={campo} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej. Cuarto frío" required />
+                                <input aria-label="Nombre" maxLength={255} className={campo} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej. Cuarto frío" required />
                                 {errores.name && <p className="mt-1 text-xs text-rose-300">{errores.name}</p>}
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Código</label>
-                                <input aria-label="Código" className={`${campo} uppercase disabled:opacity-60`} value={form.code} disabled={!!actual}
+                                <input aria-label="Código" maxLength={20} className={`${campo} uppercase disabled:opacity-60`} value={form.code} disabled={!!actual}
                                     onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="BOD-XXX" required />
                                 {errores.code && <p className="mt-1 text-xs text-rose-300">{errores.code}</p>}
                             </div>
@@ -135,7 +135,7 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                             </div>
                             <div className="sm:col-span-2">
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Descripción</label>
-                                <textarea aria-label="Descripción" rows={2} className={`${campo} resize-none`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Qué se guarda aquí" />
+                                <textarea aria-label="Descripción" maxLength={500} rows={2} className={`${campo} resize-none`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Qué se guarda aquí" />
                             </div>
                             {actual && (
                                 <div className="sm:col-span-2">

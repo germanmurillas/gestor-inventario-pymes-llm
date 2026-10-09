@@ -31,7 +31,7 @@ class ConsumptionController extends Controller
             ->sum('quantity');
 
         if ($totalAvailable < $quantityToConsume) {
-            return back()->withErrors(['quantity' => 'Stock insuficiente. Solo hay ' . $totalAvailable . ' kg disponibles sin vencer ni en cuarentena.']);
+            return back()->withErrors(['quantity' => "Stock insuficiente: de {$material->name} solo hay " . round($totalAvailable, 3) . " {$material->unit} disponibles (sin vencer ni en cuarentena)."]);
         }
 
         DB::transaction(function () use ($material, $quantityToConsume, $validated) {
@@ -164,7 +164,7 @@ class ConsumptionController extends Controller
 
         if ($totalAvailable < $quantityToConsume) {
             return response()->json([
-                'error' => "Stock insuficiente. Solo hay {$totalAvailable} kg disponibles sin vencer ni en cuarentena.",
+                'error' => "Stock insuficiente: de {$material->name} solo hay " . round($totalAvailable, 3) . " {$material->unit} disponibles (sin vencer ni en cuarentena).",
             ], 422);
         }
 

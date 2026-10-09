@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { mensajeDeError } from '../../lib/http';
+import { avisar } from '../../Components/Avisos';
 import { 
     BarChart3, TrendingUp, AlertTriangle, DollarSign, Clock, LayoutGrid,
     FileText, Table, ChevronDown, Calendar, Filter, Download, RefreshCw,
@@ -46,7 +48,7 @@ const SUMMARY_LABELS: Record<ReportType, Record<string, string>> = {
         total: 'En Riesgo', vencidos: 'Vencidos', criticos7dias: '≤7 Días', criticos15dias: '≤15 Días',
     },
     consumo: {
-        totalKilosConsumidos: 'Kgs Consumidos', totalOperaciones: 'Ops',
+        totalKilosConsumidos: 'Kg consumidos (insumos en peso)', totalOperaciones: 'Ops',
         porProduccion: 'Producción', porVenta: 'Ventas', porAjuste: 'Ajustes',
     },
     valorizacion: {
@@ -200,7 +202,8 @@ const FigmaReports = ({ stats }: { stats: any }) => {
             if (filters.to) params.set('to', filters.to);
 
             const res = await fetch(`/reports/preview?${params.toString()}`);
-            const json = await res.json();
+            let json: any = null; try { json = await res.json(); } catch { /* no era JSON */ }
+            if (!res.ok) { avisar('error', mensajeDeError(res.status, json)); json = {}; }
             setReportData(json.data || []);
             setReportSummary(json.summary || {});
             if (json.filters) {
@@ -227,7 +230,7 @@ const FigmaReports = ({ stats }: { stats: any }) => {
             if (filters.to) params.set('to', filters.to);
 
             const res = await fetch(`/reports/export?${params.toString()}`);
-            if (!res.ok) throw new Error(await res.text());
+            if (!res.ok) { let cuerpo = null; try { cuerpo = await res.json(); } catch { /* no era JSON */ } throw new Error(mensajeDeError(res.status, cuerpo)); }
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -239,8 +242,8 @@ const FigmaReports = ({ stats }: { stats: any }) => {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-        } catch (e) {
-            console.error('Export failed', e);
+        } catch (e: any) {
+            avisar('error', e?.message?.startsWith('Failed to fetch') ? mensajeDeError(0, null) : (e?.message || 'No se pudo generar el reporte.'));
         } finally {
             setExporting(false);
         }

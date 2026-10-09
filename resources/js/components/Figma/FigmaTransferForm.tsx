@@ -336,7 +336,7 @@ const FigmaTransferForm = ({ onBack, bodegas, lotes }: FigmaTransferFormProps) =
                             <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                 Motivo de la Transferencia
                             </label>
-                            <input aria-label="Motivo de la Transferencia"
+                            <input aria-label="Motivo de la Transferencia" maxLength={255}
                                 type="text"
                                 required
                                 value={data.reason}

@@ -30,6 +30,9 @@
             <div class="summary-item"><div class="val">{{ number_format($summary['totalStock'], 3) }}</div><div class="lbl">Kgs Totales</div></div>
             <div class="summary-item"><div class="val">${{ number_format($summary['costoPromedio'], 2) }}</div><div class="lbl">Costo Prom. kg</div></div>
         </div>
+        @if(!empty($recorte))
+        <p style="font-size:9px;color:#555;margin:4px 0 8px">El resumen incluye los {{ $recorte['total'] }} registros. El detalle muestra los {{ $recorte['mostradas'] }} más recientes; el detalle completo está en el reporte en Excel o CSV.</p>
+        @endif
         <table>
             <thead><tr><th>Material</th><th>C&oacute;digo</th><th>Stock (kg)</th><th>Costo Prom.</th><th>Valor Total</th><th>Lotes Activos</th></tr></thead>
             <tbody>

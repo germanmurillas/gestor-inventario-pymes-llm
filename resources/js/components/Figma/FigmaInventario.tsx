@@ -12,6 +12,7 @@ import FigmaBodegaBar from './FigmaBodegaBar';
 
 const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], user, onNavigate, initialBodegaCode, onManageBodegas }: { lotes?: any[], bodegas?: any[], categoriasExistentes?: string[], user?: any, onNavigate?: (view: string) => void, initialBodegaCode?: string | null, onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
     const [viewMode, setViewMode] = useState<'GRID' | 'DETAIL' | 'FORM' | 'CONSUME' | 'WIZARD'>('GRID');
+    const [wizardMaterial, setWizardMaterial] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showBodegaModal, setShowBodegaModal] = useState(false);
     const [showAdjustModal, setShowAdjustModal] = useState(false);
@@ -114,11 +115,12 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
     const materialsList = useMemo(() => {
         const map = new Map<number, { id: number; name: string; code: string; photo_url: string | null; unit: string; stock_total: number }>();
         lotes.forEach((l: any) => {
-            if (!l.material_name) return;
-            const key = l.codigo;
-            if (!map.has(key as any)) {
-                map.set(key as any, {
-                    id: l.id, // Will be overwritten if we find material_id
+            // Sin material_id no se puede consumir: el id del lote no sirve (es otra tabla).
+            if (!l.material_name || !l.material_id) return;
+            const key = l.material_id;
+            if (!map.has(key)) {
+                map.set(key, {
+                    id: l.material_id,
                     name: l.material_name,
                     code: l.codigo,
                     photo_url: l.photo_url,
@@ -126,7 +128,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                     stock_total: 0,
                 });
             }
-            const entry = map.get(key as any)!;
+            const entry = map.get(key)!;
             entry.stock_total += parseFloat(l.cantidad) || 0;
         });
         return Array.from(map.values());
@@ -145,7 +147,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
     }
 
     if (viewMode === 'WIZARD') {
-        return <FigmaConsumeWizard onBack={() => setViewMode('GRID')} initialMaterials={materialsList} />;
+        return <FigmaConsumeWizard onBack={() => { setViewMode('GRID'); setWizardMaterial(null); }} initialMaterials={materialsList} materialInicial={wizardMaterial} />;
     }
 
     const fmt = (n: number) => Number(n || 0).toLocaleString('es-CO', { maximumFractionDigits: 2 });
@@ -177,7 +179,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                             <div className="space-y-4">
                                 <div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre de la Bodega</label>
-                                    <input aria-label="Nombre de la Bodega" 
+                                    <input aria-label="Nombre de la Bodega" maxLength={255} 
                                         type="text" 
                                         value={data.name}
                                         onChange={e => setData('name', e.target.value)}
@@ -189,7 +191,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Código</label>
-                                        <input aria-label="Código" 
+                                        <input aria-label="Código" maxLength={20} 
                                             type="text" 
                                             value={data.code}
                                             onChange={e => setData('code', e.target.value.toUpperCase())}
@@ -371,7 +373,7 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                             <button onClick={() => setMaterialAbierto(null)} aria-label="Cerrar" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-800 text-slate-300"><X size={18} /></button>
                         </div>
 
-                        <button onClick={() => { setMaterialAbierto(null); setViewMode('WIZARD'); }}
+                        <button onClick={() => { setWizardMaterial(materialSel.materialId ?? null); setMaterialAbierto(null); setViewMode('WIZARD'); }}
                             className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3 text-sm font-bold text-white active:scale-[0.99]">
                             <Sparkles size={16} /> Consumir por FEFO
                         </button>
@@ -487,7 +489,7 @@ const AdjustModal = ({ lote, onClose }: { lote: any, onClose: () => void }) => {
 
                         <div>
                             <label htmlFor="ajuste-motivo" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Motivo del ajuste</label>
-                            <textarea id="ajuste-motivo" 
+                            <textarea id="ajuste-motivo" maxLength={255} 
                                 value={data.reason}
                                 onChange={e => setData('reason', e.target.value)}
                                 placeholder="Indica por qué cambió el stock (ej: pérdida por humedad, error de pesaje...)"

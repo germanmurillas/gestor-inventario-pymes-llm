@@ -26,16 +26,21 @@
     <main>
         <div class="title">Consumo de Materia Prima por Per&iacute;odo</div>
         <div class="summary-box">
-            <div class="summary-item"><div class="val">{{ number_format($summary['totalKilosConsumidos'], 2) }}</div><div class="lbl">Kgs Consumidos</div></div>
+            <div class="summary-item"><div class="val">{{ number_format($summary['totalKilosConsumidos'], 2) }}</div><div class="lbl">Kg consumidos (insumos en peso)</div></div>
             <div class="summary-item"><div class="val">{{ $summary['totalOperaciones'] }}</div><div class="lbl">Operaciones</div></div>
             <div class="summary-item"><div class="val">{{ $summary['porProduccion'] }}</div><div class="lbl">Producci&oacute;n</div></div>
             <div class="summary-item"><div class="val">{{ $summary['porVenta'] }}</div><div class="lbl">Ventas</div></div>
             <div class="summary-item"><div class="val">{{ $summary['porAjuste'] }}</div><div class="lbl">Ajustes</div></div>
         </div>
+        @if(!empty($recorte))
+        <p style="font-size:9px;color:#555;margin:4px 0 8px">El resumen incluye los {{ $recorte['total'] }} registros. El detalle muestra los {{ $recorte['mostradas'] }} más recientes; el detalle completo está en el reporte en Excel o CSV.</p>
+        @endif
+        {{-- Tablas de 25 filas: una tabla larga que cruza muchas páginas vuelve muy lento a dompdf. --}}
+        @foreach(array_chunk($data, 25) as $bloque)
         <table>
             <thead><tr><th>Fecha</th><th>Material</th><th>Lote</th><th>Bodega</th><th>Cantidad</th><th>Raz&oacute;n</th><th>Descripci&oacute;n</th><th>Usuario</th></tr></thead>
             <tbody>
-                @foreach($data as $row)
+                @foreach($bloque as $row)
                 <tr>
                     <td>{{ $row['fecha'] }}</td>
                     <td><strong>{{ $row['material'] }}</strong><br><small>{{ $row['codigo'] }}</small></td>
@@ -49,6 +54,7 @@
                 @endforeach
             </tbody>
         </table>
+        @endforeach
     </main>
 </body>
 </html>

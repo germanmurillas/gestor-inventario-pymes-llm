@@ -358,7 +358,7 @@ const FigmaQRScanner = ({ onBack, prefillLote }: FigmaQRScannerProps) => {
                                         <label className="text-xs font-black text-slate-200 uppercase tracking-tight">
                                             Nota / Observación
                                         </label>
-                                        <textarea aria-label="Nota / Observación"
+                                        <textarea aria-label="Nota / Observación" maxLength={500}
                                             value={data.description}
                                             onChange={e => setData('description', e.target.value)}
                                             placeholder="Ej: Retorno de producción, material de cuarentena..."

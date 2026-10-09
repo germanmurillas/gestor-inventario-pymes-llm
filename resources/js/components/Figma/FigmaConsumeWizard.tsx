@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { pedir } from '../../lib/http';
 import {
     ArrowLeft, ArrowRight, Check, Package, Scale, ClipboardCheck,
     PartyPopper, AlertTriangle, Truck, Camera, Loader2, Search,
@@ -53,6 +54,8 @@ interface MaterialOption {
 interface FigmaConsumeWizardProps {
     onBack: () => void;
     initialMaterials?: MaterialOption[];
+    /** Insumo ya elegido (al entrar desde la ficha del insumo): arranca en el paso de cantidad. */
+    materialInicial?: number | null;
 }
 
 const REASONS = [
@@ -62,12 +65,13 @@ const REASONS = [
     { value: 'ajuste', label: 'Ajuste Manual de Salida', icon: '🔄' },
 ];
 
-const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizardProps) => {
-    const [step, setStep] = useState(1);
+const FigmaConsumeWizard = ({ onBack, initialMaterials = [], materialInicial = null }: FigmaConsumeWizardProps) => {
+    const preelegido = materialInicial ? initialMaterials.find((m) => m.id === materialInicial) ?? null : null;
+    const [step, setStep] = useState(preelegido ? 2 : 1);
     const [materials, setMaterials] = useState<MaterialOption[]>(initialMaterials);
     const [materialsLoading, setMaterialsLoading] = useState(!initialMaterials.length);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedMaterial, setSelectedMaterial] = useState<MaterialOption | null>(null);
+    const [selectedMaterial, setSelectedMaterial] = useState<MaterialOption | null>(preelegido);
     const [quantity, setQuantity] = useState<number>(0);
     const [reason, setReason] = useState('produccion');
     const [description, setDescription] = useState('');
@@ -87,16 +91,8 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
             return;
         }
 
-        const fetchMaterials = async () => {
-            try {
-                const res = await fetch('/inventory/fefo-suggest/1'); // dummy to check connection
-                // Use the dashboard page data approach instead
-                setMaterialsLoading(false);
-            } catch {
-                setMaterialsLoading(false);
-            }
-        };
-        fetchMaterials();
+        // Sin lista de insumos desde la vista que lo abre no hay nada que consumir.
+        setMaterialsLoading(false);
     }, []);
 
     // Fetch FEFO suggestion when material or quantity changes
@@ -105,12 +101,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
         setSuggestionLoading(true);
         setError(null);
         try {
-            const res = await fetch(`/inventory/fefo-suggest/${materialId}?quantity=${qty}`);
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Error al obtener sugerencia');
-            }
-            const data = await res.json();
+            const data = await pedir<FefoSuggestion>(`/inventory/fefo-suggest/${materialId}?quantity=${qty}`);
             setSuggestion(data);
         } catch (e: any) {
             setError(e.message);
@@ -138,26 +129,10 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
         setError(null);
 
         try {
-            const res = await fetch('/inventory/consume-fefo', {
+            const result = await pedir('/inventory/consume-fefo', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-                },
-                body: JSON.stringify({
-                    material_id: selectedMaterial.id,
-                    quantity,
-                    reason,
-                    description: description || undefined,
-                }),
+                body: { material_id: selectedMaterial.id, quantity, reason, description: description.trim() || undefined },
             });
-
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Error al registrar consumo');
-            }
-
-            const result = await res.json();
             setConsumptionResult(result);
             setStep(4);
         } catch (e: any) {
@@ -461,7 +436,7 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [] }: FigmaConsumeWizar
                             {/* Description */}
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Observaciones</label>
-                                <textarea aria-label="Observaciones"
+                                <textarea aria-label="Observaciones" maxLength={255}
                                     value={description}
                                     onChange={e => setDescription(e.target.value)}
                                     placeholder="Nº de orden de producción, receta o detalle relevante..."

@@ -5,6 +5,8 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { applyTheme, DEFAULT_THEME } from './lib/theme';
+import Avisos from './Components/Avisos';
+import BarreraDeErrores from './Components/BarreraDeErrores';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Pymetory';
 
@@ -21,7 +23,14 @@ createInertiaApp({
         else if (!document.documentElement.dataset.theme) applyTheme(DEFAULT_THEME);
 
         const root = createRoot(el);
-        root.render(<App {...props} />);
+        // @ts-ignore — Inertia props dinámicos
+        const flash = props?.initialPage?.props?.flash;
+        root.render(
+            <>
+                <BarreraDeErrores><App {...props} /></BarreraDeErrores>
+                <Avisos flashInicial={flash} />
+            </>,
+        );
     },
     progress: {
         color: '#111111',

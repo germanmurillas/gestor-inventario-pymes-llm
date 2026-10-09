@@ -106,7 +106,8 @@ class ReportController extends Controller
                 'criticos15dias'   => count(array_filter($data, fn($r) => ($r['dias_restantes'] ?? 9999) <= 15 && ($r['dias_restantes'] ?? 9999) > 7)),
             ],
             'consumo'        => [
-                'totalKilosConsumidos' => array_sum(array_column($data, 'quantity')),
+                // Solo insumos medidos en peso (kg y g): sumar kilos con litros o unidades no tendría sentido.
+                'totalKilosConsumidos' => round(array_sum(array_map(fn ($r) => match ($r['unidad'] ?? null) { 'kg' => (float) $r['quantity'], 'g' => $r['quantity'] / 1000, default => 0 }, $data)), 2),
                 'totalOperaciones'     => count($data),
                 'porProduccion'        => count(array_filter($data, fn($r) => ($r['reason'] ?? '') === 'produccion')),
                 'porVenta'             => count(array_filter($data, fn($r) => ($r['reason'] ?? '') === 'venta')),
@@ -255,6 +256,7 @@ class ReportController extends Controller
             'bodega'      => $mov->lote->bodega->name ?? 'Sin asignar',
             'type'        => $mov->type,
             'quantity'    => $mov->quantity,
+            'unidad'      => $mov->lote->material->unit ?? null,
             'reason'      => $mov->reason,
             'description' => $mov->description,
             'user'        => $mov->user->name ?? 'Sistema',
@@ -332,6 +334,9 @@ class ReportController extends Controller
 
     // ── Export Engines ────────────────────────────────────────────────────────
 
+    /** Filas de detalle que caben en un PDF sin pasar el límite de tiempo del servidor. */
+    private const PDF_MAX_FILAS = 200;
+
     private function exportPdf(string $type, array $data)
     {
         $viewName = match ($type) {
@@ -343,10 +348,15 @@ class ReportController extends Controller
             default        => 'reports.inventory',
         };
 
+        // dompdf tarda más de 30 s (límite del servidor) con miles de filas: el PDF lleva el resumen
+        // de todo y el detalle de los registros más recientes; el detalle completo está en Excel/CSV.
+        $total = count($data);
+        $detalle = array_slice($data, 0, self::PDF_MAX_FILAS);
         $pdf = Pdf::loadView($viewName, [
-            'lotes'   => $data,    // La vista espera $lotes por compatibilidad
-            'data'    => $data,
+            'lotes'   => $detalle,    // La vista espera $lotes por compatibilidad
+            'data'    => $detalle,
             'summary' => $this->resolveSummary($type, $data),
+            'recorte' => $total > self::PDF_MAX_FILAS ? ['mostradas' => self::PDF_MAX_FILAS, 'total' => $total] : null,
         ]);
 
         $title = match ($type) {
@@ -441,9 +451,9 @@ class ReportController extends Controller
 
     private function csvConsumo($file, array $data): void
     {
-        fputcsv($file, ['ID', 'Fecha', 'Material', 'Codigo', 'Lote', 'Bodega', 'Tipo', 'Cantidad', 'Razon', 'Descripcion', 'Usuario'], ';');
+        fputcsv($file, ['ID', 'Fecha', 'Material', 'Codigo', 'Lote', 'Bodega', 'Tipo', 'Cantidad', 'Unidad', 'Razon', 'Descripcion', 'Usuario'], ';');
         foreach ($data as $r) {
-            fputcsv($file, [$r['id'], $r['fecha'], $r['material'], $r['codigo'], $r['batch'], $r['bodega'], $r['type'], $r['quantity'], $r['reason'], $r['description'], $r['user']], ';');
+            fputcsv($file, [$r['id'], $r['fecha'], $r['material'], $r['codigo'], $r['batch'], $r['bodega'], $r['type'], $r['quantity'], $r['unidad'] ?? '', $r['reason'], $r['description'], $r['user']], ';');
         }
     }
 

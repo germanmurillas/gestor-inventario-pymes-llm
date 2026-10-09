@@ -100,7 +100,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [], categorias = [
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Nombre del Producto</label>
-                                <input aria-label="Nombre del Producto" 
+                                <input aria-label="Nombre del Producto" maxLength={255} 
                                     type="text" 
                                     required
                                     value={data.name}
@@ -113,7 +113,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [], categorias = [
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Código</label>
-                                    <input aria-label="Código" 
+                                    <input aria-label="Código" maxLength={20} 
                                         type="text" 
                                         required
                                         value={data.code}
@@ -125,7 +125,7 @@ const FigmaForms = ({ onBack, initialBodega = null, bodegas = [], categorias = [
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Lote Interno</label>
-                                    <input aria-label="Lote Interno" 
+                                    <input aria-label="Lote Interno" maxLength={50} 
                                         type="text" 
                                         required
                                         value={data.batch_number}

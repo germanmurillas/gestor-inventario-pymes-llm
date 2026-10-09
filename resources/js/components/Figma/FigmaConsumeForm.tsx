@@ -25,7 +25,8 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
         });
     };
 
-    const percentage = Math.min((data.quantity / lote.quantity) * 100, 100);
+    const disponible = Number(lote.cantidad) || 0;
+    const percentage = disponible > 0 ? Math.min((data.quantity / disponible) * 100, 100) : 0;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8 animate-in slide-in-from-right-4 duration-500 max-w-7xl mx-auto pb-20">
@@ -46,7 +47,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                 </div>
                 <button 
                     type="submit"
-                    disabled={processing || data.quantity <= 0 || data.quantity > lote.quantity}
+                    disabled={processing || data.quantity <= 0 || data.quantity > disponible}
                     className="flex items-center gap-2 bg-obsidiana text-white px-8 py-3 rounded-2xl shadow-lg font-bold text-sm hover:scale-105 transition-all active:scale-95 disabled:opacity-50"
                 >
                     {processing ? <Loader2 size={18} className="animate-spin" /> : <Truck size={18} />}
@@ -217,7 +218,7 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                             <div className="space-y-4">
                                 <div className="space-y-2 h-full flex flex-col">
                                     <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Descripción / Observaciones</label>
-                                    <textarea aria-label="Descripción / Observaciones" 
+                                    <textarea aria-label="Descripción / Observaciones" maxLength={255} 
                                         value={data.description}
                                         onChange={e => setData('description', e.target.value)}
                                         placeholder="Indica el número de orden de producción o cualquier detalle relevante..."

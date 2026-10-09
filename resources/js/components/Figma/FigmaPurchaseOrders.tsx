@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { avisar } from '../../Components/Avisos';
+import { mensajeDeError } from '../../lib/http';
 import { usePage } from '@inertiajs/react';
 import { Plus, Truck, Package, CheckCircle, Clock, X, Search, Save, Trash2, ArrowRight, ChevronRight } from 'lucide-react';
 
@@ -127,6 +129,9 @@ export default function FigmaPurchaseOrders() {
             setVendors([...vendors, d.vendor]);
             setVendorId(d.vendor.id);
             setNewVendorName(''); setNewVendorPhone('');
+        } else {
+            let d = null; try { d = await res.json(); } catch { /* no era JSON */ }
+            avisar('error', mensajeDeError(res.status, d));
         }
     };
 
@@ -258,7 +263,7 @@ export default function FigmaPurchaseOrders() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase">N° Orden</div>
-                                    <input aria-label="N° Orden" type="text" value={poNumber} onChange={e => setPoNumber(e.target.value)}
+                                    <input aria-label="N° Orden" maxLength={50} type="text" value={poNumber} onChange={e => setPoNumber(e.target.value)}
                                         className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500" />
                                 </div>
                                 <div className="space-y-1">
@@ -276,16 +281,16 @@ export default function FigmaPurchaseOrders() {
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-[9px] font-black text-slate-400 uppercase">Enviado por</div>
-                                    <input aria-label="Enviado por" type="text" value={submittedBy} onChange={e => setSubmittedBy(e.target.value)}
+                                    <input aria-label="Enviado por" maxLength={100} type="text" value={submittedBy} onChange={e => setSubmittedBy(e.target.value)}
                                         placeholder="Nombre del solicitante" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500" />
                                 </div>
                             </div>
 
                             {/* Quick add vendor */}
                             <div className="flex items-center gap-3 p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30">
-                                <input aria-label="Nombre del proveedor" type="text" value={newVendorName} onChange={e => setNewVendorName(e.target.value)}
+                                <input aria-label="Nombre del proveedor" maxLength={200} type="text" value={newVendorName} onChange={e => setNewVendorName(e.target.value)}
                                     placeholder="Nuevo proveedor rápido" className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-indigo-500" />
-                                <input aria-label="Teléfono del proveedor" type="text" value={newVendorPhone} onChange={e => setNewVendorPhone(e.target.value)}
+                                <input aria-label="Teléfono del proveedor" maxLength={50} type="text" value={newVendorPhone} onChange={e => setNewVendorPhone(e.target.value)}
                                     placeholder="Teléfono" className="w-40 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-indigo-500" />
                                 <button onClick={handleAddVendor} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl">
                                     Agregar
@@ -294,12 +299,12 @@ export default function FigmaPurchaseOrders() {
 
                             <div className="space-y-1">
                                 <div className="text-[9px] font-black text-slate-400 uppercase">Dirección de envío</div>
-                                <input aria-label="Dirección de envío" type="text" value={shipTo} onChange={e => setShipTo(e.target.value)}
+                                <input aria-label="Dirección de envío" maxLength={500} type="text" value={shipTo} onChange={e => setShipTo(e.target.value)}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500" />
                             </div>
                             <div className="space-y-1">
                                 <div className="text-[9px] font-black text-slate-400 uppercase">Notas</div>
-                                <textarea aria-label="Notas" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+                                <textarea aria-label="Notas" maxLength={2000} value={notes} onChange={e => setNotes(e.target.value)} rows={2}
                                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white outline-none focus:border-indigo-500 resize-none" />
                             </div>
 
