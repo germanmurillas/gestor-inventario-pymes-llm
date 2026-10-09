@@ -49,8 +49,10 @@ class ProyeccionInventario
         $consumos = Movimiento::query()
             ->join('lotes', 'lotes.id', '=', 'movimientos.lote_id')
             ->where(fn ($q) => self::soloConsumo($q))
+            // Ventana de los $ventana días completos anteriores a hoy: [hoy − ventana, hoy). Antes incluía
+            // también el día en curso (29 días divididos entre 28).
             ->where('movimientos.created_at', '>=', $desde)
-            ->where('movimientos.created_at', '<', $hoy->copy()->addDay())
+            ->where('movimientos.created_at', '<', $hoy)
             ->when($materialIds, fn ($q) => $q->whereIn('lotes.material_id', $materialIds))
             ->groupBy('lotes.material_id')
             ->selectRaw("lotes.material_id, SUM(CASE WHEN movimientos.type = 'entrada' THEN -movimientos.quantity ELSE movimientos.quantity END) AS total")
@@ -58,7 +60,9 @@ class ProyeccionInventario
 
         return Material::query()
             ->when($materialIds, fn ($q) => $q->whereIn('id', $materialIds))
-            ->withSum(['lotes as stock_activo' => fn ($q) => $q->where('status', 'active')], 'quantity')
+            // Solo lo que se puede usar: los lotes vencidos no se despachan (Lote::motivoNoDespachable).
+            ->withSum(['lotes as stock_activo' => fn ($q) => $q->where('status', 'active')
+                ->where(fn ($v) => $v->whereNull('expiration_date')->orWhereDate('expiration_date', '>=', $hoy))], 'quantity')
             ->orderBy('name')
             ->get()
             ->map(fn (Material $m) => $this->fila($m, (float) ($consumos[$m->id] ?? 0), $ventana, $hoy))

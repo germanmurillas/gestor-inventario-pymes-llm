@@ -181,4 +181,29 @@ class ProyeccionInventarioTest extends TestCase
         $this->assertStringContainsString('MATERIAL NO ENCONTRADO', $ctx);
         $this->assertStringNotContainsString('PROYECCIÓN', $ctx);
     }
+
+    public function test_la_ventana_son_los_28_dias_completos_anteriores_sin_el_dia_en_curso(): void
+    {
+        $harina = Material::factory()->create(['name' => 'Harina de trigo', 'unit' => 'kg']);
+        $lote = Lote::factory()->create(['material_id' => $harina->id, 'quantity' => 500, 'status' => 'active', 'expiration_date' => '2027-01-01']);
+        $this->salida($lote, 28, 'produccion', $this->hoy->copy()->subDays(28)->setTime(8, 0)->toDateTimeString());
+        $this->salida($lote, 50, 'produccion', $this->hoy->copy()->setTime(9, 0)->toDateTimeString()); // hoy: no cuenta
+        $this->salida($lote, 99, 'produccion', $this->hoy->copy()->subDays(29)->setTime(9, 0)->toDateTimeString()); // fuera de la ventana
+
+        $f = app(ProyeccionInventario::class)->proyeccion([$harina->id], 28, $this->hoy)->first();
+
+        $this->assertEquals(28, $f['consumo_ventana']);
+        $this->assertEquals(1, $f['consumo_diario']);
+    }
+
+    public function test_los_lotes_vencidos_no_cuentan_como_existencia(): void
+    {
+        $harina = Material::factory()->create(['name' => 'Harina de trigo', 'unit' => 'kg']);
+        Lote::factory()->create(['material_id' => $harina->id, 'quantity' => 40, 'status' => 'active', 'expiration_date' => $this->hoy->copy()->subDay()]);
+        Lote::factory()->create(['material_id' => $harina->id, 'quantity' => 60, 'status' => 'active', 'expiration_date' => $this->hoy->copy()->addDays(10)]);
+
+        $f = app(ProyeccionInventario::class)->proyeccion([$harina->id], 28, $this->hoy)->first();
+
+        $this->assertEquals(60, $f['stock']);
+    }
 }
