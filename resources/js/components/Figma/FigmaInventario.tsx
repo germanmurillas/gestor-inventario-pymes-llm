@@ -112,7 +112,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
         const map = new Map<string, any>();
         filteredLotes.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
             if (!map.has(l.codigo)) map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg',
-                foto: l.photo_url, materialId: l.material_id, presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
+                foto: l.photo_url, materialId: l.material_id, presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, descripcion: l.descripcion ?? null, diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
             const m = map.get(l.codigo);
             m.lotes.push(l);
             if (l.estado === 'quarantined') m.cuarentena++; else m.stock += Number(l.cantidad) || 0;
@@ -122,7 +122,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
         sinExistenciaFiltrados.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
             if (map.has(l.codigo)) return;
             map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg', foto: l.photo_url, materialId: l.material_id,
-                presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null,
+                presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, descripcion: l.descripcion ?? null,
                 diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: 0, minimo: Number(l.stock_minimo || 0), stockGlobal: 0,
                 stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null, sinExistencia: true, bodegaId: l.bodega_id });
         });
@@ -415,6 +415,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
                                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{materialSel.codigo}</p>
                                 <h3 className="text-xl font-bold leading-tight text-white">{materialSel.nombre}</h3>
                                 <p className="mt-1 text-sm text-slate-300">Stock total <b className="text-white">{fmt(materialSel.stock)} {materialSel.unidad}</b>{materialSel.minimo > 0 && <> · mínimo {fmt(materialSel.minimo)}</>}</p>
+                                {materialSel.descripcion && <p className="mt-2 whitespace-pre-line text-sm text-slate-300">{materialSel.descripcion}</p>}
                             </div>
                             <button onClick={() => setMaterialAbierto(null)} aria-label="Cerrar" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-800 text-slate-300"><X size={18} /></button>
                         </div>

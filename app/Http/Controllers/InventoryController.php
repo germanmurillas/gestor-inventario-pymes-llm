@@ -26,6 +26,7 @@ class InventoryController extends Controller {
                 'presentacion_nombre' => $lote->material->presentacion_nombre ?? null,
                 'presentacion_cantidad' => $lote->material->presentacion_cantidad ?? null,
                 'vida_util_dias' => $lote->material->vida_util_dias ?? null,
+                'descripcion' => $lote->material->description,
                 'lote' => $lote->batch_number,
                 'cantidad' => $lote->quantity,
                 'vencimiento' => $lote->expiration_date->format('Y-m-d'),
@@ -53,6 +54,7 @@ class InventoryController extends Controller {
                 'material_id' => $m->id, 'codigo' => $m->code, 'material_name' => $m->name, 'categoria' => $m->categoria,
                 'unit' => $m->unit ?? 'kg', 'presentacion_nombre' => $m->presentacion_nombre, 'presentacion_cantidad' => $m->presentacion_cantidad,
                 'vida_util_dias' => $m->vida_util_dias, 'dias_criticos' => $m->dias_criticos, 'dias_entrega' => $m->dias_entrega,
+                'descripcion' => $m->description,
                 'stock_minimo' => (float) ($m->stock_minimo ?? 0), 'photo_url' => $m->photo_url,
                 'bodega' => $m->bodega?->name, 'bodega_id' => $m->bodega_id, 'sin_existencia' => true,
             ]);
