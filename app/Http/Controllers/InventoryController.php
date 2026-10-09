@@ -55,6 +55,7 @@ class InventoryController extends Controller {
                 'unit' => $m->unit ?? 'kg', 'presentacion_nombre' => $m->presentacion_nombre, 'presentacion_cantidad' => $m->presentacion_cantidad,
                 'vida_util_dias' => $m->vida_util_dias, 'dias_criticos' => $m->dias_criticos, 'dias_entrega' => $m->dias_entrega,
                 'descripcion' => $m->description,
+                'umbral_dias' => (int) ($m->dias_criticos ?: Lote::diasCriticos()),
                 'stock_minimo' => (float) ($m->stock_minimo ?? 0), 'photo_url' => $m->photo_url,
                 'bodega' => $m->bodega?->name, 'bodega_id' => $m->bodega_id, 'sin_existencia' => true,
             ]);

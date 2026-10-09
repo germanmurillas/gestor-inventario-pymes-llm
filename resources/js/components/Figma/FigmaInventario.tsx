@@ -123,7 +123,7 @@ const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categor
             if (map.has(l.codigo)) return;
             map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg', foto: l.photo_url, materialId: l.material_id,
                 presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, descripcion: l.descripcion ?? null,
-                diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: 0, minimo: Number(l.stock_minimo || 0), stockGlobal: 0,
+                diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: 0,
                 stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null, sinExistencia: true, bodegaId: l.bodega_id });
         });
         return Array.from(map.values()).sort((a, b) => (b.criticos - a.criticos) || (Number(!!a.sinExistencia) - Number(!!b.sinExistencia)) || a.nombre.localeCompare(b.nombre));
