@@ -71,23 +71,23 @@ El anteproyecto planificó seis sprints de dos semanas, precedidos por cuatro se
 \centering
 \caption{Planificación de sprints del anteproyecto.}
 \label{tab:sprints}
-\begin{tabular}{|l|l|p{3cm}|p{4cm}|p{2.5cm}|}
+\begin{tabular}{|l|l|p{3.4cm}|p{6.3cm}|p{2.1cm}|}
 \hline
-\textbf{Sprint} & \textbf{Semanas} & \textbf{Objetivo} & \textbf{Entregables} & \textbf{Casos de Uso} \\
+\textbf{Sprint} & \textbf{Semanas} & \textbf{Objetivo} & \textbf{Entregables} & \textbf{Casos de uso} \\
 \hline
-Fase 0: Requisitos y Diseño & Sem 1--4 & Identificar necesidades, definir alcance, diseñar arquitectura & Documento IEEE 830, MER (10 tablas), 18 mockups Figma, product backlog priorizado & UC1--UC9 (definición) \\
+Fase 0 & Sem 1--4 & Requisitos y diseño & Documento de requisitos, modelo de datos, 18 mockups y backlog priorizado & UC1--UC9 \\
 \hline
-Sprint 1 & Sem 5--6 & Configurar entorno de desarrollo e implementar autenticación & Proyecto Laravel 13 base, migraciones iniciales, middleware RBAC, seeders con datos de panificadora, login/logout funcional & Base para todos los UC \\
+Sprint 1 & Sem 5--6 & Entorno y autenticación & Proyecto base, roles, datos de prueba e inicio de sesión & Base \\
 \hline
-Sprint 2 & Sem 7--8 & Implementar módulo de inventario y gestión de lotes & CRUD de materiales, CRUD de lotes, lógica de bodegas con \% de ocupación, búsqueda con debounce, dashboard con KPIs & UC1, UC2, UC3 \\
+Sprint 2 & Sem 7--8 & Inventario y lotes & Materiales, lotes, bodegas, búsqueda y tablero & UC1--UC3 \\
 \hline
-Sprint 3 & Sem 9--10 & Implementar despacho FEFO, conciliación y reportes & Scope FEFO en modelo Lote, controlador de despachos, módulo de conciliación (Admin only), reportes PDF/CSV, etiquetas QR & UC4, UC5, UC6, UC8 \\
+Sprint 3 & Sem 9--10 & FEFO, conciliación y reportes & Despacho FEFO, conciliación, reportes PDF/CSV y etiquetas QR & UC4--UC6, UC8 \\
 \hline
-Sprint 4 & Sem 11--12 & Desarrollar módulo RAG de consulta inteligente & ChatLLMController (classifyQuery + buildRagContext), integración con API OpenAI GPT-4o-mini, persistencia de conversaciones en chat\_histories, mecanismo de fallback (modo texto) & UC7 \\
+Sprint 4 & Sem 11--12 & Asistente RAG & Clasificador, contexto desde la base, historial y modo texto & UC7 \\
 \hline
-Sprint 5 & Sem 13--14 & Implementar diseño visual, animaciones y settings & 18 componentes React fieles a mockups Figma, tema Midnight Luxe con Tailwind CSS v4, animaciones GSAP, panel de configuración (4 pestañas), gestión de usuarios & UC9 \\
+Sprint 5 & Sem 13--14 & Interfaz y ajustes & Componentes según los mockups, temas, ajustes y usuarios & UC9 \\
 \hline
-Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & Pruebas automatizadas (PHPUnit y Playwright), despliegue en OCI con dominio propio, documentación técnica, corrección de defectos & Validación de UC1--UC9 \\
+Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & Pruebas automatizadas, despliegue en la nube y documentación & UC1--UC9 \\
 \hline
 \end{tabular}
 \end{table}
@@ -97,11 +97,32 @@ Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & Pruebas automatiz
 El anteproyecto contiene dos calendarios: esta tabla, con seis sprints de dos semanas, y el cronograma general de 36 semanas del Capítulo 5, que asigna cuatro semanas a cada etapa. La ejecución no siguió ninguno al pie de la letra. El registro verificable de lo que se hizo y cuándo son los \textit{issues} del tablero de GitHub Projects y el historial de \textit{commits} del repositorio, que se describen en el Capítulo \ref{chap:gestion}. Las diferencias principales con el plan son:
 
 \begin{itemize}
-    \item \textbf{Modelo de lenguaje.} En lugar de una API de pago (el plan mencionaba GPT-4o-mini), el asistente usa Ollama en el propio servidor y proveedores compatibles con la API de OpenAI en su capa gratuita, seleccionables desde Ajustes.
+    \item \textbf{Modelo de lenguaje.} En lugar de una API de pago (el plan mencionaba GPT-4o-mini), el asistente usa como principal un modelo gratuito de Ollama Cloud, con respaldos en la nube y en el propio servidor, seleccionables desde Ajustes.
     \item \textbf{Despliegue.} El sistema quedó en la capa gratuita de Oracle Cloud, publicado con dominio propio mediante un túnel de Cloudflare.
     \item \textbf{Interfaz.} Los prototipos de Figma se tradujeron a componentes React; la interfaz se rediseñó después para uso en el celular y con un sistema de temas visuales.
-    \item \textbf{Verificación.} Las pruebas automatizadas, la batería de consultas al asistente, la evaluación heurística y la auditoría de accesibilidad se completaron al cierre (Capítulo \ref{chap:pruebas}); la prueba con usuario queda pendiente.
+    \item \textbf{Verificación.} Las pruebas automatizadas, la batería de consultas al asistente, la evaluación heurística y la auditoría de accesibilidad se completaron al cierre (Capítulo \ref{chap:pruebas}); la prueba con usuario se realizó el 8 de octubre.
 \end{itemize}
+
+La Tabla \ref{tab:ejecucion_real} resume la ejecución real según el historial del repositorio hasta el corte de las pruebas.
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption[Ejecución real según el repositorio.]{Ejecución real según el repositorio (rama principal, hasta el 2 de octubre de 2026; 205 \textit{commits}).}
+\label{tab:ejecucion_real}
+\begin{tabular}{|l|c|p{10.6cm}|}
+\hline
+\textbf{Periodo} & \textbf{Commits} & \textbf{Hitos (commit)} \\
+\hline
+Feb.--mar. 2026 & 3 & Creación del repositorio (\texttt{17f17ba}); sin \textit{commits} en marzo. \\ \hline
+Abr. 2026 & 15 & Tablero con datos reales, primer chat RAG, tablero Kanban y primer despliegue (\texttt{999f87c}, \texttt{1ce059c}). \\ \hline
+May. 2026 & 45 & Reportes PDF y CSV, historial del chat y RAG con clasificación de consultas (\texttt{7a8981d}, \texttt{f015af2}). \\ \hline
+Jun. 2026 & 38 & Nginx, ajustes, integración continua con pruebas (\texttt{1ec431b}, \texttt{33f07a7}). \\ \hline
+Jul.--ago. 2026 & 2 & Pausa: solo ajustes visuales (\texttt{e874959}). \\ \hline
+Sep. 2026 & 82 & Documento por capítulos verificado contra el código, reglas de despacho y seguridad, Reabastecimiento (\texttt{e0e1078}, \texttt{9d0efb8}, \texttt{e17e6ea}). \\ \hline
+Oct. 2026 (1--2) & 20 & Costos por consulta, comparación de modelos y claves de API seguras (\texttt{6ddad01}, \texttt{bf8cd8d}). \\ \hline
+\end{tabular}
+\end{table}
 
 \section{Herramientas de Desarrollo y Colaboración}
 \label{sec:herramientas}
