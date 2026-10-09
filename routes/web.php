@@ -176,7 +176,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Endpoint de Consulta RAG Brutalista LLM
 Route::post('/chat-rag', [ChatLLMController::class, 'ask'])
-    ->middleware(['auth', 'verified']);
+    // Cada consulta hace dos llamadas al proveedor del modelo: se limita para no agotar la capa gratuita.
+    ->middleware(['auth', 'verified', 'throttle:20,1']);
 
 Route::get('/api/llm-models', [ChatLLMController::class, 'models'])
     ->middleware(['auth', 'verified']);

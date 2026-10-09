@@ -239,8 +239,9 @@ class EvaluarAsistente extends Command
     }
 
     /**
-     * Prueba ciega: 10 preguntas escritas antes de corregir el asistente y NO ejecutadas hasta la
-     * medición final, con redacciones distintas a las de la batería y la validación.
+     * Prueba ciega: 10 preguntas fijadas (31a2b75) antes de corregir el asistente, con redacciones
+     * distintas a las de la batería y la validación. Se ejecutó por primera vez el 25-sep, después de
+     * la primera corrección (48f092f), que agregó patrones que aparecen en estas preguntas.
      */
     private function ciega(): array
     {
@@ -284,7 +285,7 @@ class EvaluarAsistente extends Command
     {
         return array_merge(
             $this->cuarentena(['¿Qué mercancía está apartada por problemas de calidad?', '¿Tenemos algo en cuarentena ahorita?']),
-            $this->criticos(['¿Qué se está poniendo viejo y hay que sacar ya?', '¿Qué hay que despachar ya antes de que se venza?']),
+            $this->criticosDespacho(['¿Qué se está poniendo viejo y hay que sacar ya?', '¿Qué hay que despachar ya antes de que se venza?']),
             $this->bajoMinimo(['¿De qué estamos cortos?', '¿Qué insumos hay que reponer?']),
             $this->existencias([['¿Cuánta sal refinada nos queda en bodega?', 'MP-SAL-01']]),
             $this->inexistentes([['¿Tenemos almendras fileteadas?', 'stock_check']]),
@@ -355,6 +356,29 @@ class EvaluarAsistente extends Command
         return array_map(fn ($p) => ['grupo' => 'Críticos', 'intencion' => 'critical_alerts', 'pregunta' => $p,
             'verdad' => fn () => Lote::activos()->where('quantity', '>', 0)->criticos()->pluck('batch_number')->all(),
             'criterio' => fn ($t, $e) => $this->listaExacta($t, $e)], $preguntas);
+    }
+
+    /**
+     * Preguntas de despacho: deben aparecer todos los lotes críticos que aún no vencen, y si se mencionan
+     * vencidos la respuesta debe decir que no se despachan (solo baja como desperdicio, Lote::motivoNoDespachable).
+     */
+    private function criticosDespacho(array $preguntas): array
+    {
+        return array_map(fn ($p) => ['grupo' => 'Críticos', 'intencion' => 'critical_alerts', 'pregunta' => $p,
+            'verdad' => fn () => Lote::activos()->where('quantity', '>', 0)->criticos()->get()
+                ->partition(fn ($l) => $l->expiration_date && $l->expiration_date->lt(now()->startOfDay()))
+                ->map(fn ($g) => $g->pluck('batch_number')->values()->all())->all(),
+            'criterio' => function ($t, $e) {
+                [$vencidos, $porVencer] = $e;
+                $n = $this->unificar($t);
+                $faltan = array_filter($porVencer, fn ($b) => !str_contains($n, $b));
+                if ($faltan) return [false, 'faltan: ' . implode(', ', $faltan)];
+                $menciona = array_filter($vencidos, fn ($b) => str_contains($n, $b));
+                if ($menciona && !preg_match('/baja|desperdicio|no se (pueden? )?despach|no (los )?despach/iu', $n)) {
+                    return [false, 'recomienda despachar vencidos: ' . implode(', ', $menciona)];
+                }
+                return [true, ''];
+            }], $preguntas);
     }
 
     /** Cantidad × costo de los lotes activos (tolerancia 1 %). */
