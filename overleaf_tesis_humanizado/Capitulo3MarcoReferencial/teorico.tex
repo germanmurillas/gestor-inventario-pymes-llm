@@ -134,7 +134,7 @@ Para mitigar esto, se implementó un mecanismo de \textbf{degradación elegante}
 \subsection{Framework Laravel y el Patrón MVC}
 \label{sec:laravel_mvc}
 
-Laravel es un framework de código abierto para desarrollar aplicaciones web en PHP, creado por Taylor Otwell en 2011. Lo elegimos por cuatro razones: su madurez, su licencia MIT que permite uso comercial gratuito, su ecosistema de herramientas integradas (ORM, migraciones, middleware) y su adopción del patrón MVC.
+Laravel es un framework de código abierto para desarrollar aplicaciones web en PHP, creado por Taylor Otwell en 2011. Se eligió por cuatro razones: su madurez, su licencia MIT que permite uso comercial gratuito, su ecosistema de herramientas integradas (ORM, migraciones, middleware) y su adopción del patrón MVC.
 
 \subsubsection{El Patrón Modelo-Vista-Controlador (MVC)}
 
@@ -206,7 +206,7 @@ El stack completo ---Laravel, PHP, MySQL, React, Inertia.js y Tailwind CSS---, l
 
 \subsection{Estado del Arte}
 
-Al analizar las soluciones que ya existen, encontramos un patrón. Plataformas como Odoo \cite{odoo}, Zoho Inventory \cite{zoho} y Stockpile \cite{stockpile} son robustas en gestión de inventarios, pero comparten una deficiencia: ninguna permite interactuar con el sistema mediante lenguaje natural. El usuario debe aprender la lógica de la herramienta, en lugar de que la herramienta se adapte a la lógica del usuario. Nuestra propuesta cierra esa brecha incorporando una capa de inteligencia conversacional.
+Al analizar las soluciones existentes se observa un patrón. Plataformas como Odoo \cite{odoo}, Zoho Inventory \cite{zoho} y Stockpile \cite{stockpile} son robustas en gestión de inventarios, pero, en las versiones revisadas (julio de 2025), ninguna permitía interactuar con el sistema mediante lenguaje natural. El usuario debe aprender la lógica de la herramienta, en lugar de que la herramienta se adapte a la lógica del usuario. La propuesta de este trabajo cierra esa brecha incorporando una capa de inteligencia conversacional.
 
 \begin{table}[!htbp]
 \centering
@@ -229,7 +229,7 @@ Solución Propuesta & Código abierto, personalizable, enfocado en PYMEs, módul
 
 \subsection{Análisis de Soluciones Académicas}
 
-Revisamos trabajos de grado en repositorios universitarios colombianos y encontramos un interés recurrente en resolver la gestión de inventarios para PYMEs. Bedoya (2022) en la UNAD \cite{unad_bedoya2022} y Bautista y Hernández (2022) en la UPB \cite{upb_bautista2022} proponen aplicaciones para administrar inventarios. A nivel de maestría, Acosta (2020) integra metodologías como Lean Manufacturing \cite{uamerica_acosta2020}. Sin embargo, ninguno de estos proyectos explora la integración de LLMs para mejorar la interacción con el usuario. Esa ausencia es precisamente la oportunidad que Pymetory aprovecha.
+Se revisaron trabajos de grado en repositorios universitarios colombianos (no fue una revisión sistemática) y se encontró un interés recurrente en resolver la gestión de inventarios para PYMEs. Bedoya (2022) en la UNAD \cite{unad_bedoya2022} y Bautista y Hernández (2022) en la UPB \cite{upb_bautista2022} proponen aplicaciones para administrar inventarios. A nivel de maestría, Acosta (2020) integra metodologías como Lean Manufacturing \cite{uamerica_acosta2020}. Sin embargo, ninguno de estos proyectos explora la integración de LLMs para mejorar la interacción con el usuario. Esa ausencia es precisamente la oportunidad que Pymetory aprovecha.
 
 \subsection{Tecnologías de Despliegue en la Nube}
 \label{sec:cloud}

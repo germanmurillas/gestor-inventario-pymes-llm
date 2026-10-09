@@ -22,7 +22,7 @@ Este proyecto se enmarca en la \textbf{investigación aplicada}, ya que su fin e
 Para no apoyar las conclusiones en una sola fuente de evidencia, cada afirmación sobre el sistema se contrasta con fuentes independientes, en el sentido de la triangulación metodológica \cite{denzin_creswell}:
 
 \begin{description}
-    \item[Pruebas automatizadas.] Pruebas unitarias y de integración con PHPUnit y pruebas de extremo a extremo con Playwright, que se ejecutan en cada cambio que llega a la rama principal (Capítulo \ref{chap:pruebas}).
+    \item[Pruebas automatizadas.] Pruebas unitarias y de integración con PHPUnit, que se ejecutan en cada cambio que llega a la rama principal, y pruebas de extremo a extremo con Playwright, que se ejecutan localmente antes de cada entrega (Capítulo \ref{chap:pruebas}).
     \item[Análisis estático.] PHPStan con Larastan en el nivel 5 sobre \texttt{app/}, \texttt{routes/} y \texttt{config/}. En la medición del 26 de septiembre de 2026 reportó 46 hallazgos en 10 archivos; 25 de ellos corresponden a propiedades de los modelos Eloquent que el analizador no reconoce porque se definen en la base de datos.
     \item[Mediciones contra la base de datos.] Las respuestas del asistente se comparan con el resultado de una consulta directa a la base de datos de producción (batería de consultas, Capítulo \ref{chap:pruebas}).
     \item[Evaluación de usabilidad y accesibilidad.] Evaluación heurística con los 10 principios de Nielsen y auditoría WCAG 2.1 AA, además de la prueba con usuario.
@@ -41,7 +41,7 @@ El autor (Germán David Murillas Mondragón) asumió, de manera unipersonal, las
 El plan organizó el trabajo en sprints, ciclos iterativos de dos semanas, con los eventos del marco. Cómo se adaptaron en la práctica a un único desarrollador se describe en el Capítulo \ref{chap:gestion}.
 
 \begin{itemize}
-    \item \textbf{Product Backlog:} Listado priorizado de las funcionalidades del sistema en GitHub Projects, derivado de los casos de uso y de los requerimientos levantados con la panificadora caso de estudio (Capítulo \ref{chap:requerimientos}). Las historias se priorizaron según el valor para el usuario y las dependencias técnicas, siguiendo el método MoSCoW (Must have, Should have, Could have, Won't have). La gestión del proyecto se apoyó en GitHub Projects \cite{github_projects} como herramienta de seguimiento, aplicando principios de gestión de calidad \cite{iso9001}.
+    \item \textbf{Product Backlog:} Listado priorizado de las funcionalidades del sistema en GitHub Projects, derivado de los casos de uso y de los requerimientos levantados con la panificadora caso de estudio (Capítulo \ref{chap:requerimientos}). Las historias se priorizaron según el valor para el usuario y las dependencias técnicas. La gestión del proyecto se apoyó en GitHub Projects \cite{github_projects} como herramienta de seguimiento.
     
     \item \textbf{Sprint Planning:} Al inicio de cada sprint se seleccionan tareas del Product Backlog para conformar el \textit{Sprint Backlog}, se estima su esfuerzo y se descomponen en tareas técnicas.
     
@@ -58,7 +58,7 @@ El desarrollo del proyecto se estructuró en las siguientes fases:
     \item \textbf{Diseño del Sistema:} Diseño de la arquitectura MVC, modelado de la base de datos y prototipado de las interfaces de usuario (wireframes).
     \item \textbf{Desarrollo e Implementación:} Configuración del entorno y codificación iterativa de los módulos (sprints), con control de versiones mediante Git/GitHub.
     \item \textbf{Implementación del Módulo LLM:} Configuración y puesta en marcha del módulo de consulta inteligente basado en LLM, incluyendo la integración de APIs y el desarrollo de la lógica para la interpretación de lenguaje natural y la generación de respuestas.
-    \item \textbf{Pruebas y Validación:} Ejecución de pruebas unitarias y funcionales al final de cada sprint para asegurar la calidad. Esta fase incluyó una evaluación heurística formal basada en los 10 principios de Jakob Nielsen para medir la usabilidad de la interfaz. Asimismo, se realizó una auditoría de accesibilidad utilizando herramientas automáticas y revisión manual para verificar el cumplimiento de los criterios del nivel AA de las WCAG 2.1.
+    \item \textbf{Pruebas y Validación:} Ejecución de pruebas unitarias y funcionales en cada tarea, según la definición de terminado (Capítulo \ref{chap:gestion}). Esta fase incluyó una evaluación heurística formal basada en los 10 principios de Jakob Nielsen para medir la usabilidad de la interfaz. Asimismo, se realizó una auditoría de accesibilidad utilizando herramientas automáticas y revisión manual para verificar el cumplimiento de los criterios del nivel AA de las WCAG 2.1.
     \item \textbf{Documentación y Despliegue:} Redacción concurrente del documento de trabajo de grado y preparación para la sustentación final.
 \end{itemize}
 
@@ -117,7 +117,7 @@ La Tabla \ref{tab:herramientas} resume las herramientas utilizadas durante el de
 \hline
 \textbf{Categoría} & \textbf{Herramienta} & \textbf{Propósito} \\
 \hline
-Control de versiones & Git + GitHub & Repositorio centralizado, ramas por funcionalidad, pull requests \\
+Control de versiones & Git + GitHub & Repositorio público, historial de commits y despliegue automático desde la rama principal \\
 \hline
 Gestión de proyecto & GitHub Projects & Tablero Kanban con backlog, sprints activos y completados \\
 \hline
@@ -148,7 +148,7 @@ El desarrollo de este proyecto se rigió por principios de integridad académica
 \begin{itemize}
     \item \textbf{Confidencialidad de datos empresariales}: La empresa del caso de estudio no se identifica en el documento. Los datos de demostración del sistema son ficticios: se construyeron a partir de los procesos descritos en la entrevista, con nombres genéricos de insumos y costos referenciales, y no contienen datos de la operación de la empresa. La empresa autorizó el uso de sus procesos operativos como referencia para el levantamiento de requisitos, pero los datos específicos de su operación comercial no se divulgan.
     \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, el autor utilizó asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) como herramientas de productividad para generación de código, depuración y documentación. Todo el código generado fue revisado, comprendido y validado por el autor antes de su inclusión en el proyecto, en cumplimiento de las políticas de integridad académica de la Universidad del Valle.
-    \item \textbf{Licencias de software}: Las tecnologías del sistema ---Laravel, React, Inertia.js, Tailwind CSS, MySQL, Playwright--- son de código abierto; GSAP es de uso gratuito bajo su propia licencia. Los modelos de lenguaje se usaron sin costo: Ollama en el servidor del proyecto y proveedores compatibles con la API de OpenAI en su capa gratuita. La infraestructura también es de capa gratuita (Oracle Cloud y Cloudflare).
+    \item \textbf{Licencias de software}: Las tecnologías del sistema ---Laravel, React, Inertia.js, Tailwind CSS, MySQL, Playwright--- son de código abierto; GSAP es de uso gratuito bajo su propia licencia. Los modelos de lenguaje de operación se usaron sin costo (Ollama en el servidor del proyecto y la capa gratuita de Ollama Cloud); la comparación de modelos usó una suscripción del autor. La infraestructura también es de capa gratuita (Oracle Cloud y Cloudflare).
     \item \textbf{Cumplimiento normativo}: El proyecto se acoge a la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle, que establece los lineamientos para trabajos de grado en la modalidad de Trabajo de Investigación.
 \end{itemize}
 
