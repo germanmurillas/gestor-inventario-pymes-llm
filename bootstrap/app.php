@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\CabecerasDeSeguridad::class,
         ]);
 
         $middleware->alias([
@@ -44,7 +45,12 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->report(function (\Throwable $e) {
-            $logFile = base_path('docs/ERROR_LOG.md');
+            // Registro resumido de errores en storage/logs (no dentro del código desplegado), con rotación:
+            // al pasar de 1 MB se guarda como .1 y se empieza de nuevo.
+            $logFile = storage_path('logs/errores.md');
+            if (is_file($logFile) && filesize($logFile) > 1_000_000) {
+                @rename($logFile, $logFile . '.1');
+            }
             $timestamp = now()->format('Y-m-d H:i:s');
             $cleanMessage = str_replace(["\r", "\n", "|"], [" ", " ", "/"], $e->getMessage());
             $errorClass = get_class($e);
