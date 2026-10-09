@@ -26,9 +26,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
-        $middleware->validateCsrfTokens(except: [
-            'api/chat/relay',
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Las llamadas de la interfaz que no son navegación de Inertia (fetch, axios) reciben los

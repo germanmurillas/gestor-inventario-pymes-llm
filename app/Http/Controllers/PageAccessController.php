@@ -9,7 +9,7 @@ class PageAccessController extends Controller
     public function verify(Request $request)
     {
         $request->validate([
-            'page' => 'required|in:indice,nicho',
+            'page' => 'required|in:indice',
             'password' => 'required|string',
         ]);
 

@@ -9,7 +9,6 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\QRScanController;
-use App\Http\Controllers\AgentMonitorController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\CustomFieldController;
@@ -29,11 +28,6 @@ Route::get('/indice', function () {
     return Inertia::render('Indice');
 })->middleware(['auth', 'verified', 'role:admin'])->name('indice');
 
-// ── Hub de Oportunidades con IA ──────────────────────────────────────────────
-Route::get('/nicho', function () {
-    return Inertia::render('Nicho');
-})->middleware(['auth', 'verified', 'role:admin'])->name('nicho');
-
 // ── Page Access Verification (sanitized — passwords not in client JS) ────────
 Route::post('/api/verify-page-access', [PageAccessController::class, 'verify'])->middleware(['auth', 'verified', 'role:admin', 'throttle:10,1']);
 
@@ -42,13 +36,6 @@ Route::get('/dashboard', [InventoryController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// ── Status Master — Agent Bus Monitor ──────────────────────────────────────────
-Route::get('/status-master', function () {
-    return Inertia::render('StatusMaster');
-})->middleware(['auth', 'verified', 'role:admin'])->name('status-master');
-
-// Agent bus API (SSH proxy to DesktopTitan — may be slow, frontend handles gracefully)
-Route::get('/api/agent-bus', [\App\Http\Controllers\AgentBusController::class, 'events'])->middleware(['auth', 'verified', 'role:admin']);
 
 Route::get('/inventory/kardex', [InventoryController::class, 'kardex'])
     ->middleware(['auth', 'verified'])
@@ -238,11 +225,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/kanban/{item}/rag-context', [KanbanController::class, 'saveRagContext']);
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    // Agent Monitor & Chat Relay
-    Route::get('/api/agents/status', [AgentMonitorController::class, 'status']);
-    Route::post('/api/chat/relay', [AgentMonitorController::class, 'relayToTelegram']);
-});
 
 // ── Custom Fields Management ─────────────────────────────────────────────────
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('api/custom-fields')->group(function () {

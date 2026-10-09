@@ -12,7 +12,6 @@ const SECTIONS = [
             { href: '/login', label: 'Login' },
             { href: '/dashboard', label: 'Dashboard' },
             { href: '/kanban', label: 'Kanban' },
-            { href: '/status-master', label: 'Status Master' },
         ],
     },
     {
@@ -144,14 +143,6 @@ const SECTIONS = [
                     { label: 'GET  /settings', desc: 'Listar settings' },
                     { label: 'PUT  /settings', desc: 'Guardar settings' },
                     { label: 'GET  /settings/{clave}', desc: 'Obtener clave' },
-                ],
-            },
-            {
-                title: 'Agentes', icon: MessageSquare,
-                links: [
-                    { label: 'GET  /api/agent-bus', desc: 'Eventos del bus' },
-                    { label: 'GET  /api/agents/status', desc: 'Estado agentes' },
-                    { label: 'POST /api/chat/relay', desc: 'Relay a Telegram' },
                 ],
             },
             {

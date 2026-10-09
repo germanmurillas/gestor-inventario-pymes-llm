@@ -145,17 +145,7 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
         await page.goto(`${BASE_URL}/indice`, { waitUntil: 'domcontentloaded' });
         await takeScreenshot('19-indice.png');
 
-        // 21. Nicho / Oportunidades IA
-        console.log('Capturando Página: Nicho...');
-        await page.goto(`${BASE_URL}/nicho`, { waitUntil: 'domcontentloaded' });
-        await takeScreenshot('20-nicho.png');
-
-        // 22. Status Master (Agent Monitor)
-        console.log('Capturando Página: Status Master...');
-        await page.goto(`${BASE_URL}/status-master`, { waitUntil: 'domcontentloaded' });
-        await takeScreenshot('21-status-master.png');
-
-        console.log(`\n[✓] ¡Completado! Las 21 capturas se guardaron en: ${SCREENSHOT_DIR}`);
+        console.log(`\n[✓] ¡Completado! Las 19 capturas se guardaron en: ${SCREENSHOT_DIR}`);
     } catch (error) {
         console.error('[!] Ocurrió un error durante la auditoría:', error);
     } finally {
