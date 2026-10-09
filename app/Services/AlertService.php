@@ -72,8 +72,8 @@ class AlertService
      */
     public function sendTelegram(string $tipo, string $titulo, string $mensaje): void
     {
-        $token  = env('TELEGRAM_BOT_TOKEN', '');
-        $chatId = env('TELEGRAM_CHAT_ID', '');
+        $token  = (string) config('services.telegram.token', '');
+        $chatId = (string) config('services.telegram.chat_id', '');
 
         if (empty($token) || empty($chatId)) {
             return;

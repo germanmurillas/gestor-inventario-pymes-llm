@@ -1,49 +1,49 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
-			path: app/Http/Controllers/AgentMonitorController.php
-
-		-
-			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
+			message: '#^Property App\\Models\\Material\:\:\$custom_fields \(string\|null\) does not accept array\<int\|string, mixed\>\.$#'
+			identifier: assign.propertyType
 			count: 1
-			path: app/Http/Controllers/AgentMonitorController.php
+			path: app/Console/Commands/CargarCatalogo.php
 
 		-
-			message: '#^Parameter \#1 \$user of class Illuminate\\Auth\\Events\\Verified constructor expects Illuminate\\Contracts\\Auth\\MustVerifyEmail, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
+			message: '#^Dead catch \- Illuminate\\Contracts\\Encryption\\DecryptException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
 			count: 1
-			path: app/Http/Controllers/Auth/VerifyEmailController.php
+			path: app/Http/Controllers/ApiKeyController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\ChatHistory\:\:\$bot_message\.$#'
+			message: '#^Access to an undefined property App\\Models\\Lote\:\:\$cantidad\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/ChatLLMController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\ChatHistory\:\:\$user_message\.$#'
+			message: '#^Access to an undefined property App\\Models\\Lote\:\:\$n\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/ChatLLMController.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
+			message: '#^Access to an undefined property App\\Models\\Lote\:\:\$valor\.$#'
+			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/ChatLLMController.php
 
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\ChatHistory\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: app/Http/Controllers/ChatLLMController.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>key" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/ChatLLMController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Controllers/ChatLLMController.php
@@ -85,45 +85,33 @@ parameters:
 			path: app/Http/Controllers/ConsumptionController.php
 
 		-
-			message: '#^Parameter \#1 \$array \(list\<\(int\|string\)\>\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Http/Controllers/MilotoController.php
+			path: app/Http/Controllers/InventoryController.php
 
 		-
-			message: '#^Parameter \#1 \$array \(list\<int\<1, max\>\>\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: app/Http/Controllers/MilotoController.php
-
-		-
-			message: '#^Parameter \#1 \$array \(non\-empty\-list\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: app/Http/Controllers/MilotoController.php
-
-		-
-			message: '#^Parameter \#1 \$array \(non\-empty\-list\<\(int\|string\)\>\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
+			message: '#^Offset ''codigo_barras'' on string\|null on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
 			count: 2
-			path: app/Http/Controllers/MilotoController.php
+			path: app/Http/Controllers/InventoryController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\MonitorController\:\:processesByDisk\(\) is unused\.$#'
-			identifier: method.unused
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Material\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
 			count: 1
-			path: app/Http/Controllers/MonitorController.php
+			path: app/Http/Controllers/InventoryController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\MonitorController\:\:recentDraws\(\) is unused\.$#'
-			identifier: method.unused
+			message: '#^Property App\\Models\\Material\:\:\$custom_fields \(string\|null\) does not accept array\<int\|string, mixed\>\.$#'
+			identifier: assign.propertyType
 			count: 1
-			path: app/Http/Controllers/MonitorController.php
+			path: app/Http/Controllers/InventoryController.php
 
 		-
 			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
-			count: 2
+			count: 1
 			path: app/Http/Controllers/MonitorController.php
 
 		-
@@ -187,6 +175,12 @@ parameters:
 			path: app/Http/Controllers/PurchaseOrderController.php
 
 		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$grupo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/QRScanController.php
+
+		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$batch_number\.$#'
 			identifier: property.notFound
 			count: 1
@@ -217,13 +211,25 @@ parameters:
 			path: app/Models/PurchaseOrder.php
 
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
-			path: app/Services/AlertService.php
+			message: '#^Using nullsafe property access "\?\-\>timestamp" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/ConciliacionConteo.php
 
 		-
-			message: '#^Method App\\Services\\Miloto\\AlgoritmoExecutor\:\:catalogoActivo\(\) should return Illuminate\\Support\\Collection\<int, object\> but returns Illuminate\\Support\\Collection\<int, stdClass\>\.$#'
-			identifier: return.type
+			message: '#^Access to an undefined property App\\Models\\Movimiento\:\:\$n\.$#'
+			identifier: property.notFound
 			count: 1
-			path: app/Services/Miloto/AlgoritmoExecutor.php
+			path: app/Services/ProyeccionInventario.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Movimiento\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ProyeccionInventario.php
+
+		-
+			message: '#^Parameter \#1 \$query of static method Illuminate\\Database\\Connection\:\:unprepared\(\) expects literal\-string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/KardexInmutable.php

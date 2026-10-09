@@ -18,4 +18,14 @@ class AlertServiceTest extends TestCase
 
         $this->assertDatabaseHas('notifications', ['tipo' => 'critico', 'titulo' => 'Stock bajo']);
     }
+
+    public function test_telegram_usa_la_configuracion_aunque_este_en_cache(): void
+    {
+        config(['services.telegram.token' => 'TOKEN-PRUEBA', 'services.telegram.chat_id' => '123']);
+        \Illuminate\Support\Facades\Http::fake(['api.telegram.org/*' => \Illuminate\Support\Facades\Http::response(['ok' => true])]);
+
+        app(\App\Services\AlertService::class)->sendTelegram('critico', 'Lote por vencer', 'Prueba');
+
+        \Illuminate\Support\Facades\Http::assertSent(fn ($r) => str_contains($r->url(), 'botTOKEN-PRUEBA') && ($r->data()['chat_id'] ?? null) == '123');
+    }
 }

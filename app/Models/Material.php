@@ -29,7 +29,7 @@ class Material extends Model {
             'stock_max'     => 'float',
             'stock_minimo'  => 'float',
             'presentacion_cantidad' => 'float',
-            'custom_fields' => 'json',
+            'custom_fields' => 'array',
         ];
     }
 

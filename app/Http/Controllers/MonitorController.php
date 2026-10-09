@@ -140,14 +140,6 @@ class MonitorController extends Controller
         ])->all();
     }
 
-    private function recentDraws(): array
-    {
-        $path = storage_path('app/miloto-history.json');
-        if (!file_exists($path)) return [];
-        $data = json_decode(file_get_contents($path), true);
-        return array_slice($data ?: [], 0, 20);
-    }
-
     private function processesBy(string $sort): array
     {
         try {
@@ -159,26 +151,6 @@ class MonitorController extends Controller
                 $c = preg_split('/\s+/', trim($l), 4);
                 if (count($c) < 4) continue;
                 $rows[] = ['pid' => (int)$c[0], 'name' => $c[1], 'mem' => (float)$c[2], 'cpu' => (float)$c[3]];
-            }
-            return $rows;
-        } catch (\Throwable $e) { return []; }
-    }
-
-    private function processesByDisk(): array
-    {
-        try {
-            $r = Process::timeout(5)->run(['iotop', '-b', '-n', '1', '-o', '-P', '-q']);
-            if (!$r->successful()) return [];
-            $rows = [];
-            $lines = array_slice(array_filter(explode("\n", trim($r->output()))), 2, 10);
-            foreach ($lines as $l) {
-                $c = preg_split('/\s+/', trim($l));
-                if (count($c) < 4) continue;
-                $rows[] = ['pid' => (int)($c[0]??0), 'name' => $c[count($c)-1] ?? '?', 'mem' => 0.0, 'cpu' => 0.0];
-            }
-            if (empty($rows)) { // fallback: iostat
-                $r2 = Process::timeout(5)->run(['iostat', '-x', '1', '1']);
-                return [];
             }
             return $rows;
         } catch (\Throwable $e) { return []; }

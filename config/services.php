@@ -35,6 +35,13 @@ return [
         ],
     ],
 
+    // Alertas por Telegram (AlertService). Se leen aquí y no con env() en el servicio: con la caché de
+    // configuración de producción, env() fuera de config/ devuelve null.
+    'telegram' => [
+        'token' => env('TELEGRAM_BOT_TOKEN', ''),
+        'chat_id' => env('TELEGRAM_CHAT_ID', ''),
+    ],
+
     'ollama' => [
         'url' => env('OLLAMA_URL', 'http://localhost:11434'),
         // Modelo local que responde si el modelo principal (en la nube) falla o devuelve vacío.

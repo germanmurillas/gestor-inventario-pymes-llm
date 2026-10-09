@@ -391,7 +391,7 @@ class ChatLLMController extends Controller {
                 if ($lotes->isEmpty()) {
                     return "LOTE NO ENCONTRADO: ningún lote registrado coincide con el número de la pregunta.\n\nINSTRUCCIÓN: Indica que ese lote no está registrado. No inventes datos.";
                 }
-                $context = "FICHA DEL LOTE:\n" . $lotes->map(function ($l) use ($linea) {
+                $context = "FICHA DEL LOTE:\n" . $lotes->map(function ($l) use ($linea, $usuario) {
                     $movs = $l->movimientos()->with('user')->latest('created_at')->take(5)->get()->map(fn ($m) =>
                         "    · [{$m->created_at->format('Y-m-d H:i')}] {$m->type} de {$this->num($m->quantity)} {$l->material->unit} | Motivo: {$m->reason}" . $usuario($m))->join("\n");
                     $estado = ['active' => 'activo', 'quarantined' => 'en cuarentena', 'consumed' => 'consumido'][$l->status] ?? $l->status;

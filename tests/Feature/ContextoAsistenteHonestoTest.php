@@ -87,4 +87,17 @@ class ContextoAsistenteHonestoTest extends TestCase
         $this->assertStringNotContainsString('Claudia', $this->contexto('¿Cuál fue el último movimiento de la sal refinada?', 'movements'));
         $this->assertStringContainsString('Claudia Pérez', $this->contexto('¿Quién hizo el último movimiento de la sal refinada?', 'movements'));
     }
+
+    public function test_la_ficha_de_un_lote_con_movimientos_se_arma_sin_errores(): void
+    {
+        $m = Material::factory()->create(['name' => 'Sal refinada', 'unit' => 'kg']);
+        $lote = Lote::factory()->create(['material_id' => $m->id, 'batch_number' => 'SAL-01-260817-1', 'quantity' => 10]);
+        \App\Models\Movimiento::create(['lote_id' => $lote->id, 'user_id' => User::factory()->create(['name' => 'Jefferson'])->id, 'type' => 'salida', 'quantity' => 2, 'reason' => 'produccion']);
+
+        $ctx = $this->contexto('¿Qué información hay del lote SAL-01-260817-1?', 'batch_info');
+
+        $this->assertStringContainsString('FICHA DEL LOTE', $ctx);
+        $this->assertStringContainsString('salida de 2', $ctx);
+        $this->assertStringNotContainsString('Jefferson', $ctx);
+    }
 }
