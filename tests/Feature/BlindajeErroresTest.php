@@ -19,6 +19,12 @@ class BlindajeErroresTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        app()->setLocale('es'); // los mensajes que se comprueban son los que ve el usuario, en español
+    }
+
     private function admin(): User { return User::factory()->create(['role' => 'admin']); }
 
     /** Cabeceras de una llamada fetch/axios de la interfaz que NO pide JSON explícitamente. */
