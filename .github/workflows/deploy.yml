@@ -82,6 +82,17 @@ jobs:
             sudo -u www-data php artisan config:cache
             sudo -u www-data php artisan route:cache
             sudo -u www-data php artisan view:clear
+            # Instancia de la empresa (bodega.pymetory.com): mismo código, su propia base y su .env.
+            if [ -d /var/www/bodega-pymetory ]; then
+              cd /var/www/bodega-pymetory
+              sudo git pull --ff-only origin main
+              sudo composer install --no-dev --optimize-autoloader --no-interaction
+              sudo php artisan migrate --force
+              sudo chown -R www-data:www-data .
+              sudo -u www-data php artisan config:cache
+              sudo -u www-data php artisan route:cache
+              sudo -u www-data php artisan view:clear
+            fi
             sudo systemctl reload php8.3-fpm
             echo "✅ Deploy completado"
 

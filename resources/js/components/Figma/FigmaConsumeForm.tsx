@@ -1,4 +1,5 @@
 import React from 'react';
+import CantidadConPresentacion from './CantidadConPresentacion';
 import { ArrowLeft, MinusCircle, Info, Tag, Loader2, AlertTriangle, Truck, Camera, Lightbulb } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import FigmaFefoBadge from './FigmaFefoBadge';
@@ -179,23 +180,10 @@ const FigmaConsumeForm = ({ onBack, lote }: FigmaConsumeFormProps) => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-slate-200 uppercase tracking-tight">Cantidad a retirar ({lote.unit})</label>
-                                    <div className="relative">
-                                        <input aria-label="Cantidad a retirar" 
-                                            type="number" 
-                                            step="0.01"
-                                            required
-                                            value={data.quantity}
-                                            onChange={e => setData('quantity', parseFloat(e.target.value))}
-                                            placeholder="0.00"
-                                            max={lote.cantidad}
-                                            className={`w-full bg-slate-800/50 border ${errors.quantity ? 'border-red-500' : 'border-slate-700/50'} rounded-2xl px-5 py-4 text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all`}
-                                        />
-                                        <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
-                                            <span className="text-[10px] font-black text-slate-400 uppercase">Máximo</span>
-                                            <span className="text-[10px] font-black text-indigo-400">{lote.cantidad} {lote.unit || "kg"}</span>
-                                        </div>
-                                    </div>
+                                    <CantidadConPresentacion etiqueta="Cantidad a retirar" unidad={lote.unit || 'kg'}
+                                        presentacion={lote.presentacion_nombre} factor={lote.presentacion_cantidad ? Number(lote.presentacion_cantidad) : null}
+                                        valor={Number(data.quantity) || 0} onCambio={(v) => setData('quantity', v)} max={disponible} />
+                                    <p className="text-xs text-slate-400">En este lote hay {lote.cantidad} {lote.unit || 'kg'}.</p>
                                     {errors.quantity && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.quantity}</p>}
                                 </div>
                                 <div className="space-y-2">

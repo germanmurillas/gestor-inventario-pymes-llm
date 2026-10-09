@@ -60,4 +60,12 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /** Tema visual propio del usuario (cada persona elige el suyo). */
+    public function tema(Request $request)
+    {
+        $datos = $request->validate(['theme' => 'required|string|in:midnight-luxe,obsidian-teal,carbon-amber,royal-plum,nordic-steel,paper-light']);
+        $request->user()->update(['theme' => $datos['theme']]);
+        return response()->json(['ok' => true]);
+    }
 }

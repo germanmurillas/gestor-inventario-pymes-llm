@@ -99,7 +99,7 @@ test.describe('Prueba con usuario: las 5 tareas @funcional', () => {
     test('T5: el reporte de consumo en PDF se descarga', async ({ page }) => {
         await page.goto('/dashboard?v=REPORTES');
         await page.getByText('Consumo por Período').click();
-        const descarga = page.waitForEvent('download');
+        const descarga = page.waitForEvent('download', { timeout: 45000 }); // el servidor local de desarrollo es de un solo hilo
         await page.getByRole('button', { name: /Exportar PDF/ }).click();
         expect((await descarga).suggestedFilename()).toMatch(/\.pdf$/);
         await sinTextoTecnico(page);

@@ -16,6 +16,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role', // Definición de roles: 'admin' | 'operario'
+        'theme', // tema visual propio de cada usuario
     ];
 
     protected $hidden = [

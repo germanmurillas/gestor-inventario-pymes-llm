@@ -1,16 +1,19 @@
 import FigmaMaterialAjustes from './FigmaMaterialAjustes';
 import FigmaIngresoLote from './FigmaIngresoLote';
 import React, { useState, useMemo } from 'react';
+import { GRUPOS } from '../../lib/grupos';
 import { Box, Plus, ChevronRight, X, Warehouse, ScanLine, Sparkles, Search } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import FigmaMovements from './FigmaMovements';
 import FigmaForms from './FigmaForms';
 import FigmaConsumeForm from './FigmaConsumeForm';
 import FigmaConsumeWizard from './FigmaConsumeWizard';
+import FigmaDevolucion from './FigmaDevolucion';
+import FigmaVencimiento from './FigmaVencimiento';
 import FigmaFefoBadge from './FigmaFefoBadge';
 import FigmaBodegaBar from './FigmaBodegaBar';
 
-const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], user, onNavigate, initialBodegaCode, onManageBodegas }: { lotes?: any[], bodegas?: any[], categoriasExistentes?: string[], user?: any, onNavigate?: (view: string) => void, initialBodegaCode?: string | null, onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
+const FigmaInventario = ({ lotes = [], sinExistencia = [], bodegas = [], categoriasExistentes = [], user, onNavigate, initialBodegaCode, onManageBodegas }: { lotes?: any[], sinExistencia?: any[], bodegas?: any[], categoriasExistentes?: string[], user?: any, onNavigate?: (view: string) => void, initialBodegaCode?: string | null, onManageBodegas?: (inicial: 'nueva' | number | null) => void }) => {
     const [viewMode, setViewMode] = useState<'GRID' | 'DETAIL' | 'FORM' | 'CONSUME' | 'WIZARD'>('GRID');
     const [wizardMaterial, setWizardMaterial] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
@@ -21,7 +24,12 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTag, setSelectedTag] = useState<string>('');
     const [categoria, setCategoria] = useState('');
-    const [pestana, setPestana] = useState<'insumos' | 'bodegas'>('insumos');
+    // Con bodegas agrupadas (instancia real de la empresa) el inventario empieza por las bodegas, como pidió la administradora.
+    const hayGrupos = bodegas.some((b: any) => b.grupo);
+    const [pestana, setPestana] = useState<'insumos' | 'bodegas'>(hayGrupos && !initialBodegaCode ? 'bodegas' : 'insumos');
+    const [grupoSel, setGrupoSel] = useState<string | null>(null);
+    const [devolviendo, setDevolviendo] = useState<any>(null);
+    const [venciendo, setVenciendo] = useState<any>(null);
     const [materialAbierto, setMaterialAbierto] = useState<string | null>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -78,6 +86,10 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
     const filteredLotes = useMemo(
         () => lotesBase.filter((l: any) => !selectedBodega || l.bodega === selectedBodega.name),
         [lotesBase, selectedBodega]);
+    // Insumos sin existencia (sin lotes): aparecen en su bodega habitual con stock 0.
+    const sinExistenciaFiltrados = useMemo(() => sinExistencia.filter((l: any) =>
+        (!searchQuery || l.material_name?.toLowerCase().includes(searchQuery.toLowerCase()) || l.codigo?.toLowerCase().includes(searchQuery.toLowerCase()))
+        && (!selectedBodega || l.bodega === selectedBodega.name)), [sinExistencia, searchQuery, selectedBodega]);
 
     // Bodega y categoría se filtran entre sí: las categorías son las de la bodega elegida
     // y cada bodega cuenta solo los lotes de la categoría elegida.
@@ -100,20 +112,32 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
         const map = new Map<string, any>();
         filteredLotes.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
             if (!map.has(l.codigo)) map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg',
-                foto: l.photo_url, materialId: l.material_id, diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
+                foto: l.photo_url, materialId: l.material_id, presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null, diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: Number(l.umbral_dias || 0), minimo: Number(l.stock_minimo || 0), stockGlobal: Number(l.stock_total || 0), stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null });
             const m = map.get(l.codigo);
             m.lotes.push(l);
             if (l.estado === 'quarantined') m.cuarentena++; else m.stock += Number(l.cantidad) || 0;
             if (l.status === 'CRITICO' && l.estado !== 'quarantined') m.criticos++;
             if (!m.proximo && l.estado === 'active') m.proximo = l.vencimiento;
         });
-        return Array.from(map.values()).sort((a, b) => (b.criticos - a.criticos) || a.nombre.localeCompare(b.nombre));
-    }, [filteredLotes, categoria]);
+        sinExistenciaFiltrados.filter((l: any) => !categoria || l.categoria === categoria).forEach((l: any) => {
+            if (map.has(l.codigo)) return;
+            map.set(l.codigo, { codigo: l.codigo, nombre: l.material_name, categoria: l.categoria, unidad: l.unit || 'kg', foto: l.photo_url, materialId: l.material_id,
+                presentacion: l.presentacion_nombre ?? null, factor: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null, vidaUtil: l.vida_util_dias ?? null,
+                diasCriticos: l.dias_criticos ?? null, diasEntrega: l.dias_entrega ?? null, umbral: 0, minimo: Number(l.stock_minimo || 0), stockGlobal: 0,
+                stock: 0, lotes: [], criticos: 0, cuarentena: 0, proximo: null, sinExistencia: true, bodegaId: l.bodega_id });
+        });
+        return Array.from(map.values()).sort((a, b) => (b.criticos - a.criticos) || (Number(!!a.sinExistencia) - Number(!!b.sinExistencia)) || a.nombre.localeCompare(b.nombre));
+    }, [filteredLotes, sinExistenciaFiltrados, categoria]);
     const materialSel = materiales.find((m) => m.codigo === materialAbierto) ?? null;
+    // Producto terminado: el lote lo arma el sistema (código-fecha-hora) para que el operario solo cuente paquetes.
+    const esProductoTerminado = (m: any) => {
+        const id = m?.lotes?.[0]?.bodega_id ?? m?.bodegaId;
+        return bodegas.find((b: any) => b.id === id)?.grupo === 'producto_terminado';
+    };
 
     // Derivar lista de materiales únicos para el wizard (con stock total)
     const materialsList = useMemo(() => {
-        const map = new Map<number, { id: number; name: string; code: string; photo_url: string | null; unit: string; stock_total: number }>();
+        const map = new Map<number, { id: number; name: string; code: string; photo_url: string | null; unit: string; presentacion_nombre: string | null; presentacion_cantidad: number | null; stock_total: number }>();
         lotes.forEach((l: any) => {
             // Sin material_id no se puede consumir: el id del lote no sirve (es otra tabla).
             if (!l.material_name || !l.material_id) return;
@@ -125,6 +149,8 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                     code: l.codigo,
                     photo_url: l.photo_url,
                     unit: l.unit || 'kg',
+                    presentacion_nombre: l.presentacion_nombre ?? null,
+                    presentacion_cantidad: l.presentacion_cantidad ? Number(l.presentacion_cantidad) : null,
                     stock_total: 0,
                 });
             }
@@ -155,6 +181,8 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
     return (
         <div className="relative mx-auto max-w-7xl space-y-5">
             {/* Modal de Conciliación (Ajuste Manual) */}
+            {devolviendo && <FigmaDevolucion lote={devolviendo} onClose={() => setDevolviendo(null)} />}
+            {venciendo && <FigmaVencimiento lote={venciendo} onClose={() => setVenciendo(null)} />}
             {showAdjustModal && selectedLote && (
                 <AdjustModal 
                     lote={selectedLote} 
@@ -241,9 +269,27 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                 )}
             </div>
 
+            {pestana === 'bodegas' && hayGrupos && (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" role="group" aria-label="Grupos de bodegas">
+                    {Object.entries(GRUPOS).map(([k, nombre]) => {
+                        const delGrupo = bodegas.filter((b: any) => b.grupo === k);
+                        const activo = grupoSel === k;
+                        return (
+                            <button key={k} onClick={() => setGrupoSel(activo ? null : k)} aria-pressed={activo}
+                                className={`rounded-3xl border p-5 text-left transition active:scale-[0.99] ${activo ? 'border-indigo-400 bg-indigo-500/15' : 'border-slate-700/40 bg-slate-800/40 hover:bg-slate-800/70'}`}>
+                                <span className="block text-lg font-black text-white">{nombre}</span>
+                                <span className="mt-1 block text-sm text-slate-300">
+                                    {delGrupo.length} {delGrupo.length === 1 ? 'bodega' : 'bodegas'} · {delGrupo.reduce((t: number, b: any) => t + (b.insumos || 0), 0)} insumos con existencia
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+
             {pestana === 'bodegas' ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {bodegas.map((b: any) => (
+                    {bodegas.filter((b: any) => !grupoSel || b.grupo === grupoSel).map((b: any) => (
                         <FigmaBodegaBar key={b.code} bodega={b}
                             onOpen={() => { elegirBodega(b); setPestana('insumos'); }}
                             onEdit={user?.role === 'admin' && onManageBodegas ? () => onManageBodegas(b.id) : undefined} />
@@ -378,16 +424,17 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                             <Sparkles size={16} /> Consumir por FEFO
                         </button>
                         {materialSel.materialId && (
-                            <FigmaIngresoLote key={`ing-${materialSel.codigo}`} materialId={materialSel.materialId} unidad={materialSel.unidad}
+                            <FigmaIngresoLote key={`ing-${materialSel.codigo}`} materialId={materialSel.materialId} unidad={materialSel.unidad} presentacion={materialSel.presentacion} factor={materialSel.factor} vidaUtil={materialSel.vidaUtil}
+                                loteSugerido={esProductoTerminado(materialSel) ? `${materialSel.codigo}-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${new Date().toTimeString().slice(0, 5).replace(':', '')}` : ''}
                                 bodegas={bodegas.map((b: any) => ({ id: b.id, name: b.name }))}
                                 costoSugerido={materialSel.lotes[materialSel.lotes.length - 1]?.unit_cost ?? null}
-                                bodegaSugerida={materialSel.lotes[0]?.bodega_id ?? null}
+                                bodegaSugerida={materialSel.lotes[0]?.bodega_id ?? materialSel.bodegaId ?? null}
                                 onListo={() => setMaterialAbierto(null)} />
                         )}
 
                         {user?.role === 'admin' && materialSel.materialId && (
                             <FigmaMaterialAjustes key={materialSel.codigo} categorias={categoriasExistentes} materialId={materialSel.materialId} unidad={materialSel.unidad}
-                                categoria={materialSel.categoria ?? null} minimo={materialSel.minimo} diasCriticos={materialSel.diasCriticos} diasEntrega={materialSel.diasEntrega} umbral={materialSel.umbral} />
+                                categoria={materialSel.categoria ?? null} minimo={materialSel.minimo} diasCriticos={materialSel.diasCriticos} diasEntrega={materialSel.diasEntrega} umbral={materialSel.umbral} presentacion={materialSel.presentacion} factor={materialSel.factor} vidaUtil={materialSel.vidaUtil} />
                         )}
 
                         <h4 className="mb-2 mt-5 text-[11px] font-bold uppercase tracking-widest text-slate-500">Lotes · sale primero el de arriba</h4>
@@ -397,7 +444,9 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                                     <div className="flex items-center justify-between gap-3">
                                         <div className="min-w-0">
                                             <p className="truncate text-sm font-bold text-white">{i === 0 && l.estado === 'active' && <span className="mr-1.5 rounded-md bg-indigo-500/20 px-1.5 py-0.5 text-[10px] text-indigo-200">PRIMERO</span>}{l.lote}</p>
-                                            <p className="text-xs text-slate-400">{l.bodega} · vence {l.vencimiento}</p>
+                                            <p className="text-xs text-slate-400">{l.bodega} · vence {l.vencimiento}{l.vencimiento_estimado && (user?.role === 'admin'
+                                                ? <button onClick={() => setVenciendo(l)} className="ml-1 rounded bg-amber-400/15 px-1 text-amber-200 underline" title="Calculado con la vida útil típica: confirme la fecha de la etiqueta">estimado · confirmar</button>
+                                                : <span className="ml-1 rounded bg-amber-400/15 px-1 text-amber-200">estimado</span>)}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-sm font-bold text-white">{fmt(l.cantidad)} {l.unit}</p>
@@ -405,8 +454,9 @@ const FigmaInventario = ({ lotes = [], bodegas = [], categoriasExistentes = [], 
                                                 : l.days_until_expiration !== undefined && <FigmaFefoBadge daysUntilExpiration={l.days_until_expiration} size="sm" />}
                                         </div>
                                     </div>
-                                    <div className="mt-3 grid grid-cols-3 gap-2">
+                                    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                                         <MiniAccion onClick={() => { setSelectedLote(l); setMaterialAbierto(null); setViewMode('CONSUME'); }}>Consumir</MiniAccion>
+                                        <MiniAccion onClick={() => setDevolviendo({ ...l, material_name: materialSel.nombre })}>Devolver</MiniAccion>
                                         <MiniAccion onClick={() => { setSelectedLote(l); setMaterialAbierto(null); setViewMode('DETAIL'); }}>Kardex</MiniAccion>
                                         {user?.role === 'admin'
                                             ? <MiniAccion onClick={() => { setSelectedLote(l); setMaterialAbierto(null); setShowAdjustModal(true); }}>Conciliar</MiniAccion>

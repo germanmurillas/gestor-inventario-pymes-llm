@@ -23,9 +23,13 @@ class InventoryController extends Controller {
                 'batch_number' => $lote->batch_number,
                 'expiration_date' => $lote->expiration_date->format('Y-m-d'),
                 'unit' => $lote->material->unit ?? 'kg',
+                'presentacion_nombre' => $lote->material->presentacion_nombre ?? null,
+                'presentacion_cantidad' => $lote->material->presentacion_cantidad ?? null,
+                'vida_util_dias' => $lote->material->vida_util_dias ?? null,
                 'lote' => $lote->batch_number,
                 'cantidad' => $lote->quantity,
                 'vencimiento' => $lote->expiration_date->format('Y-m-d'),
+                'vencimiento_estimado' => (bool) $lote->vencimiento_estimado,
                 'days_until_expiration' => $lote->days_until_expiration,
                 'bodega' => $lote->bodega->name ?? 'Sin asignar',
                 'status' => $lote->is_critical ? 'CRITICO' : 'NORMAL',
@@ -41,6 +45,17 @@ class InventoryController extends Controller {
                 'estado' => $lote->status,
             ];
         });
+
+        // Insumos sin lotes vigentes (p. ej. productos terminados que aún no se han producido): se
+        // muestran en su bodega habitual para poder registrar su primer lote.
+        $sinExistencia = Material::with('bodega')->whereDoesntHave('lotes', fn ($q) => $q->where('status', '!=', 'consumed'))
+            ->orderBy('name')->get()->map(fn (Material $m) => [
+                'material_id' => $m->id, 'codigo' => $m->code, 'material_name' => $m->name, 'categoria' => $m->categoria,
+                'unit' => $m->unit ?? 'kg', 'presentacion_nombre' => $m->presentacion_nombre, 'presentacion_cantidad' => $m->presentacion_cantidad,
+                'vida_util_dias' => $m->vida_util_dias, 'dias_criticos' => $m->dias_criticos, 'dias_entrega' => $m->dias_entrega,
+                'stock_minimo' => (float) ($m->stock_minimo ?? 0), 'photo_url' => $m->photo_url,
+                'bodega' => $m->bodega?->name, 'bodega_id' => $m->bodega_id, 'sin_existencia' => true,
+            ]);
 
         // Estadísticas para el Tablero (Landing Dashboard)
         $stats = [
@@ -125,6 +140,7 @@ class InventoryController extends Controller {
                 'name' => $bodega->name,
                 'id' => $bodega->id,
                 'code' => $bodega->code,
+                'grupo' => $bodega->grupo,
                 'description' => $bodega->description,
                 'image_url' => $bodega->image_url,
                 'capacity' => $bodega->capacity,
@@ -175,6 +191,7 @@ class InventoryController extends Controller {
 
         return Inertia::render('Dashboard', [
             'initialLotes' => $lotesActivos,
+            'insumosSinExistencia' => $sinExistencia,
             'dashboardStats' => [
                 // Categorías ya usadas: el formulario las sugiere para no crear duplicados ("Harina" / "Harinas").
                 'categorias' => Material::whereNotNull('categoria')->where('categoria', '!=', '')->distinct()->orderBy('categoria')->pluck('categoria'),
@@ -307,6 +324,49 @@ class InventoryController extends Controller {
     }
 
     /**
+     * Devolución de sobrante al lote (pedido de la empresa, 8-oct-2026): lo que no se usó en la
+     * producción del día vuelve al mismo lote del que salió. Entra como movimiento nuevo del Kardex
+     * (no se edita la salida) y no puede superar lo que salió de ese lote.
+     */
+    public function devolver(\Illuminate\Http\Request $request, $id) {
+        $lote = Lote::with('material')->findOrFail($id);
+        $datos = $request->validate([
+            'cantidad' => 'required|numeric|min:0.001',
+            'nota' => 'nullable|string|max:255',
+        ]);
+
+        $salio = (float) $lote->movimientos()->where('type', 'salida')->whereIn('reason', ['produccion', 'venta', 'qr_scan'])->sum('quantity');
+        $devuelto = (float) $lote->movimientos()->where('type', 'entrada')->where('reason', 'devolucion')->sum('quantity');
+        $maximo = round($salio - $devuelto, 3);
+        if ($datos['cantidad'] > $maximo + 0.0005) {
+            return back()->withErrors(['cantidad' => $maximo > 0
+                ? "De este lote solo se pueden devolver {$maximo} {$lote->material?->unit}: es lo que salió y no se ha devuelto."
+                : 'De este lote no ha salido nada que se pueda devolver.']);
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($lote, $datos) {
+            $lote->quantity = round($lote->quantity + $datos['cantidad'], 3);
+            if ($lote->status === 'consumed') $lote->status = 'active'; // la cuarentena se conserva
+            $lote->save();
+            \App\Models\Movimiento::create([
+                'lote_id' => $lote->id, 'user_id' => \Illuminate\Support\Facades\Auth::id(), 'type' => 'entrada',
+                'quantity' => $datos['cantidad'], 'reason' => 'devolucion',
+                'description' => 'Devolución de sobrante al lote' . (!empty($datos['nota']) ? ": {$datos['nota']}" : ''),
+            ]);
+        });
+
+        return back()->with('success', "Devolución registrada: {$datos['cantidad']} {$lote->material?->unit} volvieron al lote {$lote->batch_number}.");
+    }
+
+    /** Confirmar o corregir la fecha de vencimiento de un lote (p. ej. una estimada al cargar el inventario). */
+    public function vencimiento(\Illuminate\Http\Request $request, $id) {
+        $lote = Lote::findOrFail($id);
+        $datos = $request->validate(['expiration_date' => 'required|date|after:2000-01-01']);
+        $lote->update(['expiration_date' => $datos['expiration_date'], 'vencimiento_estimado' => false]);
+        return back()->with('success', "Vencimiento del lote {$lote->batch_number} confirmado: {$lote->expiration_date->format('d/m/Y')}.");
+    }
+
+    /**
      * Almacena una nueva bodega en el sistema.
      */
     public function storeBodega(\Illuminate\Http\Request $request) {
@@ -315,6 +375,7 @@ class InventoryController extends Controller {
             'code' => 'required|string|max:20|unique:bodegas,code',
             'capacity' => 'required|numeric|min:1',
             'capacity_unit' => 'required|in:' . implode(',', Material::UNIDADES),
+            'grupo' => 'nullable|in:' . implode(',', array_keys(Material::GRUPOS)),
             'description' => 'nullable|string|max:500',
             'image' => 'nullable|image|max:6144',
             'image_link' => 'nullable|url:http,https|max:1000',
@@ -325,6 +386,7 @@ class InventoryController extends Controller {
             'code' => strtoupper($validated['code']),
             'capacity' => $validated['capacity'],
             'capacity_unit' => $validated['capacity_unit'],
+            'grupo' => $validated['grupo'] ?? null,
             'description' => $validated['description'] ?? null,
             'status' => 'active',
             // Archivo subido al servidor o enlace externo; la URL final siempre sale de este campo.
@@ -354,7 +416,7 @@ class InventoryController extends Controller {
             $bodega->image_path = $request->hasFile('image') ? $request->file('image')->store('bodegas', 'public')
                 : ($request->filled('image_link') ? $validated['image_link'] : null);
         }
-        $bodega->fill(collect($validated)->only(['name', 'capacity', 'capacity_unit', 'description', 'status'])->all())->save();
+        $bodega->fill(collect($validated)->only(['name', 'capacity', 'capacity_unit', 'grupo', 'description', 'status'])->all())->save();
 
         return back()->with('success', 'Bodega actualizada.');
     }
@@ -367,13 +429,13 @@ class InventoryController extends Controller {
         $validated = $request->validate([
             'batch_number' => 'required|string|max:50|unique:lotes,batch_number',
             'quantity' => 'required|numeric|min:0.001',
-            'unit_cost' => 'required|numeric|min:0',
+            'unit_cost' => 'nullable|numeric|min:0', // producto terminado: puede no tener costo registrado
             'expiration_date' => 'required|date|after:today',
             'bodega_id' => 'required|exists:bodegas,id',
         ]);
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $material) {
-            $lote = Lote::create($validated + ['material_id' => $material->id, 'status' => 'active']);
+            $lote = Lote::create(['unit_cost' => $validated['unit_cost'] ?? 0] + $validated + ['material_id' => $material->id, 'status' => 'active']);
             \App\Models\Movimiento::create([
                 'lote_id' => $lote->id,
                 'user_id' => \Illuminate\Support\Facades\Auth::id(),
@@ -406,8 +468,14 @@ class InventoryController extends Controller {
             'stock_minimo' => 'nullable|numeric|min:0',
             'dias_criticos' => 'nullable|integer|min:1|max:365',
             'dias_entrega' => 'nullable|integer|min:0|max:365',
+            'presentacion_nombre' => 'nullable|string|max:30|required_with:presentacion_cantidad',
+            'presentacion_cantidad' => 'nullable|numeric|gt:0|required_with:presentacion_nombre',
+            'vida_util_dias' => 'nullable|integer|min:1|max:3650',
         ]);
         $material->update([
+            'presentacion_nombre' => isset($validated['presentacion_nombre']) ? mb_strtolower(trim($validated['presentacion_nombre'])) : null,
+            'presentacion_cantidad' => $validated['presentacion_cantidad'] ?? null,
+            'vida_util_dias' => $validated['vida_util_dias'] ?? null,
             'categoria' => $this->categoriaExistente($validated['categoria'] ?? null),
             'stock_minimo' => $validated['stock_minimo'] ?? 0,
             'dias_criticos' => $validated['dias_criticos'] ?? null,
@@ -454,6 +522,7 @@ class InventoryController extends Controller {
                     'categoria' => $this->categoriaExistente($validated['categoria'] ?? null),
                     'stock_minimo' => $validated['stock_minimo'] ?? 0, // 0 = sin mínimo (no genera alertas)
                     'dias_criticos' => $validated['dias_criticos'] ?? null,
+                    'bodega_id' => $validated['bodega_id'], // bodega habitual: la del primer lote
                     'photo_path' => $photoPath,
                 ]);
 

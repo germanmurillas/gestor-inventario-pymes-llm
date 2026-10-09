@@ -11,8 +11,11 @@ class Material extends Model {
     /** Unidades de medida admitidas al registrar un insumo. */
     public const UNIDADES = ['kg', 'g', 'L', 'mL', 'gal', 'und'];
 
+    /** Grupos de bodegas que pidió la empresa (prueba con usuario, 8-oct-2026). */
+    public const GRUPOS = ['materia_prima' => 'Materia prima', 'producto_terminado' => 'Producto terminado', 'reventa' => 'Productos de reventa'];
+
     protected $fillable = [
-        'code', 'name', 'unit', 'description',
+        'code', 'name', 'unit', 'description', 'presentacion_nombre', 'presentacion_cantidad', 'vida_util_dias', 'bodega_id',
         'stock_min', 'stock_max', 'photo_path',
         'unidad_medida', 'categoria', 'stock_minimo', 'dias_criticos', 'dias_entrega',
         'custom_fields',
@@ -25,6 +28,7 @@ class Material extends Model {
             'stock_min'     => 'float',
             'stock_max'     => 'float',
             'stock_minimo'  => 'float',
+            'presentacion_cantidad' => 'float',
             'custom_fields' => 'json',
         ];
     }
@@ -34,6 +38,11 @@ class Material extends Model {
     /** Todos los lotes de este material */
     public function lotes(): HasMany {
         return $this->hasMany(Lote::class);
+    }
+
+    /** Bodega habitual: donde se muestra el insumo aunque no tenga existencia. */
+    public function bodega(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
+        return $this->belongsTo(Bodega::class);
     }
 
     /** Etiquetas de clasificación (many-to-many) */

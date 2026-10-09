@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CantidadConPresentacion from './CantidadConPresentacion';
 import { router } from '@inertiajs/react';
 import { PackagePlus } from 'lucide-react';
 
@@ -14,9 +15,9 @@ interface Props {
 }
 
 /** Ingreso de un lote nuevo de un insumo ya registrado (RF-02): queda su entrada en el Kardex. */
-export default function FigmaIngresoLote({ materialId, unidad, bodegas, costoSugerido, bodegaSugerida, onListo }: Props) {
+export default function FigmaIngresoLote({ materialId, unidad, bodegas, costoSugerido, bodegaSugerida, onListo, presentacion = null, factor = null, vidaUtil = null, loteSugerido = '' }: Props & { presentacion?: string | null; factor?: number | null; vidaUtil?: number | null; loteSugerido?: string }) {
     const [abierto, setAbierto] = useState(false);
-    const [f, setF] = useState({ batch_number: '', quantity: '', unit_cost: costoSugerido ? String(costoSugerido) : '', expiration_date: '', bodega_id: bodegaSugerida ? String(bodegaSugerida) : '' });
+    const [f, setF] = useState({ batch_number: loteSugerido, quantity: '', unit_cost: costoSugerido ? String(costoSugerido) : '', expiration_date: vidaUtil ? new Date(Date.now() + vidaUtil * 864e5).toISOString().slice(0, 10) : '', bodega_id: bodegaSugerida ? String(bodegaSugerida) : '' });
     const [errores, setErrores] = useState<Record<string, string>>({});
     const [guardando, setGuardando] = useState(false);
     const campo = 'mt-1 w-full rounded-xl border border-slate-700/50 bg-slate-900/70 px-3 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none';
@@ -47,12 +48,13 @@ export default function FigmaIngresoLote({ materialId, unidad, bodegas, costoSug
                 <input className={campo} required maxLength={50} value={f.batch_number} onChange={(e) => setF({ ...f, batch_number: e.target.value.toUpperCase() })} placeholder="El de la factura o la etiqueta" />
                 {errores.batch_number && <span className="mt-1 block text-rose-300">{errores.batch_number}</span>}
             </label>
-            <label className="text-xs font-semibold text-slate-400">Cantidad ({unidad})
-                <input className={campo} required type="number" min="0.001" step="0.001" value={f.quantity} onChange={(e) => setF({ ...f, quantity: e.target.value })} />
+            <div className="text-xs font-semibold text-slate-400 sm:col-span-2">
+                <CantidadConPresentacion etiqueta="Cantidad" unidad={unidad} presentacion={presentacion} factor={factor}
+                    valor={Number(f.quantity) || 0} onCambio={(v) => setF({ ...f, quantity: v ? String(v) : '' })} inputProps={{ required: true, className: '!py-2.5 !text-base' }} />
                 {errores.quantity && <span className="mt-1 block text-rose-300">{errores.quantity}</span>}
-            </label>
+            </div>
             <label className="text-xs font-semibold text-slate-400">Costo unitario (COP por {unidad})
-                <input className={campo} required type="number" min="0" step="0.01" value={f.unit_cost} onChange={(e) => setF({ ...f, unit_cost: e.target.value })} />
+                <input className={campo} type="number" min="0" step="0.01" placeholder="Opcional" value={f.unit_cost} onChange={(e) => setF({ ...f, unit_cost: e.target.value })} />
                 {errores.unit_cost && <span className="mt-1 block text-rose-300">{errores.unit_cost}</span>}
             </label>
             <label className="text-xs font-semibold text-slate-400">Vence

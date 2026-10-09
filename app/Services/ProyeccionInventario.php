@@ -27,8 +27,15 @@ class ProyeccionInventario
     public const MOTIVOS = [
         'produccion' => 'producción', 'venta' => 'venta', 'desperdicio' => 'desperdicio',
         'qr_scan' => 'salida por escáner', 'ajuste' => 'ajuste', 'transferencia' => 'transferencia',
-        'ingreso' => 'ingreso', 'vencimiento' => 'vencimiento',
+        'ingreso' => 'ingreso', 'vencimiento' => 'vencimiento', 'devolucion' => 'devolución de sobrante',
     ];
+
+    /** Consumo neto: las salidas de demanda menos lo que volvió al lote al terminar la producción. */
+    private static function soloConsumo($q)
+    {
+        return $q->where(fn ($w) => $w->where(fn ($s) => $s->where('movimientos.type', 'salida')->whereIn('movimientos.reason', self::MOTIVOS_CONSUMO))
+            ->orWhere(fn ($e) => $e->where('movimientos.type', 'entrada')->where('movimientos.reason', 'devolucion')));
+    }
 
     /**
      * Proyección de cada insumo (o de los indicados), ordenada por urgencia:
@@ -41,13 +48,12 @@ class ProyeccionInventario
 
         $consumos = Movimiento::query()
             ->join('lotes', 'lotes.id', '=', 'movimientos.lote_id')
-            ->where('movimientos.type', 'salida')
-            ->whereIn('movimientos.reason', self::MOTIVOS_CONSUMO)
+            ->where(fn ($q) => self::soloConsumo($q))
             ->where('movimientos.created_at', '>=', $desde)
             ->where('movimientos.created_at', '<', $hoy->copy()->addDay())
             ->when($materialIds, fn ($q) => $q->whereIn('lotes.material_id', $materialIds))
             ->groupBy('lotes.material_id')
-            ->selectRaw('lotes.material_id, SUM(movimientos.quantity) AS total')
+            ->selectRaw("lotes.material_id, SUM(CASE WHEN movimientos.type = 'entrada' THEN -movimientos.quantity ELSE movimientos.quantity END) AS total")
             ->pluck('total', 'lotes.material_id');
 
         return Material::query()
@@ -124,13 +130,12 @@ class ProyeccionInventario
         Movimiento::query()
             ->join('lotes', 'lotes.id', '=', 'movimientos.lote_id')
             ->where('lotes.material_id', $materialId)
-            ->where('movimientos.type', 'salida')
-            ->whereIn('movimientos.reason', self::MOTIVOS_CONSUMO)
+            ->where(fn ($q) => self::soloConsumo($q))
             ->where('movimientos.created_at', '>=', $primero)
-            ->get(['movimientos.quantity', 'movimientos.created_at'])
+            ->get(['movimientos.quantity', 'movimientos.type', 'movimientos.created_at'])
             ->each(function ($mov) use (&$serie, $inicio) {
                 $clave = $inicio(Carbon::parse($mov->created_at))->toDateString();
-                if (isset($serie[$clave])) $serie[$clave]['cantidad'] += (float) $mov->quantity;
+                if (isset($serie[$clave])) $serie[$clave]['cantidad'] += ($mov->type === 'entrada' ? -1 : 1) * (float) $mov->quantity;
             });
 
         return array_map(fn ($p) => [...$p, 'cantidad' => round($p['cantidad'], 3)], array_values($serie));

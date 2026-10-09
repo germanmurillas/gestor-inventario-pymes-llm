@@ -12,6 +12,7 @@ class Bodega extends Model
     protected $fillable = [
         'name',
         'code',
+        'grupo',
         'description',
         'capacity',
         'capacity_unit',

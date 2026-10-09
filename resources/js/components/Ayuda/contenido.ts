@@ -36,6 +36,15 @@ export const TAREAS: Tarea[] = [
         consejo: 'No tiene que escoger el lote: el sistema saca primero del que vence antes.',
     },
     {
+        id: 'devolver', titulo: 'Devolver lo que sobró', cuando: 'Terminó la producción y quedó parte del bulto o de la estiva.', vista: 'INVENTARIO',
+        pasos: [
+            'Abra Inventario y toque el insumo.',
+            'En el lote del que sacó, pulse «Devolver».',
+            'Escriba cuánto sobró (lo que dice la báscula) y pulse «Devolver».',
+        ],
+        consejo: 'Vuelve al mismo lote y queda en el Kardex. Al sacar, puede escribir la cantidad en bultos: el sistema la pasa a kilos.',
+    },
+    {
         id: 'asistente', titulo: 'Preguntarle al asistente', cuando: 'Quiere saber cuánto hay, qué vence o qué se ha gastado, sin buscar en tablas.', vista: 'LLM',
         pasos: [
             'Abra Asistente.',

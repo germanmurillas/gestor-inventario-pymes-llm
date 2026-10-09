@@ -25,10 +25,11 @@ import FigmaBodegaManager from '../components/Figma/FigmaBodegaManager';
 import FigmaConciliacion from '../components/Figma/FigmaConciliacion';
 import GuiaRapida from '../components/Ayuda/GuiaRapida';
 import AyudaPantalla from '../components/Ayuda/AyudaPantalla';
+import Preferencias from '../Components/Preferencias';
 
 type ViewMode = 'TABLERO' | 'INVENTARIO' | 'BUSCAR' | 'ETIQUETAS' | 'REPORTES' | 'LLM' | 'REABASTECIMIENTO' | 'NOTIFICACIONES' | 'LOG_MAESTRO' | 'ESCANER' | 'SCAN_HISTORY' | 'TRANSFERENCIAS' | 'PURCHASE_ORDERS' | 'LABELS_PRINT' | 'CONCILIACION';
 
-export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth: any, initialLotes: any[], dashboardStats: any }) {
+export default function Dashboard({ auth, initialLotes, dashboardStats, insumosSinExistencia = [] }: { auth: any, initialLotes: any[], dashboardStats: any, insumosSinExistencia?: any[] }) {
     const [lotes, setLotes] = useState(initialLotes || []);
     const [stats, setStats] = useState(dashboardStats || null);
 
@@ -105,14 +106,17 @@ export default function Dashboard({ auth, initialLotes, dashboardStats }: { auth
                              <h1 className="text-sm lg:text-xs font-black lg:uppercase tracking-tight lg:tracking-widest text-white">{VIEW_LABELS[activeView] ?? activeView}</h1>
                         </nav>
                     </div>
-                    <AyudaPantalla key={activeView} vista={activeView} />
+                    <div className="flex items-center gap-2">
+                        <AyudaPantalla key={activeView} vista={activeView} />
+                        <Preferencias rol={user.role} />
+                    </div>
                 </header>
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     <div ref={viewRef} className="px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:p-8 min-h-full">
                         {activeView === 'TABLERO' && <GuiaRapida rol={user.role} onIr={(v) => setActiveView(v as ViewMode)} />}
                         {activeView === 'TABLERO' && <FigmaTablero stats={stats} user={user} onViewChange={setActiveView} onOpenBodega={abrirBodega} onManageBodegas={setGestorBodegas} />}
-                        {activeView === 'INVENTARIO' && <FigmaInventario key={bodegaFiltro ?? 'todas'} lotes={lotes} bodegas={stats?.bodegas || []} categoriasExistentes={stats?.categorias || []} user={user} onNavigate={setActiveView} initialBodegaCode={bodegaFiltro} onManageBodegas={setGestorBodegas} />}
+                        {activeView === 'INVENTARIO' && <FigmaInventario key={bodegaFiltro ?? 'todas'} lotes={lotes} sinExistencia={insumosSinExistencia} bodegas={stats?.bodegas || []} categoriasExistentes={stats?.categorias || []} user={user} onNavigate={setActiveView} initialBodegaCode={bodegaFiltro} onManageBodegas={setGestorBodegas} />}
                         {activeView === 'BUSCAR' && <FigmaSearch lotes={lotes} />}
                         {activeView === 'ETIQUETAS' && <FigmaLabels lotes={lotes} />}
                         {activeView === 'REPORTES' && <FigmaReports stats={stats} />}

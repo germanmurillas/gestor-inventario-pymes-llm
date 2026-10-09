@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { GRUPOS } from '../../lib/grupos';
 import { router } from '@inertiajs/react';
 import { ImagePlus, Plus, Trash2, Warehouse, X } from 'lucide-react';
 import type { BodegaResumen } from './FigmaBodegaBar';
@@ -10,8 +11,8 @@ interface Props {
     onClose: () => void;
 }
 
-type Form = { name: string; code: string; capacity: number | string; capacity_unit: string; description: string; status: 'active' | 'full' | 'maintenance' };
-const vacio: Form = { name: '', code: '', capacity: 1000, capacity_unit: '', description: '', status: 'active' };
+type Form = { name: string; code: string; capacity: number | string; capacity_unit: string; grupo: string; description: string; status: 'active' | 'full' | 'maintenance' };
+const vacio: Form = { name: '', code: '', capacity: 1000, capacity_unit: '', grupo: '', description: '', status: 'active' };
 const UNIDADES = ['kg', 'g', 'L', 'mL', 'gal', 'und'];
 
 /** Crear y editar bodegas con su imagen de fondo (solo administrador). */
@@ -30,7 +31,7 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
     useEffect(() => {
         setErrores({}); setImagen(null); setQuitarImagen(false); setEnlace('');
         if (actual) {
-            setForm({ name: actual.name, code: actual.code, capacity: actual.capacity, capacity_unit: actual.capacity_unit ?? '', description: actual.description ?? '', status: (actual.status as any) || 'active' });
+            setForm({ name: actual.name, code: actual.code, capacity: actual.capacity, capacity_unit: actual.capacity_unit ?? '', grupo: actual.grupo ?? '', description: actual.description ?? '', status: (actual.status as any) || 'active' });
             setPreview(actual.image_url ?? null);
         } else {
             setForm(vacio); setPreview(null);
@@ -45,7 +46,7 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
     const guardar = (e: React.FormEvent) => {
         e.preventDefault();
         setGuardando(true);
-        const datos: Record<string, any> = { name: form.name, capacity: form.capacity, capacity_unit: form.capacity_unit, description: form.description };
+        const datos: Record<string, any> = { name: form.name, capacity: form.capacity, capacity_unit: form.capacity_unit, grupo: form.grupo, description: form.description };
         if (imagen) datos.image = imagen;
         else if (enlace.trim()) datos.image_link = enlace.trim();
         const url = actual ? `/bodegas/${actual.id}` : '/bodegas';
@@ -125,13 +126,20 @@ export default function FigmaBodegaManager({ bodegas, inicial = null, onClose }:
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Capacidad</label>
                                 <div className="flex gap-2">
                                     <input aria-label="Capacidad" type="number" min={1} className={campo} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} required />
-                                    <select aria-label="Capacidad" className={`${campo} w-24`} value={form.capacity_unit} onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })} required aria-label="Unidad de la capacidad">
+                                    <select className={`${campo} w-24`} value={form.capacity_unit} onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })} required aria-label="Unidad de la capacidad">
                                         <option value="" disabled>Unidad</option>
                                         {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                                     </select>
                                 </div>
                                 <p className="mt-1 text-[11px] text-slate-500">La ocupación solo suma los lotes en esta unidad.</p>
                                 {errores.capacity_unit && <p className="mt-1 text-xs text-rose-300">{errores.capacity_unit}</p>}
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label htmlFor="bodega-grupo" className="mb-1 block text-xs font-semibold text-slate-400">Grupo</label>
+                                <select id="bodega-grupo" className={campo} value={form.grupo} onChange={(e) => setForm({ ...form, grupo: e.target.value })}>
+                                    <option value="">Sin grupo</option>
+                                    {Object.entries(GRUPOS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                                </select>
                             </div>
                             <div className="sm:col-span-2">
                                 <label className="mb-1 block text-xs font-semibold text-slate-400">Descripción</label>

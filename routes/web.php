@@ -126,6 +126,18 @@ Route::post('/inventory/material', [InventoryController::class, 'storeMaterial']
     ->middleware(['auth', 'verified', 'role:admin'])
     ->name('inventory.material.store');
 
+Route::patch('/inventory/lote/{id}/vencimiento', [InventoryController::class, 'vencimiento'])
+    ->middleware(['auth', 'verified', 'role:admin'])
+    ->name('inventory.lote.vencimiento');
+
+Route::put('/perfil/tema', [\App\Http\Controllers\ProfileController::class, 'tema'])
+    ->middleware(['auth', 'throttle:30,1'])
+    ->name('perfil.tema');
+
+Route::post('/inventory/lote/{id}/devolver', [InventoryController::class, 'devolver'])
+    ->middleware(['auth', 'verified'])
+    ->name('inventory.lote.devolver');
+
 Route::post('/inventory/lote/{id}/consume', [InventoryController::class, 'consume'])
     ->middleware(['auth', 'verified'])
     ->name('inventory.lote.consume');

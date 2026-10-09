@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import CantidadConPresentacion from './CantidadConPresentacion';
 import { pedir } from '../../lib/http';
 import {
     ArrowLeft, ArrowRight, Check, Package, Scale, ClipboardCheck,
@@ -49,6 +50,9 @@ interface MaterialOption {
     code: string;
     photo_url: string | null;
     stock_total: number;
+    unit?: string;
+    presentacion_nombre?: string | null;
+    presentacion_cantidad?: number | null;
 }
 
 interface FigmaConsumeWizardProps {
@@ -365,31 +369,13 @@ const FigmaConsumeWizard = ({ onBack, initialMaterials = [], materialInicial = n
                         <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-[2.5rem] p-10 shadow-sm space-y-8">
                             {/* Quantity input */}
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-slate-500 uppercase tracking-widest">
-                                    Cantidad a Consumir ({selectedMaterial.unit?.toUpperCase() || 'KG'})
-                                </label>
-                                <div className="relative">
-                                    <input aria-label="Cantidad a consumir"
-                                        type="number"
-                                        step="0.001"
-                                        value={quantity || ''}
-                                        onChange={e => setQuantity(parseFloat(e.target.value) || 0)}
-                                        placeholder="0.000"
-                                        min={0.001}
-                                        max={suggestion?.total_available || undefined}
-                                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl px-5 py-5 text-2xl font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                    />
-                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase">Máx</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setQuantity(suggestion?.total_available || 0)}
-                                            className="text-[10px] font-black text-indigo-400 hover:text-indigo-800 transition-colors"
-                                        >
-                                            {suggestion?.total_available ?? '...'} {selectedMaterial.unit?.toUpperCase() || 'KG'}
-                                        </button>
-                                    </div>
-                                </div>
+                                <CantidadConPresentacion etiqueta="Cantidad a consumir" unidad={selectedMaterial.unit || 'kg'}
+                                    presentacion={selectedMaterial.presentacion_nombre} factor={selectedMaterial.presentacion_cantidad}
+                                    valor={quantity} onCambio={setQuantity} max={suggestion?.total_available} />
+                                <button type="button" onClick={() => setQuantity(suggestion?.total_available || 0)}
+                                    className="text-xs font-bold text-indigo-300 hover:underline">
+                                    Usar todo lo disponible: {suggestion?.total_available ?? '…'} {selectedMaterial.unit || 'kg'}
+                                </button>
 
                                 {/* Stock consumption bar */}
                                 {quantity > 0 && suggestion?.total_available && (

@@ -30,7 +30,7 @@ class Lote extends Model {
     /** @var list<string> */
     protected $fillable = [
         'material_id', 'bodega_id', 'batch_number', 'quantity',
-        'unit_cost', 'expiration_date', 'status', 'photo_path'
+        'unit_cost', 'expiration_date', 'vencimiento_estimado', 'status', 'photo_path'
     ];
 
     /** @var list<string> */
@@ -47,6 +47,7 @@ class Lote extends Model {
             'expiration_date' => 'date',
             'quantity'        => 'float',
             'unit_cost'       => 'float',
+            'vencimiento_estimado' => 'boolean',
         ];
     }
 
