@@ -34,7 +34,7 @@ La trazabilidad es la capacidad de seguirle el rastro a un producto desde que en
 \subsubsection{Modelos de Control de Inventario: EOQ y Punto de Reorden (ROP)}
 \label{sssec:eoq_rop}
 
-Dos conceptos clásicos de la teoría de inventarios guían el diseño del sistema. La Cantidad Económica de Pedido (EOQ, por \textit{Economic Order Quantity}) responde a la pregunta ``¿cuánto debo pedir cada vez para minimizar costos?''. El Punto de Reorden (ROP, por \textit{Reorder Point}) responde a ``¿en qué momento debo hacer el pedido para no quedarme sin stock?''.
+Dos conceptos clásicos de la teoría de inventarios guían el diseño del sistema. La Cantidad Económica de Pedido (EOQ, por \textit{Economic Order Quantity}) responde a la pregunta ``¿cuánto debo pedir cada vez para minimizar costos?''. El Punto de Reorden (ROP, por \textit{Reorder Point}) responde a ``¿en qué momento debo hacer el pedido para no quedarme sin stock?''. En su forma básica, $ROP = d \times L + SS$, donde $d$ es la demanda diaria, $L$ el tiempo de entrega y $SS$ el inventario de seguridad \cite{ballou2004logistica}.
 
 Pymetory no calcula el EOQ, pero conserva en el Kardex los consumos y costos que se necesitarían para hacerlo. El ROP sí se calcula: con el consumo diario promedio de cada insumo y los días de entrega de su proveedor, el sistema indica en qué nivel de existencia conviene pedir y hasta qué fecha alcanza lo que hay (Sección \ref{sec:imp_proyeccion}).
 

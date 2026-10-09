@@ -82,7 +82,7 @@ Dos decisiones de diseño se derivan directamente de las reglas de la dirección
 \section{Selección de herramientas}
 \label{sec:dis_herramientas}
 
-La selección de herramientas respondió a cuatro criterios propios del proyecto: (1) costo de licencia nulo, porque el sistema está pensado para PYMEs que no pueden pagar suscripciones; (2) un solo desarrollador, lo que favorece herramientas que resuelven de fábrica autenticación, migraciones y pruebas; (3) experiencia previa del autor con Laravel, GitHub y Figma; y (4) que los datos del inventario puedan permanecer en infraestructura controlada por la empresa, incluido el modelo de lenguaje. La Tabla \ref{tab:dis_herramientas} presenta cada herramienta, las alternativas comparables y la razón de la elección.
+La selección de herramientas respondió a cuatro criterios propios del proyecto: (1) costo de licencia nulo, porque el sistema está pensado para PYMEs que no pueden pagar suscripciones; (2) un solo desarrollador, lo que favorece herramientas que resuelven de fábrica autenticación, migraciones y pruebas; (3) experiencia previa del autor con Laravel, GitHub y Figma; y (4) que el sistema pueda operar con un modelo de lenguaje local si la empresa lo exige; por rendimiento, el modelo principal está en la nube (Capítulo \ref{chap:implementacion}). La Tabla \ref{tab:dis_herramientas} presenta cada herramienta, las alternativas comparables y la razón de la elección.
 
 {\small
 \begin{longtable}{|p{2.4cm}|p{2.9cm}|p{8.3cm}|}
@@ -101,7 +101,7 @@ React 19 + Inertia.js 2 & Blade, Livewire, React con API REST aparte & React per
 TypeScript 5 & JavaScript & Detecta en compilación errores en los datos que llegan del servidor a los componentes. \\ \hline
 Tailwind CSS 4 & Bootstrap, CSS propio & Estilos por utilidades que permiten traducir el prototipo de Figma a componentes sin mantener hojas de estilo separadas por vista, y definir temas mediante variables. \\ \hline
 MySQL 8.0 & PostgreSQL, SQLite & Base de datos relacional con transacciones ACID e integridad referencial, necesarias para que un despacho FEFO que toca varios lotes quede completo o no quede. Disponible en el servidor de producción sin costo. En pruebas automatizadas se usa SQLite en memoria. \\ \hline
-Ollama y proveedores compatibles con la API de OpenAI & Un único proveedor comercial & Ollama permite ejecutar modelos abiertos en el propio servidor, sin costo por consulta y sin enviar los datos a terceros. El diseño admite además proveedores externos configurables desde la aplicación, para elegir según disponibilidad y calidad. \\ \hline
+Ollama y proveedores compatibles con la API de OpenAI & Un único proveedor comercial & Ollama permite ejecutar modelos abiertos en el propio servidor, sin costo por consulta, o en Ollama Cloud, que recibe la pregunta y el contexto filtrado. El diseño admite además proveedores externos configurables desde la aplicación, para elegir según disponibilidad y calidad. \\ \hline
 GitHub y GitHub Projects & GitLab, Jira, Trello & Repositorio, historial de cambios, automatización de despliegue y tablero de tareas en una sola plataforma gratuita, que el autor ya usaba. \\ \hline
 Figma & Adobe XD, Penpot & Prototipado de alta fidelidad en el navegador, con plan gratuito; el autor ya lo usaba. \\ \hline
 Playwright 1.59 y PHPUnit & Cypress, Selenium, Pest & PHPUnit viene integrado con Laravel; Playwright automatiza el navegador real para pruebas de extremo a extremo. \\ \hline
@@ -145,7 +145,7 @@ Por regla de la dirección, el Kardex es de solo inserción, y esa regla se gara
 \section{Diseño del módulo de consulta en lenguaje natural}
 \label{sec:dis_rag}
 
-El asistente sigue la arquitectura de generación aumentada por recuperación (RAG) \cite{rag_lewis2020}: antes de llamar al modelo de lenguaje, el sistema recupera de la base de datos la información pertinente y la entrega al modelo como contexto, para que la respuesta se base en el inventario real y no en conocimiento general del modelo. El diseño tiene tres etapas:
+El asistente sigue la arquitectura de generación aumentada por recuperación (RAG) \cite{rag_lewis2020}: antes de llamar al modelo de lenguaje, el sistema recupera de la base de datos la información pertinente y la entrega al modelo como contexto, para que la respuesta se base en el inventario real y no en conocimiento general del modelo. Es una variante estructurada: la recuperación son consultas SQL parametrizadas elegidas según la intención, no una búsqueda semántica. El diseño tiene tres etapas:
 
 \begin{enumerate}
     \item \textbf{Clasificación de la intención} (\texttt{intencion}). Un modelo de lenguaje asigna la pregunta a una de trece intenciones o a una general (Tabla \ref{tab:dis_intenciones}); las expresiones regulares de \texttt{classifyQuery} quedan como reserva cuando el modelo no responde o contesta algo fuera de las categorías, y un número de lote se reconoce siempre de forma exacta. Además, las palabras de la pregunta se comparan con los nombres y descripciones de los materiales para filtrar el contexto al material consultado.
