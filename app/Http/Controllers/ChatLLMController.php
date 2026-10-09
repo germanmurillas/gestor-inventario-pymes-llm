@@ -101,7 +101,7 @@ class ChatLLMController extends Controller {
         if (preg_match('/cuarentena|retenid|bloquead|no conform|rechazad/iu', $q)) return 'quarantine';
         if (preg_match('/concili|ajust|diferencia|descuadr/iu', $q)) return 'conciliation';
         // Analítica predictiva: cuándo se acaba, para cuántos días alcanza, cuándo pedir (RF-09).
-        if (preg_match('/cu[aá]ndo se (me |nos |les? )?(acaba|agota|termina|va a (acabar|agotar|terminar))|(se|me|nos) (va|van) a (acabar|agotar|terminar)|para cu[aá]nt[oa]s? d[ií]as|cu[aá]nt[oa]s? d[ií]as (me |nos |le )?(alcanza|dura)|(alcanza|dura) para|(me|nos) (alcanza|dura)|punto de (re)?orden|pron[oó]stic|proyecci|predic|desabastec|cu[aá]ndo (debo|hay que|toca|tengo que|tenemos que) (pedir|comprar|reponer)/iu', $q)) return 'forecast';
+        if (preg_match('/cu[aá]ndo se (me |nos |les? )?(acaba|agota|termina|va a (acabar|agotar|terminar))|(se|me|nos) (va|van) a (acabar|agotar|terminar)|para cu[aá]nt[oa]s? d[ií]as|(para )?cu[aá]nto (me |nos |le |les )?(alcanza|dura)|al (paso|ritmo) (actual|que vamos)|cu[aá]nt[oa]s? d[ií]as (me |nos |le )?(alcanza|dura)|(alcanza|dura) para|(me|nos) (alcanza|dura)|punto de (re)?orden|pron[oó]stic|proyecci|predic|desabastec|cu[aá]ndo (debo|hay que|toca|tengo que|tenemos que) (pedir|comprar|reponer)/iu', $q)) return 'forecast';
         // Analítica descriptiva y diagnóstica del consumo: cuánto se consumió y por qué cambió (RF-10).
         if (preg_match('/consumo|consumi(mos|eron|ó)\b|se consumi[oó]|gast(amos|aron|ó)\b|cu[aá]nt[oa]s? (se |hemos )?(us[aoóé]|gast|consum)|por qu[eé] (baj|disminu|subi|aument|cambi|se redu|hay menos|hay m[aá]s)|variaci|estad[ií]stic/iu', $q)) return 'consumption';
         if (preg_match('/m[ií]nimo|hacen? falta|faltan? (por )?pedir|(toca|hay que) (pedir|comprar|reponer)|reponer|reabastec|bajo de (stock|inventario|existencias)|poco stock|(est[aá]n?|van?) (acabando|agotando)|agotad|escase/iu', $q)) return 'low_stock';
@@ -205,6 +205,23 @@ class ChatLLMController extends Controller {
             : $candidatos->pluck('id')->all(); // solo coincidió la descripción (categoría)
     }
 
+    /**
+     * Si la pregunta no nombra ningún insumo y se refiere a lo anterior ("eso", "esos", "lo mismo"), agrega
+     * a la búsqueda los insumos que nombró la pregunta anterior de la misma conversación. Solo para buscar
+     * insumos: al modelo le llega la pregunta tal como la escribió el usuario.
+     */
+    private function conInsumosDelTurnoAnterior(string $query, ?string $sessionId): string
+    {
+        if (!$sessionId || !preg_match('/\b(eso|esos|esa|esas|ese|lo mismo|los mismos|las mismas|de ah[ií])\b/iu', $query)
+            || $this->materialesDeLaPregunta($this->materialKeywords($query))) {
+            return $query;
+        }
+        $anterior = ChatHistory::where('session_id', $sessionId)->latest('created_at')->latest('id')->value('prompt');
+        $palabras = $anterior ? $this->materialKeywords($anterior) : [];
+
+        return $palabras && $this->materialesDeLaPregunta($palabras) ? $query . ' ' . implode(' ', $palabras) : $query;
+    }
+
     /** Palabras de la pregunta que pueden nombrar un material (sin términos genéricos del dominio). */
     private function materialKeywords(string $query): array
     {
@@ -231,6 +248,8 @@ class ChatLLMController extends Controller {
             'consumo','consumió','consumio','consumimos','consumieron','gastamos','gastaron','gastó','usamos','usaron','usó','bajó','bajo','subió','subio',
             'cambió','cambio','disminuyó','disminuyo','aumentó','aumento','variación','variacion','estadística','estadistica','estadísticas','estadisticas',
             'diario','diaria','semanal','mensual','pasada','pasado','anterior','semanas','meses','día','dia','qué','por',
+            // Referencias a la pregunta anterior ("¿y eso para cuánto alcanza?").
+            'eso','esos','esa','esas','ese','mismo','mismos','misma','mismas','ahí','ahi','paso','ritmo','actual','vamos',
             'más','mas','mayor','mayores','menor','menores','mucho','mucha','tanto','tanta','ultimos','últimos','ultimas','últimas',
             // Pedidos de formato (gráficos, archivos): no nombran insumos.
             'gráfico','grafico','gráficos','graficos','gráfica','grafica','gráficas','graficas','diagrama','descargar','descarga','descargable',
@@ -621,8 +640,10 @@ class ChatLLMController extends Controller {
         $apiBaseUrl = $apiKeyRecord?->base_url;
         $apiModel = $apiKeyRecord?->model_name;
 
-        $intent = $this->intencion($query);
-        $contextoRAG = $this->buildRagContext($query, $intent);
+        // Pregunta de seguimiento ("¿y eso para cuánto alcanza?"): se buscan los insumos de la pregunta anterior.
+        $consulta = $this->conInsumosDelTurnoAnterior($query, $sessionId);
+        $intent = $this->intencion($consulta);
+        $contextoRAG = $this->buildRagContext($consulta, $intent);
 
         $defaultPrompt = "Eres Pymetory IA, asistente de inventarios. Responde de forma concisa y directa, sin rodeos.";
 
