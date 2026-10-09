@@ -301,11 +301,14 @@ class InventoryController extends Controller {
             'reason' => 'required|string|max:255'
         ]);
 
-        $lote = Lote::findOrFail($id);
-        $oldQuantity = $lote->quantity;
-        $diff = $validated['new_quantity'] - $oldQuantity;
+        Lote::findOrFail($id);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($lote, $validated, $diff, $oldQuantity) {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($id, $validated) {
+            // La cantidad anterior se lee con la fila bloqueada: si un despacho ocurre al mismo tiempo,
+            // la diferencia que queda en el Kardex es la real.
+            $lote = Lote::lockForUpdate()->findOrFail($id);
+            $oldQuantity = $lote->quantity;
+            $diff = $validated['new_quantity'] - $oldQuantity;
             $lote->quantity = $validated['new_quantity'];
             if ($lote->quantity <= 0) {
                 $lote->status = 'consumed';
@@ -593,7 +596,15 @@ class InventoryController extends Controller {
             return back()->withErrors(['quantity' => $motivo]);
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($lote, $validated) {
+        $sinSaldo = false;
+        \Illuminate\Support\Facades\DB::transaction(function () use ($lote, $validated, &$sinSaldo) {
+            // Con la fila bloqueada se vuelve a comprobar el saldo: otro despacho pudo usarlo entre la
+            // validación y este punto.
+            $lote = Lote::lockForUpdate()->findOrFail($lote->id);
+            if ($validated['quantity'] > $lote->quantity + 0.0005) {
+                $sinSaldo = true;
+                return;
+            }
             // 1. Actualizar la cantidad del lote
             $lote->quantity -= $validated['quantity'];
             
@@ -614,6 +625,10 @@ class InventoryController extends Controller {
                 'description' => $validated['description'] ?? "Despacho por {$validated['reason']}"
             ]);
         });
+
+        if ($sinSaldo) {
+            return back()->withErrors(['quantity' => 'El lote cambió mientras se registraba el despacho; revise la cantidad disponible.']);
+        }
 
         return back()->with('success', 'Despacho registrado correctamente.');
     }

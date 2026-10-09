@@ -5,7 +5,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Exceptions\StockInsuficiente;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -128,6 +130,50 @@ class Lote extends Model {
      * Reglas: solo lotes activos (no en cuarentena ni consumidos); un lote vencido solo se da de
      * baja como desperdicio; y, salvo desperdicio, FEFO exige despachar antes el lote que vence primero.
      */
+    /**
+     * Despacha una cantidad de un insumo por FEFO: el único lugar donde se recorre el orden de vencimiento.
+     * Bloquea los lotes despachables (SELECT ... FOR UPDATE) y verifica el saldo dentro de la transacción,
+     * de modo que dos despachos simultáneos no descuenten el mismo saldo; descuenta lote por lote y
+     * registra cada salida en el Kardex. Devuelve las salidas: [['lote' => Lote, 'cantidad' => float, 'movimiento' => Movimiento]].
+     *
+     * @throws StockInsuficiente
+     */
+    public static function despacharFefo(Material $material, float $cantidad, string $motivo, string $descripcion, ?int $usuarioId): array
+    {
+        return DB::transaction(function () use ($material, $cantidad, $motivo, $descripcion, $usuarioId) {
+            $lotes = self::where('material_id', $material->id)->despachables()
+                ->orderBy('expiration_date', 'asc')->lockForUpdate()->get();
+
+            $disponible = (float) $lotes->sum('quantity');
+            if ($disponible + 0.0005 < $cantidad) {
+                throw new StockInsuficiente($material, $disponible);
+            }
+
+            $salidas = [];
+            $pendiente = $cantidad;
+            foreach ($lotes as $lote) {
+                if ($pendiente <= 0.0005) break;
+
+                $sale = min((float) $lote->quantity, $pendiente);
+                $lote->quantity -= $sale;
+                if ($lote->quantity <= 0.001) {
+                    $lote->quantity = 0;
+                    $lote->status = 'consumed';
+                }
+                $lote->save();
+
+                $mov = Movimiento::create([
+                    'lote_id' => $lote->id, 'user_id' => $usuarioId, 'type' => 'salida',
+                    'quantity' => $sale, 'reason' => $motivo, 'description' => $descripcion,
+                ]);
+                $salidas[] = ['lote' => $lote, 'cantidad' => $sale, 'movimiento' => $mov];
+                $pendiente -= $sale;
+            }
+
+            return $salidas;
+        });
+    }
+
     public function motivoNoDespachable(string $reason): ?string {
         if ($this->status !== 'active') {
             $estado = $this->status === 'quarantined' ? 'en cuarentena' : 'consumido';

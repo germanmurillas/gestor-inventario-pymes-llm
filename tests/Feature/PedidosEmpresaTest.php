@@ -71,8 +71,15 @@ class PedidosEmpresaTest extends TestCase
 
     public function test_las_devoluciones_restan_del_consumo_del_pronostico(): void
     {
-        [$usuario, $lote] = $this->loteConSalida(100, 28);
-        Movimiento::create(['lote_id' => $lote->id, 'user_id' => $usuario->id, 'type' => 'entrada', 'quantity' => 14, 'reason' => 'devolucion']);
+        $usuario = $this->admin();
+        $m = Material::factory()->create(['name' => 'Ajonjolí', 'unit' => 'kg']);
+        $lote = Lote::factory()->create(['material_id' => $m->id, 'quantity' => 100, 'status' => 'active']);
+        // La ventana del pronóstico son los días completos anteriores a hoy: los movimientos van con fecha de ayer.
+        foreach ([['salida', 28, 'produccion'], ['entrada', 14, 'devolucion']] as [$tipo, $cantidad, $motivo]) {
+            $mov = new Movimiento(['lote_id' => $lote->id, 'user_id' => $usuario->id, 'type' => $tipo, 'quantity' => $cantidad, 'reason' => $motivo]);
+            $mov->created_at = $mov->updated_at = now()->subDay();
+            $mov->save();
+        }
 
         $fila = app(ProyeccionInventario::class)->proyeccion([$lote->material_id], 28)->first();
 

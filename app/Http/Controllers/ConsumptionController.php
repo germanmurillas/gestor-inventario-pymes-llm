@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\StockInsuficiente;
 use App\Models\Lote;
 use App\Models\Material;
 use App\Models\Movimiento;
@@ -25,51 +26,13 @@ class ConsumptionController extends Controller
         ], ['reason.in' => self::SOLO_ADMIN_AJUSTA]);
 
         $material = Material::findOrFail($validated['material_id']);
-        $quantityToConsume = $validated['quantity'];
 
-        // Verificar stock total disponible
-        $totalAvailable = Lote::where('material_id', $material->id)
-            ->despachables()
-            ->sum('quantity');
-
-        if ($totalAvailable < $quantityToConsume) {
-            return back()->withErrors(['quantity' => "Stock insuficiente: de {$material->name} solo hay " . round($totalAvailable, 3) . " {$material->unit} disponibles (sin vencer ni en cuarentena)."]);
+        try {
+            Lote::despacharFefo($material, (float) $validated['quantity'], $validated['reason'] ?? 'produccion',
+                'Despacho automático FEFO de ' . $material->name, Auth::id());
+        } catch (StockInsuficiente $e) {
+            return back()->withErrors(['quantity' => $e->getMessage()]);
         }
-
-        DB::transaction(function () use ($material, $quantityToConsume, $validated) {
-            // Obtener lotes activos ordenados por FEFO
-            $lotes = Lote::where('material_id', $material->id)
-                ->despachables()
-                ->orderBy('expiration_date', 'asc')
-                ->get();
-
-            $remaining = $quantityToConsume;
-
-            foreach ($lotes as $lote) {
-                if ($remaining <= 0) break;
-
-                $consumption = min($lote->quantity, $remaining);
-                
-                // Actualizar lote
-                $lote->quantity -= $consumption;
-                if ($lote->quantity <= 0) {
-                    $lote->status = 'consumed';
-                }
-                $lote->save();
-
-                // Registrar movimiento histórico
-                Movimiento::create([
-                    'lote_id' => $lote->id,
-                    'user_id' => Auth::id(),
-                    'type' => 'salida',
-                    'quantity' => $consumption,
-                    'reason' => $validated['reason'] ?? 'produccion',
-                    'description' => 'Despacho automático FEFO de ' . $material->name
-                ]);
-
-                $remaining -= $consumption;
-            }
-        });
 
         return back()->with('success', 'Consumo registrado exitosamente aplicando FEFO.');
     }
@@ -158,71 +121,30 @@ class ConsumptionController extends Controller
         ], ['reason.in' => self::SOLO_ADMIN_AJUSTA]);
 
         $material = Material::findOrFail($validated['material_id']);
-        $quantityToConsume = (float) $validated['quantity'];
 
-        $totalAvailable = Lote::where('material_id', $material->id)
-            ->despachables()
-            ->sum('quantity');
-
-        if ($totalAvailable < $quantityToConsume) {
-            return response()->json([
-                'error' => "Stock insuficiente: de {$material->name} solo hay " . round($totalAvailable, 3) . " {$material->unit} disponibles (sin vencer ni en cuarentena).",
-            ], 422);
+        try {
+            $salidas = Lote::despacharFefo($material, (float) $validated['quantity'], $validated['reason'],
+                $validated['description'] ?? "Despacho FEFO de {$material->name}", Auth::id());
+        } catch (StockInsuficiente $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         }
 
-        $consumedLotes = [];
-        $movimientos = [];
-
-        DB::transaction(function () use ($material, $quantityToConsume, $validated, &$consumedLotes, &$movimientos) {
-            $lotes = Lote::where('material_id', $material->id)
-                ->despachables()
-                ->orderBy('expiration_date', 'asc')
-                ->get();
-
-            $remaining = $quantityToConsume;
-
-            foreach ($lotes as $lote) {
-                if ($remaining <= 0) break;
-
-                $consumption = min($lote->quantity, $remaining);
-
-                $lote->quantity -= $consumption;
-                if ($lote->quantity <= 0.001) {
-                    $lote->quantity = 0;
-                    $lote->status = 'consumed';
-                }
-                $lote->save();
-
-                $mov = Movimiento::create([
-                    'lote_id' => $lote->id,
-                    'user_id' => Auth::id(),
-                    'type' => 'salida',
-                    'quantity' => $consumption,
-                    'reason' => $validated['reason'],
-                    'description' => $validated['description'] ?? "Despacho FEFO de {$material->name}",
-                ]);
-
-                $consumedLotes[] = [
-                    'id' => $lote->id,
-                    'batch_number' => $lote->batch_number,
-                    'consumed' => round($consumption, 3),
-                    'remaining' => round($lote->quantity, 3),
-                    'status' => $lote->status,
-                ];
-
-                $movimientos[] = [
-                    'id' => $mov->id,
-                    'lote_id' => $mov->lote_id,
-                    'batch_number' => $lote->batch_number,
-                    'quantity' => $mov->quantity,
-                    'type' => $mov->type,
-                    'reason' => $mov->reason,
-                    'created_at' => $mov->created_at->format('Y-m-d H:i:s'),
-                ];
-
-                $remaining -= $consumption;
-            }
-        });
+        $consumedLotes = array_map(fn ($x) => [
+            'id' => $x['lote']->id,
+            'batch_number' => $x['lote']->batch_number,
+            'consumed' => round($x['cantidad'], 3),
+            'remaining' => round($x['lote']->quantity, 3),
+            'status' => $x['lote']->status,
+        ], $salidas);
+        $movimientos = array_map(fn ($x) => [
+            'id' => $x['movimiento']->id,
+            'lote_id' => $x['movimiento']->lote_id,
+            'batch_number' => $x['lote']->batch_number,
+            'quantity' => $x['movimiento']->quantity,
+            'type' => $x['movimiento']->type,
+            'reason' => $x['movimiento']->reason,
+            'created_at' => $x['movimiento']->created_at->format('Y-m-d H:i:s'),
+        ], $salidas);
 
         return response()->json([
             'success' => true,
@@ -249,66 +171,28 @@ class ConsumptionController extends Controller
 
         $results = [];
 
-        DB::transaction(function () use ($validated, &$results) {
-            foreach ($validated['items'] as $item) {
-                $material = Material::findOrFail($item['material_id']);
-                $quantityToConsume = (float) $item['quantity'];
+        try {
+            DB::transaction(function () use ($validated, &$results) {
+                foreach ($validated['items'] as $item) {
+                    $material = Material::findOrFail($item['material_id']);
+                    $salidas = Lote::despacharFefo($material, (float) $item['quantity'], $item['reason'],
+                        $validated['description'] ?? "Despacho masivo FEFO de {$material->name}", Auth::id());
 
-                $totalAvailable = Lote::where('material_id', $material->id)
-                    ->despachables()
-                    ->sum('quantity');
-
-                if ($totalAvailable < $quantityToConsume) {
-                    throw new \RuntimeException(
-                        "Stock insuficiente para {$material->name}: necesita {$quantityToConsume}, disponible sin vencer {$totalAvailable}"
-                    );
-                }
-
-                $lotes = Lote::where('material_id', $material->id)
-                    ->despachables()
-                    ->orderBy('expiration_date', 'asc')
-                    ->get();
-
-                $remaining = $quantityToConsume;
-                $itemLotes = [];
-
-                foreach ($lotes as $lote) {
-                    if ($remaining <= 0) break;
-
-                    $consumption = min($lote->quantity, $remaining);
-
-                    $lote->quantity -= $consumption;
-                    if ($lote->quantity <= 0.001) {
-                        $lote->quantity = 0;
-                        $lote->status = 'consumed';
-                    }
-                    $lote->save();
-
-                    Movimiento::create([
-                        'lote_id' => $lote->id,
-                        'user_id' => Auth::id(),
-                        'type' => 'salida',
-                        'quantity' => $consumption,
-                        'reason' => $item['reason'],
-                        'description' => $validated['description'] ?? "Despacho masivo FEFO de {$material->name}",
-                    ]);
-
-                    $itemLotes[] = [
-                        'batch_number' => $lote->batch_number,
-                        'consumed' => round($consumption, 3),
+                    $results[] = [
+                        'material_id' => $material->id,
+                        'material_name' => $material->name,
+                        'quantity_consumed' => (float) $item['quantity'],
+                        'lotes_affected' => array_map(fn ($x) => [
+                            'batch_number' => $x['lote']->batch_number,
+                            'consumed' => round($x['cantidad'], 3),
+                        ], $salidas),
                     ];
-
-                    $remaining -= $consumption;
                 }
-
-                $results[] = [
-                    'material_id' => $material->id,
-                    'material_name' => $material->name,
-                    'quantity_consumed' => $quantityToConsume,
-                    'lotes_affected' => $itemLotes,
-                ];
-            }
-        });
+            });
+        } catch (StockInsuficiente $e) {
+            // Ninguna salida queda registrada: la transacción exterior se revierte completa.
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
 
         return response()->json([
             'success' => true,
