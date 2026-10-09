@@ -41,7 +41,7 @@ class DespachoFefoUnicoTest extends TestCase
         Lote::factory()->create(['material_id' => $m->id, 'quantity' => 5, 'expiration_date' => now()->addDays(10)]);
 
         try {
-            Lote::despacharFefo($m, 6, 'produccion', 'Prueba', null);
+            Lote::despacharFefo($m, 6, 'produccion', 'Prueba', User::factory()->create()->id);
             $this->fail('Debía lanzar StockInsuficiente');
         } catch (StockInsuficiente $e) {
             $this->assertEquals(5, $e->disponible);

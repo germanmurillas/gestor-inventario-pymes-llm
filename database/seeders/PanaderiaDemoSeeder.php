@@ -239,14 +239,23 @@ class PanaderiaDemoSeeder extends Seeder
         $mov->save();
     }
 
-    /** Borra los datos de inventario de la demo anterior. Salta el guard del Kardex a propósito (DB::table). */
+    /**
+     * Borra los datos de inventario de la demo anterior. Es el único lugar que vacía el Kardex: quita un
+     * momento los triggers de inmutabilidad (KardexInmutable) y los repone al terminar.
+     */
     private function limpiarInventario(): void
     {
+        \App\Support\KardexInmutable::quitar();
         Schema::disableForeignKeyConstraints();
         foreach (['movimientos', 'transferencias', 'purchase_order_items', 'purchase_orders', 'vendors', 'material_tag',
                   'lotes', 'materials', 'bodegas', 'notifications', 'chat_histories'] as $tabla) {
             if (Schema::hasTable($tabla)) DB::table($tabla)->delete();
         }
         Schema::enableForeignKeyConstraints();
+        try {
+            \App\Support\KardexInmutable::crear();
+        } catch (\Illuminate\Database\QueryException $e) {
+            $this->command?->warn('Triggers del Kardex no repuestos: ejecutar php artisan kardex:proteger con un usuario con permiso.');
+        }
     }
 }

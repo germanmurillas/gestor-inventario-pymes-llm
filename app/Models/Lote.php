@@ -47,7 +47,7 @@ class Lote extends Model {
     protected function casts(): array {
         return [
             'expiration_date' => 'date',
-            'quantity'        => 'float',
+            'quantity'        => 'float', // decimal(12,3) en la base, igual que movimientos.quantity
             'unit_cost'       => 'float',
             'vencimiento_estimado' => 'boolean',
         ];
@@ -138,7 +138,7 @@ class Lote extends Model {
      *
      * @throws StockInsuficiente
      */
-    public static function despacharFefo(Material $material, float $cantidad, string $motivo, string $descripcion, ?int $usuarioId): array
+    public static function despacharFefo(Material $material, float $cantidad, string $motivo, string $descripcion, int $usuarioId): array
     {
         return DB::transaction(function () use ($material, $cantidad, $motivo, $descripcion, $usuarioId) {
             $lotes = self::where('material_id', $material->id)->despachables()
