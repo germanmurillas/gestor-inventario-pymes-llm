@@ -39,7 +39,7 @@ Al construir sobre Laravel, Pymetory hereda patrones que el framework trae resue
 
 \textbf{Qué es.} Una familia de algoritmos intercambiables entre los que se elige en tiempo de ejecución.
 
-\textbf{Dónde está.} El \texttt{ChatLLMController} define una tabla de proveedores de modelo de lenguaje, cada uno con su dirección y su clave, y elige uno según la configuración del administrador (\texttt{app/Http/Controllers/ChatLLMController.php}, línea 633):
+\textbf{Dónde está.} El \texttt{ChatLLMController} define una tabla de proveedores de modelo de lenguaje, cada uno con su dirección y su clave, y elige uno según la configuración del administrador (\texttt{app/Http/Controllers/ChatLLMController.php}, línea 636):
 
 \begin{lstlisting}[language=PHP]
 $endpoints = [
@@ -81,7 +81,7 @@ public function handle(Request $request, Closure $next, string $role): Response
 
 \textbf{Qué es.} Cada objeto representa una fila de la base de datos y contiene su persistencia y sus reglas de dominio.
 
-\textbf{Dónde está.} El modelo \texttt{Lote} (\texttt{app/Models/Lote.php}) concentra las reglas que dependen de él: si está crítico por vencimiento (\texttt{getIsCriticalAttribute}, línea 80, con el umbral configurable de \texttt{diasCriticos()}), su valor (\texttt{getValorTotalAttribute}, línea 97), qué lotes pueden despacharse (\textit{scope} \texttt{despachables}, línea 121) y por qué no puede salir un lote en particular (\texttt{motivoNoDespachable}, línea 131), por ejemplo porque está vencido o en cuarentena.
+\textbf{Dónde está.} El modelo \texttt{Lote} (\texttt{app/Models/Lote.php}) concentra las reglas que dependen de él: si está crítico por vencimiento (\texttt{getIsCriticalAttribute}, línea 82, con el umbral configurable de \texttt{diasCriticos()}), su valor (\texttt{getValorTotalAttribute}, línea 99), qué lotes pueden despacharse (\textit{scope} \texttt{despachables}, línea 123) y por qué no puede salir un lote en particular (\texttt{motivoNoDespachable}, línea 177), por ejemplo porque está vencido o en cuarentena.
 
 \textbf{Alternativa descartada: Repository o Data Mapper.} Son útiles cuando se necesita independencia del motor de persistencia o hay varias fuentes de datos. Pymetory usa un solo motor (MySQL), y una capa Repository sobre Eloquent solo reenviaría llamadas.
 
@@ -91,28 +91,30 @@ public function handle(Request $request, Closure $next, string $role): Response
 
 \textbf{Qué es.} La lógica de una operación de negocio se organiza como un procedimiento único que la atiende de principio a fin.
 
-\textbf{Dónde está.} \texttt{ConsumptionController::consumeFefo()} (\texttt{app/Http/Controllers/ConsumptionController.php}, línea 149), que es el que usa la interfaz, toma los lotes despachables del material ordenados por vencimiento, descuenta la cantidad pedida lote por lote, marca como consumidos los que se agotan y registra cada salida en el Kardex, todo dentro de una transacción (línea 174):
+\textbf{Dónde está.} \texttt{Lote::despacharFefo()} (\texttt{app/Models/Lote.php}, línea 141) es el único lugar que recorre el orden de vencimiento; lo usan el despacho de la interfaz (\texttt{ConsumptionController::consumeFefo()}) y el despacho múltiple. Dentro de una transacción, bloquea los lotes despachables del material, verifica el saldo, descuenta la cantidad lote por lote, marca como consumidos los que se agotan y registra cada salida en el Kardex:
 
 \begin{lstlisting}[language=PHP]
-DB::transaction(function () use ($material, $quantityToConsume, $validated, ...) {
-    $lotes = Lote::where('material_id', $material->id)
-        ->despachables()->orderBy('expiration_date', 'asc')->get();
-    $remaining = $quantityToConsume;
+return DB::transaction(function () use ($material, $cantidad, $motivo, ...) {
+    $lotes = self::where('material_id', $material->id)->despachables()
+        ->orderBy('expiration_date', 'asc')->lockForUpdate()->get();
+    $disponible = (float) $lotes->sum('quantity');
+    if ($disponible + 0.0005 < $cantidad) throw new StockInsuficiente($material, $disponible);
+    $pendiente = $cantidad;
     foreach ($lotes as $lote) {
-        if ($remaining <= 0) break;
-        $consumption = min($lote->quantity, $remaining);
-        $lote->quantity -= $consumption;
+        if ($pendiente <= 0.0005) break;
+        $sale = min((float) $lote->quantity, $pendiente);
+        $lote->quantity -= $sale;
         if ($lote->quantity <= 0.001) { $lote->quantity = 0; $lote->status = 'consumed'; }
         $lote->save();
         Movimiento::create([ /* lote, usuario, salida, cantidad, motivo */ ]);
-        $remaining -= $consumption;
+        $pendiente -= $sale;
     }
 });
 \end{lstlisting}
 
-\textbf{Alternativa descartada: Domain Model.} Un modelo de dominio rico conviene cuando las reglas son numerosas e interdependientes. El despacho FEFO es un procedimiento lineal de unas treinta líneas. El costo del patrón es la repetición: el mismo recorrido aparece en otros puntos de despacho (\texttt{store()} y el despacho múltiple), que convendría unificar.
+\textbf{Alternativa descartada: Domain Model.} Un modelo de dominio rico conviene cuando las reglas son numerosas e interdependientes. El despacho FEFO es un procedimiento lineal de unas treinta líneas. El recorrido estuvo copiado en varios controladores; la revisión final lo dejó en un solo método.
 
-\textbf{Qué cambió.} La transacción garantiza atomicidad: un despacho que toca varios lotes queda completo o no queda, y si falla a mitad, ni los lotes ni el Kardex cambian.
+\textbf{Qué cambió.} La transacción garantiza atomicidad: un despacho que toca varios lotes queda completo o no queda. Además, el bloqueo de filas (\texttt{SELECT ... FOR UPDATE}) evita que dos despachos simultáneos descuenten el mismo saldo.
 
 \section{Proyección de reabastecimiento}
 \label{sec:imp_proyeccion}
