@@ -173,7 +173,7 @@ Inertia.js resuelve este problema con un principio simple: en lugar de que el fr
 
 Este enfoque ofrece la fluidez de una SPA sin los costos de una API REST: sin endpoints adicionales, sin serialización manual, sin duplicación de tipos.
 
-La interfaz se construyó con React 19 y TypeScript, que agrega tipado estático a JavaScript y permite detectar en compilación errores como pasar un texto donde se esperaba un número.
+La interfaz se construyó con React 19 y TypeScript, que agrega tipos a JavaScript: documentan la forma de los datos y permiten que el editor señale errores como pasar un texto donde se esperaba un número.
 
 \subsubsection{Comparativa de Enfoques de Frontend}
 
@@ -234,4 +234,4 @@ Se revisaron trabajos de grado en repositorios universitarios colombianos (no fu
 \subsection{Tecnologías de Despliegue en la Nube}
 \label{sec:cloud}
 
-El sistema se desplegó en la capa gratuita de Oracle Cloud Infrastructure, en una instancia ARM con 4 OCPU y 24 GB de RAM que permite ejecutar modelos de lenguaje locales con Ollama, y se publica en \url{https://app.pymetory.com} mediante un túnel de Cloudflare que entrega HTTPS sin abrir puertos de entrada (Capítulo \ref{chap:implementacion}).
+El sistema se desplegó en la capa gratuita de Oracle Cloud Infrastructure, en una instancia ARM con 4 OCPU y 24 GB de RAM que permite ejecutar modelos de lenguaje locales con Ollama, y se publica en \url{https://app.pymetory.com} mediante un túnel de Cloudflare que entrega HTTPS sin exponer a internet el puerto de la aplicación (Capítulo \ref{chap:implementacion}).
