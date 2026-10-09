@@ -27,7 +27,7 @@ class CargarCatalogoTest extends TestCase
             'insumos' => [
                 ['code' => '2', 'name' => 'Harina', 'unit' => 'kg', 'bodega' => 'MP', 'existencia' => 300, 'presentacion_nombre' => 'bulto', 'presentacion_cantidad' => 50, 'vida_util_dias' => 180],
                 ['code' => '9', 'name' => 'Azúcar', 'unit' => 'kg', 'bodega' => 'MP', 'existencia' => 100, 'vencimiento' => '2027-05-01'],
-                ['code' => '500', 'name' => 'Pan x 8', 'unit' => 'und', 'bodega' => 'PT', 'existencia' => 0, 'vida_util_dias' => 7],
+                ['code' => '500', 'name' => 'Pan x 8', 'unit' => 'und', 'bodega' => 'PT', 'existencia' => 0, 'vida_util_dias' => 7, 'codigo_barras' => '7709869863117'],
             ],
         ]));
         return $ruta;
@@ -53,6 +53,7 @@ class CargarCatalogoTest extends TestCase
         $this->assertFalse($azucar->vencimiento_estimado, 'Con fecha real no se marca como estimada');
         $this->assertSame(0, Lote::whereHas('material', fn ($q) => $q->where('code', '500'))->count(), 'Sin existencia no se inventa un lote');
         $this->assertSame(2, Movimiento::where('reason', 'ingreso')->count());
+        $this->assertSame('7709869863117', Material::where('code', '500')->first()->custom_fields['codigo_barras']);
     }
 
     public function test_es_idempotente(): void

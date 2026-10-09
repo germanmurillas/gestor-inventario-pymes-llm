@@ -63,6 +63,11 @@ class CargarCatalogo extends Command
                     'stock_minimo' => $i['stock_minimo'] ?? null,
                     'bodega_id' => ($bodegas[$i['bodega'] ?? ''] ?? null)?->id,
                 ], fn ($v) => $v !== null));
+                if (!empty($i['codigo_barras'])) {
+                    // Código de barras de fábrica (EAN-13 de la etiqueta del empaque), para lectura futura con el escáner.
+                    $material->custom_fields = array_merge((array) ($material->custom_fields ?? []), ['codigo_barras' => $i['codigo_barras']]);
+                    $material->save();
+                }
                 $resumen['insumos']++;
 
                 $existencia = (float) ($i['existencia'] ?? 0);
