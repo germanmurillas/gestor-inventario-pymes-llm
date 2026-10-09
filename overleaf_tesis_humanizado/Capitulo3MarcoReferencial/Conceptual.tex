@@ -18,21 +18,21 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
 \subsection*{Área de Empresas y Logística}
 
 \begin{itemize}
-    \item \textbf{Kardex:} Registro detallado y cronológico de todos los movimientos (entradas y salidas) de un producto específico \cite{ballou2004logistica}. Piensa en el Kardex como un libro contable digital que nadie puede alterar: cada línea documenta el tipo de operación, las cantidades antes y después del movimiento, el usuario responsable, la fecha exacta y la razón. En Pymetory, el Kardex es una tabla inmutable en la base de datos. Durante las entrevistas con la panificadora, descubrimos que la empresa no llevaba ningún tipo de Kardex, lo que hacía imposible reconstruir qué pasó con los insumos.
+    \item \textbf{Kardex:} Registro detallado y cronológico de todos los movimientos (entradas y salidas) de un producto específico \cite{ballou2004logistica}. Cada línea documenta el tipo de operación, la cantidad, el usuario responsable, la fecha exacta y la razón. En Pymetory, el Kardex es de solo inserción en la aplicación: ningún usuario, ni el administrador, puede editar ni borrar un movimiento, y los errores se corrigen con un ajuste. En la empresa del caso, el consumo se registra en el sistema contable sin verificación física ni constancia de quién corrige (Capítulo \ref{chap:requerimientos}).
     
     \item \textbf{Stock:} Cantidad de un producto disponible en el inventario \cite{ballou2004logistica}. En la empresa del caso de estudio, la existencia real solo se conoce recorriendo la bodega; Pymetory calcula el stock en tiempo real sumando las cantidades de todos los lotes activos de cada material.
     
     \item \textbf{Trazabilidad:} Capacidad de seguir el rastro de un producto desde su entrada hasta su salida \cite{ballou2004logistica}. En el caso de estudio, la trazabilidad por lote y vencimiento es una exigencia sanitaria que el sistema contable de la empresa no cubre. Pymetory garantiza trazabilidad completa vinculando cada movimiento del Kardex con el lote, el material, la bodega y el usuario responsable.
     
-    \item \textbf{ERP (Enterprise Resource Planning):} Sistemas de planificación de recursos empresariales ---paquetes de software que integran y automatizan todos los procesos de una empresa \cite{ballou2004logistica}. Soluciones como Odoo o SAP Business One ofrecen funcionalidades de inventario, pero su costo y complejidad las hacen inaccesibles para la mayoría de las PYMEs colombianas. La panificadora había evaluado Odoo y lo descartó por el costo mensual y porque ``parecía hecho para ingenieros''.
+    \item \textbf{ERP (Enterprise Resource Planning):} Sistemas de planificación de recursos empresariales ---paquetes de software que integran y automatizan todos los procesos de una empresa \cite{ballou2004logistica}. Soluciones como Odoo o SAP Business One ofrecen funcionalidades de inventario, pero su costo y complejidad las hacen inaccesibles para la mayoría de las PYMEs colombianas.
     
     \item \textbf{Stakeholder:} Cualquier persona o grupo que tiene un interés en el resultado de un proyecto. En SCRUM, el Product Owner representa los intereses de los stakeholders \cite{schwaber2020scrumguide}. Para Pymetory, los principales fueron el director del trabajo de grado (Prof. Héctor Fabio Ocampo), la panificadora caso de estudio y el propio autor.
     
-    \item \textbf{Desabastecimiento:} Situación en la que la demanda supera el inventario disponible, lo que puede detener la producción y generar pérdidas \cite{ballou2004logistica}. La panificadora experimentó desabastecimiento en temporadas altas (diciembre y Semana Santa) por no tener un sistema que proyectara necesidades de compra basadas en el consumo histórico.
+    \item \textbf{Desabastecimiento:} Situación en la que la demanda supera el inventario disponible, lo que puede detener la producción y generar pérdidas \cite{ballou2004logistica}. La empresa del caso ha tenido faltantes (por ejemplo, de sal) que obligaron a compras locales más costosas (Capítulo \ref{chap:requerimientos}).
     
     \item \textbf{Mermas:} Reducciones en el inventario por deterioro, vencimiento, daño, robo o errores de registro \cite{ballou2004logistica}. En la empresa del caso de estudio la rotación es rápida y no se reportan mermas por caducidad; aun así, las mermas por errores de registro se manifiestan como diferencias entre el sistema contable y la bodega.
     
-    \item \textbf{PYME (Pequeña y Mediana Empresa):} Empresas que por su facturación, empleados y activos se sitúan entre las microempresas y las grandes corporaciones \cite{ballou2004logistica}. En Colombia, según el DANE, las PYMEs representan más del 90\% del tejido empresarial y generan cerca del 65\% del empleo. La panificadora caso de estudio es una empresa mediana con aproximadamente 25 empleados y una producción diaria de 3.000 a 5.000 unidades de pan.
+    \item \textbf{PYME (Pequeña y Mediana Empresa):} Empresas que por su facturación, empleados y activos se sitúan entre las microempresas y las grandes corporaciones; en Colombia las clasifica la Ley 590 de 2000 \cite{ley590}. Las PYMEs representan el 99,5\% de las empresas formales del país \cite{bbva2024mipymes}. La empresa del caso de estudio es una panificadora de tamaño pequeño a mediano.
     
     \item \textbf{FEFO (First Expired, First Out):} Estrategia de rotación que establece que los productos con fecha de vencimiento más próxima deben despacharse primero. A diferencia de FIFO (First In, First Out), que ordena por fecha de llegada, FEFO ordena por fecha de caducidad. En Pymetory, FEFO es una regla inmutable: se implementó como un scope de Eloquent que se aplica automáticamente en cada operación de despacho.
 \end{itemize}
@@ -50,27 +50,27 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{Accesibilidad Web:} Disciplina que busca que una página web pueda ser usada por el máximo número de personas, independientemente de sus capacidades \cite{w3c_wcag_overview}. La interfaz de Pymetory se auditó contra el nivel AA de las WCAG 2.1, verificando contraste, navegación por teclado y etiquetas para lectores de pantalla.
     
-    \item \textbf{Principios de Nielsen:} Diez reglas heurísticas para diseñar interfaces intuitivas, propuestas por Jakob Nielsen \cite{nielsen1994heuristics}. Los 18 mockups de Pymetory y su implementación final se evaluaron contra estas 10 heurísticas, logrando cumplimiento alto en 8 de ellas.
+    \item \textbf{Principios de Nielsen:} Diez reglas heurísticas para diseñar interfaces intuitivas, propuestas por Jakob Nielsen \cite{nielsen1994heuristics}. La implementación final de Pymetory se evaluó contra estas 10 heurísticas: se registraron 14 hallazgos y se corrigieron 13 (Capítulo \ref{chap:pruebas}).
     
     \item \textbf{Usabilidad:} Qué tan fácil es para un usuario lograr un objetivo usando el sistema, de manera efectiva, eficiente y satisfactoria \cite{nielsen1994heuristics}. Pymetory priorizó la usabilidad para operarios de bodega y administradores de PYMEs, usando lenguaje del dominio logístico colombiano y minimizando la curva de aprendizaje.
     
     \item \textbf{WCAG (Web Content Accessibility Guidelines):} Pautas internacionales para hacer el contenido web accesible para personas con discapacidades \cite{w3c_wcag_overview}.
     
-    \item \textbf{Large Language Model (LLM):} Modelos de lenguaje entrenados con grandes volúmenes de texto, capaces de entender y generar lenguaje natural \cite{zhao2023surveyllm}. Pymetory utilizó GPT-4o-mini de OpenAI como modelo principal para el módulo RAG, y también está preparado para usar modelos locales a través de Ollama.
+    \item \textbf{Large Language Model (LLM):} Modelos de lenguaje entrenados con grandes volúmenes de texto, capaces de entender y generar lenguaje natural \cite{zhao2023surveyllm}. El modelo principal del módulo RAG de Pymetory es gpt-oss:120b, servido con Ollama Cloud; el sistema admite además modelos locales en el propio servidor.
     
     \item \textbf{RAG (Retrieval-Augmented Generation):} Arquitectura de IA que combina la generación de lenguaje natural con la recuperación de información desde bases de datos externas. En Pymetory, el RAG opera en tres pasos: clasificar la intención de la consulta, recuperar contexto desde MySQL y generar una respuesta anclada a datos reales.
     
-    \item \textbf{API (Application Programming Interface):} Conjunto de definiciones y protocolos que permite que diferentes programas se comuniquen entre sí \cite{pressman2014software}. Pymetory usa la API de OpenAI para conectarse al modelo de lenguaje.
+    \item \textbf{API (Application Programming Interface):} Conjunto de definiciones y protocolos que permite que diferentes programas se comuniquen entre sí \cite{pressman2014software}. Pymetory se conecta a los modelos de lenguaje mediante la API de Ollama y APIs compatibles con la de OpenAI.
     
     \item \textbf{Base de Datos (MySQL):} Sistema de gestión de bases de datos relacional de código abierto \cite{mysql_docs}. Pymetory utilizó MySQL 8.0 con índices optimizados para consultas FEFO y transacciones ACID que garantizan la integridad del Kardex.
     
-    \item \textbf{Wireframes:} Esqueletos visuales de una interfaz que muestran la disposición de los elementos sin detalles estéticos \cite{pressman2014software}. En Pymetory evolucionaron a 18 mockups de alta fidelidad en Figma, validados por el director antes de escribir código.
+    \item \textbf{Wireframes:} Esqueletos visuales de una interfaz que muestran la disposición de los elementos sin detalles estéticos \cite{pressman2014software}. En Pymetory evolucionaron a 18 mockups de alta fidelidad en Figma.
     
     \item \textbf{UML (Unified Modeling Language):} Lenguaje estándar para modelar sistemas de software mediante diagramas \cite{omg_uml}. Incluye diagramas de casos de uso, clases, secuencia y otros.
     
     \item \textbf{Historias de Usuario:} Descripciones breves de una funcionalidad desde la perspectiva del usuario final \cite{schwaber2020scrumguide}. Las necesidades que dieron origen a las historias de usuario de Pymetory provienen de la entrevista descrita en el Capítulo \ref{chap:requerimientos}.
     
-    \item \textbf{Sprint:} Período fijo de tiempo (1 a 4 semanas) en el que un equipo SCRUM completa un incremento de producto \cite{schwaber2020scrumguide}. Pymetory se desarrolló en 6 sprints de dos semanas.
+    \item \textbf{Sprint:} Período fijo de tiempo (1 a 4 semanas) en el que un equipo SCRUM completa un incremento de producto \cite{schwaber2020scrumguide}. El anteproyecto planificó 6 sprints de dos semanas; en la práctica el trabajo se registró en un tablero de GitHub Projects (Capítulo \ref{chap:gestion}).
     
     \item \textbf{Product Backlog:} Lista priorizada de todo lo que se desea incluir en el producto, gestionada por el Product Owner \cite{schwaber2020scrumguide}.
     
