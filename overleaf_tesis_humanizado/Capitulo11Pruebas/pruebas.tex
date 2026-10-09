@@ -18,7 +18,7 @@ Las pruebas se organizaron en seis niveles:
     \item \textbf{Unitarias y de integración (PHPUnit).} Verifican reglas de negocio, controladores y permisos ejecutando la aplicación contra una base de datos SQLite en memoria que se reconstruye en cada prueba.
     \item \textbf{De extremo a extremo (Playwright \cite{playwright}).} Manejan un navegador real contra la aplicación y recorren los casos del plan de pruebas, en escritorio y en celular.
     \item \textbf{Verificación en producción.} Después de cada despliegue se comprueba en \url{https://app.pymetory.com} el funcionamiento de los cambios.
-    \item \textbf{Precisión del asistente.} Batería de 50 consultas cuya respuesta correcta se obtiene de la base de datos de producción (Sección \ref{sec:pru_asistente}).
+    \item \textbf{Precisión del asistente.} Batería de 50 consultas sobre los datos de demostración en producción (45 insumos y sus lotes, generados a partir de la entrevista), con la respuesta correcta tomada de la base de datos (Sección \ref{sec:pru_asistente}).
     \item \textbf{Usabilidad y accesibilidad.} Evaluación heurística con los principios de Nielsen y auditoría WCAG 2.1 AA (secciones \ref{sec:pru_nielsen} y \ref{sec:pru_wcag}).
     \item \textbf{Pruebas con usuario.} Tareas reales ejecutadas por la administradora de la empresa del caso de estudio (Sección \ref{sec:pru_usuario}).
 \end{enumerate}
@@ -62,7 +62,7 @@ Reglas de despacho y acceso & 21 & \texttt{ReglasDespachoYSeguridadTest}: lotes 
 
 La suite Playwright tiene \textbf{61 pruebas} y las \textbf{61 aprobaron}. Se ejecutan en Chromium con una ventana de escritorio de 1366$\times$768 y, para las pruebas móviles, con una pantalla de 390$\times$844.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Pruebas de extremo a extremo.}
 \label{tab:pru_e2e}
@@ -87,14 +87,14 @@ Además de la suite, el repositorio conserva diez \textit{scripts} de diagnósti
 \section{Defectos encontrados}
 \label{sec:pru_defectos}
 
-Las pruebas y la verificación en producción encontraron defectos que se corrigieron antes de cerrar este documento. Los más relevantes se describen con su causa y su commit en la Tabla \ref{tab:imp_problemas} del Capítulo \ref{chap:implementacion}. Entre ellos están el registro público que permitía crear administradores, el borrado en cascada del Kardex y el asistente que devolvía lotes de otros materiales. En la última ejecución de la suite de extremo a extremo aparecieron además dos defectos introducidos por el rediseño de la pantalla de ingreso (campos sin atributo \texttt{name}) y por datos del tablero (bodegas sin identificador), también corregidos. La revisión módulo por módulo previa a la toma de las capturas del manual encontró otros tres: la pantalla de alertas mostraba avisos de ejemplo en lugar de los registrados, el formulario de transferencias no listaba lotes y el asistente respondía que ningún lote vencía en la semana porque su contexto incluía lotes ya consumidos. Los tres se corrigieron y el último quedó cubierto por una prueba de regresión.
+Las pruebas y la verificación en producción encontraron defectos que se corrigieron antes de cerrar este documento; los más relevantes, con su causa y su commit, están en la Tabla \ref{tab:imp_problemas}: el registro público que permitía crear administradores, el borrado en cascada del Kardex y el asistente que devolvía lotes de otros materiales. La última ejecución de extremo a extremo y la revisión módulo por módulo previa al manual encontraron otros cinco, también corregidos: campos sin atributo \texttt{name} tras el rediseño del ingreso, bodegas sin identificador en el tablero, avisos de ejemplo en la pantalla de alertas, transferencias sin lotes y lotes ya consumidos en el contexto del asistente (este último, cubierto por una prueba de regresión).
 
 \section{Verificación en producción}
 \label{sec:pru_produccion}
 
-Sobre la versión desplegada se verificó que el operario recibe acceso denegado (HTTP 403) en la gestión de usuarios y de claves de API, que el administrador sí accede, y que la aplicación no muestra información interna ante un error. Con el modelo \texttt{gpt-oss:120b-cloud} se hicieron las consultas de la Tabla \ref{tab:pru_rag} sobre los datos de demostración. Las cantidades se contrastaron con una consulta directa a la base de datos (harina: 5\,810,85 kg panificable más 589,98 kg integral). La pregunta por los vencimientos de la semana se agregó después de corregir el defecto descrito en la sección anterior.
+Sobre la versión desplegada se verificó que el operario recibe acceso denegado (HTTP 403) en la gestión de usuarios y de claves de API, que el administrador sí accede, y que la aplicación no muestra información interna ante un error. Con el modelo \texttt{gpt-oss:120b-cloud} se hicieron las consultas de la Tabla \ref{tab:pru_rag} sobre los datos de demostración. Las cantidades se contrastaron con una consulta directa a la base de datos (harina: 5\,810,85 kg panificable más 589,98 kg integral).
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Consultas al asistente en producción (25 de septiembre de 2026).}
 \label{tab:pru_rag}
@@ -112,15 +112,15 @@ Sobre la versión desplegada se verificó que el operario recibe acceso denegado
 \label{sec:pru_asistente}
 
 \subsection{Método}
-La batería tiene 50 consultas en español repartidas en 11 grupos (existencias, ubicación, vencimiento de un insumo, vencimientos por periodo, lotes críticos, valorización, movimientos, información de un lote, conciliación, resumen e insumos que no existen). Para cada consulta se fijaron de antemano la intención esperada y el criterio de acierto; por ejemplo, en existencias la respuesta debe contener el total de los lotes activos del insumo, y en los vencimientos por periodo debe mencionar exactamente los lotes de la ventana, ni uno más ni uno menos. La respuesta correcta se calcula con una consulta directa a la base de datos en el momento de preguntar, y la respuesta del asistente se obtiene por el mismo flujo que usa la interfaz. La batería se ejecuta con \texttt{php artisan rag:evaluar} y cada ejecución guarda las preguntas, las respuestas completas y la calificación en el repositorio (\texttt{docs/evaluaciones}).
+La batería tiene 50 consultas en español repartidas en 11 grupos (existencias, ubicación, vencimiento de un insumo, vencimientos por periodo, lotes críticos, valorización, movimientos, información de un lote, conciliación, resumen e insumos que no existen). Para cada consulta se fijaron de antemano la intención esperada y el criterio de acierto (por ejemplo, en los vencimientos por periodo, mencionar exactamente los lotes de la ventana). La respuesta correcta se calcula con una consulta directa a la base de datos en el momento de preguntar, y la respuesta del asistente se obtiene por el mismo flujo que usa la interfaz. La batería se ejecuta con \texttt{php artisan rag:evaluar} y cada ejecución guarda las preguntas, las respuestas completas y la calificación en el repositorio (\texttt{docs/evaluaciones}).
 
-Para evitar que las correcciones se ajustaran solo a estas preguntas se usaron dos conjuntos adicionales: uno de validación con 20 consultas sobre otros insumos y con otras redacciones, y una prueba ciega de 10 consultas que se escribió y se guardó en el repositorio antes de corregir el asistente y no se ejecutó hasta la medición final. Todas las mediciones se hicieron en producción con el modelo \texttt{gpt-oss:120b-cloud}.
+Para evitar que las correcciones se ajustaran solo a estas preguntas se usaron dos conjuntos adicionales: uno de validación con 20 consultas sobre otros insumos y con otras redacciones, y una prueba ciega de 10 consultas que se guardó en el repositorio antes de corregir el asistente. Se ejecutó por primera vez el 25 de septiembre, tras la primera corrección, que agregó patrones que aparecen en sus preguntas (por ejemplo, ``plata'' e ``invertida'', commit \texttt{48f092f}); por eso su resultado es optimista. Todas las mediciones se hicieron en producción con el modelo \texttt{gpt-oss:120b-cloud}.
 
 Durante la primera medición se encontraron dos fallos del evaluador, no del asistente: no reconocía fechas y códigos escritos con guiones tipográficos ni algunas frases válidas para decir que un insumo no existe. Se corrigió el evaluador y se volvieron a calificar las mismas respuestas guardadas, sin volver a preguntar; esa es la línea base que se reporta.
 
 \subsection{Resultados}
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Precisión del asistente antes y después de las correcciones.}
 \label{tab:pru_asistente}
@@ -129,23 +129,23 @@ Durante la primera medición se encontraron dos fallos del evaluador, no del asi
 \textbf{Conjunto} & \textbf{Línea base} & \textbf{Final} & \textbf{Observación} \\
 \hline
 Batería (50 consultas) & 34/50 (68\,\%) & 50/50 (100\,\%) & Clasificador de intención: 43/50 $\rightarrow$ 48/50; las dos diferencias no cambian la respuesta. \\ \hline
-Validación (20 consultas) & 11/20 (55\,\%) & 20/20 (100\,\%) & Sus fallos de la línea base se revisaron al corregir. \\ \hline
-Prueba ciega (10 consultas) & --- & 8/10 (80\,\%) & Estimación más honesta de la precisión con preguntas nuevas. \\ \hline
-Operario coloquial (18) & 6/18 (33\,\%) & 18/18 & Conjunto usado para corregir; no mide precisión. \\ \hline
-Operario, prueba ciega (8) & --- & 7/8 (88\,\%) & Lenguaje coloquial nuevo, escrito antes de corregir. \\ \hline
+Validación (20 consultas) & 11/20 (55\,\%) & 20/20 (100\,\%) & Sus fallos también se revisaron al corregir. \\ \hline
+Prueba ciega (10 consultas) & --- & 8/10 (80\,\%) & Preguntas nuevas, ver texto. IC 95\,\% (Wilson): 49--94\,\%. \\ \hline
+Operario coloquial (18) & 6/18 (33\,\%) & 18/18 & Escritas por el autor imitando a un operario; usadas para corregir. \\ \hline
+Operario, prueba ciega (8) & --- & 7/8 (88\,\%) & Escrito antes de corregir. IC 95\,\% (Wilson): 53--98\,\%. \\ \hline
 \end{tabular}
 \end{table}
 
 Por grupo, la línea base fallaba por completo en valorización (0 de 5), información de lote (0 de 4), conciliación (0 de 3) y resumen (0 de 2): el contexto no incluía costos, no reconocía los lotes por su número real ni traía los ajustes del Kardex ni los totales. Tras corregirlo (Capítulo \ref{chap:implementacion}), esos grupos pasaron a 4 de 5, 4 de 4, 3 de 3 y 2 de 2, y en la medición final del 1 de octubre, a 5 de 5 en valorización.
 
-La medición final se hizo el 1 de octubre, después de dos cambios: el tope de salida dejó de aplicarse a los modelos en la nube, porque cortaba las listas largas (con él, la batería bajó a 45 de 50), y el modelo pasó a clasificar primero, con los patrones de reserva (Capítulo \ref{chap:implementacion}). Antes se había ampliado el clasificador con el lenguaje coloquial de un operario: 18 preguntas que sirvieron para corregir, por lo que su 18/18 no mide precisión, y 8 nuevas escritas antes de corregir. El cambio del clasificador se hizo tras ver que la pregunta ``¿qué se está poniendo viejo y hay que sacar ya?'', de ese conjunto ciego, fallaba con todos los modelos; esa frase no se agregó al sistema, pero desde entonces su 7/8 ya no es una medición ciega pura. Los tres fallos que quedan son omisiones del modelo con los datos a la vista ---la cantidad del último movimiento del huevo, el total de lotes y el valor en el panorama, y lotes de la lista de despacho--- y se mantienen como fallos según el criterio fijado de antemano. Las respuestas varían entre ejecuciones (el 27 de septiembre, 48 de 50 y 9 de 10). Con el mismo RAG, otros nueve modelos acertaron entre 100 y 105 de 106, incluidos tres hasta 27 veces más costosos: la precisión depende poco del modelo. La comparación, con tiempos y costos, está en el estudio de costos, anexo digital en \url{https://tesis.pymetory.com/estudio-de-costos.pdf}. El tiempo mediano de respuesta fue de 1,2 segundos.
+La medición final se hizo el 1 de octubre, tras dos cambios: el tope de salida dejó de aplicarse a los modelos en la nube, porque cortaba las listas largas (con él, la batería bajó a 45 de 50), y el modelo pasó a clasificar primero, con los patrones de reserva (Capítulo \ref{chap:implementacion}). El cambio del clasificador se hizo tras ver que una pregunta del conjunto ciego de operario fallaba con todos los modelos; la frase no se agregó al sistema, pero desde entonces su 7/8 ya no es una medición ciega pura. Los tres fallos que quedan son omisiones del modelo con los datos a la vista y se mantienen como fallos según el criterio fijado de antemano. Las respuestas varían entre ejecuciones (el 27 de septiembre, 48 de 50 y 9 de 10). Con el mismo RAG, otros nueve modelos acertaron entre 100 y 105 de 106, incluidos tres hasta 27 veces más costosos: con esta batería no se detectan diferencias entre modelos (estudio de costos, anexo digital en \url{https://tesis.pymetory.com/estudio-de-costos.pdf}). El tiempo mediano de respuesta fue de 1,2 segundos.
 
 \section{Evaluación heurística}
 \label{sec:pru_nielsen}
 
-Se recorrieron las 17 pantallas de la aplicación, en escritorio y en celular, contra las 10 heurísticas de Nielsen \cite{nielsen1994heuristics}, y cada hallazgo se verificó en la interfaz y en el código. La severidad se calificó con la escala de Nielsen, de 0 (no es problema) a 4 (catastrófico). La evaluación la hizo un solo evaluador; Nielsen recomienda de tres a cinco para encontrar la mayoría de los problemas, de modo que no reemplaza la prueba con usuario. El informe completo, con la pantalla y el elemento de cada hallazgo, está en \texttt{docs/evaluaciones/evaluacion-heuristica-nielsen.md}. La vista Reabastecimiento (Sección \ref{sec:imp_proyeccion}) se construyó después de esta evaluación y no forma parte de ella.
+Se recorrieron las 17 pantallas de la aplicación, en escritorio y en celular, contra las 10 heurísticas de Nielsen \cite{nielsen1994heuristics}, y cada hallazgo se verificó en la interfaz y en el código. La severidad se calificó con la escala de Nielsen, de 0 (no es problema) a 4 (catastrófico). La hizo un solo evaluador, con rol de administrador, de modo que no reemplaza la prueba con usuario. El informe completo, con la pantalla y el elemento de cada hallazgo, está en \texttt{docs/evaluaciones/evaluacion-heuristica-nielsen.md}. La vista Reabastecimiento (Sección \ref{sec:imp_proyeccion}) se construyó después de esta evaluación y no forma parte de ella.
 
-\begin{table}[H]
+\begin{table}[!htbp]
 \centering
 \caption{Hallazgos de la evaluación heurística por severidad.}
 \label{tab:pru_nielsen}
@@ -161,13 +161,13 @@ Se recorrieron las 17 pantallas de la aplicación, en escritorio y en celular, c
 \end{tabular}
 \end{table}
 
-El hallazgo catastrófico era la pantalla de alertas, que mostraba avisos de ejemplo escritos en el código en lugar de las alertas que genera el sistema. Entre los mayores estaban la eliminación de órdenes de compra sin confirmación, los mensajes técnicos de error mostrados al usuario, el ingreso manual del escáner que exigía escribir el contenido del código QR, las unidades fijas en kilogramos y el registro de insumos sin unidad ni costo. El único pendiente es cosmético: algunas etiquetas usan mayúsculas sostenidas con espaciado amplio en textos pequeños.
+El hallazgo catastrófico era la pantalla de alertas, que mostraba avisos de ejemplo escritos en el código en lugar de las alertas que genera el sistema. Entre los mayores estaban borrar órdenes de compra sin confirmación, mensajes técnicos de error, un escáner que exigía escribir el contenido del QR y unidades fijas en kilogramos. El único pendiente es cosmético: algunas etiquetas usan mayúsculas sostenidas con espaciado amplio en textos pequeños.
 
 \section{Accesibilidad}
 \label{sec:pru_wcag}
 
 \subsection{Revisión automática}
-Se auditaron las 17 pantallas en escritorio y en celular (34 vistas) con axe-core \cite{axe_core} y las reglas de WCAG 2.1 niveles A y AA \cite{w3c_wcag_overview}. La primera auditoría, con el tema visual por defecto, encontró seis reglas incumplidas: contraste de color insuficiente (41 elementos), enlaces y botones sin nombre accesible (44), campos de formulario y listas desplegables sin etiqueta (20) y zonas con desplazamiento que no se alcanzaban con el teclado (3). Tras corregirlas, la misma auditoría sobre producción no encontró incumplimientos en ninguno de los seis temas visuales (204 vistas en total). También se auditaron once ventanas y formularios que solo aparecen tras una acción del usuario (la ficha de un insumo, el ingreso de un lote, la conciliación, la creación de insumos, bodegas y órdenes de compra, la recepción de órdenes, los filtros de reportes, el consumo FEFO y el menú del celular); tenían campos sin etiqueta y un botón con poco contraste, y tras corregirlos quedaron sin incumplimientos. La vista Reabastecimiento, agregada después, se auditó en el entorno local con los seis temas en escritorio y en celular (12 vistas): en el celular su tabla desplazable no se alcanzaba con el teclado; se corrigió y quedó sin incumplimientos.
+Se auditaron las 17 pantallas en escritorio y en celular (34 vistas) con axe-core \cite{axe_core} y las reglas de WCAG 2.1 niveles A y AA \cite{w3c_wcag_overview}. La primera auditoría, con el tema visual por defecto, encontró seis reglas incumplidas: contraste de color insuficiente (41 elementos), enlaces y botones sin nombre accesible (44), campos de formulario y listas desplegables sin etiqueta (20) y zonas con desplazamiento que no se alcanzaban con el teclado (3). Tras corregirlas, la misma auditoría sobre producción no encontró incumplimientos en ninguno de los seis temas visuales (204 vistas en total). También se auditaron once ventanas y formularios que solo aparecen tras una acción del usuario (ficha de insumo, ingreso de lote, conciliación, creación de insumos, bodegas y órdenes, recepción, filtros, consumo FEFO y menú del celular); sus campos sin etiqueta y un botón con poco contraste se corrigieron. La vista Reabastecimiento, agregada después, se auditó en el entorno local con los seis temas en escritorio y en celular (12 vistas): en el celular su tabla desplazable no se alcanzaba con el teclado; se corrigió y quedó sin incumplimientos.
 
 \subsection{Revisión manual}
 Las herramientas automáticas no detectan todos los problemas de accesibilidad, así que se comprobaron por separado cinco criterios sobre todas las pantallas: la aplicación se puede usar sin mouse (inicio de sesión completo con el teclado, criterio 2.1.1); todos los elementos recorridos con la tecla Tab muestran un indicador de foco visible (2.4.7); a 320 píxeles de ancho ninguna pantalla obliga a desplazarse horizontalmente (1.4.10); cada pantalla tiene título (2.4.2) y el documento declara el idioma español (3.1.1). Los cinco se cumplen. Quedan por verificar con un lector de pantalla real el orden de lectura y los anuncios de los cambios dinámicos.
@@ -184,14 +184,14 @@ La prueba con usuario se realizará con la administradora de la empresa del caso
     \item \textbf{Entrevista corta} sobre qué cambiaría del sistema.
 \end{enumerate}
 
-\textbf{Estado:} programada, pendiente de ejecución. Sus resultados se incorporarán en esta sección.
+\textbf{Estado:} la sesión se realizó el 8 de octubre de 2026; el análisis de la observación y del SUS se incorporará en esta sección.
 
 \section{Cumplimiento del indicador del objetivo específico 4}
 \label{sec:pru_indicador}
 
 El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La Tabla \ref{tab:pru_oe4} muestra su estado a la fecha.
 
-\begin{longtable}{|p{5.4cm}|p{6.3cm}|p{3cm}|}
+\begin{longtable}{|p{4.3cm}|p{8.3cm}|p{2.3cm}|}
 \caption{Estado del indicador del objetivo específico 4.}
 \label{tab:pru_oe4}\\
 \hline
@@ -202,12 +202,12 @@ El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La
 \textbf{Componente del indicador} & \textbf{Evidencia} & \textbf{Estado} \\
 \hline
 \endhead
-111 casos de prueba ejecutados & 239 pruebas automatizadas (178 PHPUnit y 61 de extremo a extremo). & Cumplido \\ \hline
-Tasa de éxito global $\geq$ 95\% & 238 de 238 pruebas ejecutadas aprobadas (una omitida por requerir un servicio externo). & Cumplido \\ \hline
-Casos de uso automatizados con Playwright & 34 casos del plan que recorren los casos de uso. & Cumplido \\ \hline
-7 escenarios de despacho FEFO & 7 pruebas sobre la regla FEFO (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
+111 casos de prueba ejecutados & 239 pruebas automatizadas (178 PHPUnit y 61 E2E) y 106 consultas al asistente (unidades distintas a las del anteproyecto). & Cumplido \\ \hline
+Tasa de éxito global $\geq$ 95\% & 238 de 238 automatizadas aprobadas (una omitida por requerir un servicio externo); en el asistente, la ciega (8/10) queda por debajo. & Cumplido en las automatizadas \\ \hline
+Casos de uso automatizados con Playwright & 34 casos cubren 7 de los 9 casos de uso (de UC7 y UC8, solo casos negativos); conciliación (UC6) y bodegas (UC9) se verifican con PHPUnit. & Cumplido parcialmente \\ \hline
+7 escenarios de despacho FEFO & 10 pruebas del área FEFO, más el despacho por lote y por QR en las reglas de despacho (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
 50 consultas en español para medir la precisión del asistente & Batería de 50: 50 correctas (100\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
 Evaluación heurística de Nielsen & 14 hallazgos, 13 corregidos (Tabla \ref{tab:pru_nielsen}). & Cumplido \\ \hline
-Auditoría de accesibilidad WCAG AA & Sin incumplimientos automáticos en las 34 vistas y en la vista Reabastecimiento; cinco criterios manuales cumplidos (Sección \ref{sec:pru_wcag}). & Cumplido \\ \hline
-Prueba con usuario & Protocolo listo (Sección \ref{sec:pru_usuario}). & Pendiente \\ \hline
+Auditoría de accesibilidad WCAG AA & Sin incumplimientos automáticos en las 34 vistas y en Reabastecimiento; cinco criterios manuales cumplidos (Sección \ref{sec:pru_wcag}). & Cumplido \\ \hline
+Prueba con usuario & Sesión realizada el 8 de octubre; resultados en análisis (Sección \ref{sec:pru_usuario}). & En análisis \\ \hline
 \end{longtable}
