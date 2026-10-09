@@ -41,12 +41,12 @@ Pymetory no calcula el EOQ, pero conserva en el Kardex los consumos y costos que
 \subsubsection{Métodos de Valoración de Inventario: PEPS y UEPS}
 \label{sssec:peps_ueps}
 
-Valorar un inventario es ponerle precio a lo que hay guardado. Los métodos más comunes son PEPS (Primeras en Entrar, Primeras en Salir) y UEPS (Últimas en Entrar, Primeras en Salir). PEPS asume que lo que se compró primero se consume primero, lo cual refleja el flujo físico real en la mayoría de los negocios. Al registrar cada movimiento cronológicamente en el Kardex, Pymetory se alinea con una lógica PEPS y le da a la empresa una base ordenada para sus cálculos de costos.
+Valorar un inventario es ponerle precio a lo que hay guardado. Los métodos más comunes son PEPS (Primeras en Entrar, Primeras en Salir) y UEPS (Últimas en Entrar, Primeras en Salir). PEPS asume que lo que se compró primero se consume primero, lo cual refleja el flujo físico real en la mayoría de los negocios. Pymetory valora cada lote por su costo de compra; el método contable de la empresa se mantiene en su sistema contable.
 
 \subsubsection{Estrategias de Rotación de Inventario: FEFO, FIFO y LIFO}
 \label{sssec:fefo_fifo_lifo}
 
-Rotar el inventario no es mover cajas. Es decidir en qué orden se despachan los productos para minimizar pérdidas. Hay tres estrategias principales. La Tabla \ref{tab:comparativa_rotacion} las compara.
+Rotar el inventario es decidir en qué orden se despachan los productos. Hay tres estrategias principales. La Tabla \ref{tab:comparativa_rotacion} las compara.
 
 \begin{table}[!htbp]
 \centering
@@ -64,7 +64,7 @@ Rotar el inventario no es mover cajas. Es decidir en qué orden se despachan los
 \hline
 \textbf{Ventaja principal} & Minimiza las pérdidas por vencimiento y deterioro & Refleja el flujo físico natural en la mayoría de las bodegas & Reduce costos de manipulación cuando los productos se apilan \\
 \hline
-\textbf{Desventaja principal} & Requiere registro y seguimiento de fechas de vencimiento por lote & No considera la caducidad; puede resultar en pérdidas por vencimiento si hay productos perecederos & Puede resultar en obsolescencia de los productos más antiguos; no aceptado bajo NIIF en muchos países \\
+\textbf{Desventaja principal} & Requiere registro y seguimiento de fechas de vencimiento por lote & No considera la caducidad; puede resultar en pérdidas por vencimiento si hay productos perecederos & Puede resultar en obsolescencia de los productos más antiguos \\
 \hline
 \textbf{Complejidad de implementación} & Alta: requiere identificar cada lote con su fecha de vencimiento y ordenar por ese campo & Media: requiere registrar la fecha de ingreso de cada lote y ordenar cronológicamente & Baja: el último que entra es el primero que sale, generalmente por disposición física \\
 \hline
@@ -75,15 +75,6 @@ Rotar el inventario no es mover cajas. Es decidir en qué orden se despachan los
 
 \textbf{¿Por qué FEFO para este proyecto?} El director del trabajo de grado estableció FEFO como una regla de negocio no negociable del sistema. La entrevista con la empresa del caso de estudio (Capítulo \ref{chap:requerimientos}) mostró que allí la práctica existe de manera informal ---la administradora instruye al personal para que se consuma primero lo que ya estaba en bodega--- y que la trazabilidad de lotes y fechas de vencimiento es una exigencia sanitaria ante entes como el INVIMA. Formalizar FEFO en el software elimina la dependencia de esa instrucción verbal.
 
-FEFO es particularmente relevante para PYMEs del sector de alimentos porque:
-
-\begin{itemize}
-    \item La materia prima perecedera (harinas, levaduras, lácteos, huevos) constituye la mayoría del inventario.
-    \item Una pérdida por vencimiento no solo implica el costo del material descartado, sino también el lucro cesante de los productos que pudieron haberse fabricado con ese material.
-    \item A diferencia de FIFO, que respeta el orden de llegada, FEFO respeta el orden de caducidad. En una panificadora, un lote de harina comprado ayer que vence en 15 días debe salir antes que un lote comprado hace un mes que vence en 45 días.
-    \item Implementar FEFO en un sistema digital elimina la dependencia de la memoria del operario para decidir qué despachar.
-\end{itemize}
-
 \subsection{Arquitectura RAG (Retrieval-Augmented Generation)}
 \label{sec:rag_teoria}
 
@@ -91,9 +82,9 @@ El módulo de consulta inteligente de Pymetory se construye sobre un paradigma l
 
 \subsubsection{El Problema de las Alucinaciones en los LLM}
 
-Los Large Language Models como GPT-4, Claude o Llama se entrenan con cantidades masivas de texto y desarrollan la capacidad de generar respuestas coherentes. Pero tienen una limitación crítica: su conocimiento está congelado en el momento del entrenamiento. No saben qué entró o salió de tu bodega hoy. Cuando se les pregunta sobre datos que desconocen, estos modelos tienden a ``alucinar'': generan respuestas que suenan convincentes pero que son factualmente incorrectas \cite{zhao2023surveyllm}.
+Los Large Language Models como GPT-4, Claude o Llama se entrenan con cantidades masivas de texto y desarrollan la capacidad de generar respuestas coherentes. Pero tienen una limitación crítica: su conocimiento está congelado en el momento del entrenamiento. No saben qué entró o salió de una bodega hoy. Cuando se les pregunta sobre datos que desconocen, estos modelos tienden a ``alucinar'': generan respuestas que suenan convincentes pero que son factualmente incorrectas \cite{zhao2023surveyllm}.
 
-En un sistema de inventario, una alucinación puede ser costosa. Si un usuario pregunta ``¿cuánta harina me queda?'' y el modelo responde ``50 kg'' cuando en realidad hay 5 kg, la empresa podría dejar de comprar y sufrir un desabastecimiento. Para eliminar este riesgo, necesitamos un mecanismo que ancle las respuestas del modelo a datos reales. Esa es exactamente la función del patrón RAG.
+En un sistema de inventario, una alucinación puede ser costosa. Si un usuario pregunta ``¿cuánta harina me queda?'' y el modelo responde ``50 kg'' cuando en realidad hay 5 kg, la empresa podría dejar de comprar y sufrir un desabastecimiento. Para reducir este riesgo se necesita un mecanismo que ancle las respuestas del modelo a datos reales. Esa es exactamente la función del patrón RAG.
 
 \subsubsection{Componentes de la Arquitectura RAG}
 
@@ -104,7 +95,7 @@ La arquitectura RAG, introducida por Lewis et al. (2020) \cite{rag_lewis2020}, o
     
     \item \textbf{Aumento (Augmentation):} Los datos recuperados se organizan en un formato textual que el modelo puede procesar y se inyectan en el prompt ---la instrucción que se le da al modelo--- junto con indicaciones precisas de cómo responder. La clave está en ser selectivo: no se envía toda la base de datos, sino solo lo relevante.
     
-    \item \textbf{Generación (Generation):} Con el contexto real inyectado, el modelo genera una respuesta. Como ahora ``ve'' los datos reales, su respuesta está anclada a hechos. Si el modelo no encuentra los datos que necesita, la arquitectura RAG lo lleva a responder honestamente que no tiene esa información, en lugar de inventarla.
+    \item \textbf{Generación (Generation):} Con el contexto real inyectado, el modelo genera una respuesta. Como ahora ``ve'' los datos reales, su respuesta está anclada a hechos. Si el modelo no encuentra los datos que necesita, se le instruye para responder que no tiene esa información, en lugar de inventarla.
 \end{enumerate}
 
 \subsubsection{Ventajas del Enfoque RAG sobre un Chat Convencional}
@@ -123,11 +114,11 @@ La Tabla \ref{tab:rag_vs_chat} contrasta implementar un chat genérico con un LL
 \hline
 \textbf{Actualización} & No se actualiza; el modelo no sabe qué entró o salió hoy & Cada consulta dispara una lectura de la base de datos \\
 \hline
-\textbf{Riesgo de alucinación} & Alto cuando se pregunta por datos específicos no incluidos en el entrenamiento & Bajo; el contexto inyectado fuerza al modelo a responder con los datos proporcionados \\
+\textbf{Riesgo de alucinación} & Alto cuando se pregunta por datos específicos no incluidos en el entrenamiento & Bajo, aunque no nulo; el contexto inyectado orienta al modelo a responder con los datos proporcionados \\
 \hline
 \textbf{Personalización} & Genérica; responde sobre ``inventarios en general'' & Específica; responde sobre el inventario de la PYME concreta \\
 \hline
-\textbf{Auditabilidad} & Baja; no hay trazabilidad entre la respuesta y una fuente de datos verificable & Alta; cada respuesta está vinculada a un contexto recuperado de la base de datos \\
+\textbf{Auditabilidad} & Baja; no hay trazabilidad entre la respuesta y una fuente de datos verificable & Media; se registran la pregunta, la respuesta y el modelo que la generó \\
 \hline
 \textbf{Dependencia externa} & Total; sin LLM no hay respuesta & Parcial; con mecanismo de fallback, el sistema puede responder con los datos crudos de la base de datos \\
 \hline

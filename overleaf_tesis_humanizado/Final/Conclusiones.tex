@@ -8,7 +8,7 @@
 \subsection{Cumplimiento de los objetivos}
 
 \begin{itemize}
-    \item \textbf{Objetivo general.} Se construyó y desplegó en \url{https://app.pymetory.com} un sistema web de gestión de inventario de materia prima para PYMEs, con trazabilidad por lote, despacho FEFO, Kardex inmutable, control de acceso por roles y un asistente que responde en español con los datos reales de la base de datos.
+    \item \textbf{Objetivo general.} Se construyó y desplegó en \url{https://app.pymetory.com} un sistema web de gestión de inventario de materia prima para PYMEs, con trazabilidad por lote, despacho FEFO, Kardex inmutable, control de acceso por roles y un asistente que responde en español con los datos reales de la base de datos. Su efecto en la operación de la empresa (conciliación, diferencias de cierre, faltantes) no se midió.
 
     \item \textbf{Objetivo específico 1 --- Entender las necesidades de una PYME (cumplido).} La entrevista con la administradora de una panificadora del Valle del Cauca mostró que el problema de la empresa no son las pérdidas por vencimiento, sino un inventario contable que no coincide con la bodega, una conciliación manual y un reabastecimiento sin datos. De ella se derivaron 18 requerimientos funcionales y 4 no funcionales (Capítulo \ref{chap:requerimientos}); de los funcionales, 15 quedaron implementados, 2 de forma parcial y 1 se propone como trabajo futuro. Se documentaron los 9 casos de uso que pedía el indicador (Anexos).
 
@@ -22,9 +22,9 @@
 \subsection{Reglas de negocio de la dirección}
 
 \begin{itemize}
-    \item \textbf{FEFO.} El consumo descuenta siempre primero el lote activo con el vencimiento más próximo, dentro de una transacción. El umbral de criticidad es configurable y se aplica de forma coherente en tablero, inventario, alertas y reportes.
+    \item \textbf{FEFO.} El consumo descuenta siempre primero el lote activo con el vencimiento más próximo, dentro de una transacción. El umbral de criticidad es configurable y se aplica igual en todas las vistas.
     \item \textbf{Kardex inmutable.} Cada movimiento guarda lote, usuario, tipo, cantidad, motivo y fecha. La aplicación rechaza modificar o eliminar un movimiento, y la base de datos impide borrar un lote o un usuario con historial.
-    \item \textbf{Control de acceso por roles.} El \textit{middleware} \texttt{CheckRole} protege las rutas administrativas; no hay registro público (las cuentas las crea un administrador) y las pruebas verifican que un operario reciba acceso denegado.
+    \item \textbf{Control de acceso por roles.} El \textit{middleware} \texttt{CheckRole} protege las rutas administrativas; no hay registro público y las pruebas verifican que un operario reciba acceso denegado.
     \item \textbf{RAG dinámico.} El asistente clasifica cada pregunta, consulta la base de datos y responde a partir de ese contexto; cuando el material no existe, lo dice en lugar de mostrar datos de otros materiales.
 \end{itemize}
 
@@ -32,9 +32,9 @@
 
 \begin{itemize}
     \item \textbf{El requisito real puede diferir del supuesto.} El planteamiento inicial suponía pérdidas por vencimiento; la entrevista mostró que en la empresa del caso el problema es la calidad de la información. Levantar requerimientos con un usuario real cambió qué se debía priorizar.
-    \item \textbf{Lo que el documento afirma debe verificarse en el código.} La revisión final encontró diferencias entre la documentación y el sistema (el Kardex no estaba protegido contra el borrado en cascada, el registro permitía crear administradores, el tablero tenía cifras de maqueta). Corregirlas antes de la entrega fue parte del trabajo de ingeniería.
-    \item \textbf{En un servidor sin GPU, los modelos de lenguaje deben elegirse por recursos.} Con cuatro núcleos ARM, el modelo local de respaldo tardó de 33 a 56 segundos y los más grandes, minutos, frente a cerca de un segundo del modelo gratuito en la nube (Capítulo \ref{chap:implementacion}). El diseño RAG, que entrega al modelo solo datos filtrados, es lo que permite responder sin GPU y sin costo.
-    \item \textbf{La infraestructura gratuita es suficiente para el alcance del proyecto.} El sistema opera en la capa \textit{Always Free} de Oracle Cloud, publicado con un túnel de Cloudflare y con modelos gratuitos de Ollama Cloud.
+    \item \textbf{Lo que el documento afirma debe verificarse en el código.} La revisión final encontró diferencias entre la documentación y el sistema (el Kardex no estaba protegido contra el borrado en cascada y el registro permitía crear administradores); corregirlas fue parte del trabajo de ingeniería.
+    \item \textbf{En un servidor sin GPU, los modelos de lenguaje deben elegirse por recursos.} Con cuatro núcleos ARM, el modelo local de respaldo tardó de 33 a 56 segundos y los más grandes, minutos, frente a cerca de un segundo del modelo gratuito en la nube (Capítulo \ref{chap:implementacion}). El diseño RAG entrega al modelo solo datos filtrados; la velocidad la da el modelo en la nube, y el servidor propio no necesita GPU.
+    \item \textbf{La infraestructura gratuita bastó para la demostración y las mediciones.} El sistema opera en la capa \textit{Always Free} de Oracle Cloud, con un túnel de Cloudflare y modelos gratuitos de Ollama Cloud.
 \end{itemize}
 
 \subsection{Lecciones aprendidas}
@@ -42,5 +42,5 @@
 \begin{itemize}
     \item Integrar un modelo de lenguaje en una aplicación de negocio es sobre todo un problema de ingeniería de software: clasificar la intención, construir el contexto, limitar lo que el modelo puede hacer (aquí, solo leer) y prever qué pasa cuando falla.
     \item Con un solo desarrollador, las pruebas automatizadas en la integración continua son la principal defensa al desplegar directamente a producción.
-    \item Anonimizar a las personas y a la empresa, y declarar las cifras aproximadas como tales, protege a los participantes sin quitarle valor a la evidencia.
+    \item Anonimizar a las personas y a la empresa y declarar las cifras aproximadas protege a los participantes sin restarle valor a la evidencia.
 \end{itemize}

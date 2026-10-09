@@ -92,7 +92,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{Playwright:} Framework de automatización de pruebas desarrollado por Microsoft que simula interacciones reales de usuarios en navegadores \cite{playwright}. Pymetory utilizó Playwright 1.59 para sus pruebas de extremo a extremo (Capítulo \ref{chap:pruebas}).
     
-    \item \textbf{Middleware:} Capa de software que se ejecuta antes de que una solicitud llegue al controlador. Pymetory implementó dos middlewares: \texttt{Authenticate} (verifica sesión) y \texttt{CheckRole} (verifica permisos según el rol).
+    \item \textbf{Middleware:} Capa de software que se ejecuta antes de que una solicitud llegue al controlador. Pymetory usa el de autenticación de Laravel y uno propio, \texttt{CheckRole}, que verifica permisos según el rol.
     
     \item \textbf{RBAC (Role-Based Access Control):} Modelo de control de acceso donde los permisos se asignan a roles y los usuarios heredan los permisos de su rol. Pymetory define dos roles: Admin (acceso completo) y Operario (acceso restringido a funciones diarias).
     
@@ -101,6 +101,4 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
 \subsection{Contexto del caso de estudio}
 \label{sec:contexto_panificadora}
 
-Para anclar el desarrollo a necesidades reales, se tomó como caso de estudio una panificadora de tamaño pequeño a mediano del municipio de La Victoria (Valle del Cauca), que elabora productos de panadería a escala industrial. Su inventario de materia prima incluye harinas, mejoradores, levaduras, grasas, semillas, sal, azúcar y material de empaque, y se lleva en kilogramos en un sistema contable que se alimenta desde las facturas de compra y desde el reporte diario de producción.
-
-Los requisitos se levantaron mediante una entrevista semiestructurada con la administradora de la empresa. Las preguntas, las respuestas, el problema identificado y los requerimientos derivados se presentan en el Capítulo \ref{chap:requerimientos}.
+El caso de estudio es una panificadora de tamaño pequeño a mediano del Valle del Cauca, cuyo inventario de materia prima se lleva en kilogramos en un sistema contable alimentado desde las facturas y el reporte diario de producción. Los requisitos se levantaron con una entrevista semiestructurada a la administradora; las preguntas, las respuestas, el problema y los requerimientos derivados se presentan en el Capítulo \ref{chap:requerimientos}.
