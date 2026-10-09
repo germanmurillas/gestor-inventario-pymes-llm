@@ -167,7 +167,7 @@ El asistente sigue la arquitectura de generación aumentada por recuperación (R
 \texttt{location} & dónde, ubicación, bodega, almacén & Materiales por bodega \\ \hline
 \texttt{valuation} & valor, precio, costo & Cantidad por costo unitario \\ \hline
 \texttt{movements} & entró, salió, movimiento, historial, kardex & Movimientos con usuario y motivo \\ \hline
-\texttt{batch\_info} & lote LT-\ldots & Detalle de un lote \\ \hline
+\texttt{batch\_info} & lote HAR-01-\ldots & Detalle de un lote \\ \hline
 \texttt{summary} & resumen, todo, general, panorama & Resumen del inventario \\ \hline
 \texttt{conciliation} & conciliar, ajuste, diferencia, descuadre & Datos para conciliación \\ \hline
 \texttt{quarantine} & cuarentena, retenido, no conforme & Lotes en cuarentena \\ \hline
@@ -190,7 +190,7 @@ La interfaz se prototipó en Figma. El commit del 14 de abril de 2026 (\texttt{3
 Los principios que guiaron el diseño de la interfaz fueron:
 
 \begin{itemize}
-    \item \textbf{Navegación por tareas.} La barra lateral agrupa los módulos en tres secciones ---Principal (Tablero, Inventario, Buscar), Análisis (Asistente, Reportes, Kardex, Etiquetas, Escáner QR) y Gestión (Historial QR, Transferencias, Órdenes de compra, Imprimir etiquetas, Alertas)--- y el tablero ofrece accesos rápidos a las acciones más frecuentes (nuevo insumo, escanear, reporte, consumo rápido).
+    \item \textbf{Navegación por tareas.} La barra lateral agrupa los módulos en tres secciones ---Principal (Tablero, Inventario, Buscar), Análisis (Asistente, Reportes, Reabastecimiento, Kardex, Etiquetas, Escáner) y Gestión (Historial QR, Transferencias, Órdenes de compra, Conteo físico, Imprimir etiquetas, Alertas)--- y el tablero ofrece accesos rápidos a las acciones más frecuentes (nuevo insumo, escanear, reporte, consumo rápido).
     \item \textbf{Lo urgente primero.} El tablero muestra en la parte superior los indicadores que requieren acción (lotes críticos por vencimiento, existencias, valorización) y, debajo, la actividad reciente del Kardex y la ocupación de las bodegas.
     \item \textbf{Uso en bodega desde el celular.} El diseño es adaptable a pantallas pequeñas: el menú lateral se reemplaza por una barra inferior con las cuatro acciones más usadas (tablero, inventario, escanear y asistente) y un panel con el resto de módulos, y el escáner usa la cámara del dispositivo, para que el personal pueda registrar movimientos sin ir a un computador.
     \item \textbf{Temas visuales.} Los colores se definen como variables de CSS, lo que permitió ofrecer seis temas seleccionables (\textit{midnight-luxe}, \textit{carbon-amber}, \textit{nordic-steel}, \textit{obsidian-teal}, \textit{royal-plum} y \textit{paper-light}), incluido uno claro. Cada tema define un pequeño conjunto de colores base (fondo, panel, borde, texto y acento) y a partir de ellos redefine la paleta completa que usan los componentes; así un tema no puede alterar a otro. Las imágenes, como las de las bodegas, provienen de la base de datos (archivo subido o enlace), no de rutas fijas en el código.
