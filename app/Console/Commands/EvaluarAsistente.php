@@ -29,7 +29,7 @@ use Illuminate\Support\Str;
 class EvaluarAsistente extends Command
 {
     protected $signature = 'rag:evaluar
-        {--conjunto=bateria : bateria | validacion | ciega | operario | operario-ciega}
+        {--conjunto=bateria : bateria | validacion | ciega | operario | operario-ciega | pronostico}
         {--etiqueta=medicion : Nombre de la ejecución}
         {--solo= : Ejecutar solo las N primeras preguntas}
         {--fuente= : Proveedor solo para esta ejecución (local, opencode-go, opencode, openai), sin cambiar los ajustes}
@@ -169,6 +169,7 @@ class EvaluarAsistente extends Command
             'ciega' => $this->ciega(),
             'operario' => $this->operario(),
             'operario-ciega' => $this->operarioCiega(),
+            'pronostico' => $this->pronostico(),
             default => $this->bateria(),
         };
     }
@@ -379,6 +380,30 @@ class EvaluarAsistente extends Command
                 }
                 return [true, ''];
             }], $preguntas);
+    }
+
+    /**
+     * Pronóstico y consumo (revisión contra-tesis, frente 49): ninguna de las 106 preguntas los cubría.
+     * La respuesta correcta sale del mismo servicio que usa la vista Reabastecimiento.
+     */
+    private function pronostico(): array
+    {
+        $fila = fn (string $code) => app(\App\Services\ProyeccionInventario::class)->proyeccion([$this->mat($code)->id])->first();
+        $cobertura = fn (array $items) => array_map(fn ($x) => ['grupo' => 'Pronóstico', 'intencion' => 'forecast', 'pregunta' => $x[0],
+            'verdad' => fn () => $fila($x[1])['dias_cobertura'] !== null ? round($fila($x[1])['dias_cobertura'], 1) : null,
+            'criterio' => fn ($t, $e) => $e !== null && ($this->contieneNumero($t, $e, 0.05) || $this->contieneNumero($t, floor($e), 0.0)) ? [true, ''] : [false, "no aparecen los {$e} días de cobertura"]], $items);
+        $agotamiento = fn (array $items) => array_map(fn ($x) => ['grupo' => 'Pronóstico', 'intencion' => 'forecast', 'pregunta' => $x[0],
+            'verdad' => fn () => $fila($x[1])['fecha_agotamiento'],
+            'criterio' => fn ($t, $e) => $e && $this->contieneFecha($t, $e) ? [true, ''] : [false, "no aparece la fecha {$e}"]], $items);
+        $consumo = fn (array $items) => array_map(fn ($x) => ['grupo' => 'Consumo', 'intencion' => 'consumption', 'pregunta' => $x[0],
+            'verdad' => fn () => round(app(\App\Services\ProyeccionInventario::class)->variacion($this->mat($x[1])->id, 7)['consumo_actual'], 2),
+            'criterio' => fn ($t, $e) => $this->contieneNumero($t, $e, 0.01) ? [true, ''] : [false, "no aparece el consumo {$e}"]], $items);
+
+        return array_merge(
+            $cobertura([['¿Para cuántos días alcanza la harina de trigo panificable?', 'MP-HAR-01'], ['¿Cuántos días nos dura el azúcar blanca al ritmo actual?', 'MP-AZU-01']]),
+            $agotamiento([['¿Cuándo se acaba la levadura fresca prensada?', 'MP-LEV-01'], ['¿Cuándo se nos agota la sal refinada?', 'MP-SAL-01'], ['¿Para qué fecha se termina el ajonjolí descortezado?', 'MP-AJO-01']]),
+            $consumo([['¿Cuánta harina de trigo panificable se consumió en los últimos 7 días?', 'MP-HAR-01'], ['¿Cuánto azúcar blanca gastamos esta semana?', 'MP-AZU-01'], ['¿Cuánta mantequilla sin sal se usó esta semana?', 'MP-MAN-01']]),
+        );
     }
 
     /** Cantidad × costo de los lotes activos (tolerancia 1 %). */
