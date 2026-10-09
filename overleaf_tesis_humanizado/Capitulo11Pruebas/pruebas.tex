@@ -30,7 +30,7 @@ Las pruebas PHPUnit se ejecutan automáticamente en cada cambio que llega a la r
 
 La suite PHPUnit tiene \textbf{178 pruebas en 46 clases}: 177 aprobadas y 1 omitida, con \textbf{638 aserciones}. La prueba omitida llama a un proveedor externo de modelos de lenguaje y solo se ejecuta cuando se configura una clave para ello.
 
-En Laravel, la mayoría de estas pruebas son de integración: envían una petición HTTP y recorren rutas, \textit{middleware}, controladores y base de datos. Algunas prueban un componente aislado, como el modelo \texttt{Movimiento} (inmutabilidad), el umbral del modelo \texttt{Lote} o el clasificador del asistente, y cumplen el papel de pruebas unitarias. La Tabla \ref{tab:pru_phpunit} las agrupa por área.
+En Laravel, la mayoría de estas pruebas son de integración: envían una petición HTTP y recorren rutas, \textit{middleware}, controladores y base de datos. Algunas prueban un componente aislado, como el modelo \texttt{Movimiento} (inmutabilidad), el umbral del modelo \texttt{Lote} o el clasificador del asistente, y cumplen el papel de pruebas unitarias. La Tabla \ref{tab:pru_phpunit} las agrupa por área. La cobertura de líneas, medida con Xdebug el 9 de octubre tras retirar el código muerto, fue del 68\,\%; lo menos cubierto es el envío de alertas por Telegram y correo (34\,\%).
 
 \begin{longtable}{|p{3.4cm}|c|p{10cm}|}
 \caption{Pruebas PHPUnit por área.}
