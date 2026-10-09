@@ -71,11 +71,22 @@ jobs:
             # Cualquier error detiene el despliegue y marca el job como fallido
             # (antes un git pull fallido terminaba igual en "Deploy completado").
             set -e
+            # Respaldo comprimido de la base antes de migrar; si sale vacío (ya pasó: 154 bytes) no se migra.
+            respaldar() {
+              BASE=$(sudo grep -E '^DB_DATABASE=' .env | cut -d= -f2)
+              sudo mkdir -p /var/backups/pymetory
+              F=/var/backups/pymetory/$BASE-antes-de-migrar-$(date +%Y%m%d-%H%M%S).sql.gz
+              sudo bash -c "set -o pipefail; mysqldump --single-transaction --routines --triggers '$BASE' | gzip > '$F'"
+              if [ "$(sudo stat -c%s "$F")" -lt 5000 ]; then echo "Respaldo de $BASE vacío: no se migra"; exit 1; fi
+              sudo find /var/backups/pymetory -name "$BASE-antes-de-migrar-*" -mtime +14 -delete
+              echo "Respaldo $F ($(sudo stat -c%s "$F") bytes)"
+            }
             cd /var/www/portafolio/SolucionesWeb/pymetoryTesis
             # Repositorio público: el servidor actualiza sin credenciales.
             sudo git remote set-url origin https://github.com/germanmurillas/gestor-inventario-pymes-llm.git
             sudo git pull --ff-only origin main
             sudo composer install --no-dev --optimize-autoloader --no-interaction
+            respaldar
             sudo php artisan migrate --force
             sudo chown -R www-data:www-data .
             # Cachés de configuración y rutas con el código nuevo; PHP-FPM toma los archivos cambiados.
@@ -87,6 +98,7 @@ jobs:
               cd /var/www/bodega-pymetory
               sudo git pull --ff-only origin main
               sudo composer install --no-dev --optimize-autoloader --no-interaction
+              respaldar
               sudo php artisan migrate --force
               sudo chown -R www-data:www-data .
               sudo -u www-data php artisan config:cache
