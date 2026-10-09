@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * Si MySQL no deja crear los triggers (binlog activo sin log_bin_trust_function_creators y sin SUPER),
  * la migración lo registra y continúa para no detener el despliegue; un administrador del servidor
- * puede activarlos después con `php artisan kardex:proteger`.
+ * puede activarlos después con `php artisan kardex:proteger --sql | sudo mysql <base>`.
  */
 return new class extends Migration
 {
@@ -32,8 +32,8 @@ return new class extends Migration
             if (DB::getDriverName() !== 'mysql') {
                 throw $e;
             }
-            Log::warning('Kardex: no se pudieron crear los triggers (' . $e->getMessage() . '). Ejecutar php artisan kardex:proteger con un usuario con permiso.');
-            echo "  AVISO: triggers del Kardex no creados; ver storage/logs y ejecutar kardex:proteger.\n";
+            Log::warning('Kardex: no se pudieron crear los triggers (' . $e->getMessage() . '). Aplicarlos con: php artisan kardex:proteger --sql | sudo mysql ' . DB::getDatabaseName());
+            echo "  AVISO: triggers del Kardex no creados (falta SUPER o log_bin_trust_function_creators); aplicar: php artisan kardex:proteger --sql | sudo mysql " . DB::getDatabaseName() . "\n";
         }
     }
 

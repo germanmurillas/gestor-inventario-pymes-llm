@@ -255,7 +255,8 @@ class PanaderiaDemoSeeder extends Seeder
         try {
             \App\Support\KardexInmutable::crear();
         } catch (\Illuminate\Database\QueryException $e) {
-            $this->command?->warn('Triggers del Kardex no repuestos: ejecutar php artisan kardex:proteger con un usuario con permiso.');
+            // En MySQL con binlog, el usuario de la app puede quitar los triggers pero no crearlos (ERROR 1419).
+            $this->command?->warn('Triggers del Kardex NO repuestos: aplicar php artisan kardex:proteger --sql | sudo mysql ' . DB::getDatabaseName());
         }
     }
 }

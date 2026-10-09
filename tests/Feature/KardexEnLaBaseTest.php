@@ -56,4 +56,11 @@ class KardexEnLaBaseTest extends TestCase
         $this->assertEquals(0.996, (float) DB::table('lotes')->where('id', $lote->id)->value('quantity'));
         $this->assertEquals(0.004, (float) DB::table('movimientos')->where('lote_id', $lote->id)->value('quantity'));
     }
+
+    public function test_el_comando_imprime_el_sql_de_mysql_para_el_administrador(): void
+    {
+        $this->artisan('kardex:proteger --sql')
+            ->expectsOutputToContain("CREATE TRIGGER kardex_sin_modificar BEFORE UPDATE ON movimientos FOR EACH ROW SIGNAL SQLSTATE '45000'")
+            ->assertSuccessful();
+    }
 }
