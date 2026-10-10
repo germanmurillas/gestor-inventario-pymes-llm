@@ -67,6 +67,9 @@ class ChatLLMController extends Controller {
     /** Tokens consumidos en la consulta actual (suma de todas las llamadas al modelo). */
     private array $tokens = ['entrada' => null, 'salida' => null];
 
+    /** Lotes vencidos del contexto de esta consulta: la respuesta debe nombrarlos para que se den de baja. */
+    private array $vencidosParaBaja = [];
+
     /** Suma el consumo que reporta el proveedor: usage.* (API compatible con OpenAI) o *_eval_count (Ollama nativo). */
     private function sumarTokens($respuesta): void
     {
@@ -352,6 +355,7 @@ class ChatLLMController extends Controller {
                 $lotes = $lotes->take(40)->get();
                 // Los vencidos no se despachan (Lote::motivoNoDespachable): solo se dan de baja como desperdicio.
                 [$vencidos, $porVencer] = $lotes->partition(fn ($l) => $l->expiration_date && $l->expiration_date->lt(now()->startOfDay()));
+                $this->vencidosParaBaja = $vencidos->all();
                 $context = ($ventana !== null
                     ? "ALERTAS FEFO - Lotes con existencias que vencen en los próximos {$ventana} días. Son {$lotes->count()} lotes:\n"
                     : "ALERTAS FEFO - Lotes con existencias dentro del umbral de criticidad de su insumo. Son {$lotes->count()} lotes:\n")
@@ -367,6 +371,7 @@ class ChatLLMController extends Controller {
                 $totalLotes = (clone $lotes)->count();
                 $lotes = $lotes->take($ventana !== null || !empty($materialIds) ? 40 : 12)->get();
                 $hayVencidos = $lotes->contains(fn ($l) => $l->expiration_date->lt(now()->startOfDay()));
+                $this->vencidosParaBaja = $lotes->filter(fn ($l) => $l->expiration_date->lt(now()->startOfDay()))->all();
                 $context = $this->avisoCorte($lotes->count(), $totalLotes)
                     . ($hayVencidos ? "NOTA: los lotes VENCIDOS no se despachan; solo se dan de baja como desperdicio. Lístalos SIEMPRE aparte, indicando que deben darse de baja, y no recomiendes usarlos.\n" : '')
                     . ($ventana !== null
@@ -796,6 +801,7 @@ class ChatLLMController extends Controller {
                           . 'Prueba con otro modelo desde el selector de arriba.';
                 }
 
+                $text = $this->conVencidosNombrados($text);
                 $this->recordChat($query, $text, $llmSource, $sessionId, $sessionTitle, $llmModelo);
                 return response()->json([
                     'response'    => $text,
@@ -818,6 +824,7 @@ class ChatLLMController extends Controller {
         // El modelo principal no respondió: se intenta el modelo local antes de pasar a modo texto.
         if (isset($payload['messages']) && ($alt = $this->respaldo($payload['messages'], $llmSource, $llmModelo, $inicio ?? microtime(true))) !== null) {
             [$texto, $modeloAlt, $fuenteAlt] = $alt;
+            $texto = $this->conVencidosNombrados($texto);
             $this->recordChat($query, $texto, $fuenteAlt, $sessionId, $sessionTitle, $modeloAlt);
             return response()->json([
                 'response' => $texto, 'tokens' => $this->tokens, 'intent' => $intent, 'session_id' => $sessionId, 'session_title' => $sessionTitle,
@@ -841,6 +848,20 @@ class ChatLLMController extends Controller {
      * (settings llm_respaldo_fuente / llm_respaldo_modelo, unos segundos) y después el modelo local (CPU, 30 a 60 s).
      * Devuelve [texto, modelo, fuente] o null.
      */
+    /**
+     * Si el contexto traía lotes vencidos y la respuesta del modelo no los nombra, el sistema los agrega al final con
+     * los datos de la base: lo que hay que dar de baja no puede depender de que el modelo decida mencionarlo
+     * (medición del 10-oct: con solo la instrucción, el modelo los omitía en 5 de 8 preguntas).
+     */
+    private function conVencidosNombrados(string $texto): string
+    {
+        $normal = mb_strtolower(str_replace(['‑', '–', '—'], '-', $texto));
+        $faltan = array_filter($this->vencidosParaBaja, fn ($l) => !str_contains($normal, mb_strtolower((string) $l->batch_number)));
+        if (!$faltan) return $texto;
+        $lineas = array_map(fn ($l) => "- {$l->material->name} – lote {$l->batch_number} – venció el {$l->expiration_date->toDateString()}", $faltan);
+        return rtrim($texto) . "\n\n**Lotes vencidos (no se despachan; deben darse de baja como desperdicio):**\n" . implode("\n", $lineas);
+    }
+
     private function respaldo(array $mensajes, string $fuentePrincipal, string $modeloPrincipal, float $inicio): ?array
     {
         if (($nube = $this->respaldoNube($mensajes, $fuentePrincipal, $modeloPrincipal)) !== null) return $nube;

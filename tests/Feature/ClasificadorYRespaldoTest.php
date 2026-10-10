@@ -86,4 +86,23 @@ class ClasificadorYRespaldoTest extends TestCase
         Http::assertSent(fn (PeticionHttp $p) => str_contains($p->url(), 'opencode.ai') && $p['model'] === 'glm-5.3-flash'
             && str_starts_with($p->header('x-opencode-session')[0] ?? '', 'sess-pymetory-'));
     }
+
+    public function test_si_el_modelo_omite_los_vencidos_el_sistema_los_agrega_y_no_los_repite_si_ya_estan(): void
+    {
+        $u = $this->ajustes();
+        $m = \App\Models\Material::factory()->create(['name' => 'Huevo líquido']);
+        \App\Models\Lote::factory()->create(['material_id' => $m->id, 'batch_number' => 'HUE-VIEJO', 'quantity' => 5, 'expiration_date' => now()->subDays(3)]);
+        \App\Models\Lote::factory()->create(['material_id' => $m->id, 'batch_number' => 'HUE-NUEVO', 'quantity' => 5, 'expiration_date' => now()->addDays(2)]);
+
+        Http::fake(['*/api/chat' => Http::sequence()
+            ->push(['message' => ['content' => 'Por vencer: Huevo líquido, lote HUE-NUEVO.']])
+            ->push(['message' => ['content' => 'Por vencer: HUE-NUEVO. Vencido, dar de baja: HUE‑VIEJO.']])]);
+        $r = $this->preguntar($u, '¿Qué está por vencer?')->json('response');
+        $this->assertStringContainsString('HUE-NUEVO', $r);
+        $this->assertStringContainsString('Lotes vencidos (no se despachan; deben darse de baja', $r);
+        $this->assertStringContainsString('HUE-VIEJO', $r);
+
+        $r = $this->preguntar($u, '¿Qué lotes están por vencer?')->json('response');
+        $this->assertStringNotContainsString('Lotes vencidos (no se despachan', $r);
+    }
 }
