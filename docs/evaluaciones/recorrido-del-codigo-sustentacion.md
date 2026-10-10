@@ -41,7 +41,7 @@ El modelo nunca escribe consultas: `buildRagContext()` tiene una consulta fija p
 Lo que se pierde: preguntas que no encajan en ninguna intención caen en "general". Es la limitación que se reconoce y un trabajo futuro.
 
 **"¿Y si la conversación tiene varios turnos?"**
-Respuesta honesta: el modelo recibe solo la pregunta actual, no el historial. Lo único que se hereda es el insumo: si la pregunta dice "eso", "esos" o "lo mismo" y no nombra ningún insumo, `conInsumosDelTurnoAnterior()` (`:213`) toma los de la pregunta anterior de la misma sesión ("¿cuánta harina hay?" → "¿y eso para cuánto alcanza?"). Tiene pruebas automáticas (`PreguntasDeSeguimientoTest`), pero **las baterías de evaluación son de un solo turno: el desempeño en conversaciones largas no está medido**.
+Respuesta honesta: el modelo recibe los dos últimos turnos de la sesión para redactar, pero la clasificación y la búsqueda de insumos usan la pregunta actual. Desde el 10-oct, si la pregunta dice "eso", "esos" o "lo mismo" y no nombra ningún insumo, `conInsumosDelTurnoAnterior()` (`:213`) toma los de la pregunta anterior de la misma sesión ("¿cuánta harina hay?" → "¿y eso para cuánto alcanza?"). Tiene pruebas automáticas (`PreguntasDeSeguimientoTest`), pero **las baterías de evaluación son de un solo turno: el desempeño en conversaciones largas no está medido**. Lo que falta: heredar también la intención ("¿y de azúcar?" tras "¿cuánta harina queda?").
 
 ## 4. Pronóstico: "¿de dónde sale 'se acaba el 18 de octubre'?"
 
