@@ -102,4 +102,20 @@ class ContextoAsistenteHonestoTest extends TestCase
         $this->assertStringContainsString('salida de 2', $ctx);
         $this->assertStringNotContainsString('Jefferson', $ctx);
     }
+
+    public function test_los_vencidos_de_una_consulta_no_se_pegan_a_la_siguiente_en_la_misma_instancia(): void
+    {
+        $m = Material::factory()->create(['name' => 'Pan perro']);
+        Lote::factory()->create(['material_id' => $m->id, 'batch_number' => 'PAN-VENCIDO', 'quantity' => 3, 'expiration_date' => now()->subDays(2)]);
+        $c = app(\App\Http\Controllers\ChatLLMController::class);
+        $ctx = new \ReflectionMethod($c, 'buildRagContext'); $ctx->setAccessible(true);
+        $nombrar = new \ReflectionMethod($c, 'conVencidosNombrados'); $nombrar->setAccessible(true);
+
+        $ctx->invoke($c, '¿Qué está por vencer?', 'critical_alerts');
+        $this->assertStringContainsString('PAN-VENCIDO', $nombrar->invoke($c, 'Nada urgente.'));
+
+        // Siguiente pregunta, misma instancia (así trabaja rag:evaluar): no debe arrastrar la lista anterior.
+        $ctx->invoke($c, '¿Tenemos queso crema?', 'stock_check');
+        $this->assertSame('No está registrado.', $nombrar->invoke($c, 'No está registrado.'));
+    }
 }

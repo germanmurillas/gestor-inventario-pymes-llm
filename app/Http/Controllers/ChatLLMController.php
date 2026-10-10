@@ -287,6 +287,8 @@ class ChatLLMController extends Controller {
     }
 
     private function buildRagContext($query, $intent) {
+        // Cada consulta empieza limpia: el evaluador (rag:evaluar) reutiliza la misma instancia del controlador.
+        $this->vencidosParaBaja = [];
         $keywords = $this->materialKeywords($query);
         // Solo lotes con existencias: los consumidos quedan en el Kardex, no en el inventario.
         $conStock = fn () => Lote::with(['material', 'bodega'])->activos()->where('quantity', '>', 0);
