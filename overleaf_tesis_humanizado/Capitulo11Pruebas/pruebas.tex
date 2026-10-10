@@ -106,25 +106,28 @@ Durante la primera medición se encontraron dos fallos del evaluador, no del asi
 
 \subsection{Resultados}
 
+La Tabla \ref{tab:pru_asistente} es el resultado definitivo: una sola medición, el 10 de octubre de 2026, en producción, con la versión desplegada y el modelo \texttt{gpt-oss:120b-cloud}. Antes de las correcciones la batería daba 34 de 50; las mediciones intermedias (25 de septiembre a 10 de octubre) sirvieron para corregir y están en el repositorio, pero no se reportan como resultado.
+
 \begin{table}[!htbp]
 \centering
-\caption{Precisión del asistente antes y después de las correcciones.}
+\caption{Precisión del asistente: resultado definitivo (corte del 10 de octubre de 2026).}
 \label{tab:pru_asistente}
-\begin{tabular}{|p{4.6cm}|c|c|p{4.2cm}|}
+\begin{tabular}{|p{4.6cm}|c|p{7.4cm}|}
 \hline
-\textbf{Conjunto} & \textbf{Línea base} & \textbf{Final} & \textbf{Observación} \\
+\textbf{Conjunto} & \textbf{Aciertos} & \textbf{Observación} \\
 \hline
-Batería (50 consultas) & 34/50 (68\,\%) & 49/50 (98\,\%) & Clasificador de intención: 43/50 $\rightarrow$ 48/50; las dos diferencias no cambian la respuesta. \\ \hline
-Validación (20 consultas) & 11/20 (55\,\%) & 20/20 (100\,\%) & Sus fallos también se revisaron al corregir. \\ \hline
-Prueba ciega (10 consultas) & --- & 8/10 (80\,\%) & Preguntas nuevas, ver texto. IC 95\,\% (Wilson): 49--94\,\%. \\ \hline
-Operario coloquial (18) & 6/18 (33\,\%) & 17/18 & Escritas por el autor imitando a un operario; usadas para corregir. \\ \hline
-Operario, prueba ciega (8) & --- & 8/8 (100\,\%) & Escrito antes de corregir. IC 95\,\% (Wilson): 68--100\,\%. \\ \hline
+Batería (50 consultas) & 49/50 (98\,\%) & Usada para corregir; es la cifra que cita el Resumen. \\ \hline
+Validación (20) & 20/20 (100\,\%) & Otros insumos y redacciones; sus fallos también se revisaron. \\ \hline
+Prueba ciega (10) & 8/10 (80\,\%) & Ya no es independiente: sus fallos se revisaron. IC 95\,\% (Wilson): 49--94\,\%. \\ \hline
+Operario coloquial (18) & 17/18 & Escritas por el autor imitando a un operario; usadas para corregir. \\ \hline
+Operario, prueba ciega (8) & 8/8 (100\,\%) & Ya no es independiente, igual que la anterior. IC 95\,\%: 68--100\,\%. \\ \hline
+\textbf{Total} & \textbf{102/106} & Tiempo mediano de respuesta: 1,1 segundos. \\ \hline
 \end{tabular}
 \end{table}
 
-Por grupo, la línea base fallaba por completo en valorización (0 de 5), información de lote (0 de 4), conciliación (0 de 3) y resumen (0 de 2): el contexto no incluía costos, no reconocía los lotes por su número real ni traía los ajustes del Kardex ni los totales. Tras corregirlo (Capítulo \ref{chap:implementacion}), esos grupos pasaron a 4 de 5, 4 de 4, 3 de 3 y 2 de 2.
+El Resumen cita la batería principal (49 de 50) porque es el indicador que fijó el anteproyecto; el total de los cinco conjuntos es 102 de 106. Las dos pruebas ciegas se escribieron antes de corregir, pero sus fallos se revisaron después, así que ninguna medición sobre ellas es independiente: son una estimación optimista, no una prueba de generalización.
 
-La medición final se hizo el 10 de octubre, ya desplegados los cambios de la revisión crítica (lotes vencidos aparte, totales calculados por la base, datos delimitados). La primera remedición dio 95 de 106: el asistente dejó de recomendar lotes vencidos, pero los omitía; por eso, si el modelo no los nombra, el sistema los agrega al final con los datos de la base. Ese cambio se hizo tras ver también la prueba ciega, que deja de ser ciega pura, como el conjunto de operario desde el 1 de octubre, cuando el modelo pasó a clasificar primero. Quedan cuatro fallos: tres discutibles (el costo del aceite se dio por litro, el ``último movimiento'' se respondió con la fecha y el ``panorama'' con la ocupación) y uno real (una pregunta de alertas omitió los lotes por vencer). Las respuestas varían entre ejecuciones (1 de octubre: 103 de 106). Una auditoría manual de las respuestas del 1 de octubre concordó con el evaluador en 99 de 106 y no halló cifras inventadas (\texttt{docs/evaluaciones/auditoria-manual-20261009.md}). Con el mismo RAG, otros nueve modelos acertaron entre 100 y 105 de 106, incluidos tres hasta 27 veces más costosos: con esta batería no se detectan diferencias entre modelos (estudio de costos, anexo digital en \url{https://tesis.pymetory.com/estudio-de-costos.pdf}). El tiempo mediano de respuesta fue de 1,1 segundos.
+De los cuatro fallos, tres son discutibles (el costo del aceite se dio por litro, el ``último movimiento'' se respondió con la fecha y el ``panorama'' con la ocupación) y uno es real (una pregunta de alertas omitió los lotes por vencer). Una auditoría manual de las respuestas del 1 de octubre no halló cifras inventadas (\texttt{docs/evaluaciones/auditoria-manual-20261009.md}). Otros nueve modelos, con el mismo RAG, acertaron entre 100 y 105 de 106: con esta batería no se detectan diferencias entre modelos (estudio de costos, anexo digital en \url{https://tesis.pymetory.com/estudio-de-costos.pdf}).
 
 \section{Evaluación heurística}
 \label{sec:pru_nielsen}

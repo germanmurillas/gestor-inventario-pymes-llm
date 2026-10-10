@@ -50,24 +50,7 @@ La Figura \ref{fig:dis_arquitectura} resume las capas y el recorrido de una soli
 
 \begin{figure}[H]
 \centering
-\footnotesize
-\begin{verbatim}
- Navegador (React 19 + Inertia.js)
-        |  solicitud HTTP (sesión)
-        v
- Laravel 13 - middleware: auth, verified, role:admin (CheckRole)
-        |
-        +--> Controladores de inventario --> Modelos Eloquent --> MySQL 8
-        |      (Inventory, Consumption,        (Material, Lote,
-        |       Transfer, Report, Label...)     Movimiento, Bodega...)
-        |
-        +--> ChatLLMController (RAG)
-               1. intencion()        intención (modelo; patrones de reserva)
-               2. buildRagContext()  lectura de MySQL
-               3. llamada al proveedor de modelo de lenguaje
-                  (Ollama | OpenCode | API compatible OpenAI; respaldos)
-               4. respuesta + registro en chat_histories
-\end{verbatim}
+\includegraphics[width=\textwidth]{Anexos/Imagenes/Arquitectura.pdf}
 \caption{Arquitectura en capas de Pymetory y flujo de una solicitud.}
 \label{fig:dis_arquitectura}
 \end{figure}

@@ -1,0 +1,28 @@
+// Arquitectura en capas de Pymetory y recorrido de una solicitud (Cap. 9).
+// Regenerar (vectorial): dot -Tpdf fuentes/Arquitectura.dot -o Arquitectura.pdf
+digraph Arquitectura {
+    rankdir=LR; nodesep=0.22; ranksep=0.32; fontname="Helvetica"; newrank=true;
+    node [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", color="#64748b", fillcolor="#f1f5f9", margin="0.08,0.05"];
+    edge [fontname="Helvetica", fontsize=9, color="#475569", arrowsize=0.6];
+
+    Navegador [label="Navegador\nReact 19 +\nInertia.js", fillcolor="#e8eef8"];
+    subgraph cluster_servidor {
+        label="Aplicación Laravel 13 (MVC)"; labelloc=t; fontsize=11; style="rounded"; color="#94a3b8";
+        Middleware [label="Middleware\nauth · verified\nrole:admin", fillcolor="#fff7e6", color="#b7791f"];
+        Inventario [label="Controladores de\ninventario, reportes\ny proyección"];
+        RAG [label="ChatLLMController (RAG)\n1. intención\n2. contexto (solo lectura)\n3. modelo  4. registro", fillcolor="#ede9fe", color="#6d28d9"];
+        Modelos [label="Modelos Eloquent\nMaterial · Lote\nMovimiento · Bodega"];
+    }
+    MySQL [label="MySQL 8\nKardex inmutable\n(triggers)", shape=cylinder, fillcolor="#e6f4ea", color="#2f855a"];
+    LLM [label="Modelo de lenguaje\nnube · respaldos ·\nmodo texto", fillcolor="#f5f3ff", color="#6d28d9"];
+
+    Navegador -> Middleware [label="HTTP"];
+    Middleware -> Inventario;
+    Middleware -> RAG;
+    Inventario -> Modelos;
+    RAG -> Modelos;
+    Modelos -> MySQL [constraint=false];
+    RAG -> LLM [label="cifras reales"];
+    { rank=same; Inventario; RAG; }
+    { rank=same; Modelos; LLM; MySQL; }
+}
