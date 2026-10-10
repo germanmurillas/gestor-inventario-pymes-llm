@@ -1,0 +1,174 @@
+{
+    "resumen": {
+        "conjunto": "pronostico",
+        "etiqueta": "final4-20261010",
+        "fecha": "2026-10-10 09:35:52",
+        "total": 8,
+        "correctas": 8,
+        "precision": 100,
+        "intenciones_correctas": 8,
+        "precision_clasificador": 100,
+        "tiempo_mediano_s": 0.885,
+        "modelo": [
+            "gpt-oss:120b-cloud"
+        ],
+        "tokens": {
+            "entrada": {
+                "n": 8,
+                "promedio": 906.6,
+                "mediana": 903.5,
+                "p95": 939,
+                "maximo": 939,
+                "suma": 7253
+            },
+            "salida": {
+                "n": 8,
+                "promedio": 203.4,
+                "mediana": 186,
+                "p95": 336,
+                "maximo": 336,
+                "suma": 1627
+            }
+        },
+        "por_grupo": {
+            "Pronóstico": {
+                "total": 5,
+                "correctas": 5
+            },
+            "Consumo": {
+                "total": 3,
+                "correctas": 3
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Pronóstico",
+            "pregunta": "¿Para cuántos días alcanza la harina de trigo panificable?",
+            "intencion_esperada": "forecast",
+            "intencion_obtenida": "forecast",
+            "esperado": 147.1,
+            "respuesta": "Alcanza para **147.1 días**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.85,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 892,
+            "tokens_salida": 165
+        },
+        {
+            "n": 2,
+            "grupo": "Pronóstico",
+            "pregunta": "¿Cuántos días nos dura el azúcar blanca al ritmo actual?",
+            "intencion_esperada": "forecast",
+            "intencion_obtenida": "forecast",
+            "esperado": 12.8,
+            "respuesta": "Al ritmo actual, el azúcar blanca dura aproximadamente **12.8 días**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.87,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 899,
+            "tokens_salida": 200
+        },
+        {
+            "n": 3,
+            "grupo": "Pronóstico",
+            "pregunta": "¿Cuándo se acaba la levadura fresca prensada?",
+            "intencion_esperada": "forecast",
+            "intencion_obtenida": "forecast",
+            "esperado": "2026-12-06",
+            "respuesta": "Se agotará aproximadamente el 2026‑12‑06.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.79,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 882,
+            "tokens_salida": 172
+        },
+        {
+            "n": 4,
+            "grupo": "Pronóstico",
+            "pregunta": "¿Cuándo se nos agota la sal refinada?",
+            "intencion_esperada": "forecast",
+            "intencion_obtenida": "forecast",
+            "esperado": "2026-10-28",
+            "respuesta": "Se agotará alrededor del 2026‑10‑28.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.9,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 895,
+            "tokens_salida": 159
+        },
+        {
+            "n": 5,
+            "grupo": "Pronóstico",
+            "pregunta": "¿Para qué fecha se termina el ajonjolí descortezado?",
+            "intencion_esperada": "forecast",
+            "intencion_obtenida": "forecast",
+            "esperado": "2026-11-23",
+            "respuesta": "Se agotaría aproximadamente el 2026‑11‑23.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 908,
+            "tokens_salida": 219
+        },
+        {
+            "n": 6,
+            "grupo": "Consumo",
+            "pregunta": "¿Cuánta harina de trigo panificable se consumió en los últimos 7 días?",
+            "intencion_esperada": "consumption",
+            "intencion_obtenida": "consumption",
+            "esperado": 0,
+            "respuesta": "Se consumieron **0 kg** de harina de trigo panificable en los últimos 7 días.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.83,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 939,
+            "tokens_salida": 128
+        },
+        {
+            "n": 7,
+            "grupo": "Consumo",
+            "pregunta": "¿Cuánto azúcar blanca gastamos esta semana?",
+            "intencion_esperada": "consumption",
+            "intencion_obtenida": "consumption",
+            "esperado": 0,
+            "respuesta": "Esta semana consumimos **0 kg** de azúcar blanca.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.16,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 914,
+            "tokens_salida": 336
+        },
+        {
+            "n": 8,
+            "grupo": "Consumo",
+            "pregunta": "¿Cuánta mantequilla sin sal se usó esta semana?",
+            "intencion_esperada": "consumption",
+            "intencion_obtenida": "consumption",
+            "esperado": 0,
+            "respuesta": "Esta semana se usó **0 kg** de mantequilla sin sal.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.08,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 924,
+            "tokens_salida": 248
+        }
+    ]
+}

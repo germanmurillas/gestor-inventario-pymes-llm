@@ -4,10 +4,10 @@
 % algún reporte. Cifras (PHPUnit y Playwright del 2-oct-2026; PHPUnit confirmado el 4-oct):
 %   php artisan test  -> 178 pruebas (177 aprobadas, 1 omitida), 638 aserciones, 46 clases (2-oct-2026)
 %   npx playwright test -> 61 de 61 aprobadas (2-oct-2026)
-%   rag:evaluar (producción, gpt-oss:120b-cloud) -> docs/evaluaciones/*-final-20261001-*.json (medición final del 1-oct)
+%   rag:evaluar (producción, gpt-oss:120b-cloud) -> docs/evaluaciones/*-final-20261010-*.json (medición final del 10-oct)
 % -------------------------------------------------
 
-Este capítulo presenta las pruebas con que se verificó Pymetory: pruebas unitarias y de integración sobre el backend, pruebas de extremo a extremo sobre la interfaz, verificaciones en producción y el protocolo de pruebas con usuario. Las pruebas automatizadas corresponden a las ejecuciones del 2 de octubre de 2026; la medición final del asistente, al 1 de octubre, y las consultas de verificación en producción, al 25 de septiembre.
+Este capítulo presenta las pruebas con que se verificó Pymetory: pruebas unitarias y de integración sobre el backend, pruebas de extremo a extremo sobre la interfaz, verificaciones en producción y el protocolo de pruebas con usuario. Las pruebas automatizadas corresponden a las ejecuciones del 2 de octubre de 2026; la medición final del asistente, al 10 de octubre, y las consultas de verificación en producción, al 25 de septiembre.
 
 \section{Estrategia}
 \label{sec:pru_estrategia}
@@ -114,17 +114,17 @@ Durante la primera medición se encontraron dos fallos del evaluador, no del asi
 \hline
 \textbf{Conjunto} & \textbf{Línea base} & \textbf{Final} & \textbf{Observación} \\
 \hline
-Batería (50 consultas) & 34/50 (68\,\%) & 50/50 (100\,\%) & Clasificador de intención: 43/50 $\rightarrow$ 48/50; las dos diferencias no cambian la respuesta. \\ \hline
+Batería (50 consultas) & 34/50 (68\,\%) & 49/50 (98\,\%) & Clasificador de intención: 43/50 $\rightarrow$ 48/50; las dos diferencias no cambian la respuesta. \\ \hline
 Validación (20 consultas) & 11/20 (55\,\%) & 20/20 (100\,\%) & Sus fallos también se revisaron al corregir. \\ \hline
 Prueba ciega (10 consultas) & --- & 8/10 (80\,\%) & Preguntas nuevas, ver texto. IC 95\,\% (Wilson): 49--94\,\%. \\ \hline
-Operario coloquial (18) & 6/18 (33\,\%) & 18/18 & Escritas por el autor imitando a un operario; usadas para corregir. \\ \hline
-Operario, prueba ciega (8) & --- & 7/8 (88\,\%) & Escrito antes de corregir. IC 95\,\% (Wilson): 53--98\,\%. \\ \hline
+Operario coloquial (18) & 6/18 (33\,\%) & 17/18 & Escritas por el autor imitando a un operario; usadas para corregir. \\ \hline
+Operario, prueba ciega (8) & --- & 8/8 (100\,\%) & Escrito antes de corregir. IC 95\,\% (Wilson): 68--100\,\%. \\ \hline
 \end{tabular}
 \end{table}
 
-Por grupo, la línea base fallaba por completo en valorización (0 de 5), información de lote (0 de 4), conciliación (0 de 3) y resumen (0 de 2): el contexto no incluía costos, no reconocía los lotes por su número real ni traía los ajustes del Kardex ni los totales. Tras corregirlo (Capítulo \ref{chap:implementacion}), esos grupos pasaron a 4 de 5, 4 de 4, 3 de 3 y 2 de 2, y en la medición final del 1 de octubre, a 5 de 5 en valorización.
+Por grupo, la línea base fallaba por completo en valorización (0 de 5), información de lote (0 de 4), conciliación (0 de 3) y resumen (0 de 2): el contexto no incluía costos, no reconocía los lotes por su número real ni traía los ajustes del Kardex ni los totales. Tras corregirlo (Capítulo \ref{chap:implementacion}), esos grupos pasaron a 4 de 5, 4 de 4, 3 de 3 y 2 de 2.
 
-La medición final se hizo el 1 de octubre, tras dos cambios: el tope de salida dejó de aplicarse a los modelos en la nube, porque cortaba las listas largas (con él, la batería bajó a 45 de 50), y el modelo pasó a clasificar primero, con los patrones de reserva (Capítulo \ref{chap:implementacion}). El cambio del clasificador se hizo tras ver que una pregunta del conjunto ciego de operario fallaba con todos los modelos; la frase no se agregó al sistema, pero desde entonces su 7/8 ya no es una medición ciega pura. Los tres fallos que quedan son omisiones del modelo con los datos a la vista y se mantienen como fallos según el criterio fijado de antemano. Las respuestas varían entre ejecuciones (el 27 de septiembre, 48 de 50 y 9 de 10). Una auditoría manual de las 106 respuestas finales concordó con el evaluador en 99: dos fallos de la ciega son discutibles, cuatro aciertos ponen primero lotes vencidos y uno sugiere un material inexistente; en las 20 respuestas con cuentas verificables no hubo cifras inventadas (\texttt{docs/evaluaciones/auditoria-manual-20261009.md}). Con el mismo RAG, otros nueve modelos acertaron entre 100 y 105 de 106, incluidos tres hasta 27 veces más costosos: con esta batería no se detectan diferencias entre modelos (estudio de costos, anexo digital en \url{https://tesis.pymetory.com/estudio-de-costos.pdf}). El tiempo mediano de respuesta fue de 1,2 segundos.
+La medición final se hizo el 10 de octubre, ya desplegados los cambios de la revisión crítica (lotes vencidos aparte, totales calculados por la base, datos delimitados). La primera remedición dio 95 de 106: el asistente dejó de recomendar lotes vencidos, pero los omitía; por eso, si el modelo no los nombra, el sistema los agrega al final con los datos de la base. Ese cambio se hizo tras ver también la prueba ciega, que deja de ser ciega pura, como el conjunto de operario desde el 1 de octubre, cuando el modelo pasó a clasificar primero. Quedan cuatro fallos: tres discutibles (el costo del aceite se dio por litro, el ``último movimiento'' se respondió con la fecha y el ``panorama'' con la ocupación) y uno real (una pregunta de alertas omitió los lotes por vencer). Las respuestas varían entre ejecuciones (1 de octubre: 103 de 106). Una auditoría manual de las respuestas del 1 de octubre concordó con el evaluador en 99 de 106 y no halló cifras inventadas (\texttt{docs/evaluaciones/auditoria-manual-20261009.md}). Con el mismo RAG, otros nueve modelos acertaron entre 100 y 105 de 106, incluidos tres hasta 27 veces más costosos: con esta batería no se detectan diferencias entre modelos (estudio de costos, anexo digital en \url{https://tesis.pymetory.com/estudio-de-costos.pdf}). El tiempo mediano de respuesta fue de 1,1 segundos.
 
 \section{Evaluación heurística}
 \label{sec:pru_nielsen}
@@ -189,7 +189,7 @@ El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La
 Tasa de éxito global $\geq$ 95\% & 238 de 238 automatizadas aprobadas (una omitida por requerir un servicio externo); en el asistente, la ciega (8/10) queda por debajo. & Cumplido en las automatizadas \\ \hline
 Casos de uso automatizados con Playwright & 34 casos cubren 7 de 9 casos de uso (UC7 y UC8, solo negativos); UC6 y UC9, con PHPUnit. & Cumplido parcialmente \\ \hline
 7 escenarios de despacho FEFO & 10 pruebas FEFO, más despacho por lote y por QR (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
-50 consultas en español para medir la precisión del asistente & Batería de 50: 50 correctas (100\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
+50 consultas en español para medir la precisión del asistente & Batería de 50: 49 correctas (98\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
 Evaluación heurística de Nielsen & 14 hallazgos, 13 corregidos (Tabla \ref{tab:pru_nielsen}). & Cumplido \\ \hline
 Auditoría de accesibilidad WCAG AA & Sin incumplimientos automáticos (34 vistas y Reabastecimiento); cinco criterios manuales cumplidos (Sección \ref{sec:pru_wcag}). & Cumplido \\ \hline
 Prueba con usuario & Cinco tareas completadas en dos sesiones; SUS de 92,5 (Sección \ref{sec:pru_usuario}). & Cumplido \\ \hline
