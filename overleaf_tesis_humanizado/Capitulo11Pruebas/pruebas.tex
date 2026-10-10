@@ -161,16 +161,13 @@ Las herramientas automáticas no detectan todos los problemas de accesibilidad, 
 \section{Pruebas con usuario}
 \label{sec:pru_usuario}
 
-La prueba con usuario se realizará con la administradora de la empresa del caso de estudio, sobre la versión de producción. El protocolo es el siguiente:
+Se hizo con la administradora, con consentimiento informado escrito, en dos sesiones grabadas: cinco tareas derivadas de los requerimientos, el cuestionario SUS \cite{brooke1996sus} y preguntas abiertas, con la guía rápida ya incluida en la aplicación. Las tareas constan en los registros del servidor.
 
-\begin{enumerate}
-    \item \textbf{Tareas}, derivadas de los requerimientos del Capítulo \ref{chap:requerimientos}: registrar el ingreso de un lote con su fecha de vencimiento, consumir una cantidad y comprobar qué lote se descontó, consultar al asistente cuánto queda de un insumo, conciliar un conteo físico y generar el reporte de consumo.
-    \item \textbf{Observación}: por cada tarea se registra si se completó, el tiempo empleado y los errores o dudas.
-    \item \textbf{Cuestionario SUS} (\textit{System Usability Scale}) \cite{brooke1996sus} de diez preguntas al finalizar.
-    \item \textbf{Entrevista corta} sobre qué cambiaría del sistema.
-\end{enumerate}
+\textbf{Sesión piloto (8 de octubre, datos de demostración).} Se completaron el ingreso de un lote, la consulta al asistente y el reporte en PDF, pero no el consumo por FEFO ni el ajuste por conteo físico: la pantalla de consumo enviaba el identificador del lote en lugar del insumo y el servidor respondía con una página de error. Ninguna prueba automática lo detectó; se corrigió y se agregó una prueba de extremo a extremo con las cinco tareas.
 
-\textbf{Estado:} la sesión se realizó el 8 de octubre de 2026; el análisis de la observación y del SUS se incorporará en esta sección.
+\textbf{Evaluación (9 de octubre, datos reales).} En una instancia con el catálogo real, repitió sin errores el ingreso, el consumo por FEFO (con el lote correcto) y el ajuste: las cinco tareas quedaron completadas. Además confirmó por escrito los cuatro puntos de la Sección \ref{sec:req_problema}.
+
+\textbf{SUS.} Las hojas de la sesión piloto se extraviaron y el cuestionario se respondió por mensaje después de la segunda sesión: 5, 3, 5, 1, 5, 2, 5, 1, 5 y 1, que dan \textbf{92,5} sobre 100 (referencia: 68). La única respuesta intermedia fue a «encontré el sistema innecesariamente complejo». Con una sola participante, que ya conocía el sistema, el puntaje es indicativo y no generalizable.
 
 \section{Cumplimiento del indicador del objetivo específico 4}
 \label{sec:pru_indicador}
@@ -190,10 +187,10 @@ El anteproyecto fijó para el objetivo 4 un indicador con varios componentes. La
 \endhead
 111 casos de prueba ejecutados & 239 pruebas automatizadas (178 PHPUnit y 61 E2E) y 106 consultas al asistente (unidades distintas a las del anteproyecto). & Cumplido \\ \hline
 Tasa de éxito global $\geq$ 95\% & 238 de 238 automatizadas aprobadas (una omitida por requerir un servicio externo); en el asistente, la ciega (8/10) queda por debajo. & Cumplido en las automatizadas \\ \hline
-Casos de uso automatizados con Playwright & 34 casos cubren 7 de los 9 casos de uso (de UC7 y UC8, solo casos negativos); conciliación (UC6) y bodegas (UC9) se verifican con PHPUnit. & Cumplido parcialmente \\ \hline
-7 escenarios de despacho FEFO & 10 pruebas del área FEFO, más el despacho por lote y por QR en las reglas de despacho (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
+Casos de uso automatizados con Playwright & 34 casos cubren 7 de 9 casos de uso (UC7 y UC8, solo negativos); UC6 y UC9, con PHPUnit. & Cumplido parcialmente \\ \hline
+7 escenarios de despacho FEFO & 10 pruebas FEFO, más despacho por lote y por QR (Tabla \ref{tab:pru_phpunit}). & Cumplido \\ \hline
 50 consultas en español para medir la precisión del asistente & Batería de 50: 50 correctas (100\,\%); prueba ciega: 8 de 10 (Tabla \ref{tab:pru_asistente}). & Cumplido \\ \hline
 Evaluación heurística de Nielsen & 14 hallazgos, 13 corregidos (Tabla \ref{tab:pru_nielsen}). & Cumplido \\ \hline
-Auditoría de accesibilidad WCAG AA & Sin incumplimientos automáticos en las 34 vistas y en Reabastecimiento; cinco criterios manuales cumplidos (Sección \ref{sec:pru_wcag}). & Cumplido \\ \hline
-Prueba con usuario & Sesión realizada el 8 de octubre; resultados en análisis (Sección \ref{sec:pru_usuario}). & En análisis \\ \hline
+Auditoría de accesibilidad WCAG AA & Sin incumplimientos automáticos (34 vistas y Reabastecimiento); cinco criterios manuales cumplidos (Sección \ref{sec:pru_wcag}). & Cumplido \\ \hline
+Prueba con usuario & Cinco tareas completadas en dos sesiones; SUS de 92,5 (Sección \ref{sec:pru_usuario}). & Cumplido \\ \hline
 \end{longtable}
