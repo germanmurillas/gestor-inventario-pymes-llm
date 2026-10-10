@@ -41,7 +41,9 @@ class ContextoAsistenteHonestoTest extends TestCase
         $this->assertGreaterThan($porVencer, strpos($ctx, 'PAN-PRONTO'));
         $this->assertLessThan($vencidos, strpos($ctx, 'PAN-PRONTO'));
         $this->assertGreaterThan($vencidos, strpos($ctx, 'PAN-VENCIDO'));
-        $this->assertStringContainsString('No recomiendes despachar', $ctx);
+        $this->assertStringContainsString('No recomiendes despacharlos', $ctx);
+        // Seguros pero incompletos no sirven: la respuesta debe nombrar los vencidos para darlos de baja (medición 10-oct).
+        $this->assertStringContainsString('lista SIEMPRE en una sección aparte todos los lotes VENCIDOS', $ctx);
     }
 
     public function test_sin_vencidos_no_agrega_la_seccion_ni_la_instruccion(): void

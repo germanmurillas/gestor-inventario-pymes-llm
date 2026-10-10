@@ -358,7 +358,7 @@ class ChatLLMController extends Controller {
                     . $this->avisoCorte($lotes->count(), $totalLotes)
                     . ($porVencer->isNotEmpty() ? "POR VENCER (despachar primero, en orden FEFO):\n" . $porVencer->map(fn ($l) => $linea($l))->join("\n") . "\n" : '')
                     . ($vencidos->isNotEmpty() ? "VENCIDOS (NO se despachan; solo se dan de baja como desperdicio):\n" . $vencidos->map(fn ($l) => $linea($l))->join("\n") . "\n"
-                        . "INSTRUCCIÓN: No recomiendes despachar ni usar los lotes vencidos; indica que deben darse de baja como desperdicio.\n" : '');
+                        . "INSTRUCCIÓN: Después de los lotes por vencer, lista SIEMPRE en una sección aparte todos los lotes VENCIDOS (insumo y lote) e indica que deben darse de baja como desperdicio. No recomiendes despacharlos ni usarlos.\n" : '');
                 break;
             case 'expiration':
                 $lotes = $porMaterial($conStock())->whereNotNull('expiration_date')
@@ -368,7 +368,7 @@ class ChatLLMController extends Controller {
                 $lotes = $lotes->take($ventana !== null || !empty($materialIds) ? 40 : 12)->get();
                 $hayVencidos = $lotes->contains(fn ($l) => $l->expiration_date->lt(now()->startOfDay()));
                 $context = $this->avisoCorte($lotes->count(), $totalLotes)
-                    . ($hayVencidos ? "NOTA: los lotes VENCIDOS no se despachan; solo se dan de baja como desperdicio. No recomiendes usarlos.\n" : '')
+                    . ($hayVencidos ? "NOTA: los lotes VENCIDOS no se despachan; solo se dan de baja como desperdicio. Lístalos SIEMPRE aparte, indicando que deben darse de baja, y no recomiendes usarlos.\n" : '')
                     . ($ventana !== null
                     ? "FECHAS DE VENCIMIENTO - Lotes con existencias que vencen en los próximos {$ventana} días (o ya vencidos), del más próximo al más lejano. Son {$lotes->count()} lotes:\n"
                     : "FECHAS DE VENCIMIENTO - Lotes con existencias ordenados por cercanía de vencimiento (el primero es el que vence antes):\n")
