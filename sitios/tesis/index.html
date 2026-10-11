@@ -72,6 +72,7 @@ section{padding:56px 0;border-top:1px solid var(--line)}
 .shots .big img{aspect-ratio:auto;height:calc(100% - 42px)}
 @media(max-width:820px){.shots{grid-template-columns:1fr}.shots .big{grid-row:auto}.shots .big img{height:auto;aspect-ratio:1400/840}}
 
+.facil{display:inline-block;margin-top:10px;font-weight:600;font-size:.9rem}
 /* capítulos */
 .guias{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .guia{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 16px}
@@ -152,9 +153,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <p>Las fijó la dirección del trabajo de grado y el sistema las hace cumplir en el código y en la base de datos, no solo en la interfaz.</p>
       </div>
       <div class="grid4">
-        <article class="card reveal"><span class="chip">FEFO</span><h3>Sale primero lo que vence primero</h3><p>Cada consumo descuenta del lote con la fecha de vencimiento más cercana, aunque atraviese varios lotes.</p></article>
-        <article class="card reveal"><span class="chip">Kardex</span><h3>Historial que no se borra</h3><p>Cada movimiento guarda usuario, fecha y motivo. Editarlo o eliminarlo se rechaza en el modelo y en las llaves de la base de datos.</p></article>
-        <article class="card reveal"><span class="chip">RBAC</span><h3>Permisos por rol</h3><p>Administrador y operario. Usuarios, claves de API, reportes y ajustes son solo del administrador.</p></article>
+        <article class="card reveal"><span class="chip">FEFO</span><h3>Sale primero lo que vence primero</h3><p>Cada consumo descuenta del lote con la fecha de vencimiento más cercana, aunque atraviese varios lotes.</p><a class="facil" href="https://aprende.pymetory.com/#fefo">Explicado fácil →</a></article>
+        <article class="card reveal"><span class="chip">Kardex</span><h3>Historial que no se borra</h3><p>Cada movimiento guarda usuario, fecha y motivo. Editarlo o eliminarlo se rechaza en el modelo y en las llaves de la base de datos.</p><a class="facil" href="https://aprende.pymetory.com/#kardex">Explicado fácil →</a></article>
+        <article class="card reveal"><span class="chip">RBAC</span><h3>Permisos por rol</h3><p>Administrador y operario. Usuarios, claves de API, reportes y ajustes son solo del administrador.</p><a class="facil" href="https://aprende.pymetory.com/#roles">Explicado fácil →</a></article>
         <article class="card reveal"><span class="chip">RAG</span><h3>Respuestas con datos reales</h3><p>Antes de llamar al modelo de lenguaje se consultan los lotes, movimientos y bodegas que pide la pregunta.</p></article>
       </div>
     </div>
@@ -219,6 +220,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div class="sec-h reveal">
         <h2>El documento</h2>
         <p>Los capítulos 1 a 7 vienen del anteproyecto; del 8 en adelante documentan lo construido. Formato de la tesis de referencia y citación IEEE.</p>
+        <p>¿Prefieres empezar por lo sencillo? En <a href="https://aprende.pymetory.com">aprende.pymetory.com</a> están los conceptos principales explicados con dibujos y juegos, y cada lección te trae de vuelta a la página exacta de la tesis.</p>
       </div>
       <ol class="toc reveal">
         <li><span class="n">1</span><span class="t">Introducción</span><span class="p">p. 2</span></li>
