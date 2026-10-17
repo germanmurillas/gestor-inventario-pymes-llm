@@ -1,0 +1,261 @@
+{
+    "resumen": {
+        "conjunto": "ciega",
+        "etiqueta": "final2-20261010",
+        "fecha": "2026-10-10 09:19:44",
+        "total": 10,
+        "correctas": 8,
+        "precision": 80,
+        "intenciones_correctas": 10,
+        "precision_clasificador": 100,
+        "tiempo_mediano_s": 0.995,
+        "modelo": [
+            "gpt-oss:120b-cloud"
+        ],
+        "tokens": {
+            "entrada": {
+                "n": 10,
+                "promedio": 1046,
+                "mediana": 884.5,
+                "p95": 1836,
+                "maximo": 1836,
+                "suma": 10460
+            },
+            "salida": {
+                "n": 10,
+                "promedio": 364.2,
+                "mediana": 201,
+                "p95": 1185,
+                "maximo": 1185,
+                "suma": 3642
+            }
+        },
+        "por_grupo": {
+            "Existencias": {
+                "total": 2,
+                "correctas": 2
+            },
+            "Ubicación": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Vencimiento": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Valorización": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Movimientos": {
+                "total": 1,
+                "correctas": 0
+            },
+            "Información de lote": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Críticos": {
+                "total": 1,
+                "correctas": 1
+            },
+            "Resumen": {
+                "total": 1,
+                "correctas": 0
+            },
+            "Insumo inexistente": {
+                "total": 1,
+                "correctas": 1
+            }
+        }
+    },
+    "resultados": [
+        {
+            "n": 1,
+            "grupo": "Existencias",
+            "pregunta": "¿Me dices cuánta mantequilla sin sal nos queda?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 31.1,
+            "respuesta": "31.1 kg",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.81,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 843,
+            "tokens_salida": 138
+        },
+        {
+            "n": 2,
+            "grupo": "Existencias",
+            "pregunta": "Stock de cocoa en polvo",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": 47.23,
+            "respuesta": "Total cocoa en polvo: 47.23 kg (1 lote).  \nLote COC‑01‑260817‑1: 47.23 kg.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.04,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 827,
+            "tokens_salida": 196
+        },
+        {
+            "n": 3,
+            "grupo": "Ubicación",
+            "pregunta": "¿En qué parte está el ACPM para planta eléctrica?",
+            "intencion_esperada": "location",
+            "intencion_obtenida": "location",
+            "esperado": [
+                "Cuarto de combustibles"
+            ],
+            "respuesta": "El ACPM para planta eléctrica se encuentra en el **Cuarto de combustibles**.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.95,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 830,
+            "tokens_salida": 206
+        },
+        {
+            "n": 4,
+            "grupo": "Vencimiento",
+            "pregunta": "¿Hasta cuándo sirve la esencia de vainilla?",
+            "intencion_esperada": "expiration",
+            "intencion_obtenida": "expiration",
+            "esperado": "2028-02-08",
+            "respuesta": "La esencia de vainilla vence el 2028‑02‑08 (en 486 días).",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.82,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 845,
+            "tokens_salida": 164
+        },
+        {
+            "n": 5,
+            "grupo": "Valorización",
+            "pregunta": "¿Cuánta plata tenemos invertida en salsa de tomate para pizza?",
+            "intencion_esperada": "valuation",
+            "intencion_obtenida": "valuation",
+            "esperado": 106938,
+            "respuesta": "Tenemos invertidos $106.938 COP en salsa de tomate para pizza.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 0.81,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 883,
+            "tokens_salida": 133
+        },
+        {
+            "n": 6,
+            "grupo": "Movimientos",
+            "pregunta": "¿Cuándo fue el último movimiento del huevo líquido pasteurizado?",
+            "intencion_esperada": "movements",
+            "intencion_obtenida": "movements",
+            "esperado": {
+                "cantidad": 6.84,
+                "tipo": "salida"
+            },
+            "respuesta": "El último movimiento del huevo líquido pasteurizado fue el **25 de septiembre de 2026 a las 15:00**.",
+            "correcta": false,
+            "motivo": "no aparece salida de 6.84",
+            "segundos": 0.93,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 1265,
+            "tokens_salida": 188
+        },
+        {
+            "n": 7,
+            "grupo": "Información de lote",
+            "pregunta": "Detalle del lote MAN-01-260817-1",
+            "intencion_esperada": "batch_info",
+            "intencion_obtenida": "batch_info",
+            "esperado": 31.1,
+            "respuesta": "**Mantequilla sin sal**  \n- Lote: **MAN-01-260817-1**  \n- Stock: **31.1 kg**  \n- Vence: **2026‑11‑15** (en 36 días)  \n- Bodega: **Cuarto frío**  \n- Costo unitario: **$32.000 COP\/kg**  \n- Valor: **$995.200 COP**  \n- Estado: **activo**  \n- Últimos movimientos:  \n  · [2026‑09‑25 15:00] salida 1.9 kg (producción)  \n  · [2026‑09‑24 15:00] salida 1.7 kg (producción)  \n  · [2026‑09‑23 15:00] salida 2.02 kg (producción)  \n  · [2026‑09‑22 15:00] salida 2.2 kg (producción)  \n  · [2026‑09‑21 15:00] salida 2.28 kg (producción)  \n\n**Manteca vegetal panadera**  \n- Lote: **MAN-01-260817-1**  \n- Stock: **135.36 kg**  \n- Vence: **2027‑02‑13** (en 126 días)  \n- Bodega: **Bodega de grasas y rellenos**  \n- Costo unitario: **$9.200 COP\/kg**  \n- Valor: **$1.245.312 COP**  \n- Estado: **activo**  \n- Últimos movimientos:  \n  · [2026‑09‑25 15:00] salida 8.46 kg (producción)  \n  · [2026‑09‑24 15:00] salida 10.08 kg (producción)  \n  · [2026‑09‑23 15:00] salida 8.46 kg (producción)  \n  · [2026‑09‑22 15:00] salida 8.55 kg (producción)  \n  · [2026‑09‑21 15:00] salida 8.73 kg (producción)",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.76,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 894,
+            "tokens_salida": 679
+        },
+        {
+            "n": 8,
+            "grupo": "Críticos",
+            "pregunta": "¿Qué hay próximo a vencerse?",
+            "intencion_esperada": "critical_alerts",
+            "intencion_obtenida": "critical_alerts",
+            "esperado": [
+                "LEV-01-260905-1",
+                "LEV-01-260912-2",
+                "HUE-01-260914-1",
+                "CRE-01-260908-1",
+                "SAL-01-260821-1",
+                "TAJ-01-260924",
+                "TAJ-01-260925",
+                "TAJ-01-260926",
+                "TAJ-02-260924",
+                "TAJ-02-260925",
+                "TAJ-02-260926",
+                "HAM-01-260925",
+                "HAM-01-260926",
+                "PER-01-260924",
+                "PER-01-260925",
+                "PER-01-260926",
+                "MOG-01-260925",
+                "MOG-01-260926"
+            ],
+            "respuesta": "**Por vencer (orden FEFO):**  \n- Levadura fresca prensada – Lote **LEV-01-260905-1** – Stock: 87.36 kg – Vence: **2026‑10‑10** (hoy)  \n- Levadura fresca prensada – Lote **LEV-01-260912-2** – Stock: 200 kg – Vence: **2026‑10‑17** (en 7 días)  \n- Salsa de tomate para pizza – Lote **SAL-01-260821-1** – Stock: 13.71 kg – Vence: **2026‑10‑20** (en 10 días)  \n\n**Vencidos (deben darse de baja como desperdicio):**  \n- Mogolla integral x 6 – Lote **MOG-01-260925** – Vencido: 2026‑09‑30  \n- Pan perro x 8 – Lote **PER-01-260924** – Vencido: 2026‑09‑30  \n- Mogolla integral x 6 – Lote **MOG-01-260926** – Vencido: 2026‑10‑01  \n- Pan perro x 8 – Lote **PER-01-260925** – Vencido: 2026‑10‑01  \n- Pan tajado blanco 500 g – Lote **TAJ-01-260924** – Vencido: 2026‑10‑01  \n- Pan tajado integral 500 g – Lote **TAJ-02-260924** – Vencido: 2026‑10‑01  \n- Pan hamburguesa x 8 con ajonjolí – Lote **HAM-01-260925** – Vencido: 2026‑10‑01  \n- Pan tajado integral 500 g – Lote **TAJ-02-260925** – Vencido: 2026‑10‑02  \n- Pan perro x 8 – Lote **PER-01-260926** – Vencido: 2026‑10‑02  \n- Pan hamburguesa x 8 con ajonjolí – Lote **HAM-01-260926** – Vencido: 2026‑10‑02  \n- Pan tajado blanco 500 g – Lote **TAJ-01-260925** – Vencido: 2026‑10‑02  \n- Pan tajado integral 500 g – Lote **TAJ-02-260926** – Vencido: 2026‑10‑03  \n- Pan tajado blanco 500 g – Lote **TAJ-01-260926** – Vencido: 2026‑10‑03  \n- Huevo líquido pasteurizado – Lote **HUE-01-260914-1** – Vencido: 2026‑10‑05  \n- Crema pastelera base – Lote **CRE-01-260908-1** – Vencido: 2026‑10‑08",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 2.88,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 1836,
+            "tokens_salida": 1185
+        },
+        {
+            "n": 9,
+            "grupo": "Resumen",
+            "pregunta": "Hazme un panorama de la bodega",
+            "intencion_esperada": "summary",
+            "intencion_obtenida": "summary",
+            "esperado": {
+                "lotes": 59,
+                "valor": 64433524
+            },
+            "respuesta": "Bodega de materia prima seca: 41.69 % de 20 000 kg  \nCuarto frío: 17.26 % de 2 500 kg  \nCuarto de aditivos y pesaje: 21.67 % de 1 200 kg  \nBodega de grasas y rellenos: 7.52 % de 4 000 kg  \nBodega de empaques: 12.33 % de 120 000 und  \nProducto terminado y despacho: 14.57 % de 15 000 und  \nCuarto de combustibles: 9 % de 1 000 gal  \nCuarentena: 10 % de 1 500 kg",
+            "correcta": false,
+            "motivo": "no aparece 59 lotes ni el valor 64433524",
+            "segundos": 1.43,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 1351,
+            "tokens_salida": 343
+        },
+        {
+            "n": 10,
+            "grupo": "Insumo inexistente",
+            "pregunta": "¿Tenemos fécula de maíz?",
+            "intencion_esperada": "stock_check",
+            "intencion_obtenida": "stock_check",
+            "esperado": "no registrado",
+            "respuesta": "No, ese material no está registrado en el inventario.\n\nPodría tratarse de alguno de los siguientes productos registrados que se usan como bases o almidones:\n\n- Harina de trigo integral  \n- Harina de trigo panificable  \n- Avena en hojuelas  \n- Amilasa maltogénica (antienvejecimiento)  \n\nRevisa si alguno de ellos es lo que necesitas.",
+            "correcta": true,
+            "motivo": "",
+            "segundos": 1.5,
+            "modelo": "gpt-oss:120b-cloud",
+            "fuente": "local",
+            "tokens_entrada": 886,
+            "tokens_salida": 410
+        }
+    ]
+}
