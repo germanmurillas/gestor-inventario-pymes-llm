@@ -73,7 +73,7 @@ Rotar el inventario es decidir en qué orden se despachan los productos. Hay tre
 \end{tabular}
 \end{table}
 
-\textbf{¿Por qué FEFO para este proyecto?} El director del trabajo de grado estableció FEFO como una regla de negocio no negociable del sistema. La entrevista con la empresa del caso de estudio (Capítulo \ref{chap:requerimientos}) mostró que allí la práctica existe de manera informal ---la administradora instruye al personal para que se consuma primero lo que ya estaba en bodega--- y que la trazabilidad de lotes y fechas de vencimiento es una exigencia sanitaria ante entes como el INVIMA \cite{res2674_2013}. Formalizar FEFO en el software elimina la dependencia de esa instrucción verbal.
+\textbf{¿Por qué FEFO para este proyecto?} FEFO se acordó con el director del trabajo de grado como regla de negocio no negociable del sistema. La entrevista con la empresa del caso de estudio (Capítulo \ref{chap:requerimientos}) mostró que allí la práctica existe de manera informal ---la administradora instruye al personal para que se consuma primero lo que ya estaba en bodega--- y que la trazabilidad de lotes y fechas de vencimiento es una exigencia sanitaria ante entes como el INVIMA \cite{res2674_2013}. Formalizar FEFO en el software elimina la dependencia de esa instrucción verbal.
 
 \subsection{Arquitectura RAG (Retrieval-Augmented Generation)}
 \label{sec:rag_teoria}
@@ -129,7 +129,7 @@ La Tabla \ref{tab:rag_vs_chat} contrasta implementar un chat genérico con un LL
 
 Una decisión de diseño fundamental fue asumir que el servicio de IA externo puede fallar. Depender de una API de terceros introduce un riesgo: si la clave no está configurada, si hay un corte de red, o si se agotan los créditos, el módulo de consulta inteligente quedaría inoperativo justo cuando se necesita.
 
-Para mitigar esto, se implementó un mecanismo de \textbf{degradación elegante} (\textit{graceful degradation}). Cuando la llamada al LLM falla, el sistema responde en ``modo texto'': muestra los datos recuperados de la base de datos en un formato legible, sin la capa de generación de lenguaje natural. La respuesta es menos conversacional, pero el usuario obtiene la información. Este principio ---la información del inventario debe estar disponible incluso sin IA--- fue una directriz del director del proyecto.
+Para mitigar esto, se implementó un mecanismo de \textbf{degradación elegante} (\textit{graceful degradation}). Cuando la llamada al LLM falla, el sistema responde en ``modo texto'': muestra los datos recuperados de la base de datos en un formato legible, sin la capa de generación de lenguaje natural. La respuesta es menos conversacional, pero el usuario obtiene la información. Este principio ---la información del inventario debe estar disponible incluso sin IA--- se acordó con el director del proyecto.
 
 \subsection{Framework Laravel y el Patrón MVC}
 \label{sec:laravel_mvc}
