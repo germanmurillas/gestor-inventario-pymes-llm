@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\Controllers\ChatLLMController;
+use App\Models\Bodega;
 use App\Models\Lote;
 use App\Models\Material;
 use App\Models\User;
@@ -81,8 +82,9 @@ class ContextoAsistenteHonestoTest extends TestCase
 
     public function test_los_nombres_de_usuarios_solo_van_al_modelo_si_la_pregunta_los_pide(): void
     {
-        $m = Material::factory()->create(['name' => 'Sal refinada', 'unit' => 'kg']);
-        $lote = Lote::factory()->create(['material_id' => $m->id, 'quantity' => 10]);
+        // Nombres fijos: con Faker en inglés (CI) la ciudad de la bodega puede traer un nombre de persona («Claudiaview»).
+        $m = Material::factory()->create(['name' => 'Sal refinada', 'unit' => 'kg', 'description' => 'Sal']);
+        $lote = Lote::factory()->create(['material_id' => $m->id, 'bodega_id' => Bodega::factory()->create(['name' => 'Bodega principal'])->id, 'quantity' => 10]);
         $u = User::factory()->create(['name' => 'Claudia Pérez']);
         \App\Models\Movimiento::create(['lote_id' => $lote->id, 'user_id' => $u->id, 'type' => 'salida', 'quantity' => 2, 'reason' => 'produccion']);
 
@@ -92,8 +94,8 @@ class ContextoAsistenteHonestoTest extends TestCase
 
     public function test_la_ficha_de_un_lote_con_movimientos_se_arma_sin_errores(): void
     {
-        $m = Material::factory()->create(['name' => 'Sal refinada', 'unit' => 'kg']);
-        $lote = Lote::factory()->create(['material_id' => $m->id, 'batch_number' => 'SAL-01-260817-1', 'quantity' => 10]);
+        $m = Material::factory()->create(['name' => 'Sal refinada', 'unit' => 'kg', 'description' => 'Sal']);
+        $lote = Lote::factory()->create(['material_id' => $m->id, 'bodega_id' => Bodega::factory()->create(['name' => 'Bodega principal'])->id, 'batch_number' => 'SAL-01-260817-1', 'quantity' => 10]);
         \App\Models\Movimiento::create(['lote_id' => $lote->id, 'user_id' => User::factory()->create(['name' => 'Jefferson'])->id, 'type' => 'salida', 'quantity' => 2, 'reason' => 'produccion']);
 
         $ctx = $this->contexto('¿Qué información hay del lote SAL-01-260817-1?', 'batch_info');
