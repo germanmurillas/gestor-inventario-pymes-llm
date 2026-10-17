@@ -39,7 +39,7 @@ Al construir sobre Laravel, Pymetory hereda patrones que el framework trae resue
 
 \textbf{Qué es.} Una familia de algoritmos intercambiables entre los que se elige en tiempo de ejecución.
 
-\textbf{Dónde está.} El \texttt{ChatLLMController} define una tabla de proveedores de modelo de lenguaje, cada uno con su dirección y su clave, y elige uno según la configuración del administrador (\texttt{app/Http/Controllers/ChatLLMController.php}, línea 636):
+\textbf{Dónde está.} El \texttt{ChatLLMController} define una tabla de proveedores de modelo de lenguaje, cada uno con su dirección y su clave, y elige uno según la configuración del administrador (\texttt{app/Http/Controllers/ChatLLMController.php}, línea 668):
 
 \begin{lstlisting}[language=PHP]
 $endpoints = [
@@ -91,7 +91,7 @@ public function handle(Request $request, Closure $next, string $role): Response
 
 \textbf{Qué es.} La lógica de una operación de negocio se organiza como un procedimiento único que la atiende de principio a fin.
 
-\textbf{Dónde está.} \texttt{Lote::despacharFefo()} (\texttt{app/Models/Lote.php}, línea 141) es el único lugar que recorre el orden de vencimiento; lo usan el despacho de la interfaz (\texttt{ConsumptionController::consumeFefo()}) y el despacho múltiple. Dentro de una transacción, bloquea los lotes despachables del material, verifica el saldo, descuenta la cantidad lote por lote, marca como consumidos los que se agotan y registra cada salida en el Kardex:
+\textbf{Dónde está.} \texttt{Lote::despacharFefo()} (\texttt{app/Models/Lote.php}, línea 141) es el único lugar que despacha en orden de vencimiento (el conteo físico aplica ese orden a los faltantes); lo usan el despacho de la interfaz (\texttt{ConsumptionController::consumeFefo()}) y el despacho múltiple. Dentro de una transacción, bloquea los lotes despachables del material, verifica el saldo, descuenta la cantidad lote por lote, marca como consumidos los que se agotan y registra cada salida en el Kardex:
 
 \begin{lstlisting}[language=PHP]
 return DB::transaction(function () use ($material, $cantidad, $motivo, ...) {
@@ -164,7 +164,7 @@ El formulario de transferencias no listaba lotes. & Los datos enviados a la vist
 El asistente respondió que ningún lote vencía en la semana cuando sí había. & El contexto incluía lotes ya consumidos, con fechas pasadas, y no indicaba la fecha del día. & Solo lotes con existencias, ventana de días según la pregunta y fecha de hoy en el contexto; prueba de regresión. & \texttt{ec76a78} \\ \hline
 Recibir una orden de compra creaba el lote con vencimiento de ``hoy más un año''. & La recepción no pedía los datos del lote: fecha, número y bodega se fijaban en el código. & La recepción exige número de lote, vencimiento y bodega por ítem; se agregó el ingreso de lotes para insumos ya registrados. & \texttt{2987679} \\ \hline
 El pan terminado aparecía siempre como crítico y la ocupación sumaba kilos con unidades. & Un único umbral de 15 días para productos que duran de 5 a 7 días; capacidad sin unidad. & Umbral FEFO por insumo y unidad de capacidad por bodega; ocupación global como promedio. & \texttt{de53e61} \\ \hline
-El asistente acertó 34 de 50 consultas en la primera medición. & Contextos sin costos, sin ajustes de conciliación ni totales; lotes no reconocidos por su número real. & Contextos completos y clasificador revisado; la misma batería pasó a 49 de 50 (26-sep; 50 de 50 en la medición final). & \texttt{48f092f} \\ \hline
+El asistente acertó 34 de 50 consultas en la primera medición. & Contextos sin costos, sin ajustes de conciliación ni totales; lotes no reconocidos por su número real. & Contextos completos y clasificador revisado; la misma batería pasó a 49 de 50 (26-sep; 49 de 50 el 10-oct). & \texttt{48f092f} \\ \hline
 Las listas largas de lotes por vencer salían cortadas. & El tope de 1\,024 tokens de salida se aplicaba también a los modelos en la nube. & El tope solo rige para modelos que corren en el servidor. & \texttt{717677d} \\ \hline
 ``¿Qué se está poniendo viejo?'' se respondía como una pregunta de existencias. & Decidían los patrones, que tomaron ``hay que sacar'' por una consulta de cantidad. & Clasifica primero el modelo; los patrones quedan de reserva. & \texttt{0afef8a} \\ \hline
 Seis tipos de incumplimiento de WCAG 2.1 AA. & Contraste bajo, botones de solo ícono sin nombre y campos sin etiqueta. & Acento sólido por tema, nombres accesibles y etiquetas; cero incumplimientos automáticos en el tema por defecto. & \texttt{fb0e9bb} \\ \hline
