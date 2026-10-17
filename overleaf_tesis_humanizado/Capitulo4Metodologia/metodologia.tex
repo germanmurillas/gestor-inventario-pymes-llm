@@ -69,7 +69,7 @@ El anteproyecto planificó seis sprints de dos semanas, precedidos por cuatro se
 
 \begin{table}[!htbp]
 \centering
-\caption{Planificación de sprints del anteproyecto.}
+\caption{Planificación de sprints del anteproyecto (casos de uso con la numeración del Anexo).}
 \label{tab:sprints}
 \begin{tabular}{|l|l|p{3.4cm}|p{6.3cm}|p{2.1cm}|}
 \hline
@@ -79,13 +79,13 @@ Fase 0 & Sem 1--4 & Requisitos y diseño & Documento de requisitos, modelo de da
 \hline
 Sprint 1 & Sem 5--6 & Entorno y autenticación & Proyecto base, roles, datos de prueba e inicio de sesión & Base \\
 \hline
-Sprint 2 & Sem 7--8 & Inventario y lotes & Materiales, lotes, bodegas, búsqueda y tablero & UC1--UC3 \\
+Sprint 2 & Sem 7--8 & Inventario y lotes & Materiales, lotes, bodegas, búsqueda y tablero & UC1, UC2, UC9 \\
 \hline
-Sprint 3 & Sem 9--10 & FEFO, conciliación y reportes & Despacho FEFO, conciliación, reportes PDF/CSV y etiquetas QR & UC4--UC6, UC8 \\
+Sprint 3 & Sem 9--10 & FEFO, conciliación y reportes & Despacho FEFO, conciliación, reportes PDF/CSV y etiquetas QR & UC3, UC5, UC6 \\
 \hline
-Sprint 4 & Sem 11--12 & Asistente RAG & Clasificador, contexto desde la base, historial y modo texto & UC7 \\
+Sprint 4 & Sem 11--12 & Asistente RAG & Clasificador, contexto desde la base, historial y modo texto & UC4, UC8 \\
 \hline
-Sprint 5 & Sem 13--14 & Interfaz y ajustes & Componentes según los mockups, temas, ajustes y usuarios & UC9 \\
+Sprint 5 & Sem 13--14 & Interfaz y ajustes & Componentes según los mockups, temas, ajustes y usuarios & UC7 \\
 \hline
 Sprint 6 & Sem 15--16 & Pruebas, despliegue y documentación & Pruebas automatizadas, despliegue en la nube y documentación & UC1--UC9 \\
 \hline
@@ -167,7 +167,7 @@ Despliegue & SSH + SCP + Tmux & Transferencia de archivos y administración de s
 El desarrollo de este proyecto se rigió por principios de integridad académica y profesional:
 
 \begin{itemize}
-    \item \textbf{Confidencialidad de datos empresariales}: La empresa del caso de estudio no se identifica en el documento. Los datos de demostración del sistema son ficticios: se construyeron a partir de los procesos descritos en la entrevista, con nombres genéricos de insumos y costos referenciales, y no contienen datos de la operación de la empresa. La empresa autorizó el uso de sus procesos operativos como referencia para el levantamiento de requisitos, pero los datos específicos de su operación comercial no se divulgan. Las consultas al modelo en la nube envían la pregunta y el contexto filtrado, que puede incluir nombres de usuario en los movimientos; el administrador puede elegir un modelo local.
+    \item \textbf{Confidencialidad de datos empresariales}: La empresa del caso de estudio no se identifica en el documento. Los datos de demostración del sistema son ficticios. La evaluación con usuario (Capítulo \ref{chap:pruebas}) usó una instancia aparte, de acceso restringido, con el catálogo real de insumos que entregó la administradora y vencimientos estimados; esos datos no se publican. La empresa autorizó el uso de sus procesos operativos como referencia para el levantamiento de requisitos, pero los datos específicos de su operación comercial no se divulgan. Las consultas al modelo en la nube envían la pregunta y el contexto filtrado, que puede incluir nombres de usuario en los movimientos; el administrador puede elegir un modelo local.
     \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, el autor utilizó asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) como herramientas de productividad para generación de código, depuración, y redacción y revisión de este documento. El autor revisó y validó el código antes de incluirlo y verificó las cifras del documento contra el repositorio y la base de datos.
     \item \textbf{Licencias de software}: Las tecnologías del sistema ---Laravel, React, Inertia.js, Tailwind CSS, MySQL, Playwright--- son de código abierto; GSAP es de uso gratuito bajo su propia licencia. Los modelos de lenguaje de operación se usaron sin costo (Ollama en el servidor del proyecto y la capa gratuita de Ollama Cloud); la comparación de modelos usó una suscripción del autor. La infraestructura también es de capa gratuita (Oracle Cloud y Cloudflare).
     \item \textbf{Cumplimiento normativo}: El proyecto se acoge a la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle, que establece los lineamientos para trabajos de grado en la modalidad de Trabajo de Investigación.

@@ -161,6 +161,7 @@ sitios/tesis/pymetory-tesis.pdf
 /docs/*
 !/docs/screenshots/
 !/docs/evaluaciones/
+!/docs/anexos/
 /docs/screenshots/*
 !/docs/screenshots/pruebas/
 !/docs/screenshots/version-anterior/

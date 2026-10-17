@@ -39,7 +39,7 @@ Los resultados no son solo un sistema que funciona. Son también un modelo de ar
 
 \section{Alcance del Proyecto y Niveles de Analítica}
 
-El sistema propuesto va más allá del simple registro digital. Integra una arquitectura pensada para optimizar la cadena de suministro con Inteligencia Artificial. El proyecto se sitúa en un nivel de \textbf{Analítica Predictiva}: no solo muestra lo que pasó, sino que anticipa lo que puede pasar.
+El sistema propuesto va más allá del simple registro digital. Integra un asistente basado en Inteligencia Artificial y una proyección estadística del consumo: además de mostrar lo que pasó, estima lo que puede pasar.
 
 \subsection{Funcionalidades Operativas del Sistema}
 El sistema integra por diseño las siguientes capacidades de gestión:
@@ -56,7 +56,7 @@ Como innovación central, el sistema integra un modelo de lenguaje de gran escal
 
 \begin{enumerate}
     \item \textbf{Analítica Descriptiva y Diagnóstica:} El usuario puede preguntar en español colombiano ---sin saber SQL, sin aprender filtros--- cosas como ``¿cuánta harina me queda?'', ``¿qué movimientos hubo esta semana?'' o ``¿por qué bajó tanto el stock de azúcar?''.
-    \item \textbf{Analítica Predictiva (Valor Agregado):} El módulo procesa el historial del Kardex para hacer \textit{forecasting} ---previsión de la demanda futura. Esto permite predecir fechas probables de desabastecimiento (\textit{stock-out}) y sugerir cuándo reabastecer, basándose en el cálculo dinámico del Punto de Reorden (ROP), el nivel de inventario en el que conviene hacer un nuevo pedido. Se implementó con un promedio móvil del consumo de cuatro semanas (Sección \ref{sec:imp_proyeccion}).
+    \item \textbf{Analítica Predictiva (Valor Agregado):} El módulo procesa el historial del Kardex para hacer \textit{forecasting} ---previsión de la demanda futura. Esto permite predecir fechas probables de desabastecimiento (\textit{stock-out}) y sugerir cuándo reabastecer, basándose en el cálculo dinámico del Punto de Reorden (ROP), el nivel de inventario en el que conviene hacer un nuevo pedido. Es una proyección estadística (promedio móvil de cuatro semanas, Sección \ref{sec:imp_proyeccion}), no un modelo de IA, y no se validó contra el consumo real; el asistente solo la consulta y la redacta.
 \end{enumerate}
 
 \subsection{Límites del Proyecto}

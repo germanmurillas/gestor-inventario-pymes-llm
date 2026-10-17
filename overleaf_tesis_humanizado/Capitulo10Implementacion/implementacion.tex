@@ -197,7 +197,7 @@ El sistema corre en una instancia de Oracle Cloud de la capa gratuita \textit{Al
 \section{Despliegue}
 \label{sec:imp_despliegue}
 
-El despliegue está automatizado con GitHub Actions (\texttt{.github/workflows/deploy.yml}). Cada cambio que llega a la rama principal recorre tres etapas:
+El despliegue está automatizado con GitHub Actions (\texttt{.github/workflows/deploy.yml}). La estrategia de ramas fue de rama principal (\textit{trunk-based}): los cambios pequeños entraban a \texttt{main}, protegida por este flujo, y los grandes se hicieron en ramas aparte (p.~ej., \texttt{tesis/limite-80-paginas} y \texttt{contra-tesis/9oct}), fusionadas después de correr las pruebas. Cada cambio que llega a la rama principal recorre tres etapas:
 
 \begin{enumerate}
     \item \textbf{Revisión.} Verificación de sintaxis de los archivos PHP.
