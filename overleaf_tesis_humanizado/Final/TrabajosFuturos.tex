@@ -12,29 +12,26 @@
 % cifrado de claves de API) y se acotaron las que existen solo en parte.
 
 
-\section{Trabajos Futuros}
-
 Las propuestas se agrupan en cinco frentes. El primero recoge lo que quedó pendiente del caso de estudio y es el más directamente útil para la empresa; los demás amplían el sistema en infraestructura, inteligencia artificial, funcionalidades de negocio, y experiencia de usuario, seguridad e investigación. En cada caso se indica qué existe hoy, para distinguir lo que falta de lo que ya se construyó.
 
-\subsection{Requerimientos del caso de estudio pendientes}
+\section{Requerimientos del caso de estudio pendientes}
 Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedaron por completar:
 \begin{itemize}
     \item \textbf{Desglose del consumo por destino (RF-15)}: registrar cuánto se usa en esponja, espolvoreo y cada línea de producto, que es la causa de las diferencias que la empresa detecta en el cierre.
-    \item \textbf{Factura y ficha de calidad en el ingreso (RF-03)} y un \textbf{registro de no conformidades en la recepción (RF-14)}. Hoy el proveedor queda asociado a la orden de compra y un lote puede pasar a cuarentena, pero la factura, la ficha y la novedad no tienen un registro propio.
+    \item \textbf{Factura y ficha de calidad en el ingreso (RF-03)} y un \textbf{registro de no conformidades en la recepción (RF-14)}. Hoy el proveedor queda asociado a la orden de compra y el lote admite el estado de cuarentena (aún sin una acción en la interfaz para asignarlo), pero la factura, la ficha y la novedad no tienen un registro propio.
     \item \textbf{Registro de los códigos de barras de fábrica} de todos los insumos: el sistema ya los lee (RF-13), pero en la instancia de evaluación solo se registraron los de dos productos.
-    \item \textbf{Conversión automática de presentaciones} (bultos y cajas) a la unidad base en kilogramos (RNF-01); hoy la conversión la hace el usuario.
 \end{itemize}
 
-\subsection{Infraestructura y despliegue}
+\section{Infraestructura y despliegue}
 \begin{itemize}
     \item \textbf{Copias de seguridad fuera del servidor}: el volcado nocturno de la base de datos y los respaldos manuales previos a cambios delicados (Capítulo \ref{chap:implementacion}) quedan en el mismo servidor, de modo que una falla de la instancia los perdería. Se propone enviarlos a otro almacenamiento de capa gratuita (por ejemplo, OCI Object Storage), incluir los archivos subidos y probar periódicamente la restauración.
     \item \textbf{Integración continua más estricta}: GitHub Actions ya revisa la sintaxis, ejecuta PHPUnit y despliega solo si las pruebas pasan; faltan la suite Playwright contra una instancia temporal y el análisis estático (PHPStan y ESLint) como condición para desplegar.
     \item \textbf{Contenedores Docker}: actualizar el \texttt{Dockerfile} y el \texttt{docker-compose.yml} del repositorio, que conservan valores de una etapa anterior, y validarlos en la integración continua.
     \item \textbf{Multi-tenencia}: aislar los datos de varias PYMEs en una sola instancia mediante un identificador de inquilino (\texttt{tenant\_id}).
-    \item \textbf{Modelo local afinado}: el respaldo local \texttt{qwen3.5:9b} tarda de 30 a 60 segundos por respuesta (Capítulo \ref{chap:implementacion}); afinar un modelo más pequeño con consultas del dominio, o usar un servidor con GPU, lo haría más rápido.
+    \item \textbf{Modelo local afinado}: el respaldo local \texttt{qwen3.5:9b} tarda de 33 a 56 segundos por respuesta (Capítulo \ref{chap:implementacion}); afinar un modelo más pequeño con consultas del dominio, o usar un servidor con GPU, lo haría más rápido.
 \end{itemize}
 
-\subsection{Inteligencia artificial y RAG}
+\section{Inteligencia artificial y RAG}
 \begin{itemize}
     \item \textbf{Consultas con herramientas}: que el modelo pida los datos que necesita mediante funciones de solo lectura sobre la base de datos, con el sistema como filtro de seguridad y una verificación automática de que cada cifra de la respuesta aparezca en los datos consultados.
     \item \textbf{Búsqueda semántica con embeddings}, para responder por significado (``¿qué grasas tenemos?'') sin conocer el nombre exacto de cada insumo.
@@ -43,7 +40,7 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
     \item \textbf{Evaluación continua del asistente}: programar la batería de \texttt{rag:evaluar} (Sección \ref{sec:pru_asistente}) y alertar cuando la tasa de acierto baje de un umbral.
 \end{itemize}
 
-\subsection{Funcionalidades de negocio}
+\section{Funcionalidades de negocio}
 \begin{itemize}
     \item \textbf{Cotizaciones} previas a las órdenes de compra, que hoy ya cubren proveedor, aprobación y recepción con lote, vencimiento y bodega.
     \item \textbf{Catálogo de categorías} propio de cada empresa, para renombrarlas y fusionarlas; hoy la categoría es un texto del insumo.
@@ -52,7 +49,7 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
     \item \textbf{Contabilidad integrada} y \textbf{facturación electrónica DIAN}.
 \end{itemize}
 
-\subsection{Experiencia de usuario, seguridad e investigación}
+\section{Experiencia de usuario, seguridad e investigación}
 \begin{itemize}
     \item \textbf{Registro sin conexión}: la aplicación ya funciona en el celular y su \textit{Service Worker} guarda en caché los archivos estáticos; falta registrar movimientos sin red y sincronizarlos respetando FEFO y la inmutabilidad del Kardex.
     \item \textbf{Notificaciones \textit{push}} del navegador, además de las alertas en la aplicación, Telegram y correo; \textbf{identidad visual por empresa} conservando el contraste WCAG 2.1 AA de los seis temas; \textbf{tutoriales interactivos} y \textbf{consultas por voz}.
@@ -61,7 +58,7 @@ Del levantamiento de requerimientos (Capítulo \ref{chap:requerimientos}) quedar
     \item \textbf{Investigación}: repetir la prueba con usuario (Capítulo \ref{chap:pruebas}) en al menos diez PYMEs con la escala SUS; comparar modelos de lenguaje con la misma batería de \texttt{rag:evaluar}; medir el tiempo que ahorra el asistente; y documentar el método de desarrollo con asistentes de IA y sus controles.
 \end{itemize}
 
-\subsection{Hoja de ruta priorizada}
+\section{Hoja de ruta priorizada}
 
 La Tabla \ref{tab:roadmap} presenta un orden sugerido. La prioridad combina el impacto esperado para una PYME como la del caso de estudio con la factibilidad, entendida como los recursos, las dependencias técnicas y el tiempo que requiere cada mejora.
 

@@ -79,7 +79,7 @@ La selección de herramientas respondió a cuatro criterios propios del proyecto
 \textbf{Herramienta} & \textbf{Alternativas} & \textbf{Por qué se eligió} \\
 \hline
 \endhead
-Laravel 13.4 (PHP 8.3) & Django, Node.js/Express, Spring Boot & Incluye ORM, migraciones versionadas, \textit{middleware}, validación, tareas programadas y soporte de pruebas en un solo marco; el autor ya lo conocía. PHP se ejecuta en casi cualquier alojamiento de bajo costo. \\ \hline
+Laravel 13 (PHP 8.3) & Django, Node.js/Express, Spring Boot & Incluye ORM, migraciones versionadas, \textit{middleware}, validación, tareas programadas y soporte de pruebas en un solo marco; el autor ya lo conocía. PHP se ejecuta en casi cualquier alojamiento de bajo costo. \\ \hline
 React 19 + Inertia.js 2 & Blade, Livewire, React con API REST aparte & React permite construir una interfaz interactiva (arrastrar y soltar, escáner, chat) con un ecosistema amplio de componentes; Inertia evita duplicar la capa de API para las vistas y conserva el enrutamiento y la autenticación de Laravel. \\ \hline
 TypeScript 5 & JavaScript & Documenta la forma de los datos que llegan del servidor y permite que el editor señale errores; la verificación estricta en la integración continua queda como trabajo futuro. \\ \hline
 Tailwind CSS 4 & Bootstrap, CSS propio & Estilos por utilidades que permiten traducir el prototipo de Figma a componentes sin mantener hojas de estilo separadas por vista, y definir temas mediante variables. \\ \hline
@@ -123,7 +123,7 @@ Operación & \texttt{notifications} (alertas), \texttt{kanban\_items} (tablero d
 
 La entidad central del diseño es el lote, no el material: la existencia de un material es la suma de las cantidades de sus lotes activos, y cada lote conoce su fecha de vencimiento. Esto es lo que permite aplicar FEFO. Las operaciones que cambian la cantidad de un lote desde el inventario ---ingreso, consumo, despacho por escaneo, transferencia y ajuste de conciliación--- registran un movimiento en la tabla \texttt{movimientos} con el usuario autenticado, el tipo, la cantidad, el motivo y la marca de tiempo. Las operaciones que tocan más de un lote (por ejemplo, un despacho FEFO que agota un lote y continúa con el siguiente, o una transferencia) se ejecutan dentro de una transacción de base de datos, para que el Kardex nunca quede con movimientos a medias.
 
-Por regla acordada con la dirección, el Kardex es de solo inserción, y se garantiza en tres niveles: el modelo \texttt{Movimiento} rechaza modificar o eliminar un registro; dos disparadores (\textit{triggers}) sobre \texttt{movimientos} lo impiden también fuera de la aplicación, y las llaves foráneas hacia \texttt{lotes} y \texttt{users} impiden borrar un lote o un usuario con historial. Los errores se corrigen con un movimiento de ajuste justificado.
+Por regla acordada con la dirección, el Kardex es de solo inserción, y se protege en tres niveles: el modelo \texttt{Movimiento} rechaza modificar o eliminar un registro; dos disparadores (\textit{triggers}) sobre \texttt{movimientos} lo impiden también fuera de la aplicación, y las llaves foráneas hacia \texttt{lotes} y \texttt{users} impiden borrar un lote o un usuario con historial. Los errores se corrigen con un movimiento de ajuste justificado.
 
 \section{Diseño del módulo de consulta en lenguaje natural}
 \label{sec:dis_rag}
@@ -151,7 +151,7 @@ El asistente sigue la arquitectura de generación aumentada por recuperación (R
 \texttt{valuation} & valor, precio, costo & Cantidad por costo unitario \\ \hline
 \texttt{movements} & entró, salió, movimiento, historial, kardex & Movimientos con usuario y motivo \\ \hline
 \texttt{batch\_info} & lote HAR-01-\ldots & Detalle de un lote \\ \hline
-\texttt{summary} & resumen, todo, general, panorama & Resumen del inventario \\ \hline
+\texttt{summary} & resumen, panorama, todo el inventario & Resumen del inventario \\ \hline
 \texttt{conciliation} & conciliar, ajuste, diferencia, descuadre & Datos para conciliación \\ \hline
 \texttt{quarantine} & cuarentena, retenido, no conforme & Lotes en cuarentena \\ \hline
 \texttt{low\_stock} & mínimo, hace falta pedir, reponer, agotado & Insumos bajo su stock mínimo \\ \hline
@@ -163,7 +163,7 @@ El asistente sigue la arquitectura de generación aumentada por recuperación (R
 
 \subsection{Proveedores de modelo de lenguaje}
 
-El controlador define un mapa de proveedores intercambiables ---Ollama en el propio servidor, OpenCode y cualquier API compatible con la de OpenAI--- y el administrador elige el proveedor y el modelo desde la configuración, con una palanca que muestra la precisión medida y el costo de cada modelo, y con claves de API almacenadas cifradas. Este diseño evita depender de un único proveedor: si el servicio externo no está disponible se puede cambiar a un modelo local, si el proveedor elegido falla responde un modelo rápido en la nube y, después, uno local, y si ningún modelo responde el sistema devuelve en texto plano un listado de lotes en orden FEFO en lugar de un error. La justificación de esta estructura desde el punto de vista de los patrones de diseño se presenta en el capítulo de Implementación.
+El controlador define un mapa de proveedores intercambiables ---Ollama en el propio servidor, OpenCode y cualquier API compatible con la de OpenAI--- y el administrador elige el proveedor y el modelo desde la configuración, con una palanca que muestra la precisión medida y el costo de cada modelo, y con claves de API almacenadas cifradas. Este diseño evita depender de un único proveedor: si el servicio externo no está disponible se puede cambiar a un modelo local, si el proveedor elegido falla responde un modelo rápido en la nube y, después, uno local, y si ningún modelo responde el sistema muestra en texto plano los datos que recuperó para la pregunta, en lugar de un error. La justificación de esta estructura desde el punto de vista de los patrones de diseño se presenta en el capítulo de Implementación.
 
 \section{Diseño de la interfaz de usuario}
 \label{sec:dis_ui}

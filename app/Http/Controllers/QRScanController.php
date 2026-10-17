@@ -48,7 +48,12 @@ class QRScanController extends Controller
             return back()->withErrors(['qr_data' => $motivo]);
         }
 
-        DB::transaction(function () use ($lote, $validated) {
+        $sinSaldo = DB::transaction(function () use ($lote, $validated) {
+            // Se relee el lote bloqueado: dos escaneos simultáneos no descuentan el mismo saldo.
+            $lote = Lote::lockForUpdate()->findOrFail($lote->id);
+            if ($validated['action'] === 'salida' && $lote->quantity < $validated['quantity']) {
+                return 'Stock insuficiente. Disponible: ' . round($lote->quantity, 3) . '.';
+            }
             if ($validated['action'] === 'salida') {
                 $lote->quantity -= $validated['quantity'];
                 if ($lote->quantity <= 0.001) {
@@ -72,7 +77,11 @@ class QRScanController extends Controller
                 'reason'      => 'qr_scan',
                 'description' => $validated['description'] ?? 'Escaneo QR — ' . ($validated['action'] === 'entrada' ? 'Check-in' : 'Check-out'),
             ]);
+            return null;
         });
+        if ($sinSaldo) {
+            return back()->withErrors(['quantity' => $sinSaldo]);
+        }
 
         $actionLabel = $validated['action'] === 'entrada' ? 'Check-in (entrada)' : 'Check-out (salida)';
 

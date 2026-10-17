@@ -34,9 +34,9 @@ Cada cifra del Capítulo \ref{chap:pruebas} indica de cuál de estas fuentes pro
 \label{sec:scrum}
 Para la gestión del proyecto se planteó una metodología de desarrollo ágil basada en el marco de trabajo SCRUM. Se eligió este enfoque por su flexibilidad, su capacidad para gestionar la incertidumbre y su énfasis en la entrega de valor de manera iterativa e incremental.
 
-Aunque SCRUM define roles como Product Owner, Scrum Master y Equipo de Desarrollo, para este proyecto se adaptaron de la siguiente manera: para obtener una retroalimentación crítica y asegurar que el desarrollo se alineara con los objetivos, el Director de Trabajo de Grado (Prof. Héctor Fabio Ocampo) actuó como el principal \textit{stakeholder} y su perspectiva en las revisiones de sprint cumplió una función análoga a la del Product Owner, validando los incrementos de software y ajustando prioridades según los objetivos académicos y técnicos del proyecto.
+Aunque SCRUM define roles como Product Owner, Scrum Master y Equipo de Desarrollo, para este proyecto se adaptaron de la siguiente manera: para obtener una retroalimentación crítica y asegurar que el desarrollo se alineara con los objetivos, el Director de Trabajo de Grado (Prof. Héctor Fabio Ocampo) actuó como el principal \textit{stakeholder} y su perspectiva en las reuniones de seguimiento cumplió una función análoga a la del Product Owner, validando los incrementos de software y ajustando prioridades según los objetivos académicos y técnicos del proyecto.
 
-El autor (Germán David Murillas Mondragón) asumió, de manera unipersonal, las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso y eliminando impedimentos. Cómo se adaptaron en la práctica las ceremonias de SCRUM a un solo desarrollador se explica en el Capítulo \ref{chap:gestion}.
+El autor (Germán David Murillas Mondragón) asumió, de manera unipersonal, las responsabilidades tanto del Equipo de Desarrollo como las del Scrum Master, facilitando el proceso y eliminando impedimentos.
 
 El plan organizó el trabajo en sprints, ciclos iterativos de dos semanas, con los eventos del marco. Cómo se adaptaron en la práctica a un único desarrollador se describe en el Capítulo \ref{chap:gestion}.
 
@@ -100,7 +100,7 @@ El anteproyecto contiene dos calendarios: esta tabla, con seis sprints de dos se
     \item \textbf{Modelo de lenguaje.} En lugar de una API de pago (el plan mencionaba GPT-4o-mini), el asistente usa como principal un modelo gratuito de Ollama Cloud, con respaldos en la nube y en el propio servidor, seleccionables desde Ajustes.
     \item \textbf{Despliegue.} El sistema quedó en la capa gratuita de Oracle Cloud, publicado con dominio propio mediante un túnel de Cloudflare.
     \item \textbf{Interfaz.} Los prototipos de Figma se tradujeron a componentes React; la interfaz se rediseñó después para uso en el celular y con un sistema de temas visuales.
-    \item \textbf{Verificación.} Las pruebas automatizadas, la batería de consultas al asistente, la evaluación heurística y la auditoría de accesibilidad se completaron al cierre (Capítulo \ref{chap:pruebas}); la prueba con usuario se realizó el 8 de octubre.
+    \item \textbf{Verificación.} Las pruebas automatizadas, la batería de consultas al asistente, la evaluación heurística y la auditoría de accesibilidad se completaron al cierre (Capítulo \ref{chap:pruebas}); la prueba con usuario, el 8 y el 9 de octubre.
 \end{itemize}
 
 La Tabla \ref{tab:ejecucion_real} resume la ejecución real según el historial del repositorio hasta el corte de las pruebas.
@@ -140,7 +140,7 @@ La Tabla \ref{tab:herramientas} resume las herramientas utilizadas durante el de
 \hline
 Control de versiones & Git + GitHub & Repositorio público, historial de commits y despliegue automático desde la rama principal \\
 \hline
-Gestión de proyecto & GitHub Projects & Tablero Kanban con backlog, sprints activos y completados \\
+Gestión de proyecto & GitHub Projects & Tablero Kanban con backlog, tareas en curso y terminadas \\
 \hline
 IDE & Visual Studio Code + Cursor & Edición de código con soporte para PHP, TypeScript, React y Tailwind \\
 \hline
@@ -152,7 +152,7 @@ Base de datos & MySQL 8 y SQLite & MySQL en producción; SQLite en desarrollo y 
 \hline
 Pruebas & PHPUnit + Playwright 1.59 & Pruebas unitarias y de integración; pruebas de extremo a extremo en Chromium (escritorio y celular) \\
 \hline
-Documentación & Overleaf (LaTeX) & Redacción colaborativa del documento de trabajo de grado \\
+Documentación & Overleaf (LaTeX) & Redacción del documento de trabajo de grado \\
 \hline
 IA asistentes & OpenCode Go, Claude Code, Gemini Antigravity & Asistencia en generación de código, depuración y documentación \\
 \hline
@@ -169,7 +169,7 @@ El desarrollo de este proyecto se rigió por principios de integridad académica
 \begin{itemize}
     \item \textbf{Confidencialidad de datos empresariales}: La empresa del caso de estudio no se identifica en el documento. Los datos de demostración del sistema son ficticios. La evaluación con usuario (Capítulo \ref{chap:pruebas}) usó una instancia aparte, de acceso restringido, con el catálogo real de insumos que entregó la administradora y vencimientos estimados; esos datos no se publican. La empresa autorizó el uso de sus procesos operativos como referencia para el levantamiento de requisitos, pero los datos específicos de su operación comercial no se divulgan. Las consultas al modelo en la nube envían la pregunta y el contexto filtrado, que puede incluir nombres de usuario en los movimientos; el administrador puede elegir un modelo local.
     \item \textbf{Uso de inteligencia artificial como herramienta}: Durante el desarrollo, el autor utilizó asistentes de IA (OpenCode Go, Claude Code, Gemini Antigravity) como herramientas de productividad para generación de código, depuración, y redacción y revisión de este documento. El autor revisó y validó el código antes de incluirlo y verificó las cifras del documento contra el repositorio y la base de datos.
-    \item \textbf{Licencias de software}: Las tecnologías del sistema ---Laravel, React, Inertia.js, Tailwind CSS, MySQL, Playwright--- son de código abierto; GSAP es de uso gratuito bajo su propia licencia. Los modelos de lenguaje de operación se usaron sin costo (Ollama en el servidor del proyecto y la capa gratuita de Ollama Cloud); la comparación de modelos usó una suscripción del autor. La infraestructura también es de capa gratuita (Oracle Cloud y Cloudflare).
+    \item \textbf{Licencias de software}: Las tecnologías del sistema ---Laravel, React, Inertia.js, Tailwind CSS, MySQL, Playwright--- son de código abierto; GSAP es de uso gratuito bajo su propia licencia. El modelo principal y el local no tienen costo (capa gratuita de Ollama Cloud y Ollama en el servidor); la comparación de modelos y el respaldo en la nube usan una suscripción del autor a OpenCode Go. La infraestructura también es de capa gratuita (Oracle Cloud y Cloudflare).
     \item \textbf{Cumplimiento normativo}: El proyecto se acoge a la Resolución núm. 137 de la Facultad de Ingeniería de la Universidad del Valle, que establece los lineamientos para trabajos de grado en la modalidad de Trabajo de Investigación.
 \end{itemize}
 

@@ -13,9 +13,9 @@ Autor: Germán David Murillas Mondragón · Director: Héctor Fabio Ocampo.
 
 | Regla | Dónde se hace cumplir |
 |---|---|
-| FEFO | `ConsumptionController::consumeFefo` ordena los lotes por fecha de vencimiento: cada consumo descuenta del lote que vence primero, aunque atraviese varios. |
-| Kardex inmutable | `Movimiento` rechaza `update` y `delete`; las llaves foráneas de `movimientos` son `restrict`. Cada movimiento guarda usuario, fecha y motivo. |
-| Roles (RBAC) | Middleware `role:admin` en usuarios, claves de API, proveedores de modelos, reportes y ajustes. El registro público solo crea operarios. |
+| FEFO | `Lote::despacharFefo()` es el camino de todo despacho por insumo: dentro de una transacción bloquea los lotes despachables y descuenta del que vence primero, aunque atraviese varios. Los lotes vencidos o en cuarentena no se despachan. |
+| Kardex inmutable | `Movimiento` rechaza `update` y `delete`; dos disparadores de MySQL lo impiden también fuera de la aplicación (`php artisan kardex:proteger`); las llaves foráneas de `movimientos` son `restrict`. Cada movimiento guarda usuario, fecha y motivo. |
+| Roles (RBAC) | Middleware `role:admin` en usuarios, claves de API, proveedores de modelos, ajustes y conteo físico; los reportes son para ambos roles. No hay registro público: las cuentas las crea el administrador. |
 | RAG | `ChatLLMController::buildRagContext` consulta lotes, movimientos y bodegas según la intención de la pregunta antes de llamar al modelo. |
 
 ## Stack

@@ -15,7 +15,7 @@
 
 Un sistema de gestión de inventario es más que una base de datos donde se anota qué entra y qué sale. Es una herramienta de optimización logística. Según Ballou \cite{ballou2004logistica}, gestionar bien un inventario significa encontrar el equilibrio entre dos fuerzas opuestas: mantener suficiente producto para no parar la operación y no tener tanto que el dinero quede congelado en estanterías.
 
-El sistema que proponemos busca ayudar a las PYMEs a acercarse a ese equilibrio, dándoles la visibilidad que hoy no tienen: saber en tiempo real qué hay, qué está por acabarse y qué está por vencerse. Sin esa información, cualquier decisión de compra es a ciegas.
+El sistema propuesto busca ayudar a las PYMEs a acercarse a ese equilibrio, dándoles la visibilidad que hoy no tienen: saber en tiempo real qué hay, qué está por acabarse y qué está por vencerse. Sin esa información, cualquier decisión de compra es a ciegas.
 
 El módulo de consulta inteligente se apoya en el Procesamiento de Lenguaje Natural (PLN), la rama de la inteligencia artificial que enseña a las computadoras a entender cómo hablamos los humanos ---no solo palabras sueltas, sino intenciones y contexto. Los Large Language Models (LLMs) son la evolución más reciente del PLN: modelos entrenados con cantidades masivas de texto, capaces de entender una pregunta en español colombiano y responder con información pertinente \cite{zhao2023surveyllm}. En lugar de obligar al usuario a aprender filtros y menús, el LLM permite preguntar como si se hablara con un compañero.
 
@@ -73,7 +73,7 @@ Rotar el inventario es decidir en qué orden se despachan los productos. Hay tre
 \end{tabular}
 \end{table}
 
-\textbf{¿Por qué FEFO para este proyecto?} FEFO se acordó con el director del trabajo de grado como regla de negocio no negociable del sistema. La entrevista con la empresa del caso de estudio (Capítulo \ref{chap:requerimientos}) mostró que allí la práctica existe de manera informal ---la administradora instruye al personal para que se consuma primero lo que ya estaba en bodega--- y que la trazabilidad de lotes y fechas de vencimiento es una exigencia sanitaria ante entes como el INVIMA \cite{res2674_2013}. Formalizar FEFO en el software elimina la dependencia de esa instrucción verbal.
+\textbf{¿Por qué FEFO para este proyecto?} FEFO se acordó con el director del trabajo de grado como regla de negocio no negociable del sistema. La entrevista con la empresa del caso de estudio (Capítulo \ref{chap:requerimientos}) mostró que allí existe una rotación informal por orden de llegada ---la administradora instruye al personal para que se consuma primero lo que ya estaba en bodega--- y que la trazabilidad de lotes y fechas de vencimiento es una exigencia sanitaria ante entes como el INVIMA \cite{res2674_2013}. Formalizar FEFO en el software elimina la dependencia de esa instrucción verbal.
 
 \subsection{Arquitectura RAG (Retrieval-Augmented Generation)}
 \label{sec:rag_teoria}
@@ -95,7 +95,7 @@ La arquitectura RAG, introducida por Lewis et al. (2020) \cite{rag_lewis2020}, o
     
     \item \textbf{Aumento (Augmentation):} Los datos recuperados se organizan en un formato textual que el modelo puede procesar y se inyectan en el prompt ---la instrucción que se le da al modelo--- junto con indicaciones precisas de cómo responder. La clave está en ser selectivo: no se envía toda la base de datos, sino solo lo relevante.
     
-    \item \textbf{Generación (Generation):} Con el contexto real inyectado, el modelo genera una respuesta. Como ahora ``ve'' los datos reales, su respuesta está anclada a hechos. Si el modelo no encuentra los datos que necesita, se le instruye para responder que no tiene esa información, en lugar de inventarla.
+    \item \textbf{Generación (Generation):} Con el contexto real inyectado, el modelo genera una respuesta. Como recibe los datos reales, el riesgo de que invente cifras baja, aunque no desaparece. Si el modelo no encuentra los datos que necesita, se le instruye para responder que no tiene esa información, en lugar de inventarla.
 \end{enumerate}
 
 \subsubsection{Ventajas del Enfoque RAG sobre un Chat Convencional}
@@ -141,14 +141,14 @@ Laravel es un framework de código abierto para desarrollar aplicaciones web en 
 El patrón MVC, formalizado por Trygve Reenskaug en 1979, propone separar el código en tres capas que no se mezclan:
 
 \begin{itemize}
-    \item \textbf{Modelo (Model):} Representa los datos y la lógica de negocio. En Laravel se implementa con Eloquent, un ORM (Object-Relational Mapper) que permite manipular la base de datos usando objetos de PHP, no consultas SQL escritas a mano. Por ejemplo, el modelo \texttt{Lote} contiene el scope \texttt{fefoOrder()} que garantiza que cualquier despacho priorice los lotes por fecha de vencimiento.
+    \item \textbf{Modelo (Model):} Representa los datos y la lógica de negocio. En Laravel se implementa con Eloquent, un ORM (Object-Relational Mapper) que permite manipular la base de datos usando objetos de PHP, no consultas SQL escritas a mano. Por ejemplo, el modelo \texttt{Lote} contiene el método \texttt{despacharFefo()}, por el que pasa todo despacho en orden de vencimiento.
     
     \item \textbf{Vista (View):} Es lo que el usuario ve y toca. En Pymetory, las vistas son componentes React 19 conectados al backend mediante Inertia.js 2.0, que actúa como puente. Esto permite construir una interfaz moderna (Single Page Application) sin la complejidad de una API REST separada.
     
     \item \textbf{Controlador (Controller):} Recibe las solicitudes del usuario, aplica la lógica de negocio y retorna una respuesta. Cada módulo tiene su controlador: \texttt{InventoryController} para materiales y lotes, \texttt{ConsumptionController} para despachos, \texttt{ChatLLMController} para consultas inteligentes.
 \end{itemize}
 
-La separación en capas trae beneficios prácticos: puedes rediseñar la interfaz sin tocar la lógica de negocio, puedes probar cada capa por separado, y dos desarrolladores pueden trabajar simultáneamente sin pisarse.
+La separación en capas trae beneficios prácticos: se puede rediseñar la interfaz sin tocar la lógica de negocio y probar cada capa por separado.
 
 \subsection{React e Inertia.js: Single Page Applications sin API REST}
 \label{sec:react_inertia}
@@ -229,7 +229,7 @@ Solución Propuesta & Código abierto, personalizable, enfocado en PYMEs, módul
 
 \subsection{Análisis de Soluciones Académicas}
 
-Se revisaron trabajos de grado en repositorios universitarios colombianos (no fue una revisión sistemática) y se encontró un interés recurrente en resolver la gestión de inventarios para PYMEs. Bedoya (2022) en la UNAD \cite{unad_bedoya2022} y Bautista y Hernández (2022) en la UPB \cite{upb_bautista2022} proponen aplicaciones para administrar inventarios. A nivel de maestría, Acosta (2020) integra metodologías como Lean Manufacturing \cite{uamerica_acosta2020}. Sin embargo, ninguno de estos proyectos explora la integración de LLMs para mejorar la interacción con el usuario. Esa ausencia es precisamente la oportunidad que Pymetory aprovecha.
+Se revisaron trabajos de grado en repositorios universitarios colombianos (no fue una revisión sistemática) y se encontró un interés recurrente en resolver la gestión de inventarios para PYMEs. Bedoya (2022) en la UNAD \cite{unad_bedoya2022} y Bautista y Hernández (2022) en la UPB \cite{upb_bautista2022} proponen aplicaciones para administrar inventarios. A nivel de maestría, Acosta (2020) integra metodologías como Lean Manufacturing \cite{uamerica_acosta2020}. Ninguno de estos tres trabajos integra un LLM para la interacción con el usuario; Pymetory explora esa posibilidad.
 
 \subsection{Tecnologías de Despliegue en la Nube}
 \label{sec:cloud}

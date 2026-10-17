@@ -140,14 +140,14 @@ class PedidosEmpresaTest extends TestCase
 
     public function test_cada_usuario_guarda_su_propio_tema(): void
     {
-        $lina = $this->admin();
+        $administradora = $this->admin();
         $operario = User::factory()->create(['role' => 'operario']);
 
-        $this->actingAs($lina)->putJson('/perfil/tema', ['theme' => 'carbon-amber'])->assertOk();
+        $this->actingAs($administradora)->putJson('/perfil/tema', ['theme' => 'carbon-amber'])->assertOk();
         $this->actingAs($operario)->putJson('/perfil/tema', ['theme' => 'royal-plum'])->assertOk();
         $this->actingAs($operario)->putJson('/perfil/tema', ['theme' => 'inventado'])->assertStatus(422);
 
-        $this->assertSame('carbon-amber', $lina->fresh()->theme);
+        $this->assertSame('carbon-amber', $administradora->fresh()->theme);
         $this->assertSame('royal-plum', $operario->fresh()->theme);
     }
 

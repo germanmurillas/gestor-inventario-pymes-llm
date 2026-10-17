@@ -99,7 +99,7 @@ La conciliación es manual. Al cierre de cada mes, la administradora registra en
 
 \subsection{Vencimiento y rotación (P5)}
 
-La administradora afirmó que \textbf{no tienen pérdidas por vencimiento}: se compra lo que se va a consumir en menos de un mes, la materia prima llega de forma constante y, en general, lo comprado se consume en 15 a 20 días. Aun así, instruye al personal para que se consuma primero lo que ya estaba en bodega, práctica que corresponde de manera informal a la estrategia FEFO (\textit{First Expired, First Out}), y considera importante revisar lotes y fechas por razones sanitarias.
+La administradora afirmó que \textbf{no tienen pérdidas por vencimiento}: se compra lo que se va a consumir en menos de un mes, la materia prima llega de forma constante y, en general, lo comprado se consume en 15 a 20 días. Aun así, instruye al personal para que se consuma primero lo que ya estaba en bodega (una rotación informal por llegada, que el sistema formaliza como FEFO) y considera importante revisar lotes y fechas por razones sanitarias.
 
 \subsection{Ubicación de productos (P6)}
 
@@ -192,7 +192,7 @@ RF-18 & Administrar usuarios y sus roles. & Sistema, P8 & Implementado. \\ \hlin
 \textbf{ID} & \textbf{Requerimiento} & \textbf{Origen} & \textbf{Estado} \\
 \hline
 \endhead
-RNF-01 & El inventario se expresa en una unidad base (kilogramos), independiente de la presentación comercial (bulto o caja). & P1 & Parcial. Cada material tiene una unidad; la conversión de presentación a kilos la hace el usuario. \\ \hline
+RNF-01 & El inventario se expresa en una unidad base (kilogramos), independiente de la presentación comercial (bulto o caja). & P1 & Implementado: el ingreso y el consumo convierten la presentación (p. ej., bulto de 50 kg) a kilos. \\ \hline
 RNF-02 & La trazabilidad por lote y fecha de vencimiento debe poder consultarse en cualquier momento, como soporte ante una inspección sanitaria. & P1 (depurada), P5 & Implementado mediante el Kardex y los reportes. \\ \hline
 RNF-03 & La identificación de productos no debe exigir etiquetar cada bulto individualmente. & P9 & Implementado. Las etiquetas se generan por lote. \\ \hline
 RNF-04 & La interfaz y el asistente deben operar en español y ser utilizables por personal sin formación técnica. & Toda la entrevista & Implementado. Su evaluación se presenta en el capítulo de pruebas. \\ \hline
@@ -213,6 +213,6 @@ Durante la entrevista surgieron ideas que se dejaron explícitamente fuera del a
 
 \begin{itemize}
     \item Se entrevistó a una sola persona, la administradora; lo relativo a la líder de producción y a quien digita las facturas se conoció a través de ella. Con la empresa hubo tres sesiones (4 de marzo, 8 y 9 de octubre de 2026), no las ocho con la empresa y la dirección que menciona el anteproyecto.
-    \item La transcripción es automática y las cifras, aproximadas; no se analizaron documentos de la empresa, solo se describieron en la entrevista.
+    \item La transcripción es automática, las cifras son aproximadas y no se analizaron documentos de la empresa.
     \item Las preguntas depuradas sugieren términos (lote, mermas) que la participante pudo adoptar; el texto distingue sus respuestas de las dadas a las preguntas en bruto.
 \end{itemize}

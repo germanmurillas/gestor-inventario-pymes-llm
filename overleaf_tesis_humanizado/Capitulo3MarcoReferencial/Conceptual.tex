@@ -13,7 +13,7 @@
 
 \subsection{Glosario}
 
-Esta sección reúne los términos que aparecen a lo largo del documento. Si encuentras un acrónimo o concepto técnico que no queda claro, aquí está su definición, contextualizada, cuando aplica, en el caso de estudio de una panificadora del Valle del Cauca. Los términos están agrupados en dos áreas: logística y negocios, y computación e ingeniería de software.
+Esta sección reúne los términos que aparecen a lo largo del documento. Cada definición se contextualiza, cuando aplica, en el caso de estudio de una panificadora del Valle del Cauca. Los términos están agrupados en dos áreas: logística y negocios, y computación e ingeniería de software.
 
 \subsection*{Área de Empresas y Logística}
 
@@ -34,7 +34,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{PYME (Pequeña y Mediana Empresa):} Empresas que por su facturación, empleados y activos se sitúan entre las microempresas y las grandes corporaciones; en Colombia las clasifica la Ley 590 de 2000 \cite{ley590}. Las PYMEs representan el 99,5\% de las empresas formales del país \cite{bbva2024mipymes}. La empresa del caso de estudio es una panificadora de tamaño pequeño a mediano.
     
-    \item \textbf{FEFO (First Expired, First Out):} Estrategia de rotación que establece que los productos con fecha de vencimiento más próxima deben despacharse primero. A diferencia de FIFO (First In, First Out), que ordena por fecha de llegada, FEFO ordena por fecha de caducidad. En Pymetory, FEFO es una regla inmutable: se implementó como un \textit{scope} local de Eloquent que se aplica en cada operación de despacho.
+    \item \textbf{FEFO (First Expired, First Out):} Estrategia de rotación que establece que los productos con fecha de vencimiento más próxima deben despacharse primero. A diferencia de FIFO (First In, First Out), que ordena por fecha de llegada, FEFO ordena por fecha de caducidad. En Pymetory, FEFO es una regla inmutable: todo despacho pasa por el método \texttt{Lote::despacharFefo()} (Capítulo \ref{chap:implementacion}).
 \end{itemize}
 
 \subsection*{Área de Computación e Ingeniería de Software}
@@ -60,7 +60,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{API (Application Programming Interface):} Conjunto de definiciones y protocolos que permite que diferentes programas se comuniquen entre sí \cite{pressman2014software}. Pymetory se conecta a los modelos de lenguaje mediante la API de Ollama y APIs compatibles con la de OpenAI.
     
-    \item \textbf{Base de Datos (MySQL):} Sistema de gestión de bases de datos relacional de código abierto \cite{mysql_docs}. Pymetory utilizó MySQL 8.0 con índices optimizados para consultas FEFO y transacciones ACID que garantizan la integridad del Kardex.
+    \item \textbf{Base de Datos (MySQL):} Sistema de gestión de bases de datos relacional de código abierto \cite{mysql_docs}. Pymetory utilizó MySQL 8.0 con transacciones ACID que garantizan la integridad del Kardex.
     
     \item \textbf{Wireframes:} Esqueletos visuales de una interfaz que muestran la disposición de los elementos sin detalles estéticos \cite{pressman2014software}. En Pymetory evolucionaron a 18 mockups de alta fidelidad en Figma.
     
@@ -80,7 +80,7 @@ Esta sección reúne los términos que aparecen a lo largo del documento. Si enc
     
     \item \textbf{ORM (Object-Relational Mapper):} Técnica que permite interactuar con una base de datos usando objetos del lenguaje de programación en lugar de SQL. Eloquent es el ORM de Laravel \cite{fowler2002poeaa}.
     
-    \item \textbf{Tailwind CSS:} Framework de CSS basado en utilidades que permite diseñar interfaces directamente en el marcado HTML/JSX \cite{tailwindcss}. Pymetory usó Tailwind CSS v4 para implementar el tema visual Midnight Luxe.
+    \item \textbf{Tailwind CSS:} Framework de CSS basado en utilidades que permite diseñar interfaces directamente en el marcado HTML/JSX \cite{tailwindcss}. Pymetory usó Tailwind CSS v4 para implementar seis temas visuales.
     
     \item \textbf{Inertia.js y SPA:} Inertia.js es una biblioteca que une un backend Laravel con un frontend React para construir una \textit{Single Page Application} (SPA), que actualiza el contenido sin recargar la página completa, sin necesidad de una API REST (Sección \ref{sec:react_inertia}).
     
