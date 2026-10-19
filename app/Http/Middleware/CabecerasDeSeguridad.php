@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Cabeceras de seguridad en todas las respuestas web (revisión contra-tesis, frente 59). La cámara queda
+ * Cabeceras de seguridad en todas las respuestas web. La cámara queda
  * permitida para el propio sitio porque el escáner de QR y código de barras la usa.
  */
 class CabecerasDeSeguridad

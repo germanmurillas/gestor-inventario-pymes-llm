@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
-import { Globe, GraduationCap, Server, Code, Github, Shield, Lock, ArrowRight, Box, LayoutGrid, Search, Tag, BarChart3, MessageSquare, Bell, Settings, ScanLine, History, ArrowRightLeft, Truck, Printer, FileText } from 'lucide-react';
+import { Globe, Server, Code, Github, Shield, Lock, ArrowRight, Box, LayoutGrid, Search, Tag, BarChart3, MessageSquare, Bell, Settings, ScanLine, History, ArrowRightLeft, Truck, Printer, FileText } from 'lucide-react';
 import PixelSnow from '../components/PixelSnow';
 
 const SECTIONS = [
@@ -12,15 +12,6 @@ const SECTIONS = [
             { href: '/login', label: 'Login' },
             { href: '/dashboard', label: 'Dashboard' },
             { href: '/kanban', label: 'Kanban' },
-        ],
-    },
-    {
-        emoji: '🎓', title: 'Tesis', icon: GraduationCap,
-        links: [
-            { href: '/portafolio/SolucionesWeb/pymetoryTesis/tesis/', label: 'Índice Tesis' },
-            { href: '/portafolio/SolucionesWeb/pymetoryTesis/tesis/magister/', label: 'Magíster' },
-            { href: '/portafolio/SolucionesWeb/pymetoryTesis/tesis/tecnologo/', label: 'Tecnólogo' },
-            { href: '/portafolio/SolucionesWeb/pymetoryTesis/tesis/dummies/', label: 'Dummies' },
         ],
     },
     {

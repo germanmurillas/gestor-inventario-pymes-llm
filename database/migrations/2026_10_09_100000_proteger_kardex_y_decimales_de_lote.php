@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Revisión contra-tesis (5-oct-2026):
+ * Revisión del 5-oct-2026:
  * - lotes.quantity pasa de decimal(10,2) a decimal(12,3), igual que movimientos.quantity: un despacho
  *   de gramos ya no descuadra el lote frente al Kardex.
  * - Triggers que rechazan UPDATE y DELETE en `movimientos` (Kardex inmutable también en la base).

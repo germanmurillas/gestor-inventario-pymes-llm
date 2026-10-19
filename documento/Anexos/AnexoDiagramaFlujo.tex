@@ -1,0 +1,16 @@
+
+\section*{Diagrama de flujo del proceso FEFO} \label{flujoFEFO}
+\addcontentsline{toc}{section}{Diagrama de flujo del proceso FEFO}
+
+El siguiente diagrama de actividad modela el ciclo de vida completo de un lote bajo la política FEFO (First Expired, First Out — primero en vencer, primero en salir), desde su registro inicial en bodega hasta su despacho final. El flujo incluye dos puntos de decisión críticos: el monitoreo continuo de fechas de vencimiento con alerta a los 15 días, y el algoritmo de selección que itera sobre los lotes activos ordenados por proximidad de vencimiento, descontando del más urgente primero.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{Anexos/Imagenes/DiagramaFlujoFEFO.png}
+	\caption{Diagrama de actividad del proceso FEFO completo: desde el registro de un lote hasta su despacho, incluyendo monitoreo de vencimientos, alertas críticas y el algoritmo de selección por fecha de expiración.}
+	\label{fig:flujoFEFO}
+\end{figure}
+
+\subsection*{Explicación del flujo FEFO}
+
+Al registrar un lote, el sistema lo guarda como activo y, si vence dentro del umbral de días críticos, genera una alerta. En un despacho verifica primero que haya existencia suficiente del material; si no la hay, rechaza la operación indicando la cantidad disponible. Si la hay, descuenta del lote que vence primero, continúa con el siguiente si ese no alcanza y registra cada salida en el Kardex dentro de una sola transacción (Sección \ref{sec:imp_patrones}, patrón \textit{Transaction Script}).

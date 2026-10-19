@@ -383,7 +383,7 @@ class EvaluarAsistente extends Command
     }
 
     /**
-     * Pronóstico y consumo (revisión contra-tesis, frente 49): ninguna de las 106 preguntas los cubría.
+     * Pronóstico y consumo: ninguna de las 106 preguntas los cubría.
      * La respuesta correcta sale del mismo servicio que usa la vista Reabastecimiento.
      */
     private function pronostico(): array

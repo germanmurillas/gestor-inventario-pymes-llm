@@ -53,7 +53,7 @@ npx playwright test         # de extremo a extremo (requiere la app en http://lo
 - `resources/js/` — interfaz en React (páginas, componentes y sistema de temas).
 - `database/` — migraciones y seeders; `database/seeders/data/` contiene el catálogo de la demostración y el tablero del proyecto.
 - `tests/` — PHPUnit (`Feature/`) y Playwright (`usabilidad/`).
-- `overleaf_tesis_humanizado/` — fuente LaTeX del documento de la tesis.
+- `documento/` — fuente LaTeX del documento de la tesis.
 - `sitios/` — páginas estáticas de tesis.pymetory.com y reuniones.pymetory.com.
 
 ## Despliegue
